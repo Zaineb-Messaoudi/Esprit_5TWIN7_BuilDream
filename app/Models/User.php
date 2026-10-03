@@ -21,6 +21,9 @@ class User extends Authenticatable
         'name',
         'email',
         'password',
+        'phone_number',
+        'address',
+        'role',
     ];
 
     /**
@@ -43,6 +46,32 @@ class User extends Authenticatable
         return [
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
+            'role' => \App\Enums\UserRole::class,
         ];
+    }
+
+    public function isAdmin(): bool
+    {
+        return $this->role === \App\Enums\UserRole::ADMIN;
+    }
+
+    public function isUser(): bool
+    {
+        return $this->role === \App\Enums\UserRole::USER;
+    }
+
+    public function equipment()
+    {
+        return $this->hasMany(\App\Models\Equipment::class, 'owner_id');
+    }
+
+    public function rentals()
+    {
+        return $this->hasMany(\App\Models\Rental::class);
+    }
+
+    public function reservations()
+    {
+        return $this->hasMany(\App\Models\Reservation::class);
     }
 }

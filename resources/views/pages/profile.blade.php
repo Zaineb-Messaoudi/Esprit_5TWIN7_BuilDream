@@ -20,15 +20,15 @@
                                 </div>
                                 <div class="text-start">
                                     <h4 class="mb-2 text-lg font-semibold text-gray-800 dark:text-white/90">
-                                        Musharof Chowdhury
+                                        {{ auth()->user()->name }}
                                     </h4>
                                     <div class="flex items-center gap-1 sm:gap-3">
                                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                                            Team Manager
+                                            {{ ucfirst(auth()->user()->role) }}
                                         </p>
                                         <div class="hidden h-3.5 w-px bg-gray-300 sm:block dark:bg-gray-700"></div>
                                         <p class="text-sm text-gray-500 dark:text-gray-400">
-                                            Arizona, United States.
+                                            {{ auth()->user()->address ?? 'No address provided' }}
                                         </p>
                                     </div>
                                 </div>
@@ -38,18 +38,10 @@
                             class="relative grid max-w-4xl grid-cols-1 gap-5 sm:grid-cols-2 xl:grid-cols-4 xl:gap-x-11 xl:gap-y-7">
                             <div class="w-full">
                                 <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                                    First Name
+                                    Full Name
                                 </p>
                                 <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                                    Chowdury
-                                </p>
-                            </div>
-                            <div class="w-full">
-                                <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                                    Last Name
-                                </p>
-                                <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                                    Musharof
+                                    {{ auth()->user()->name }}
                                 </p>
                             </div>
                             <div class="hidden xl:block"></div>
@@ -59,7 +51,7 @@
                                     Email address
                                 </p>
                                 <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                                    randomuser@pimjo.com
+                                    {{ auth()->user()->email }}
                                 </p>
                             </div>
                             <div>
@@ -67,15 +59,15 @@
                                     Phone
                                 </p>
                                 <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                                    +09 363 398 46
+                                    {{ auth()->user()->phone_number ?? 'Not provided' }}
                                 </p>
                             </div>
                             <div>
                                 <p class="mb-2 text-xs leading-normal text-gray-500 dark:text-gray-400">
-                                    Bio
+                                    Role
                                 </p>
                                 <p class="text-sm font-medium text-gray-800 dark:text-white/90">
-                                    Team Manager
+                                    {{ ucfirst(auth()->user()->role) }}
                                 </p>
                             </div>
                             <div>

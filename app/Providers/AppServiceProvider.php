@@ -20,8 +20,13 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // Define global role gates
+        \Illuminate\Support\Facades\Gate::define('admin-only', function (\App\Models\User $user) {
+            return $user->role === \App\Enums\UserRole::ADMIN;
+        });
+
         // Force HTTPS in production
-        if (config('app.env') === 'production') {
+        if (config('app.app_env') === 'production') {
             URL::forceScheme('https');
         }
     }

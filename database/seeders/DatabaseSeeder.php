@@ -3,7 +3,7 @@
 namespace Database\Seeders;
 
 use App\Models\User;
-// use Illuminate\Database\Console\Seeds\WithoutModelEvents;
+use App\Enums\UserRole;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -13,11 +13,25 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
-        // User::factory(10)->create();
-
+        // Persona 1: Super Admin
         User::factory()->create([
-            'name' => 'Test User',
-            'email' => 'test@example.com',
+            'name' => 'Solar Admin',
+            'email' => 'admin@solarshare.com',
+            'password' => bcrypt('password'),
+            'role' => UserRole::ADMIN,
+            'email_verified_at' => now(),
         ]);
+
+        // Persona 2: Regular User
+        User::factory()->create([
+            'name' => 'John Doe',
+            'email' => 'user@solarshare.com',
+            'password' => bcrypt('password'),
+            'role' => UserRole::USER,
+            'email_verified_at' => now(),
+        ]);
+
+        // Generic users for testing
+        User::factory(10)->create();
     }
 }
