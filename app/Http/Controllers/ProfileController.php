@@ -34,10 +34,11 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $profileData = UserProfileData::fromRequest($request);
+        $emailChanged = $user->email !== $profileData->email;
 
         $this->userService->updateProfile($user, $profileData);
 
-        if ($user->isDirty('email')) {
+        if ($emailChanged) {
             $user->email_verified_at = null;
             $user->save();
         }

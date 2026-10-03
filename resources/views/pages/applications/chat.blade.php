@@ -1,96 +1,93 @@
 @extends('layouts.app')
 
 @section('content')
-    <div class="grid grid-cols-12 gap-4 md:gap-6 h-[calc(100vh-180px)]" x-data>
-        <!-- Contacts List -->
-        <div class="col-span-12 md:col-span-4 lg:col-span-3 flex flex-col bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700">
-                <div class="relative">
-                    <input type="text" placeholder="Search messages..." class="w-full pl-9 pr-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:ring-brand focus:border-brand" />
-                    <div class="absolute left-3 top-1/2 -translate-y-1/2 text-gray-400">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z"></path></svg>
-                    </div>
-                </div>
-            </div>
-
-            <div class="flex-1 overflow-y-auto">
-                <template x-for="contact in Object.keys($store.chat.messages)" :key="contact">
-                    <div
-                        @click="$store.chat.setActiveContact(contact)"
-                        :class="$store.chat.activeContact === contact ? 'bg-brand-50 dark:bg-brand-900/20' : ''"
-                        class="p-4 flex items-center gap-3 hover:bg-gray-50 dark:hover:bg-gray-800 cursor-pointer border-b border-gray-100 dark:border-gray-800 transition-colors"
-                    >
-                        <div class="relative">
-                            <div class="w-10 h-10 rounded-full bg-gray-200 dark:bg-gray-700 flex items-center justify-center font-bold text-gray-600 dark:text-gray-400">
-                                <span x-text="contact[0]"></span>
-                            </div>
-                            <span class="absolute bottom-0 right-0 w-3 h-3 bg-success border-2 border-white dark:border-gray-800 rounded-full"></span>
-                        </div>
-                        <div class="flex-1 min-w-0">
-                            <div class="flex justify-between items-baseline">
-                                <p class="text-sm font-medium text-gray-800 dark:text-white truncate" x-text="contact"></p>
-                                <span class="text-[10px] text-gray-400">12:45 PM</span>
-                            </div>
-                            <p class="text-xs text-gray-500 dark:text-gray-400 truncate">Click to chat...</p>
-                        </div>
-                    </div>
-                </template>
-            </div>
+    <div class="space-y-6">
+        <div>
+            <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Applications') }} / {{ __('Chat') }}</p>
+            <h1 class="mt-1 text-title-md font-semibold text-gray-800 dark:text-white/90">{{ __('Team chat') }}</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Local conversation demo. Messages and attachments stay in this browser session.') }}</p>
         </div>
 
-        <!-- Chat Window -->
-        <div class="col-span-12 md:col-span-8 lg:col-span-9 flex flex-col bg-white dark:bg-gray-800 rounded-xl border border-gray-200 dark:border-gray-700 overflow-hidden">
-            <!-- Chat Header -->
-            <div class="p-4 border-b border-gray-200 dark:border-gray-700 flex justify-between items-center bg-gray-50 dark:bg-gray-800/50">
-                <div class="flex items-center gap-3">
-                    <div class="w-10 h-10 rounded-full bg-brand text-white flex items-center justify-center font-bold">
-                        <span x-text="$store.chat.activeContact[0]"></span>
-                    </div>
-                    <div>
-                        <p class="text-sm font-bold text-gray-800 dark:text-white" x-text="$store.chat.activeContact"></p>
-                        <span class="text-xs text-success">Online</span>
-                    </div>
+        <div
+            x-data="{ search: '', mobileChatOpen: false, draft: '', attachment: '' }"
+            class="grid h-[calc(100vh-230px)] min-h-[480px] grid-cols-12 gap-4 md:gap-6"
+        >
+            <aside
+                :class="mobileChatOpen ? 'hidden md:flex' : 'flex'"
+                class="col-span-12 min-h-0 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 md:col-span-4 xl:col-span-3"
+                aria-label="{{ __('Conversations') }}"
+            >
+                <div class="border-b border-gray-200 p-4 dark:border-gray-700">
+                    <label for="chat-search" class="sr-only">{{ __('Search contacts and messages') }}</label>
+                    <input id="chat-search" x-model="search" type="search" placeholder="{{ __('Search contacts and messages...') }}" class="w-full rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
                 </div>
-                <div class="flex gap-2">
-                    <button class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 5a2 2 0 012-2h3.28a1 1 0 01.948.655l1.892 5.135a2 2 0 01-.512 1.787l-3.35 3.35a1 1 0 01-1.414 0L3.84 10.34A2 2 0 013 8V5z"></path></svg>
-                    </button>
-                    <button class="p-2 text-gray-400 hover:text-gray-600 dark:hover:text-gray-200 transition-colors">
-                        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 5v.01M12 12v.01M12 19v.01M12 6a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2zm0 7a1 1 0 110-2 1 1 0 010 2z"></path></svg>
-                    </button>
+                <div class="min-h-0 flex-1 overflow-y-auto">
+                    <template x-for="contact in $store.chat.visibleContacts(search)" :key="contact">
+                        <button
+                            type="button"
+                            @click="$store.chat.setActiveContact(contact); mobileChatOpen = true"
+                            :aria-current="$store.chat.activeContact === contact ? 'true' : null"
+                            :class="$store.chat.activeContact === contact ? 'bg-brand-50 dark:bg-brand-500/10' : 'hover:bg-gray-50 dark:hover:bg-gray-900/50'"
+                            class="flex w-full items-center gap-3 border-b border-gray-100 p-4 text-start transition-colors dark:border-gray-700"
+                        >
+                            <span class="relative flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-50 font-semibold text-brand-600 dark:bg-brand-500/15 dark:text-brand-300" x-text="contact.slice(0, 1)" aria-hidden="true">
+                                <span class="absolute -end-0.5 -bottom-0.5 h-3 w-3 rounded-full border-2 border-white dark:border-gray-800" :class="$store.chat.contacts[contact].online ? 'bg-success-500' : 'bg-gray-400'"></span>
+                            </span>
+                            <span class="min-w-0 flex-1">
+                                <span class="flex items-center justify-between gap-2">
+                                    <span class="truncate text-sm font-medium text-gray-800 dark:text-white" x-text="contact"></span>
+                                    <span x-show="$store.chat.contacts[contact].unread" x-text="$store.chat.contacts[contact].unread" class="flex h-5 min-w-5 items-center justify-center rounded-full bg-brand-500 px-1 text-[10px] font-semibold text-white" :aria-label="$store.chat.contacts[contact].unread + ' unread messages'"></span>
+                                </span>
+                                <span class="mt-1 block truncate text-xs text-gray-500 dark:text-gray-400" x-text="$store.chat.messages[contact].at(-1)?.text || '{{ __('Attachment') }}'"></span>
+                            </span>
+                        </button>
+                    </template>
+                    <p x-show="$store.chat.visibleContacts(search).length === 0" x-cloak class="p-6 text-center text-sm text-gray-500 dark:text-gray-400" role="status">{{ __('No conversations match your search.') }}</p>
                 </div>
-            </div>
+            </aside>
 
-            <!-- Messages Area -->
-            <div class="flex-1 overflow-y-auto p-4 space-y-4 bg-gray-50 dark:bg-gray-900/30">
-                <template x-for="msg in $store.chat.messages[$store.chat.activeContact]" :key="msg.text">
-                    <div :class="msg.sent ? 'flex justify-end' : 'flex justify-start'">
-                        <div :class="msg.sent ? 'bg-brand text-white rounded-tr-none' : 'bg-white dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded-tl-none border border-gray-100 dark:border-gray-700'"
-                             class="p-3 rounded-lg text-sm shadow-sm max-w-[70%]">
-                            <span x-text="msg.text"></span>
+            <section
+                :class="mobileChatOpen ? 'flex' : 'hidden md:flex'"
+                class="col-span-12 min-h-0 flex-col overflow-hidden rounded-xl border border-gray-200 bg-white dark:border-gray-700 dark:bg-gray-800 md:col-span-8 xl:col-span-9"
+                aria-label="{{ __('Conversation') }}"
+            >
+                <header class="flex items-center justify-between gap-3 border-b border-gray-200 bg-gray-50 p-4 dark:border-gray-700 dark:bg-gray-800/70">
+                    <div class="flex min-w-0 items-center gap-3">
+                        <button type="button" @click="mobileChatOpen = false" class="rounded-lg p-2 text-gray-500 hover:bg-gray-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:hover:bg-gray-700 md:hidden" aria-label="{{ __('Back to conversations') }}">‹</button>
+                        <span class="flex h-10 w-10 shrink-0 items-center justify-center rounded-full bg-brand-500 font-semibold text-white" x-text="$store.chat.activeContact.slice(0, 1)" aria-hidden="true"></span>
+                        <div class="min-w-0">
+                            <h2 class="truncate text-sm font-semibold text-gray-800 dark:text-white" x-text="$store.chat.activeContact"></h2>
+                            <p class="text-xs text-gray-500 dark:text-gray-400" x-text="$store.chat.contacts[$store.chat.activeContact].online ? '{{ __('Online') }}' : '{{ __('Away') }}'"></p>
                         </div>
                     </div>
-                </template>
-            </div>
+                    <x-ui.badge variant="light" color="gray">{{ __('Demo') }}</x-ui.badge>
+                </header>
 
-            <!-- Input Area -->
-            <div class="p-4 border-t border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800">
-                <div class="flex gap-3" x-data="{ message: '' }">
-                    <input
-                        x-model="message"
-                        @keydown.enter="$store.chat.sendMessage($store.chat.activeContact, message); message = ''"
-                        type="text"
-                        placeholder="Type a message..."
-                        class="flex-1 px-4 py-2 text-sm rounded-lg border border-gray-300 dark:border-gray-700 bg-gray-50 dark:bg-gray-900 text-gray-800 dark:text-white focus:ring-brand focus:border-brand"
-                    />
-                    <button
-                        @click="$store.chat.sendMessage($store.chat.activeContact, message); message = ''"
-                        class="px-4 py-2 bg-brand text-white rounded-lg text-sm font-medium hover:bg-brand-600 transition-colors"
-                    >
-                        Send
-                    </button>
+                <div class="min-h-0 flex-1 space-y-4 overflow-y-auto bg-gray-50 p-4 dark:bg-gray-900/40 sm:p-6" aria-live="polite" aria-relevant="additions">
+                    <template x-for="message in $store.chat.messages[$store.chat.activeContact]" :key="message.id">
+                        <div :class="message.sent ? 'justify-end' : 'justify-start'" class="flex">
+                            <div :class="message.sent ? 'rounded-te-none bg-brand-500 text-white' : 'rounded-ts-none border border-gray-100 bg-white text-gray-700 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300'" class="max-w-[85%] rounded-xl px-4 py-3 text-sm shadow-theme-xs sm:max-w-[70%]">
+                                <p x-show="message.text" x-text="message.text"></p>
+                                <p x-show="message.attachment" x-cloak class="mt-2 flex items-center gap-2 text-xs" x-text="'📎 ' + message.attachment"></p>
+                            </div>
+                        </div>
+                    </template>
+                    <p x-show="!$store.chat.messages[$store.chat.activeContact].length" class="py-10 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('No messages yet. Start the conversation below.') }}</p>
                 </div>
-            </div>
+
+                <form class="border-t border-gray-200 bg-white p-3 dark:border-gray-700 dark:bg-gray-800 sm:p-4" @submit.prevent="$store.chat.sendMessage($store.chat.activeContact, draft, attachment); draft = ''; attachment = ''; $refs.chatAttachment.value = ''">
+                    <label for="chat-message" class="sr-only">{{ __('Write a message') }}</label>
+                    <textarea id="chat-message" x-model="draft" @keydown.ctrl.enter="$store.chat.sendMessage($store.chat.activeContact, draft, attachment); draft = ''; attachment = ''; $refs.chatAttachment.value = ''" rows="2" placeholder="{{ __('Write a message...') }}" class="w-full resize-y rounded-lg border border-gray-300 bg-gray-50 px-3 py-2.5 text-sm text-gray-800 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white"></textarea>
+                    <div class="mt-2 flex flex-wrap items-center justify-between gap-3">
+                        <div class="flex min-w-0 items-center gap-2">
+                            <label for="chat-attachment" class="cursor-pointer rounded-lg border border-gray-300 px-3 py-2 text-xs font-medium text-gray-600 hover:bg-gray-50 focus-within:ring-2 focus-within:ring-brand-500 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-700">{{ __('Attach file') }}</label>
+                            <input x-ref="chatAttachment" id="chat-attachment" type="file" class="sr-only" @change="attachment = $event.target.files[0]?.name || ''" />
+                            <span x-show="attachment" x-cloak class="max-w-40 truncate text-xs text-gray-500 dark:text-gray-400" x-text="attachment"></span>
+                        </div>
+                        <button type="submit" class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">{{ __('Send message') }}</button>
+                    </div>
+                </form>
+            </section>
         </div>
     </div>
 @endsection

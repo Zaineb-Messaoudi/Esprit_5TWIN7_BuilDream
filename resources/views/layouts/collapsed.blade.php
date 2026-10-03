@@ -10,6 +10,12 @@
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
+
     <script>
         document.addEventListener('alpine:init', () => {
             Alpine.store('theme', {
@@ -74,6 +80,9 @@
 </head>
 
 <body class="antialiased">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-999999 focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-medium focus:text-brand-700 focus:shadow-theme-lg dark:focus:bg-gray-900 dark:focus:text-brand-300">
+        {{ __('Skip to main content') }}
+    </a>
 
     <div class="min-h-screen xl:flex" x-data :class="{ 'sidebar-expanded': $store.sidebar.isHovered || $store.sidebar.isMobileOpen }">
         @include('layouts.backdrop')
@@ -81,9 +90,9 @@
 
         <div class="flex-1 ml-0 ltr:xl:ml-[90px] rtl:xl:ml-0 rtl:xl:mr-[90px] [.sidebar-expanded_&]:ltr:xl:ml-[290px] [.sidebar-expanded_&]:rtl:xl:ml-0 [.sidebar-expanded_&]:rtl:xl:mr-[290px] transition-all duration-300 ease-in-out">
             @include('layouts.app-header')
-            <div class="p-4 mx-auto max-w-(--breakpoint-2xl) md:p-6">
+            <main id="main-content" tabindex="-1" class="p-4 mx-auto max-w-(--breakpoint-2xl) outline-none md:p-6">
                 @yield('content')
-            </div>
+            </main>
         </div>
     </div>
 

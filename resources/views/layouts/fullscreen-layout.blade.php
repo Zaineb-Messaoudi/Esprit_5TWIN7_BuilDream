@@ -6,7 +6,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? 'Page' }} | SolarShare Admin</title>
+    <title>@hasSection('title')@yield('title')@else{{ $title ?? 'Page' }}@endif | SolarShare Admin</title>
+
+    <style>
+        [x-cloak] {
+            display: none !important;
+        }
+    </style>
 
     @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -51,7 +57,7 @@
 
 <body class="antialiased">
     <div class="min-h-screen flex items-center justify-center p-4">
-        {{ $slot }}
+        @yield('content')
     </div>
 </body>
 

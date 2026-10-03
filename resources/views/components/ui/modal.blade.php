@@ -2,41 +2,55 @@
     'isOpen' => false,
     'showCloseButton' => true,
     'title' => '',
+    'label' => null,
+    'id' => 'modal-' . \Illuminate\Support\Str::uuid(),
 ])
 
 <div x-data="{
     open: @js($isOpen),
+    previousOverflow: '',
+    previousFocus: null,
     init() {
-        this.$watch('open', value => {
-            if (value) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = 'unset';
+        this.previousOverflow = document.body.style.overflow;
+        this.$watch('open', value => this.syncOpen(value));
+        if (this.open) this.syncOpen(true);
+    },
+    syncOpen(value) {
+        if (value) {
+            this.previousFocus = document.activeElement;
+            document.body.style.overflow = 'hidden';
+            this.$nextTick(() => {
+                const firstFocusable = [...this.$refs.dialog.querySelectorAll('[autofocus], button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]')].find(element => element.tabIndex >= 0);
+                (firstFocusable || this.$refs.dialog).focus();
+            });
+        } else {
+            document.body.style.overflow = this.previousOverflow;
+            if (this.previousFocus instanceof HTMLElement && this.previousFocus.isConnected) {
+                this.previousFocus.focus();
             }
-        });
+        }
     }
-}" x-show="open" x-cloak @keydown.escape.window="open = false"
+}" x-show="open" x-cloak @keydown.escape.window="if (open) { open = false; $event.stopPropagation(); }"
+    @keydown.tab="const focusable = [...$refs.dialog.querySelectorAll('button:not([disabled]), [href], input:not([disabled]), select:not([disabled]), textarea:not([disabled]), [tabindex]')].filter(element => element.tabIndex >= 0 && element.offsetParent !== null); const first = focusable[0]; const last = focusable[focusable.length - 1]; if (!first) { $event.preventDefault(); $refs.dialog.focus(); } else if ($event.shiftKey && (document.activeElement === first || document.activeElement === $refs.dialog)) { $event.preventDefault(); last.focus(); } else if (!$event.shiftKey && document.activeElement === last) { $event.preventDefault(); first.focus(); }"
     class="modal fixed inset-0 z-99999 flex items-center justify-center overflow-y-auto p-5"
+    role="presentation"
     {{ $attributes->except('class') }}>
 
-    <!-- Backdrop -->
-    <div @click="open = false" class="fixed inset-0 h-full w-full bg-gray-400/50 backdrop-blur-[32px]"
+    <button type="button" @click="open = false" class="fixed inset-0 h-full w-full cursor-default bg-gray-400/50 backdrop-blur-[32px]" aria-label="{{ __('Close dialog') }}"
         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0"
         x-transition:enter-end="opacity-100" x-transition:leave="transition ease-in duration-200"
-        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0">
-    </div>
+        x-transition:leave-start="opacity-100" x-transition:leave-end="opacity-0"></button>
 
-    <!-- Modal Content -->
-    <div @click.stop class="relative w-full max-w-lg rounded-3xl bg-white dark:bg-gray-900 {{ $attributes->get('class') }}"
+    <section x-ref="dialog" id="{{ $id }}" tabindex="-1" role="dialog" aria-modal="true" @if($title) aria-labelledby="{{ $id }}-title" @elseif($label) aria-label="{{ $label }}" @endif @click.stop class="relative w-full max-w-lg rounded-3xl bg-white dark:bg-gray-900 {{ $attributes->get('class') }}"
         x-transition:enter="transition ease-out duration-300" x-transition:enter-start="opacity-0 transform scale-95"
         x-transition:enter-end="opacity-100 transform scale-100" x-transition:leave="transition ease-in duration-200"
         x-transition:leave-start="opacity-100 transform scale-100"
         x-transition:leave-end="opacity-0 transform scale-95">
 
-        <!-- Close Button -->
         @if ($showCloseButton)
-            <button @click="open = false"
-                class="absolute right-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white sm:right-6 sm:top-6 sm:h-11 sm:w-11">
+            <button type="button" @click="open = false"
+                aria-label="{{ __('Close dialog') }}"
+                class="absolute end-3 top-3 z-999 flex h-9.5 w-9.5 items-center justify-center rounded-full bg-gray-100 text-gray-400 transition-colors hover:bg-gray-200 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-gray-700 dark:hover:text-white sm:end-6 sm:top-6 sm:h-11 sm:w-11">
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
                     <path fillRule="evenodd" clipRule="evenodd"
@@ -46,22 +60,14 @@
             </button>
         @endif
 
-        <!-- Modal Header -->
         @if($title)
             <div class="px-6 py-4 border-b dark:border-gray-800">
-                <h3 class="text-lg font-semibold text-gray-800 dark:text-white">{{ $title }}</h3>
+                <h2 id="{{ $id }}-title" class="text-lg font-semibold text-gray-800 dark:text-white">{{ $title }}</h2>
             </div>
         @endif
 
-        <!-- Modal Body -->
         <div class="p-6">
             {{ $slot }}
         </div>
-    </div>
+    </section>
 </div>
-
-<style>
-    [x-cloak] {
-        display: none;
-    }
-</style>

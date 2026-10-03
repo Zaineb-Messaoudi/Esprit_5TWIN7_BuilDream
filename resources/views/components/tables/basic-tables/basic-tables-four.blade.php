@@ -44,19 +44,12 @@
         ],
     ];
 
-    function getStatusClass($status) {
-        $baseClasses = 'rounded-full px-2 text-theme-xs font-medium';
-        switch ($status) {
-            case 'Success':
-                return "$baseClasses bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500";
-            case 'Pending':
-                return "$baseClasses bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400";
-            case 'Failed':
-                return "$baseClasses bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500";
-            default:
-                return $baseClasses;
-        }
-    }
+    $statusClass = fn ($status) => match ($status) {
+        'Success' => 'rounded-full px-2 text-theme-xs font-medium bg-success-50 text-success-600 dark:bg-success-500/15 dark:text-success-500',
+        'Pending' => 'rounded-full px-2 text-theme-xs font-medium bg-warning-50 text-warning-600 dark:bg-warning-500/15 dark:text-orange-400',
+        'Failed' => 'rounded-full px-2 text-theme-xs font-medium bg-error-50 text-error-600 dark:bg-error-500/15 dark:text-error-500',
+        default => 'rounded-full px-2 text-theme-xs font-medium',
+    };
 @endphp
 
 <div
@@ -129,7 +122,7 @@
                         </td>
                         <td class="py-3">
                             <div class="flex items-center">
-                                <span class="{{ getStatusClass($campaign['status']) }}">
+                                <span class="{{ $statusClass($campaign['status']) }}">
                                     {{ $campaign['status'] }}
                                 </span>
                             </div>

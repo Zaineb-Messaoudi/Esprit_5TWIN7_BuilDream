@@ -140,6 +140,9 @@
 
                 <!-- Modal Footer -->
                 <div class="modal-footer mt-6 flex items-center gap-3 sm:justify-end">
+                    <button type="button" class="btn-delete-event me-auto hidden w-full justify-center rounded-lg border border-error-200 px-4 py-2.5 text-sm font-medium text-error-600 hover:bg-error-50 sm:w-auto dark:border-error-500/30 dark:text-error-400 dark:hover:bg-error-500/10" style="display: none;">
+                        Delete Event
+                    </button>
                     <button type="button" class="modal-close-btn flex w-full justify-center rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 sm:w-auto dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/3">
                         Close
                     </button>

@@ -7,6 +7,7 @@
 @endphp
 
 <aside id="sidebar"
+    aria-label="{{ __('Main navigation') }}"
     class="fixed flex flex-col mt-0 top-0 px-5 start-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-99999 ltr:border-r rtl:border-l border-gray-200 w-[90px] [.sidebar-expanded_&]:min-w-[290px]"
     x-data="{
         openSubmenus: {},
@@ -22,8 +23,7 @@
                     @if (isset($item['subItems']))
                         // Check if any submenu item matches current path
                         @foreach ($item['subItems'] as $subItem)
-                            if (currentPath === '{{ ltrim($subItem['path'], '/') }}' ||
-                                window.location.pathname === '{{ $subItem['path'] }}') {
+                            if (this.isActive('{{ $subItem['path'] }}', '{{ $subItem['activePrefix'] ?? '' }}')) {
                                 this.openSubmenus['{{ $groupIndex }}-{{ $itemIndex }}'] = true;
                             } @endforeach
             @endif
@@ -45,8 +45,13 @@
             const key = groupIndex + '-' + itemIndex;
             return this.openSubmenus[key] || false;
         },
-        isActive(path) {
-            return window.location.pathname === path || '{{ $currentPath }}' === path.replace(/^\//, '');
+        isActive(path, prefix = '') {
+            const current = window.location.pathname.replace(/\/$/, '') || '/';
+            const target = new URL(path, window.location.origin).pathname.replace(/\/$/, '') || '/';
+            const activeBase = prefix ? new URL(prefix, window.location.origin).pathname.replace(/\/$/, '') : target;
+            return current === target ||
+                '{{ $currentPath }}' === target.replace(/^\//, '') ||
+                (activeBase !== '/' && current.startsWith(activeBase + '/'));
         }
     }"
     :class="{
@@ -68,7 +73,7 @@
 
     <!-- Navigation Menu -->
     <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
-        <nav class="mb-6">
+        <nav class="mb-6" aria-label="{{ __('Primary navigation') }}">
             <div class="flex flex-col gap-4">
                 @foreach ($menuGroups as $groupIndex => $menuGroup)
                     <div>
@@ -93,7 +98,11 @@
                                 <li>
                                     @if (isset($item['subItems']))
                                         <!-- Dropdown Menu Item -->
-                                        <button @click="toggleSubmenu({{ $groupIndex }}, {{ $itemIndex }})"
+                                        <button
+                                            @click="toggleSubmenu({{ $groupIndex }}, {{ $itemIndex }})"
+                                            @keydown.escape.stop="openSubmenus = {}"
+                                            aria-controls="sidebar-submenu-{{ $groupIndex }}-{{ $itemIndex }}"
+                                            :aria-expanded="isSubmenuOpen({{ $groupIndex }}, {{ $itemIndex }})"
                                             class="menu-item group w-full"
                                             :class="[
                                                 isSubmenuOpen({{ $groupIndex }}, {{ $itemIndex }}) ?
@@ -142,15 +151,16 @@
                                         </button>
 
                                         <!-- Submenu -->
-                                        <div x-show="isSubmenuOpen({{ $groupIndex }}, {{ $itemIndex }}) && ($store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen)"
+                                        <div id="sidebar-submenu-{{ $groupIndex }}-{{ $itemIndex }}" x-show="isSubmenuOpen({{ $groupIndex }}, {{ $itemIndex }}) && ($store.sidebar.isExpanded || $store.sidebar.isHovered || $store.sidebar.isMobileOpen)"
                                             x-collapse>
                                             <ul class="mt-2 space-y-1 ltr:ml-9 rtl:mr-9">
                                                 @foreach ($item['subItems'] as $subItem)
                                                     <li>
                                                         <a href="{{ $subItem['path'] }}" class="menu-dropdown-item"
-                                                            :class="isActive('{{ $subItem['path'] }}') ?
+                                                            :class="isActive('{{ $subItem['path'] }}', '{{ $subItem['activePrefix'] ?? '' }}') ?
                                                                 'menu-dropdown-item-active' :
-                                                                'menu-dropdown-item-inactive'">
+                                                                'menu-dropdown-item-inactive'"
+                                                            :aria-current="isActive('{{ $subItem['path'] }}', '{{ $subItem['activePrefix'] ?? '' }}') ? 'page' : null">
                                                             {{ __($subItem['name']) }}
                                                             <span class="flex items-center gap-1 ltr:ml-auto rtl:mr-auto">
                                                                 @if (!empty($subItem['new']))
