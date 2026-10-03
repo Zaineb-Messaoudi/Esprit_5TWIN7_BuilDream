@@ -1,40 +1,13 @@
 <div class="relative" x-data="{
     isOpen: false,
     subDropdownOpen: false,
-    currentLocale: '{{ app()->getLocale() }}' || localStorage.getItem('locale') || (localStorage.getItem('dir') === 'rtl' ? 'ar' : 'en'),
-    languages: [
-        {
-            id: 'en',
-            name: 'English',
-            shortName: 'English',
-            flag: 'flag-us.svg',
-            dir: 'ltr'
-        },
-        {
-            id: 'ar',
-            name: 'Arabic (Saudi)',
-            shortName: 'Arabic',
-            flag: 'flag-sa.svg',
-            badge: 'RTL',
-            dir: 'rtl'
-        },
-        {
-            id: 'es',
-            name: 'Español',
-            shortName: 'Español',
-            flag: 'flag-es.svg',
-            dir: 'ltr'
-        },
-        {
-            id: 'de',
-            name: 'Deutsch',
-            shortName: 'Deutsch',
-            flag: 'flag-de.svg',
-            dir: 'ltr'
-        }
+    direction: localStorage.getItem('dir') || document.documentElement.getAttribute('dir') || 'ltr',
+    directions: [
+        { id: 'ltr', name: 'Left to right (LTR)' },
+        { id: 'rtl', name: 'Right to left (RTL)' }
     ],
-    get currentLang() {
-        return this.languages.find(l => l.id === this.currentLocale) || this.languages[0];
+    get currentDirection() {
+        return this.directions.find(item => item.id === this.direction) || this.directions[0];
     },
     toggleDropdown() {
         this.isOpen = !this.isOpen;
@@ -46,27 +19,25 @@
         this.isOpen = false;
         this.subDropdownOpen = false;
     },
-    selectLanguage(lang) {
-        this.currentLocale = lang.id;
-        const dir = lang.dir || (lang.id === 'ar' ? 'rtl' : 'ltr');
-        localStorage.setItem('locale', lang.id);
-        localStorage.setItem('dir', dir);
-        document.documentElement.setAttribute('dir', dir);
-        document.documentElement.setAttribute('lang', lang.id);
-        window.location.href = '/locale/' + lang.id;
+    selectDirection(direction) {
+        this.direction = direction === 'rtl' ? 'rtl' : 'ltr';
+        localStorage.setItem('dir', this.direction);
+        document.documentElement.setAttribute('dir', this.direction);
+        this.closeDropdown();
     }
 }" @click.outside="closeDropdown()">
+    @auth
     <!-- User Trigger -->
     <button
         class="flex items-center text-gray-700 dark:text-gray-400"
         type="button"
         @click="toggleDropdown()"
     >
-        <span class="mr-3 overflow-hidden rounded-full h-11 w-11 rtl:mr-0 rtl:ml-3">
-            <img src="/images/user/owner.png" alt="User" />
+        <span class="me-3 overflow-hidden rounded-full h-11 w-11">
+            <x-ui.avatar :src="auth()->user()->profile_photo_url ?? null" :alt="auth()->user()->name" size="large" />
         </span>
 
-        <span class="block mr-1 font-medium text-theme-sm rtl:mr-0 rtl:ml-1">Musharof</span>
+        <span class="block me-1 max-w-32 truncate font-medium text-theme-sm">{{ auth()->user()->name }}</span>
 
         <!-- Chevron Down Icon -->
         <svg
@@ -102,15 +73,15 @@
     >
         <!-- User Info -->
         <div>
-            <span class="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">Musharof Chowdhury</span>
-            <span class="mt-0.5 block text-theme-xs text-gray-500 dark:text-gray-400">randomuser@pimjo.com</span>
+            <span class="block font-medium text-gray-700 text-theme-sm dark:text-gray-400">{{ auth()->user()->name }}</span>
+            <span class="mt-0.5 block break-all text-theme-xs text-gray-500 dark:text-gray-400">{{ auth()->user()->email }}</span>
         </div>
 
         <!-- Menu Items -->
         <ul class="flex flex-col gap-1 pt-4 pb-3 border-b border-gray-200 dark:border-gray-800">
             <li>
                 <a
-                    href="/profile"
+                    href="{{ route('profile.overview') }}"
                     class="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
                 >
                     <span class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300">
@@ -123,7 +94,7 @@
             </li>
             <li>
                 <a
-                    href="/profile"
+                    href="{{ route('settings') }}"
                     class="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
                 >
                     <span class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300">
@@ -136,7 +107,7 @@
             </li>
             <li>
                 <a
-                    href="/profile"
+                    href="{{ route('faq.index') }}"
                     class="flex items-center gap-3 px-3 py-2 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
                 >
                     <span class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300">
@@ -166,14 +137,13 @@
                                 stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
                         </svg>
 
-                        <span>Language</span>
+                        <span>Direction</span>
                     </span>
 
                     <span
                         class="flex items-center gap-1.5 rounded-lg border border-gray-200 bg-gray-50 px-2 py-1 text-theme-xs font-medium text-gray-700 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-300"
                     >
-                        <span x-text="currentLang.shortName"></span>
-                        <img :src="'/images/icons/' + currentLang.flag" :alt="currentLang.shortName" class="size-3.5 shrink-0 overflow-hidden rounded-full object-cover" />
+                        <span x-text="currentDirection.id.toUpperCase()"></span>
                     </span>
                 </button>
 
@@ -189,30 +159,23 @@
                     style="display: none;"
                 >
                     <ul class="flex flex-col gap-1">
-                        <template x-for="lang in languages" :key="lang.id">
+                        <template x-for="option in directions" :key="option.id">
                             <li>
                                 <button
                                     type="button"
-                                    @click="selectLanguage(lang)"
+                                    @click="selectDirection(option.id)"
                                     class="flex w-full items-center justify-between gap-2 rounded-lg px-2.5 py-2 ltr:text-left rtl:text-right text-theme-sm font-medium transition-colors"
-                                    :class="currentLocale === lang.id
+                                    :class="direction === option.id
                                         ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
                                         : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-300 dark:hover:bg-white/5 dark:hover:text-white'"
                                 >
                                     <span class="flex items-center gap-2">
                                         <span
                                             class="size-1.5 shrink-0 rounded-full transition-opacity"
-                                            :class="currentLocale === lang.id ? 'bg-brand-500 opacity-100 dark:bg-brand-400' : 'opacity-0'"></span>
-                                        <img :src="'/images/icons/' + lang.flag" :alt="lang.name" class="size-5 shrink-0 overflow-hidden rounded-full object-cover" />
-                                        <span class="truncate" x-text="lang.name"></span>
+                                            :class="direction === option.id ? 'bg-brand-500 opacity-100 dark:bg-brand-400' : 'opacity-0'"></span>
+                                        <span class="truncate" x-text="option.name"></span>
                                     </span>
-
-                                    <template x-if="lang.badge">
-                                        <span
-                                            class="rounded bg-warning-50 px-1.5 py-0.5 text-theme-xs font-semibold text-warning-600 dark:bg-warning-500/15 dark:text-warning-400"
-                                            x-text="lang.badge">
-                                        </span>
-                                    </template>
+                                    <span class="rounded bg-gray-100 px-1.5 py-0.5 text-theme-xs font-semibold text-gray-600 dark:bg-gray-800 dark:text-gray-300" x-text="option.id.toUpperCase()"></span>
                                 </button>
                             </li>
                         </template>
@@ -222,17 +185,26 @@
         </ul>
 
         <!-- Sign Out -->
-        <a
-            href="/signin"
-            class="flex items-center w-full gap-3 px-3 py-2 mt-3 font-medium text-gray-700 rounded-lg group text-theme-sm hover:bg-gray-100 hover:text-gray-700 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
-            @click="closeDropdown()"
-        >
-            <span class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300">
-                <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
-                </svg>
-            </span>
-            Sign out
-        </a>
+        <form method="POST" action="{{ route('logout') }}" class="mt-3">
+            @csrf
+            <button
+                type="submit"
+                class="flex w-full items-center gap-3 rounded-lg px-3 py-2 text-start font-medium text-gray-700 group text-theme-sm hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300"
+                @click="closeDropdown()"
+            >
+                <span class="text-gray-500 group-hover:text-gray-700 dark:group-hover:text-gray-300" aria-hidden="true">
+                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1"></path>
+                    </svg>
+                </span>
+                {{ __('Sign out') }}
+            </button>
+        </form>
+        @else
+            <div class="flex shrink-0 items-center gap-2 whitespace-nowrap">
+                <a href="{{ route('login') }}" class="rounded-lg px-3 py-2 text-sm font-medium text-gray-600 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800">{{ __('Sign in') }}</a>
+                <a href="{{ route('register') }}" class="rounded-lg bg-brand-500 px-3 py-2 text-sm font-medium text-white hover:bg-brand-600">{{ __('Create account') }}</a>
+            </div>
+        @endauth
     </div>
 </div>

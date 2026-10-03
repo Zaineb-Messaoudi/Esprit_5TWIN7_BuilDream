@@ -10,7 +10,11 @@ test('email verification screen can be rendered', function () {
 
     $response = $this->actingAs($user)->get('/verify-email');
 
-    $response->assertStatus(200);
+    $response
+        ->assertStatus(200)
+        ->assertSee('Verify your email address | SolarShare Admin')
+        ->assertSee('action="'.route('verification.send').'"', false)
+        ->assertSee('action="'.route('logout').'"', false);
 });
 
 test('email can be verified', function () {

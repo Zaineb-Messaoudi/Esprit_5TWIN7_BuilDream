@@ -8,7 +8,10 @@
                 <h1 class="mt-1 text-title-md font-semibold text-gray-800 dark:text-white/90">{{ __('Support tickets') }}</h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('Ticket workflow demonstration. Updates are kept in this page only.') }}</p>
             </div>
-            <button type="button" @click="$dispatch('open-ticket-form')" class="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">{{ __('Create ticket') }}</button>
+            <div class="flex flex-wrap gap-2">
+                <a href="{{ route('app.support.reply') }}" class="rounded-lg border border-gray-300 px-4 py-2.5 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">{{ __('Open ticket reply') }}</a>
+                <button type="button" @click="$dispatch('open-ticket-form')" class="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">{{ __('Create ticket') }}</button>
+            </div>
         </div>
 
         <div

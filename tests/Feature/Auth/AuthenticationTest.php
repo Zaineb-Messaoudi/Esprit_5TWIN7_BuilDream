@@ -5,7 +5,26 @@ use App\Models\User;
 test('login screen can be rendered', function () {
     $response = $this->get('/login');
 
-    $response->assertStatus(200);
+    $response->assertOk()
+        ->assertSee('Sign In')
+        ->assertSee('id="signin-form"', false)
+        ->assertSee('action="'.route('login').'"', false);
+});
+
+test('guests must sign in before opening dashboards', function () {
+    $this->get('/')->assertRedirect(route('login'));
+    $this->get(route('dashboard.ecommerce'))->assertRedirect(route('login'));
+});
+
+test('signed-in users are sent to the ecommerce dashboard from home', function () {
+    $this->actingAs(User::factory()->create())
+        ->get('/')
+        ->assertRedirect(route('dashboard.ecommerce'));
+
+    $this->get(route('dashboard.ecommerce'))
+        ->assertOk()
+        ->assertSee('xl:flex-1', false)
+        ->assertSee('xl:shrink-0', false);
 });
 
 test('users can authenticate using the login screen', function () {
@@ -37,5 +56,5 @@ test('users can logout', function () {
     $response = $this->actingAs($user)->post('/logout');
 
     $this->assertGuest();
-    $response->assertRedirect('/');
+    $response->assertRedirect(route('login'));
 });

@@ -1,12 +1,12 @@
 @props([
-    'title' => 'No data found',
-    'message' => 'Try adjusting your filters or search terms to find what you are looking for.',
+    'title' => __('No data found'),
+    'message' => __('Try adjusting your filters or search terms to find what you are looking for.'),
     'icon' => null,
     'actionLabel' => null,
     'actionRoute' => null,
 ])
 
-<div class="flex flex-col items-center justify-center text-center p-8">
+<div {{ $attributes->merge(['class' => 'flex flex-col items-center justify-center p-8 text-center']) }}>
     @if($icon)
         <div class="mb-4 text-gray-300 dark:text-gray-600">
             {!! $icon !!}
@@ -19,16 +19,16 @@
         </div>
     @endif
 
-    <h3 class="text-lg font-semibold text-gray-800 dark:text-white mb-1">
+    <h3 class="mb-1 text-lg font-semibold text-gray-800 dark:text-white">
         {{ $title }}
     </h3>
-    <p class="text-sm text-gray-500 dark:text-gray-400 max-w-xs mx-auto">
+    <p class="mx-auto max-w-xs text-sm text-gray-500 dark:text-gray-400">
         {{ $message }}
     </p>
 
     @if($actionLabel && $actionRoute)
         <div class="mt-6">
-            <a href="{{ $actionRoute }}" class="bg-brand text-white px-4 py-2 rounded-md hover:bg-brand-600 transition-colors text-sm font-medium">
+            <a href="{{ $actionRoute }}" class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs transition-colors hover:bg-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 motion-reduce:transition-none">
                 {{ $actionLabel }}
             </a>
         </div>

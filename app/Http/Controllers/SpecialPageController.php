@@ -31,6 +31,14 @@ class SpecialPageController extends Controller
             'tone' => 'warning',
             'action' => 'Try the dashboard',
         ],
+        'error-505' => [
+            'title' => '505 · HTTP version not supported',
+            'heading' => 'This HTTP version is not supported.',
+            'message' => 'The request used an HTTP protocol version this server does not support. This is a static error-page example.',
+            'code' => '505',
+            'tone' => 'error',
+            'action' => 'Return home',
+        ],
         'access-denied' => [
             'title' => 'Access denied',
             'heading' => 'This area is restricted.',

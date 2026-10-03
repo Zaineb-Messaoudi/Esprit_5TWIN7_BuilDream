@@ -7,6 +7,8 @@
             submitted: false,
             copied: false,
             prompt: '',
+            maxTokens: 2048,
+            temperature: 0.4,
             messages: [{ role: 'assistant', text: 'Hello! I can help you explore SolarShare demo workflows. This local UI does not call an AI service.' }],
             sendMessage() {
                 const message = this.prompt.trim();
@@ -149,22 +151,62 @@
                         </div>
                     </x-common.component-card>
                 @else
-                    <x-common.component-card title="Model preferences" desc="Selections update this page only; there are no API credentials or provider connections.">
+                    <x-common.component-card :title="__('Model configuration')" :desc="__('Choose a provider, model, and generation limits for the visual demo.')">
                         <form @submit.prevent="submitDemo()" class="space-y-5">
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Default model
-                                <select class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"><option>Demo writing model</option><option>Demo image model</option><option>Demo code model</option></select>
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <label for="ai-provider" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Provider') }}
+                                    <select id="ai-provider" class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"><option>OpenAI-compatible</option><option>Anthropic-compatible</option><option>Custom endpoint</option></select>
+                                </label>
+                                <label for="ai-model" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Model') }}
+                                    <select id="ai-model" class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"><option>gpt-4o-mini · demo</option><option>claude-3-haiku · demo</option><option>Custom model ID</option></select>
+                                </label>
+                            </div>
+                            <label for="ai-base-url" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('API base URL') }}
+                                <input id="ai-base-url" type="url" placeholder="https://api.example.test/v1" class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
                             </label>
-                            <label class="block text-sm font-medium text-gray-700 dark:text-gray-300">Response length
-                                <select class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"><option>Balanced</option><option>Short</option><option>Detailed</option></select>
+                            <label for="ai-api-key" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('API key') }}
+                                <input id="ai-api-key" type="password" autocomplete="new-password" placeholder="{{ __('Enter a demo key (not saved or sent)') }}" class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
                             </label>
-                            <label class="flex items-center gap-3 text-sm text-gray-700 dark:text-gray-300"><input type="checkbox" checked class="rounded border-gray-300 text-brand-500 focus:ring-brand-500" /> Include demo usage metrics</label>
-                            <button type="submit" class="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">Save demo preferences</button>
-                            <p x-show="submitted" x-cloak role="status" class="text-sm text-gray-500 dark:text-gray-400">Preferences were not persisted.</p>
+                            <p class="rounded-lg bg-warning-50 px-3 py-2.5 text-xs leading-5 text-warning-700 dark:bg-warning-500/10 dark:text-warning-300">{{ __('Demo only: never enter a real API key. This form does not save, transmit, or connect credentials.') }}</p>
+
+                            <div class="grid grid-cols-1 gap-5 border-t border-gray-100 pt-5 dark:border-gray-800 sm:grid-cols-2">
+                                <label for="ai-max-tokens" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Maximum output tokens') }}
+                                    <div class="mt-2 flex items-center gap-3"><input id="ai-max-tokens" x-model.number="maxTokens" type="range" min="256" max="8192" step="256" class="min-w-0 flex-1 accent-brand-500" /><output for="ai-max-tokens" class="w-16 text-end text-sm font-semibold text-gray-800 dark:text-white" x-text="maxTokens"></output></div>
+                                    <span class="mt-1 block text-xs text-gray-400">{{ __('Allowed range: 256–8192 tokens') }}</span>
+                                </label>
+                                <label for="ai-temperature" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Temperature') }}
+                                    <div class="mt-2 flex items-center gap-3"><input id="ai-temperature" x-model.number="temperature" type="range" min="0" max="1" step="0.1" class="min-w-0 flex-1 accent-brand-500" /><output for="ai-temperature" class="w-16 text-end text-sm font-semibold text-gray-800 dark:text-white" x-text="Number(temperature).toFixed(1)"></output></div>
+                                    <span class="mt-1 block text-xs text-gray-400">{{ __('Lower values produce more consistent output.') }}</span>
+                                </label>
+                            </div>
+                            <div class="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                                <label for="ai-fallback-model" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Fallback model') }}
+                                    <select id="ai-fallback-model" class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"><option>{{ __('None') }}</option><option>gpt-4o-mini · demo</option><option>claude-3-haiku · demo</option></select>
+                                </label>
+                                <label for="ai-timeout" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Request timeout') }}
+                                    <select id="ai-timeout" class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"><option>30 seconds</option><option>60 seconds</option><option>120 seconds</option></select>
+                                </label>
+                            </div>
+                            <div class="space-y-3 border-t border-gray-100 pt-5 dark:border-gray-800">
+                                <label class="flex items-center justify-between gap-4 text-sm text-gray-700 dark:text-gray-300"><span><span class="block font-medium">{{ __('Log usage metrics') }}</span><span class="mt-0.5 block text-xs text-gray-400">{{ __('Display request and token totals in the demo.') }}</span></span><input type="checkbox" checked class="size-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" /></label>
+                                <label class="flex items-center justify-between gap-4 text-sm text-gray-700 dark:text-gray-300"><span><span class="block font-medium">{{ __('Show provider health checks') }}</span><span class="mt-0.5 block text-xs text-gray-400">{{ __('Show configuration readiness in the settings panel.') }}</span></span><input type="checkbox" class="size-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" /></label>
+                            </div>
+                            <div class="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-5 dark:border-gray-800">
+                                <button type="submit" class="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">{{ __('Save demo settings') }}</button>
+                                <p x-show="submitted" x-cloak role="status" class="text-sm text-gray-500 dark:text-gray-400">{{ __('Settings preview updated in this page only; nothing was saved.') }}</p>
+                            </div>
                         </form>
                     </x-common.component-card>
-                    <x-common.component-card title="Provider status">
-                        <div class="flex items-center gap-3"><span class="h-2.5 w-2.5 rounded-full bg-gray-400"></span><p class="text-sm text-gray-600 dark:text-gray-300">No AI provider configured</p></div>
-                        <p class="mt-3 text-xs text-gray-400">Connect a provider through an approved backend integration before enabling real generation features.</p>
+                    <x-common.component-card :title="__('Provider status')">
+                        <div class="flex flex-wrap items-start justify-between gap-3">
+                            <div><p class="text-sm font-medium text-gray-800 dark:text-white/90">{{ __('No AI provider configured') }}</p><p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('Add credentials only in a secure backend integration.') }}</p></div>
+                            <x-ui.badge variant="light" color="gray">{{ __('Not connected') }}</x-ui.badge>
+                        </div>
+                        <div class="mt-5 grid grid-cols-1 gap-3 sm:grid-cols-3">
+                            @foreach ([__('Model endpoint'), __('Credential check'), __('Token budget')] as $item)
+                                <div class="rounded-lg border border-gray-100 p-3 dark:border-gray-800"><p class="text-xs text-gray-500 dark:text-gray-400">{{ $item }}</p><p class="mt-1 text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Demo only') }}</p></div>
+                            @endforeach
+                        </div>
                     </x-common.component-card>
                 @endif
             </div>

@@ -1,5 +1,5 @@
 @props([
-    'title',
+    'title' => '',
     'desc' => '',
 ])
 

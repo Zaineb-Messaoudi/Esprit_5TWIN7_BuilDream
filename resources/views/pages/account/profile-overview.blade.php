@@ -32,6 +32,18 @@
                         </dd>
                     </div>
                     <div>
+                        <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">{{ __('Phone number') }}</dt>
+                        <dd class="mt-2 text-sm font-medium text-gray-800 dark:text-white/90">{{ $user->phone_number ?: __('Not provided') }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">{{ __('Address') }}</dt>
+                        <dd class="mt-2 text-sm font-medium text-gray-800 dark:text-white/90">{{ $user->address ?: __('Not provided') }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">{{ __('Account role') }}</dt>
+                        <dd class="mt-2"><x-ui.badge color="{{ $user->isAdmin() ? 'success' : 'gray' }}" variant="light">{{ $user->role?->label() ?? __('User') }}</x-ui.badge></dd>
+                    </div>
+                    <div>
                         <dt class="text-xs font-medium uppercase tracking-wide text-gray-400">{{ __('Account created') }}</dt>
                         <dd class="mt-2 text-sm font-medium text-gray-800 dark:text-white/90">{{ $user->created_at?->format('M d, Y') ?? __('Not available') }}</dd>
                     </div>

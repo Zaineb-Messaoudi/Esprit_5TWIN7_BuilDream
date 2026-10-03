@@ -12,15 +12,14 @@ use App\Http\Controllers\SpecialPageController;
 use Illuminate\Support\Facades\Route;
 
 Route::get('/', function () {
-    return view('pages.dashboard.ecommerce', [
-        'title' => 'E-commerce Dashboard',
-    ]);
-})->name('dashboard');
+    return redirect()->route('dashboard.ecommerce');
+})->middleware('auth')->name('dashboard');
 
 foreach ([
     'error-403',
     'error-500',
     'error-503',
+    'error-505',
     'access-denied',
     'maintenance',
     'coming-soon',
@@ -173,6 +172,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         return view('pages.chart.showcase', ['title' => 'Radial Chart', 'type' => 'radial']);
     })->name('chart.radial');
     Route::get('/chart-examples', [ChartShowcaseController::class, 'index'])->name('chart.examples');
+    Route::get('/radar-chart', [ChartShowcaseController::class, 'radar'])->name('chart.radar-showcase');
+    Route::get('/radial-progress-charts', [ChartShowcaseController::class, 'radialProgress'])->name('chart.radial-progress');
 
     // UI Elements
     Route::get('/alerts', function () {
@@ -209,6 +210,15 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/components', function () {
         return view('pages.ui-elements.components', ['title' => 'Component Library']);
     })->name('ui.components');
+    Route::get('/carousel', function () {
+        return view('pages.ui-elements.carousel', ['title' => 'Carousel']);
+    })->name('ui.carousel');
+    Route::get('/ribbons', function () {
+        return view('pages.ui-elements.ribbons', ['title' => 'Ribbons']);
+    })->name('ui.ribbons');
+    Route::get('/layouts/sidebar-variants', function () {
+        return view('pages.layouts.sidebar-variants', ['title' => 'Sidebar Variants']);
+    })->name('layouts.sidebar-variants');
 
     // Applications
     Route::get('/chat', function () {
@@ -220,6 +230,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/support-ticket', function () {
         return view('pages.applications.support', ['title' => 'Support Tickets']);
     })->name('app.support');
+    Route::get('/support-ticket-reply', function () {
+        return view('pages.applications.support-ticket-detail', ['title' => 'Ticket Reply']);
+    })->name('app.support.reply');
 
     // Ecommerce
     Route::get('/product-list', function () {
@@ -261,6 +274,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/maps', function () {
         return view('pages.applications.maps', ['title' => __('Map examples')]);
     })->name('maps.index');
+    Route::get('/vector-maps', function () {
+        return view('pages.applications.vector-maps', ['title' => __('Vector Maps')]);
+    })->name('maps.vector');
 });
 
 require __DIR__.'/auth.php';

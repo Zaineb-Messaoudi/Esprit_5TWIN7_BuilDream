@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-gray-50 dark:bg-gray-900">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="h-full bg-gray-50 dark:bg-gray-900">
 
 <head>
     <meta charset="utf-8">
@@ -46,6 +46,10 @@
 
     <script>
         (function() {
+            const savedDir = localStorage.getItem('dir');
+            if (savedDir) {
+                document.documentElement.setAttribute('dir', savedDir);
+            }
             const savedTheme = localStorage.getItem('theme');
             if (savedTheme === 'dark') {
                 document.documentElement.classList.add('dark');
@@ -56,9 +60,13 @@
 </head>
 
 <body class="antialiased">
-    <div class="min-h-screen flex items-center justify-center p-4">
+    @if (View::hasSection('full-bleed'))
         @yield('content')
-    </div>
+    @else
+        <div class="flex min-h-screen items-center justify-center p-4">
+            @yield('content')
+        </div>
+    @endif
 </body>
 
 @stack('scripts')

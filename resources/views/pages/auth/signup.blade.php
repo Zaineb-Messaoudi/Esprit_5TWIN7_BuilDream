@@ -1,20 +1,14 @@
 @extends('layouts.fullscreen-layout')
 
+@section('title', __('Create an account'))
+@section('full-bleed', true)
+
 @section('content')
-    <div class="relative z-1 bg-white p-6 sm:p-0 dark:bg-gray-900">
-        <div class="flex h-screen w-full flex-col justify-center sm:p-0 lg:flex-row dark:bg-gray-900">
+    <div class="relative z-1 min-h-screen bg-white p-6 sm:p-0 dark:bg-gray-900">
+        <div class="flex min-h-screen w-full flex-col justify-center sm:p-0 lg:flex-row dark:bg-gray-900">
             <!-- Form -->
-            <div class="flex w-full flex-1 flex-col lg:w-1/2">
-                <div class="mx-auto w-full max-w-md pt-5 sm:py-10">
-                    <a href="/"
-                        class="inline-flex items-center gap-2 text-sm text-gray-500 transition-colors hover:text-gray-700 dark:text-gray-400 dark:hover:text-gray-300">
-                        <svg class="stroke-current rtl:rotate-180" xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                            <path d="M12.7083 5L7.5 10.2083L12.7083 15.4167" stroke="" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-                        </svg>
-                        Back to dashboard
-                    </a>
-                </div>
-                <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center">
+            <div class="flex min-h-screen w-full flex-1 flex-col lg:w-1/2">
+                <div class="mx-auto flex w-full max-w-md flex-1 flex-col justify-center py-8 sm:py-10">
                     <div class="mb-5 sm:mb-8">
                         <h1 class="text-title-sm sm:text-title-md mb-2 font-semibold text-gray-800 dark:text-white/90">
                             Sign Up
@@ -52,7 +46,10 @@
                                 <span class="bg-white p-2 text-gray-400 sm:px-5 sm:py-2 dark:bg-gray-900">Or</span>
                             </div>
                         </div>
-                        <form>
+                        <form id="register-form" method="POST" action="{{ route('register') }}" enctype="multipart/form-data" x-data="{ firstName: @js(old('fname', '')), lastName: @js(old('lname', '')), password: '' }">
+                            @csrf
+                            <input type="hidden" name="name" :value="[firstName, lastName].filter(Boolean).join(' ')">
+                            <input type="hidden" name="password_confirmation" :value="password">
                             <div class="space-y-5">
                                 <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                                     <!-- First Name -->
@@ -60,7 +57,7 @@
                                         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                             First Name<span class="text-error-500">*</span>
                                         </label>
-                                        <input type="text" id="fname" name="fname"
+                                        <input type="text" id="fname" name="fname" x-model="firstName" value="{{ old('fname') }}" required autocomplete="given-name"
                                             placeholder="Enter your first name"
                                             class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
                                     </div>
@@ -69,18 +66,68 @@
                                         <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                             Last Name<span class="text-error-500">*</span>
                                         </label>
-                                        <input type="text" id="lname" name="lname"
+                                        <input type="text" id="lname" name="lname" x-model="lastName" value="{{ old('lname') }}" required autocomplete="family-name"
                                             placeholder="Enter your last name"
                                             class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
                                     </div>
+                                </div>
+                                @error('name')
+                                    <p class="mt-1.5 text-sm text-error-500" role="alert">{{ $message }}</p>
+                                @enderror
+                                <div x-data="{ photoName: '' }">
+                                    <label for="profile_photo" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                        {{ __('Profile photo') }} <span class="font-normal text-gray-400 dark:text-gray-500">({{ __('optional') }})</span>
+                                    </label>
+                                    <label for="profile_photo" class="flex cursor-pointer items-center gap-4 rounded-xl border border-dashed border-gray-300 bg-gray-50 p-4 transition hover:border-brand-400 hover:bg-brand-50/50 dark:border-gray-700 dark:bg-gray-800/50 dark:hover:border-brand-500 dark:hover:bg-brand-500/5">
+                                        <span class="flex size-11 shrink-0 items-center justify-center rounded-full bg-white text-brand-500 shadow-theme-xs dark:bg-gray-800">
+                                            <svg class="size-5" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+                                                <path d="M12 16V4m0 0L7.5 8.5M12 4l4.5 4.5M5 14v4a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2v-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                                            </svg>
+                                        </span>
+                                        <span class="min-w-0 flex-1">
+                                            <span class="block truncate text-sm font-medium text-gray-800 dark:text-white/90" x-text="photoName || @js(__('Choose a profile photo'))">{{ __('Choose a profile photo') }}</span>
+                                            <span class="mt-1 block text-xs text-gray-500 dark:text-gray-400">{{ __('JPG, PNG, or WebP. Maximum file size: 2 MB.') }}</span>
+                                        </span>
+                                        <span class="rounded-lg border border-gray-200 bg-white px-3 py-2 text-xs font-medium text-gray-700 shadow-theme-xs dark:border-gray-700 dark:bg-gray-800 dark:text-gray-300">{{ __('Browse') }}</span>
+                                    </label>
+                                    <input type="file" id="profile_photo" name="profile_photo" accept="image/jpeg,image/png,image/webp"
+                                        class="sr-only" @change="photoName = $event.target.files.length ? $event.target.files[0].name : ''" />
+                                    @error('profile_photo')
+                                        <p class="mt-1.5 text-sm text-error-500" role="alert">{{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <!-- Email -->
                                 <div>
                                     <label class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
                                         Email<span class="text-error-500">*</span>
                                     </label>
-                                    <input type="email" id="email" name="email" placeholder="Enter your email"
+                                    <input type="email" id="email" name="email" value="{{ old('email') }}" placeholder="Enter your email" required autocomplete="email"
                                         class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                                    @error('email')
+                                        <p class="mt-1.5 text-sm text-error-500" role="alert">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <!-- Phone -->
+                                <div>
+                                    <label for="phone_number" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                        {{ __('Phone number') }}
+                                    </label>
+                                    <input type="tel" id="phone_number" name="phone_number" value="{{ old('phone_number') }}" placeholder="Enter your phone number" autocomplete="tel"
+                                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                                    @error('phone_number')
+                                        <p class="mt-1.5 text-sm text-error-500" role="alert">{{ $message }}</p>
+                                    @enderror
+                                </div>
+                                <!-- Address -->
+                                <div>
+                                    <label for="address" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
+                                        {{ __('Address') }}
+                                    </label>
+                                    <input type="text" id="address" name="address" value="{{ old('address') }}" placeholder="Enter your address" autocomplete="street-address"
+                                        class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent px-4 py-2.5 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                                    @error('address')
+                                        <p class="mt-1.5 text-sm text-error-500" role="alert">{{ $message }}</p>
+                                    @enderror
                                 </div>
                                 <!-- Password -->
                                 <div>
@@ -88,8 +135,11 @@
                                         Password<span class="text-error-500">*</span>
                                     </label>
                                     <div x-data="{ showPassword: false }" class="relative">
-                                        <input :type="showPassword ? 'text' : 'password'" placeholder="Enter your password"
+                                        <input :type="showPassword ? 'text' : 'password'" id="password" name="password" x-model="password" required autocomplete="new-password" placeholder="Enter your password"
                                             class="dark:bg-dark-900 shadow-theme-xs focus:border-brand-300 focus:ring-brand-500/10 dark:focus:border-brand-800 h-11 w-full rounded-lg border border-gray-300 bg-transparent py-2.5 pr-11 pl-4 text-sm text-gray-800 placeholder:text-gray-400 focus:ring-3 focus:outline-hidden dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30" />
+                                        @error('password')
+                                            <p class="mt-1.5 text-sm text-error-500" role="alert">{{ $message }}</p>
+                                        @enderror
                                         <span @click="showPassword = !showPassword"
                                             class="absolute top-1/2 right-4 z-30 -translate-y-1/2 cursor-pointer text-gray-500 dark:text-gray-400">
                                             <svg x-show="!showPassword" class="fill-current" width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -143,14 +193,14 @@
                         <div class="mt-5">
                             <p class="text-center text-sm font-normal text-gray-700 sm:text-start dark:text-gray-400">
                                 Already have an account?
-                                <a href="/signin" class="text-brand-500 hover:text-brand-600 dark:text-brand-400">Sign In</a>
+                                <a href="{{ route('login') }}" class="text-brand-500 hover:text-brand-600 dark:text-brand-400">Sign In</a>
                             </p>
                         </div>
                     </div>
                 </div>
             </div>
-            <div class="bg-brand-950 relative hidden h-full w-full items-center lg:grid lg:w-1/2 dark:bg-white/5">
-                <div class="z-1 flex items-center justify-center">
+            <div class="bg-brand-950 relative hidden min-h-screen w-full items-center lg:sticky lg:top-0 lg:grid lg:h-screen lg:w-1/2 lg:self-start dark:bg-white/5">
+                <div class="z-1 flex -translate-y-6 items-center justify-center">
                     <!-- ===== Common Grid Shape Start ===== -->
                     <x-common.common-grid-shape />
                     <div class="flex max-w-xs flex-col items-center">

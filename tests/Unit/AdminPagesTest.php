@@ -13,6 +13,7 @@ class AdminPagesTest extends TestCase
             'special.error-403',
             'special.error-500',
             'special.error-503',
+            'special.error-505',
             'special.access-denied',
             'special.maintenance',
             'special.coming-soon',
@@ -78,6 +79,8 @@ class AdminPagesTest extends TestCase
             'chart.pie',
             'chart.donut',
             'chart.radial',
+            'chart.radar-showcase',
+            'chart.radial-progress',
             'chart.examples',
             'ui.alerts',
             'ui.avatars',
@@ -89,9 +92,13 @@ class AdminPagesTest extends TestCase
             'ui.skeletons',
             'ui.empty-state',
             'ui.components',
+            'ui.carousel',
+            'ui.ribbons',
+            'layouts.sidebar-variants',
             'app.chat',
             'app.email',
             'app.support',
+            'app.support.reply',
             'ecommerce.list',
             'ecommerce.detail',
             'ecommerce.cart',
@@ -114,6 +121,7 @@ class AdminPagesTest extends TestCase
             'pricing',
             'ai.map',
             'maps.index',
+            'maps.vector',
             'faq.index',
             'layouts.full-width',
         ];
@@ -131,6 +139,28 @@ class AdminPagesTest extends TestCase
 
             $this->actingAs($user)->get(route($pageName, $routeParameters))->assertStatus(200, "The {$pageName} page should render.");
         }
+
+        $this->actingAs($user)
+            ->get(route('chart.examples'))
+            ->assertOk()
+            ->assertSee('x-init="mount($refs.chart)"', false)
+            ->assertSee('Bar Chart Five')
+            ->assertSee('Bar Chart Six')
+            ->assertSee('Pie Chart Four')
+            ->assertSee('Pie Chart Five');
+        $this->actingAs($user)
+            ->get(route('chart.radar-showcase'))
+            ->assertOk()
+            ->assertSee('Basic Radar')
+            ->assertSee('Radar with Multiple Series')
+            ->assertSee('Radar with Polygon Fill');
+        $this->actingAs($user)
+            ->get(route('chart.radial-progress'))
+            ->assertOk()
+            ->assertSee('Single Progress')
+            ->assertSee('Multiple Progress')
+            ->assertSee('Semi-circle Progress')
+            ->assertSee('Progress with Labels');
 
         $this->actingAs($user)
             ->get(route('calendar'))
@@ -163,7 +193,23 @@ class AdminPagesTest extends TestCase
             ->assertOk()
             ->assertSee('id="ticket-search"', false)
             ->assertSee('id="ticket-status"', false)
-            ->assertSee('Database Connection Timeout');
+            ->assertSee('Database Connection Timeout')
+            ->assertSee(route('app.support.reply'), false)
+            ->assertSee('selectDirection(option.id)', false)
+            ->assertSee("localStorage.setItem('dir', this.direction)", false)
+            ->assertDontSee('/locale/', false);
+        $this->actingAs($user)
+            ->get(route('app.support.reply'))
+            ->assertOk()
+            ->assertSee('TKT-8838')
+            ->assertSee('support-detail-reply', false)
+            ->assertSee('inverter-status.png')
+            ->assertSee('Resolve ticket');
+        $this->actingAs($user)
+            ->get(route('maps.vector'))
+            ->assertOk()
+            ->assertSee('id="mapVectorWorld"', false)
+            ->assertSee('id="mapVectorRegions"', false);
         $this->actingAs($user)
             ->get(route('app.tasks'))
             ->assertOk()
@@ -176,6 +222,8 @@ class AdminPagesTest extends TestCase
         $this->actingAs($user)
             ->get(route('ui.components'))
             ->assertOk()
+            ->assertSee('focus-visible:ring-2', false)
+            ->assertSee('motion-reduce:transition-none', false)
             ->assertSee('id="component-date-selector"', false)
             ->assertSee('role="dialog"', false)
             ->assertSee('aria-modal="true"', false)
@@ -183,12 +231,49 @@ class AdminPagesTest extends TestCase
             ->assertSee('aria-labelledby="component-modal-title"', false)
             ->assertSee('pageNumbers()', false)
             ->assertSee("'Home'", false)
-            ->assertSee('element.tabIndex >= 0', false);
+            ->assertSee('element.tabIndex >= 0', false)
+            ->assertSee('Carousel')
+            ->assertSee('Ribbons');
+        $this->actingAs($user)
+            ->get(route('ui.carousel'))
+            ->assertOk()
+            ->assertSee('aria-roledescription="carousel"', false)
+            ->assertSee('Previous slide');
+        $this->actingAs($user)
+            ->get(route('ui.ribbons'))
+            ->assertOk()
+            ->assertSee('Featured')
+            ->assertSee('Needs attention');
+        $this->actingAs($user)
+            ->get(route('layouts.sidebar-variants'))
+            ->assertOk()
+            ->assertSee('Classic')
+            ->assertSee('Sectioned')
+            ->assertSee('Documentation')
+            ->assertSee('Collapsible')
+            ->assertSee('Nested')
+            ->assertSee('Toggle');
+        $this->actingAs($user)
+            ->get(route('ai.settings'))
+            ->assertOk()
+            ->assertSee('API base URL')
+            ->assertSee('Maximum output tokens')
+            ->assertSee('Temperature')
+            ->assertSee('not save, transmit, or connect');
         $this->actingAs($user)
             ->get(route('ui.alerts'))
             ->assertOk()
             ->assertSee('aria-live="assertive"', false)
-            ->assertSee('role="alert"', false);
+            ->assertSee('role="alert"', false)
+            ->assertSee('text-warning-500', false)
+            ->assertDontSee('fill="#F04438"', false);
+
+        $emptyState = \Illuminate\Support\Facades\Blade::render(
+            '<x-ui.empty-state title="No items" message="Create one to get started." action-label="Create item" action-route="'.route('dashboard').'" />'
+        );
+        $this->assertStringContainsString('bg-brand-500', $emptyState);
+        $this->assertStringContainsString('focus-visible:ring-2', $emptyState);
+        $this->assertStringContainsString('href="'.route('dashboard').'"', $emptyState);
         $this->actingAs($user)
             ->get(route('settings.preferences'))
             ->assertOk()
@@ -232,10 +317,42 @@ class AdminPagesTest extends TestCase
         }
     }
 
+    public function test_dashboard_sidebar_renders_icons_and_a_bounded_scroll_region(): void
+    {
+        foreach (\App\Helpers\MenuHelper::getMenuGroups() as $group) {
+            foreach ($group['items'] as $item) {
+                $this->assertNotSame('', \App\Helpers\MenuHelper::getIconSvg($item['icon']));
+            }
+        }
+
+        $dashboardItems = \App\Helpers\MenuHelper::getMainNavItems()[0]['subItems'];
+        $dashboardIcons = array_map(
+            fn (array $item) => \App\Helpers\MenuHelper::getIconSvg($item['icon']),
+            $dashboardItems,
+        );
+        $this->assertCount(count($dashboardItems), array_unique($dashboardIcons));
+
+        $user = new User([
+            'name' => 'Dashboard reviewer',
+            'email' => 'dashboard-reviewer@example.test',
+        ]);
+        $user->email_verified_at = now();
+
+        $this->actingAs($user)
+            ->get(route('dashboard.main'))
+            ->assertOk()
+            ->assertSee('overflow-y-auto overscroll-contain custom-scrollbar', false)
+            ->assertSee('<span class="shrink-0 [&_svg]:h-4 [&_svg]:w-4"', false)
+            ->assertSee('M3 6.5H14', false)
+            ->assertSee('<svg width="24" height="24"', false);
+    }
+
     public function test_routed_auth_pages_use_functional_branded_forms(): void
     {
         $this->get(route('login'))
             ->assertOk()
+            ->assertSee('Sign in | SolarShare Admin')
+            ->assertSee('const savedDir = localStorage.getItem(\'dir\')', false)
             ->assertSee('id="signin-form"', false)
             ->assertSee('action="'.route('login').'"', false)
             ->assertSee('name="email"', false)
@@ -243,17 +360,47 @@ class AdminPagesTest extends TestCase
             ->assertSee('name="remember"', false)
             ->assertSee('href="'.route('password.request').'"', false)
             ->assertSee(route('register'), false)
-            ->assertSee('SolarShare workspace');
+            ->assertSee('Free and Open-Source Tailwind CSS Admin Dashboard Template')
+            ->assertSee('h-screen w-full flex-col justify-center sm:p-0 lg:flex-row', false)
+            ->assertSee('Sign in with Google')
+            ->assertSee('Sign in with X')
+            ->assertDontSee('Back to dashboard')
+            ->assertSee('-translate-y-6', false)
+            ->assertSee('lg:grid lg:w-1/2', false);
+        $this->get('/')
+            ->assertRedirect(route('login'));
 
         $this->get(route('register'))
             ->assertOk()
+            ->assertSee('Create an account | SolarShare Admin')
             ->assertSee('id="register-form"', false)
             ->assertSee('action="'.route('register').'"', false)
             ->assertSee('name="name"', false)
             ->assertSee('name="email"', false)
             ->assertSee('name="phone_number"', false)
             ->assertSee('name="address"', false)
+            ->assertSee('name="profile_photo"', false)
+            ->assertSee('(optional)')
             ->assertSee('name="password_confirmation"', false)
-            ->assertSee('SolarShare workspace');
+            ->assertSee('Free and Open-Source Tailwind CSS Admin Dashboard Template')
+            ->assertSee('Sign up with Google')
+            ->assertSee('Sign up with X')
+            ->assertDontSee('Back to dashboard')
+            ->assertSee('lg:sticky lg:top-0 lg:grid lg:h-screen lg:w-1/2', false)
+            ->assertSee('-translate-y-6', false);
+        $this->assertTrue(is_subclass_of(\App\Models\User::class, \Illuminate\Contracts\Auth\MustVerifyEmail::class));
+
+        $this->get(route('password.request'))
+            ->assertOk()
+            ->assertSee('id="forgot-password-form"', false)
+            ->assertSee('action="'.route('password.email').'"', false)
+            ->assertSee('name="email"', false);
+
+        $this->get(route('password.reset', ['token' => 'demo-token']))
+            ->assertOk()
+            ->assertSee('id="reset-password-form"', false)
+            ->assertSee('action="'.route('password.store').'"', false)
+            ->assertSee('name="token"', false)
+            ->assertSee('name="password_confirmation"', false);
     }
 }

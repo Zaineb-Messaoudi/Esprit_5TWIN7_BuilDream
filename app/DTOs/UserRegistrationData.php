@@ -2,6 +2,8 @@
 
 namespace App\DTOs;
 
+use Illuminate\Http\UploadedFile;
+
 readonly class UserRegistrationData
 {
     public function __construct(
@@ -11,6 +13,7 @@ readonly class UserRegistrationData
         public ?string $phone_number = null,
         public ?string $address = null,
         public string $role = 'user',
+        public ?UploadedFile $profile_photo = null,
     ) {}
 
     public static function fromRequest(\Illuminate\Http\Request $request): self
@@ -22,6 +25,7 @@ readonly class UserRegistrationData
             phone_number: $request->validated('phone_number'),
             address: $request->validated('address'),
             role: $request->validated('role', 'user'),
+            profile_photo: $request->file('profile_photo'),
         );
     }
 }

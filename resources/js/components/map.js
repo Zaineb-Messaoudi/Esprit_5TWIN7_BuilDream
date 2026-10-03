@@ -15,6 +15,12 @@ const mapConfigs = {
         { name: 'United Kingdom', coords: [55.3781, 3.436] },
         { name: 'United States', coords: [37.0902, -95.7129] },
     ],
+    mapVectorWorld: [
+        { name: 'Egypt', coords: [26.8206, 30.8025] },
+        { name: 'United Kingdom', coords: [55.3781, 3.436] },
+        { name: 'United States', coords: [37.0902, -95.7129] },
+    ],
+    mapVectorRegions: locations,
     mapBasic: [],
     mapMarker: [locations[0]],
     mapMultiple: locations,

@@ -17,7 +17,7 @@
 @else
     <div
         x-data="apexChart(@js($options), {{ (int) $height }})"
-        x-init="init($refs.chart)"
+        x-init="mount($refs.chart)"
         @theme-changed.window="syncTheme($event.detail)"
         class="min-w-0"
     >

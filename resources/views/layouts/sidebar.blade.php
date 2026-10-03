@@ -8,7 +8,7 @@
 
 <aside id="sidebar"
     aria-label="{{ __('Main navigation') }}"
-    class="fixed flex flex-col mt-0 top-0 px-5 start-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen transition-all duration-300 ease-in-out z-99999 ltr:border-r rtl:border-l border-gray-200 w-[90px] [.sidebar-expanded_&]:min-w-[290px]"
+    class="fixed flex flex-col mt-0 top-0 px-5 start-0 bg-white dark:bg-gray-900 dark:border-gray-800 text-gray-900 h-screen overflow-hidden transition-all duration-300 ease-in-out z-99999 ltr:border-r rtl:border-l border-gray-200 w-[90px] [.sidebar-expanded_&]:min-w-[290px]"
     x-data="{
         openSubmenus: {},
         init() {
@@ -61,7 +61,7 @@
     @mouseenter="if (!$store.sidebar.isExpanded) $store.sidebar.setHovered(true)"
     @mouseleave="$store.sidebar.setHovered(false)">
     <!-- Logo Section -->
-    <div class="pt-8 pb-7 flex items-center gap-2" :class="(!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ? 'justify-center' : 'justify-between'">
+    <div class="pt-8 pb-7 flex shrink-0 items-center gap-2" :class="(!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ? 'justify-center' : 'justify-between'">
         <a href="/">
             <div class="hidden [.sidebar-expanded_&]:block">
                 <img class="dark:hidden" src="/images/logo/logo.svg" alt="Logo" width="150" height="40" />
@@ -72,8 +72,8 @@
     </div>
 
     <!-- Navigation Menu -->
-    <div class="flex flex-col overflow-y-auto duration-300 ease-linear no-scrollbar">
-        <nav class="mb-6" aria-label="{{ __('Primary navigation') }}">
+    <div class="flex min-h-0 flex-1 flex-col overflow-y-auto overscroll-contain custom-scrollbar duration-300 ease-linear">
+        <nav class="mb-6 shrink-0" aria-label="{{ __('Primary navigation') }}">
             <div class="flex flex-col gap-4">
                 @foreach ($menuGroups as $groupIndex => $menuGroup)
                     <div>
@@ -161,7 +161,13 @@
                                                                 'menu-dropdown-item-active' :
                                                                 'menu-dropdown-item-inactive'"
                                                             :aria-current="isActive('{{ $subItem['path'] }}', '{{ $subItem['activePrefix'] ?? '' }}') ? 'page' : null">
-                                                            {{ __($subItem['name']) }}
+                                                            <span class="shrink-0 [&_svg]:h-4 [&_svg]:w-4"
+                                                                :class="isActive('{{ $subItem['path'] }}', '{{ $subItem['activePrefix'] ?? '' }}') ?
+                                                                    'text-brand-500 dark:text-brand-400' :
+                                                                    'text-gray-400 dark:text-gray-500'">
+                                                                {!! MenuHelper::getIconSvg($subItem['icon'] ?? $item['icon']) !!}
+                                                            </span>
+                                                            <span class="min-w-0 truncate">{{ __($subItem['name']) }}</span>
                                                             <span class="flex items-center gap-1 ltr:ml-auto rtl:mr-auto">
                                                                 @if (!empty($subItem['new']))
                                                                     <span

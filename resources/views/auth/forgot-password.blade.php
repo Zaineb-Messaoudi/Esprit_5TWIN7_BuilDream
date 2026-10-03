@@ -1,25 +1,22 @@
-<x-guest-layout>
-    <div class="mb-4 text-sm text-gray-600 dark:text-gray-400">
-        {{ __('Forgot your password? No problem. Just let us know your email address and we will email you a password reset link that will allow you to choose a new one.') }}
+<x-guest-layout :title="__('Reset your password')">
+    <div class="mb-8">
+        <h1 class="text-title-md font-semibold text-gray-900 dark:text-white/90">{{ __('Reset your password') }}</h1>
+        <p class="mt-2 text-sm leading-6 text-gray-500 dark:text-gray-400">{{ __('Enter your email and we will send you a password reset link.') }}</p>
     </div>
 
-    <!-- Session Status -->
-    <x-auth-session-status class="mb-4" :status="session('status')" />
+    <x-auth-session-status class="mb-5" :status="session('status')" />
 
-    <form method="POST" action="{{ route('password.email') }}">
+    <form id="forgot-password-form" method="POST" action="{{ route('password.email') }}">
         @csrf
-
-        <!-- Email Address -->
-        <div>
-            <x-input-label for="email" :value="__('Email')" />
-            <x-text-input id="email" class="block mt-1 w-full" type="email" name="email" :value="old('email')" required autofocus />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-
-        <div class="flex items-center justify-end mt-4">
-            <x-primary-button>
-                {{ __('Email Password Reset Link') }}
-            </x-primary-button>
+        <div class="space-y-5">
+            <x-auth.form-field name="email" :label="__('Email address')" type="email" autocomplete="username" inputmode="email" :required="true" :autofocus="true" />
+            <button type="submit" class="inline-flex min-h-11 w-full items-center justify-center rounded-lg bg-brand-500 px-4 py-3 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900">
+                {{ __('Send password reset link') }}
+            </button>
         </div>
     </form>
+
+    <p class="mt-7 text-center text-sm text-gray-600 dark:text-gray-400">
+        <a href="{{ route('login') }}" class="rounded-sm font-medium text-brand-600 hover:text-brand-700 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:text-brand-400 dark:hover:text-brand-300">{{ __('Back to sign in') }}</a>
+    </p>
 </x-guest-layout>

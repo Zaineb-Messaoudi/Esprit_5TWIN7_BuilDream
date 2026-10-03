@@ -1,4 +1,9 @@
 {
+    "Profile photo": "Profile photo",
+    "JPG, PNG, or WebP. Maximum file size: 2 MB.": "JPG, PNG, or WebP. Maximum file size: 2 MB.",
+    "optional": "optional",
+    "Choose a profile photo": "Choose a profile photo",
+    "Browse": "Browse",
     "UI Elements": "UI Elements",
     "Components": "Components",
     "Component Library": "Component Library",
@@ -510,5 +515,20 @@
     "Phone Number": "Phone Number",
     "Address": "Address",
     "Password": "Password",
-    "Confirm Password": "Confirm Password"
+    "Confirm Password": "Confirm Password",
+    "Authentication": "Authentication",
+    "Reset your password": "Reset your password",
+    "Enter your email and we will send you a password reset link.": "Enter your email and we will send you a password reset link.",
+    "Send password reset link": "Send password reset link",
+    "Back to sign in": "Back to sign in",
+    "Choose a new password": "Choose a new password",
+    "Set a new password to secure your account.": "Set a new password to secure your account.",
+    "Confirm your password": "Confirm your password",
+    "This is a secure area. Please confirm your password before continuing.": "This is a secure area. Please confirm your password before continuing.",
+    "Verify your email address": "Verify your email address",
+    "Check your inbox for a verification link. If you did not receive it, request another below.": "Check your inbox for a verification link. If you did not receive it, request another below.",
+    "A new verification link has been sent to your email address.": "A new verification link has been sent to your email address.",
+    "Resend verification email": "Resend verification email",
+    "Log out": "Log out",
+    "Reset Password": "Reset Password"
 }

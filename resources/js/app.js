@@ -1,32 +1,52 @@
 import { createPopper } from '@popperjs/core';
 import './bootstrap';
 import Alpine from 'alpinejs';
-import ApexCharts from 'apexcharts';
 
-// flatpickr
-import flatpickr from 'flatpickr';
-import 'flatpickr/dist/flatpickr.min.css';
-// FullCalendar
-import { Calendar } from 'fullcalendar';
+let apexChartsPromise;
 
+function loadApexCharts() {
+    if (!apexChartsPromise) {
+        apexChartsPromise = import('apexcharts').then(({ default: ApexCharts }) => {
+            window.ApexCharts = ApexCharts;
+            return ApexCharts;
+        });
+    }
 
+    return apexChartsPromise;
+}
+
+function observeNearViewport(element, callback) {
+    if (!('IntersectionObserver' in window)) {
+        callback();
+        return null;
+    }
+
+    const observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) {
+            observer.disconnect();
+            callback();
+        }
+    }, { rootMargin: '200px' });
+
+    observer.observe(element);
+    return observer;
+}
 
 window.Alpine = Alpine;
 window.createPopper = createPopper;
-window.ApexCharts = ApexCharts;
-window.flatpickr = flatpickr;
-window.FullCalendar = Calendar;
 
 Alpine.data('apexChart', (options, height) => ({
     chart: null,
+    observer: null,
 
-    init(element) {
-        if (!window.ApexCharts) {
-            throw new Error('ApexCharts is required to render chart components.');
-        }
+    mount(element) {
+        this.observer = observeNearViewport(element, () => this.renderChart(element));
+    },
 
-        this.chart = new window.ApexCharts(element, this.withTheme(options, height));
-        this.chart.render();
+    async renderChart(element) {
+        const ApexCharts = await loadApexCharts();
+        this.chart = new ApexCharts(element, this.withTheme(options, height));
+        await this.chart.render();
     },
 
     withTheme(config, chartHeight) {
@@ -57,6 +77,7 @@ Alpine.data('apexChart', (options, height) => ({
     },
 
     destroy() {
+        this.observer?.disconnect();
         if (this.chart) {
             this.chart.destroy();
         }
@@ -191,37 +212,52 @@ Alpine.store('email', {
     }
 });
 
-Alpine.start();
+async function startAlpine() {
+    if (document.querySelector('.custom-datepicker, [data-class="flatpickr-right"]')) {
+        const [{ default: flatpickr }] = await Promise.all([
+            import('flatpickr'),
+            import('flatpickr/dist/flatpickr.min.css'),
+        ]);
+
+        window.flatpickr = flatpickr;
+    }
+
+    Alpine.start();
+}
+
+startAlpine();
+
+function initializeChartWhenVisible(selector, loadChart, initialize) {
+    const element = document.querySelector(selector);
+
+    if (!element) {
+        return;
+    }
+
+    observeNearViewport(element, () => {
+        loadApexCharts().then(loadChart).then((module) => module[initialize]());
+    });
+}
 
 // Initialize components on DOM ready
 document.addEventListener('DOMContentLoaded', () => {
     // Map imports
     if (document.querySelector('#mapOne, [data-vector-map]')) {
-        import('./components/map').then(module => module.initMap());
+        const element = document.querySelector('#mapOne, [data-vector-map]');
+        observeNearViewport(element, () => import('./components/map').then(module => module.initMap()));
     }
 
     // Chart imports
-    if (document.querySelector('#chartOne')) {
-        import('./components/chart/chart-1').then(module => module.initChartOne());
-    }
-    if (document.querySelector('#chartTwo')) {
-        import('./components/chart/chart-2').then(module => module.initChartTwo());
-    }
-    if (document.querySelector('#chartThree')) {
-        import('./components/chart/chart-3').then(module => module.initChartThree());
-    }
-    if (document.querySelector('#chartSix')) {
-        import('./components/chart/chart-6').then(module => module.initChartSix());
-    }
-    if (document.querySelector('#chartEight')) {
-        import('./components/chart/chart-8').then(module => module.initChartEight());
-    }
-    if (document.querySelector('#chartThirteen')) {
-        import('./components/chart/chart-13').then(module => module.initChartThirteen());
-    }
+    initializeChartWhenVisible('#chartOne', () => import('./components/chart/chart-1'), 'initChartOne');
+    initializeChartWhenVisible('#chartTwo', () => import('./components/chart/chart-2'), 'initChartTwo');
+    initializeChartWhenVisible('#chartThree', () => import('./components/chart/chart-3'), 'initChartThree');
+    initializeChartWhenVisible('#chartSix', () => import('./components/chart/chart-6'), 'initChartSix');
+    initializeChartWhenVisible('#chartEight', () => import('./components/chart/chart-8'), 'initChartEight');
+    initializeChartWhenVisible('#chartThirteen', () => import('./components/chart/chart-13'), 'initChartThirteen');
 
     // Calendar init
     if (document.querySelector('#calendar')) {
-        import('./components/calendar-init').then(module => module.calendarInit());
+        const element = document.querySelector('#calendar');
+        observeNearViewport(element, () => import('./components/calendar-init').then(module => module.calendarInit()));
     }
 });

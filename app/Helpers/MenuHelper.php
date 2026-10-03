@@ -6,21 +6,21 @@ class MenuHelper
 {
     public static function getMainNavItems()
     {
-        return [
+        $items = [
             [
                 'icon' => 'dashboard',
                 'name' => 'Dashboard',
                 'subItems' => [
-                    ['name' => 'Ecommerce', 'path' => route('dashboard.ecommerce'), 'pro' => false],
-                    ['name' => 'Analytics', 'path' => route('dashboard.analytics'), 'pro' => false],
-                    ['name' => 'Marketing', 'path' => route('dashboard.marketing'), 'pro' => false],
-                    ['name' => 'CRM', 'path' => route('dashboard.crm'), 'pro' => false],
-                    ['name' => 'SaaS', 'path' => route('dashboard.saas'), 'pro' => false],
-                    ['name' => 'AI Dashboard', 'path' => route('dashboard.ai'), 'pro' => false],
-                    ['name' => 'Stocks', 'path' => route('dashboard.stocks'), 'pro' => false],
-                    ['name' => 'Finance', 'path' => route('dashboard.finance'), 'pro' => false],
-                    ['name' => 'Sales', 'path' => route('dashboard.sales'), 'pro' => false],
-                    ['name' => 'Logistics', 'path' => route('dashboard.logistics'), 'pro' => false],
+                    ['name' => 'Ecommerce', 'icon' => 'ecommerce', 'path' => route('dashboard.ecommerce'), 'pro' => false],
+                    ['name' => 'Analytics', 'icon' => 'charts', 'path' => route('dashboard.analytics'), 'pro' => false],
+                    ['name' => 'Marketing', 'icon' => 'email', 'path' => route('dashboard.marketing'), 'pro' => false],
+                    ['name' => 'CRM', 'icon' => 'user-profile', 'path' => route('dashboard.crm'), 'pro' => false],
+                    ['name' => 'SaaS', 'icon' => 'saas', 'path' => route('dashboard.saas'), 'pro' => false],
+                    ['name' => 'AI Dashboard', 'icon' => 'ai-assistant', 'path' => route('dashboard.ai'), 'pro' => false],
+                    ['name' => 'Stocks', 'icon' => 'stocks', 'path' => route('dashboard.stocks'), 'pro' => false],
+                    ['name' => 'Finance', 'icon' => 'finance', 'path' => route('dashboard.finance'), 'pro' => false],
+                    ['name' => 'Sales', 'icon' => 'task', 'path' => route('dashboard.sales'), 'pro' => false],
+                    ['name' => 'Logistics', 'icon' => 'logistics', 'path' => route('dashboard.logistics'), 'pro' => false],
                 ],
             ],
             [
@@ -62,6 +62,7 @@ class MenuHelper
                 'subItems' => [
                     ['name' => 'Blank Page', 'path' => route('pages.blank'), 'pro' => false],
                     ['name' => '404 Error', 'path' => route('pages.error-404'), 'pro' => false],
+                    ['name' => '505 Error', 'path' => route('special.error-505'), 'pro' => false],
                     ['name' => 'Account Settings', 'path' => route('settings'), 'pro' => false],
                     ['name' => 'Integrations', 'path' => route('integrations'), 'pro' => false],
                     ['name' => 'API Keys', 'path' => route('api-keys'), 'pro' => false],
@@ -78,6 +79,16 @@ class MenuHelper
                 ],
             ],
         ];
+
+        if (auth()->user()?->isAdmin()) {
+            array_splice($items, 2, 0, [[
+                'icon' => 'user-profile',
+                'name' => 'User Management',
+                'path' => route('admin.users.index'),
+            ]]);
+        }
+
+        return $items;
     }
 
     public static function getOthersItems()
@@ -93,6 +104,8 @@ class MenuHelper
                     ['name' => 'Pie Chart', 'path' => route('chart.pie'), 'pro' => false],
                     ['name' => 'Donut Chart', 'path' => route('chart.donut'), 'pro' => false],
                     ['name' => 'Radial Chart', 'path' => route('chart.radial'), 'pro' => false],
+                    ['name' => 'Radar Charts', 'path' => route('chart.radar-showcase'), 'pro' => false],
+                    ['name' => 'Radial Progress Charts', 'path' => route('chart.radial-progress'), 'pro' => false],
                     ['name' => 'Chart Library', 'path' => route('chart.examples'), 'pro' => false],
                 ],
             ],
@@ -110,6 +123,9 @@ class MenuHelper
                     ['name' => 'Skeletons', 'path' => route('ui.skeletons'), 'pro' => false],
                     ['name' => 'Empty State', 'path' => route('ui.empty-state'), 'pro' => false],
                     ['name' => 'Component Library', 'path' => route('ui.components'), 'pro' => false],
+                    ['name' => 'Carousel', 'path' => route('ui.carousel'), 'pro' => false],
+                    ['name' => 'Ribbons', 'path' => route('ui.ribbons'), 'pro' => false],
+                    ['name' => 'Sidebar Variants', 'path' => route('layouts.sidebar-variants'), 'pro' => false],
                 ],
             ],
             [
@@ -130,10 +146,12 @@ class MenuHelper
                     ['name' => 'Chat', 'path' => route('app.chat'), 'pro' => false],
                     ['name' => 'Email', 'path' => route('app.email'), 'pro' => false],
                     ['name' => 'Support Ticket', 'path' => route('app.support'), 'pro' => false],
+                    ['name' => 'Ticket Reply', 'path' => route('app.support.reply'), 'pro' => false],
                     ['name' => 'Tasks', 'path' => route('app.tasks'), 'pro' => false],
                     ['name' => 'File Manager', 'path' => route('app.file-manager'), 'pro' => false],
                     ['name' => 'Calendar', 'path' => route('calendar'), 'pro' => false],
                     ['name' => 'Map Examples', 'path' => route('maps.index'), 'pro' => false],
+                    ['name' => 'Vector Maps', 'path' => route('maps.vector'), 'pro' => false],
                 ],
             ],
             [
@@ -193,7 +211,7 @@ class MenuHelper
 
     public static function getIconSvg($iconName)
     {
-        $icons = [
+        static $icons = [
             'dashboard' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M5.5 3.25C4.25736 3.25 3.25 4.25736 3.25 5.5V8.99998C3.25 10.2426 4.25736 11.25 5.5 11.25H9C10.2426 11.25 11.25 10.2426 11.25 8.99998V5.5C11.25 4.25736 10.2426 3.25 9 3.25H5.5ZM4.75 5.5C4.75 5.08579 5.08579 4.75 5.5 4.75H9C9.41421 4.75 9.75 5.08579 9.75 5.5V8.99998C9.75 9.41419 9.41421 9.74998 9 9.74998H5.5C5.08579 9.74998 4.75 9.41419 4.75 8.99998V5.5ZM5.5 12.75C4.25736 12.75 3.25 13.7574 3.25 15V18.5C3.25 19.7426 4.25736 20.75 5.5 20.75H9C10.2426 20.75 11.25 19.7427 11.25 18.5V15C11.25 13.7574 10.2426 12.75 9 12.75H5.5ZM4.75 15C4.75 14.5858 5.08579 14.25 5.5 14.25H9C9.41421 14.25 9.75 14.5858 9.75 15V18.5C9.75 18.9142 9.41421 19.25 9 19.25H5.5C5.08579 19.25 4.75 18.9142 4.75 18.5V15ZM12.75 5.5C12.75 4.25736 13.7574 3.25 15 3.25H18.5C19.7426 3.25 20.75 4.25736 20.75 5.5V8.99998C20.75 10.2426 19.7426 11.25 18.5 11.25H15C13.7574 11.25 12.75 10.2426 12.75 8.99998V5.5ZM15 4.75C14.5858 4.75 14.25 5.08579 14.25 5.5V8.99998C14.25 9.41419 14.5858 9.74998 15 9.74998H18.5C18.9142 9.74998 19.25 9.41419 19.25 8.99998V5.5C19.25 5.08579 18.9142 4.75 18.5 4.75H15ZM15 12.75C13.7574 12.75 12.75 13.7574 12.75 15V18.5C12.75 19.7426 13.7574 20.75 15 20.75H18.5C19.7426 20.75 20.75 19.7427 20.75 18.5V15C20.75 13.7574 19.7426 12.75 18.5 12.75H15ZM14.25 15C14.25 14.5858 14.5858 14.25 15 14.25H18.5C18.9142 14.25 19.25 14.5858 19.25 15V18.5C19.25 18.9142 18.9142 19.25 18.5 19.25H15C14.5858 19.25 14.25 18.9142 14.25 18.5V15Z" fill="currentColor"></path></svg>',
             'ai-assistant' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M18.75 2.42969V7.70424M9.42261 13.673C10.0259 14.4307 10.9562 14.9164 12 14.9164C13.0438 14.9164 13.9742 14.4307 14.5775 13.673M20 12V18.5C20 19.3284 19.3284 20 18.5 20H5.5C4.67157 20 4 19.3284 4 18.5V12C4 7.58172 7.58172 4 12 4C16.4183 4 20 7.58172 20 12Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M18.75 2.42969V2.43969M9.50391 9.875L9.50391 9.885M14.4961 9.875V9.885" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
             'ecommerce' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M2.31641 4H3.49696C4.24468 4 4.87822 4.55068 4.98234 5.29112L5.13429 6.37161M5.13429 6.37161L6.23641 14.2089C6.34053 14.9493 6.97407 15.5 7.72179 15.5L17.0833 15.5C17.6803 15.5 18.2205 15.146 18.4587 14.5986L21.126 8.47023C21.5572 7.4795 20.8312 6.37161 19.7507 6.37161H5.13429Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path><path d="M7.7832 19.5H7.7932M16.3203 19.5H16.3303" stroke="currentColor" stroke-width="3.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
@@ -209,6 +227,12 @@ class MenuHelper
             'chat' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M4.00002 12.0957C4.00002 7.67742 7.58174 4.0957 12 4.0957C16.4183 4.0957 20 7.67742 20 12.0957C20 16.514 16.4183 20.0957 12 20.0957H5.06068L6.34317 18.8132C6.48382 18.6726 6.56284 18.4818 6.56284 18.2829C6.56284 18.084 6.48382 17.8932 6.34317 17.7526C4.89463 16.304 4.00002 14.305 4.00002 12.0957ZM12 2.5957C6.75332 2.5957 2.50002 6.849 2.50002 12.0957C2.50002 14.4488 3.35633 16.603 4.77303 18.262L2.71969 20.3154C2.50519 20.5299 2.44103 20.8525 2.55711 21.1327C2.6732 21.413 2.94668 21.5957 3.25002 21.5957H12C17.2467 21.5957 21.5 17.3424 21.5 12.0957C21.5 6.849 17.2467 2.5957 12 2.5957ZM7.62502 10.8467C6.93467 10.8467 6.37502 11.4063 6.37502 12.0967C6.37502 12.787 6.93467 13.3467 7.62502 13.3467H7.62512C8.31548 13.3467 8.87512 12.787 8.87512 12.0967C8.87512 11.4063 8.31548 10.8467 7.62512 10.8467H7.62502ZM10.75 12.0967C10.75 11.4063 11.3097 10.8467 12 10.8467H12.0001C12.6905 10.8467 13.2501 11.4063 13.2501 12.0967C13.2501 12.787 12.6905 13.3467 12.0001 13.3467H12C11.3097 13.3467 10.75 12.787 10.75 12.0967ZM16.375 10.8467C15.6847 10.8467 15.125 11.4063 15.125 12.0967C15.125 12.787 15.6847 13.3467 16.375 13.3467H16.3751C17.0655 13.3467 17.6251 12.787 17.6251 12.0967C17.6251 11.4063 17.0655 10.8467 16.3751 10.8467H16.375Z" fill="currentColor"></path></svg>',
             'support-ticket' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M20 17.0518V12C20 7.58174 16.4183 4 12 4C7.58168 4 3.99994 7.58174 3.99994 12V17.0518M19.9998 14.041V19.75C19.9998 20.5784 19.3282 21.25 18.4998 21.25H13.9998M6.5 18.75H5.5C4.67157 18.75 4 18.0784 4 17.25V13.75C4 12.9216 4.67157 12.25 5.5 12.25H6.5C7.32843 12.25 8 12.9216 8 13.75V17.25C8 18.0784 7.32843 18.75 6.5 18.75ZM17.4999 18.75H18.4999C19.3284 18.75 19.9999 18.0784 19.9999 17.25V13.75C19.9999 12.9216 19.3284 12.25 18.4999 12.25H17.4999C16.6715 12.25 15.9999 12.9216 15.9999 13.75V17.25C15.9999 18.0784 16.6715 18.75 17.4999 18.75Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"></path></svg>',
             'email' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path fill-rule="evenodd" clip-rule="evenodd" d="M3.5 8.187V17.25C3.5 17.6642 3.83579 18 4.25 18H19.75C20.1642 18 20.5 17.6642 20.5 17.25V8.18747L13.2873 13.2171C12.5141 13.7563 11.4866 13.7563 10.7134 13.2171L3.5 8.187ZM20.5 6.2286C20.5 6.23039 20.5 6.23218 20.5 6.23398V6.24336C20.4976 6.31753 20.4604 6.38643 20.3992 6.42905L12.4293 11.9867C12.1716 12.1664 11.8291 12.1664 11.5713 11.9867L3.60116 6.42885C3.538 6.38481 3.50035 6.31268 3.50032 6.23568C3.50028 6.10553 3.60577 6 3.73592 6H20.2644C20.3922 6 20.4963 6.10171 20.5 6.2286ZM22 6.25648V17.25C22 18.4926 20.9926 19.5 19.75 19.5H4.25C3.00736 19.5 2 18.4926 2 17.25V6.23398C2 6.22371 2.00021 6.2135 2.00061 6.20333C2.01781 5.25971 2.78812 4.5 3.73592 4.5H20.2644C21.2229 4.5 22 5.27697 22.0001 6.23549C22.0001 6.24249 22.0001 6.24949 22 6.25648Z" fill="currentColor"></path></svg>',
+            'saas' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M7 18.5H17.5C19.433 18.5 21 16.933 21 15C21 13.067 19.433 11.5 17.5 11.5C17.215 8.965 15.07 7 12.5 7C10.087 7 8.045 8.732 7.578 11.01C5.579 10.727 3.75 12.276 3.75 14.3C3.75 16.619 5.63 18.5 7.95 18.5H7Z" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+            'stocks' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M5 19V5M5 19H20M8 15V11M12 13V7M16 16V9M19 12V4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+            'finance' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.5"/><path d="M14.5 9.5C14.1 8.7 13.2 8.25 12.1 8.25C10.8 8.25 9.75 8.95 9.75 10C9.75 12.5 14.25 11.5 14.25 14C14.25 15.05 13.2 15.75 11.9 15.75C10.8 15.75 9.9 15.3 9.5 14.5M12 6.75V17.25" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"/></svg>',
+            'logistics' => '<svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"><path d="M3 6.5H14V16.5H3V6.5ZM14 10H18L21 13V16.5H14V10Z" stroke="currentColor" stroke-width="1.5" stroke-linejoin="round"/><circle cx="7" cy="17.5" r="1.75" stroke="currentColor" stroke-width="1.5"/><circle cx="17.5" cy="17.5" r="1.75" stroke="currentColor" stroke-width="1.5"/></svg>',
         ];
+
+        return $icons[$iconName] ?? '';
     }
 }

@@ -117,14 +117,8 @@
     <script>
         (function() {
             const savedDir = localStorage.getItem('dir');
-            const savedLocale = localStorage.getItem('locale');
             if (savedDir) {
                 document.documentElement.setAttribute('dir', savedDir);
-            } else if (savedLocale === 'ar') {
-                document.documentElement.setAttribute('dir', 'rtl');
-            }
-            if (savedLocale) {
-                document.documentElement.setAttribute('lang', savedLocale);
             }
 
             const savedTheme = localStorage.getItem('theme');
@@ -149,9 +143,9 @@
         @include('layouts.backdrop')
         @include('layouts.sidebar')
 
-        <div class="flex-1 ml-0 ltr:xl:ml-[90px] rtl:xl:ml-0 rtl:xl:mr-[90px] [.sidebar-expanded_&]:ltr:xl:ml-[290px] [.sidebar-expanded_&]:rtl:xl:ml-0 [.sidebar-expanded_&]:rtl:xl:mr-[290px] transition-all duration-300 ease-in-out">
+        <div class="min-w-0 flex-1 ml-0 ltr:xl:ml-[90px] rtl:xl:ml-0 rtl:xl:mr-[90px] [.sidebar-expanded_&]:ltr:xl:ml-[290px] [.sidebar-expanded_&]:rtl:xl:ml-0 [.sidebar-expanded_&]:rtl:xl:mr-[290px] transition-all duration-300 ease-in-out">
             @include('layouts.app-header')
-            <main id="main-content" tabindex="-1" class="p-4 mx-auto max-w-(--breakpoint-2xl) outline-none md:p-6">
+            <main id="main-content" tabindex="-1" class="mx-auto w-full max-w-(--breakpoint-2xl) p-4 outline-none md:p-6">
                 @yield('content')
             </main>
         </div>

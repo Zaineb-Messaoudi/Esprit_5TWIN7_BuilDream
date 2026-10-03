@@ -255,6 +255,30 @@
                     </div>
                 </div>
             </x-common.component-card>
+
+            <x-common.component-card :title="__('Carousel')" :desc="__('Responsive, keyboard-accessible image carousel.')">
+                <x-ui.carousel
+                    :label="__('Carousel component preview')"
+                    :slides="[
+                        ['image' => '/images/carousel/carousel-01.png', 'alt' => __('Solar panel installation'), 'title' => __('Clean energy')],
+                        ['image' => '/images/carousel/carousel-02.png', 'alt' => __('Renewable energy products'), 'title' => __('Built for your home')],
+                    ]"
+                />
+                <a href="{{ route('ui.carousel') }}" class="mt-4 inline-flex text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">{{ __('View carousel examples') }}</a>
+            </x-common.component-card>
+
+            <x-common.component-card :title="__('Ribbon')" :desc="__('Reusable status and featured-content labels.')">
+                <x-ui.ribbon :label="__('Featured')" color="brand">
+                    <p class="text-sm font-semibold text-gray-800 dark:text-white">{{ __('A ribbon wraps any card content.') }}</p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">{{ __('Choose color, corner, and appearance with component properties.') }}</p>
+                </x-ui.ribbon>
+                <a href="{{ route('ui.ribbons') }}" class="mt-4 inline-flex text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">{{ __('View ribbon examples') }}</a>
+            </x-common.component-card>
+
+            <x-common.component-card :title="__('Sidebar variants')" :desc="__('Classic, sectioned, documentation, collapsible, nested, and toggle navigation previews.')">
+                <p class="text-sm leading-6 text-gray-500 dark:text-gray-400">{{ __('Compare six patterns without changing the active application sidebar.') }}</p>
+                <a href="{{ route('layouts.sidebar-variants') }}" class="mt-4 inline-flex text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">{{ __('Explore sidebar variants') }}</a>
+            </x-common.component-card>
         </div>
     </div>
 @endsection

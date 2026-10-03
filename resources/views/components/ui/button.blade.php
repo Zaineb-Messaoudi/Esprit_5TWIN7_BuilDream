@@ -8,7 +8,7 @@
 ])
 
 @php
-    $base = 'inline-flex items-center justify-center font-medium gap-2 rounded-lg transition duration-200';
+    $base = 'inline-flex items-center justify-center gap-2 rounded-lg font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 motion-reduce:transition-none';
 
     $sizeMap = [
         'xs' => 'px-2 py-1.5 text-xs',
