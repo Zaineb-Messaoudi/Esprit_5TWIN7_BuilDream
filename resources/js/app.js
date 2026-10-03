@@ -17,6 +17,45 @@ window.ApexCharts = ApexCharts;
 window.flatpickr = flatpickr;
 window.FullCalendar = Calendar;
 
+Alpine.store('chat', {
+    activeContact: 'Claude',
+    messages: {
+        'Claude': [
+            { text: 'Hello! How can I assist you with the SolarShare admin today?', sent: false },
+            { text: 'I need to check the new user management views.', sent: true },
+            { text: 'They are ready! I\'ve implemented the resource controllers and the Blade views.', sent: false },
+        ],
+        'Zaineb': [{ text: 'Welcome to the team!', sent: false }],
+    },
+    sendMessage(contact, text) {
+        if (!text.trim()) return;
+        this.messages[contact].push({ text, sent: true });
+    },
+    setActiveContact(contact) {
+        this.activeContact = contact;
+    }
+});
+
+Alpine.store('email', {
+    activeFolder: 'Inbox',
+    selectedEmail: null,
+    folders: {
+        'Inbox': [
+            { id: 1, from: 'Support Team', subject: 'Ticket #1001: Payment Issue', body: 'Dear User, we are sorry to hear...', date: 'Oct 1' },
+            { id: 2, from: 'Marketing', subject: 'New Campaign Results', body: 'The Summer Sale was a huge success...', date: 'Oct 2' },
+        ],
+        'Sent': [],
+        'Drafts': [],
+    },
+    setFolder(folder) {
+        this.activeFolder = folder;
+        this.selectedEmail = null;
+    },
+    selectEmail(email) {
+        this.selectedEmail = email;
+    }
+});
+
 Alpine.start();
 
 // Initialize components on DOM ready
