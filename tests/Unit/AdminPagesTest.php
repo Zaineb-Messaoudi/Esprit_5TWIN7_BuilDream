@@ -2,11 +2,22 @@
 
 namespace Tests\Unit;
 
+use App\Enums\UserRole;
 use App\Models\User;
 use Tests\TestCase;
 
 class AdminPagesTest extends TestCase
 {
+    public function test_empty_state_action_uses_the_shared_primary_button_style(): void
+    {
+        $html = \Illuminate\Support\Facades\Blade::render(
+            '<x-ui.empty-state title="No items" message="Create one to get started." action-label="Create item" action-route="'.route('dashboard').'" />'
+        );
+
+        $this->assertStringContainsString('button-base button-primary', $html);
+        $this->assertStringContainsString('href="'.route('dashboard').'"', $html);
+    }
+
     public function test_registered_admin_pages_render_without_database_setup(): void
     {
         foreach ([
@@ -31,6 +42,7 @@ class AdminPagesTest extends TestCase
         $user = new User([
             'name' => 'Dashboard reviewer',
             'email' => 'dashboard-reviewer@example.test',
+            'role' => UserRole::ADMIN,
         ]);
         $user->email_verified_at = now();
 
@@ -271,7 +283,7 @@ class AdminPagesTest extends TestCase
         $emptyState = \Illuminate\Support\Facades\Blade::render(
             '<x-ui.empty-state title="No items" message="Create one to get started." action-label="Create item" action-route="'.route('dashboard').'" />'
         );
-        $this->assertStringContainsString('bg-brand-500', $emptyState);
+        $this->assertStringContainsString('button-primary', $emptyState);
         $this->assertStringContainsString('focus-visible:ring-2', $emptyState);
         $this->assertStringContainsString('href="'.route('dashboard').'"', $emptyState);
         $this->actingAs($user)
@@ -335,6 +347,7 @@ class AdminPagesTest extends TestCase
         $user = new User([
             'name' => 'Dashboard reviewer',
             'email' => 'dashboard-reviewer@example.test',
+            'role' => UserRole::ADMIN,
         ]);
         $user->email_verified_at = now();
 
@@ -360,7 +373,7 @@ class AdminPagesTest extends TestCase
             ->assertSee('name="remember"', false)
             ->assertSee('href="'.route('password.request').'"', false)
             ->assertSee(route('register'), false)
-            ->assertSee('Free and Open-Source Tailwind CSS Admin Dashboard Template')
+            ->assertSee('Shared renewable energy, made easier for everyone.')
             ->assertSee('h-screen w-full flex-col justify-center sm:p-0 lg:flex-row', false)
             ->assertSee('Sign in with Google')
             ->assertSee('Sign in with X')
@@ -368,7 +381,8 @@ class AdminPagesTest extends TestCase
             ->assertSee('-translate-y-6', false)
             ->assertSee('lg:grid lg:w-1/2', false);
         $this->get('/')
-            ->assertRedirect(route('login'));
+            ->assertOk()
+            ->assertSee('goes further when we share it.');
 
         $this->get(route('register'))
             ->assertOk()
@@ -382,7 +396,7 @@ class AdminPagesTest extends TestCase
             ->assertSee('name="profile_photo"', false)
             ->assertSee('(optional)')
             ->assertSee('name="password_confirmation"', false)
-            ->assertSee('Free and Open-Source Tailwind CSS Admin Dashboard Template')
+            ->assertSee('Shared renewable energy, made easier for everyone.')
             ->assertSee('Sign up with Google')
             ->assertSee('Sign up with X')
             ->assertDontSee('Back to dashboard')

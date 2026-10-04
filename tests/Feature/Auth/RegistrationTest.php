@@ -10,7 +10,9 @@ test('registration screen can be rendered', function () {
     $response = $this->get('/register');
 
     $response->assertOk()
-        ->assertSee('Sign Up')
+        ->assertSee('Create your SolarShare account')
+        ->assertDontSee('How will you use SolarShare?')
+        ->assertDontSee('name="role"', false)
         ->assertSee('id="register-form"', false)
         ->assertSee('action="'.route('register').'"', false)
         ->assertSee('enctype="multipart/form-data"', false)
@@ -35,10 +37,11 @@ test('new users can register', function () {
     ]);
 
     $this->assertAuthenticated();
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertRedirect(route('role.setup', absolute: false));
 
     $user = User::where('email', 'test@example.com')->firstOrFail();
-    expect($user->role->value)->toBe('user')
+    expect($user->role->value)->toBe('buyer')
+        ->and($user->role_setup_completed)->toBeFalse()
         ->and($user->hasVerifiedEmail())->toBeFalse()
         ->and($user->phone_number)->toBe('+1 555 0100')
         ->and($user->address)->toBe('1 Solar Way')
@@ -46,6 +49,17 @@ test('new users can register', function () {
         ->and($user->profile_photo_url)->toBe(Storage::disk('public')->url($user->profile_photo_path));
     Storage::disk('public')->assertExists($user->profile_photo_path);
     Notification::assertSentTo($user, VerifyEmail::class);
+    $this->get(route('role.setup'))
+        ->assertOk()
+        ->assertSee('How will you use SolarShare?')
+        ->assertSee('I want to rent equipment')
+        ->assertSee('I want to share my equipment');
+    $this->get(route('dashboard'))->assertRedirect(route('role.setup'));
+    $this->post(route('role.setup.store'), ['role' => 'owner'])
+        ->assertRedirect(route('dashboard', absolute: false));
+    $user->refresh();
+    expect($user->role->value)->toBe('owner')
+        ->and($user->role_setup_completed)->toBeTrue();
     $this->get('/dashboard')->assertRedirect(route('verification.notice'));
 });
 
@@ -60,9 +74,30 @@ test('registration can use the default profile photo when no photo is uploaded',
         'password_confirmation' => 'password',
     ]);
 
-    $response->assertRedirect(route('dashboard', absolute: false));
+    $response->assertRedirect(route('role.setup', absolute: false));
     $user = User::where('email', 'test@example.com')->firstOrFail();
 
     expect($user->profile_photo_path)->toBeNull()
         ->and($user->profile_photo_url)->toBe(asset('images/user/owner.png'));
+});
+
+test('new owners can register into the owner workspace', function () {
+    Notification::fake();
+
+    $response = $this->post('/register', [
+        'name' => 'Solar Equipment Owner',
+        'email' => 'owner@example.com',
+        'password' => 'password',
+        'password_confirmation' => 'password',
+    ]);
+
+    $response->assertRedirect(route('role.setup', absolute: false));
+
+    $user = User::where('email', 'owner@example.com')->firstOrFail();
+    expect($user->role->value)->toBe('buyer')
+        ->and($user->role_setup_completed)->toBeFalse();
+    $this->post(route('role.setup.store'), ['role' => 'owner'])
+        ->assertRedirect(route('dashboard', absolute: false));
+    expect($user->fresh()->role->value)->toBe('owner')
+        ->and($user->fresh()->role_setup_completed)->toBeTrue();
 });

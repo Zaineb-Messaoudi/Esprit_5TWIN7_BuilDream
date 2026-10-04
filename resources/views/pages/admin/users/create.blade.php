@@ -8,7 +8,7 @@
                 <span class="text-gray-400">/</span>
                 <a href="{{ route('admin.users.index') }}" class="text-gray-500 transition-colors hover:text-brand-600 dark:text-gray-400">{{ __('User Management') }}</a>
                 <span class="text-gray-400">/</span>
-                <span class="text-gray-800 dark:text-white">{{ __('Create User') }}</span>
+                <span class="text-gray-800 dark:text-white">{{ __('Create user') }}</span>
             </div>
         </x-common.page-breadcrumb>
 
@@ -32,7 +32,9 @@
                         <div>
                             <label for="role" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Account role') }}</label>
                             <select id="role" name="role" required class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 text-sm text-gray-800 focus:border-brand-400 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
-                                <option value="user" @selected(old('role', 'user') === 'user')>{{ __('Standard user') }}</option>
+                                <option value="buyer" @selected(old('role', 'buyer') === 'buyer')>{{ __('Buyer') }}</option>
+                                <option value="owner" @selected(old('role') === 'owner')>{{ __('Equipment Owner') }}</option>
+                                <option value="user" @selected(old('role') === 'user')>{{ __('Legacy buyer') }}</option>
                                 <option value="admin" @selected(old('role') === 'admin')>{{ __('Administrator') }}</option>
                             </select>
                             @error('role')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror

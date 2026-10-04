@@ -55,7 +55,7 @@
                         </div>
 
                         <div>
-                            <label for="phone_number" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Phone Number') }}</label>
+                            <label for="phone_number" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Phone number') }}</label>
                             <input id="phone_number" type="tel" name="phone_number" value="{{ old('phone_number') }}" autocomplete="tel" inputmode="tel"
                                 @class([
                                     'h-11 w-full rounded-lg border bg-white px-4 py-2.5 text-sm text-gray-900 shadow-theme-xs outline-none transition placeholder:text-gray-400 focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30',
@@ -112,7 +112,7 @@
                         </div>
 
                         <div x-data="{ showPassword: false }">
-                            <label for="password_confirmation" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Confirm Password') }}</label>
+                            <label for="password_confirmation" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Confirm password') }}</label>
                             <div class="relative">
                                 <input id="password_confirmation" :type="showPassword ? 'text' : 'password'" name="password_confirmation" required autocomplete="new-password"
                                     class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 pe-12 text-sm text-gray-900 shadow-theme-xs outline-none transition placeholder:text-gray-400 focus:border-brand-400 focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-400"

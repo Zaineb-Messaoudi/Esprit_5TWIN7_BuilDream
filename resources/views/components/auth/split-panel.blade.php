@@ -2,11 +2,11 @@
     <div class="relative z-1 flex items-center justify-center">
         <x-common.common-grid-shape />
         <div class="flex flex-col items-center">
-            <a href="{{ route('login') }}" class="mb-4 block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
-                <img src="/images/logo/auth-logo.svg" alt="TailAdmin" width="231" height="48" />
+            <a href="{{ route('home') }}" class="mb-4 block rounded-sm focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-white">
+                <x-front.logo :inverted="true" />
             </a>
             <p class="max-w-xs text-center text-gray-400 dark:text-white/60">
-                Free and Open-Source Tailwind CSS Admin Dashboard Template
+                {{ __('Shared renewable energy, made easier for everyone.') }}
             </p>
         </div>
     </div>

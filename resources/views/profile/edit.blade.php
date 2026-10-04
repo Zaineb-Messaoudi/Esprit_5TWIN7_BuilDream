@@ -1,4 +1,4 @@
-@extends('layouts.app')
+@extends(auth()->user()->isAdmin() ? 'layouts.app' : 'layouts.front')
 
 @section('content')
     <div class="mx-auto max-w-5xl space-y-6">

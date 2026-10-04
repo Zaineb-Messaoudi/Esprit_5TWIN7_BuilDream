@@ -17,6 +17,12 @@ class LocaleController extends Controller
             "flag" => "us",
             "dir" => "ltr",
         ],
+        "fr" => [
+            "name" => "French",
+            "native" => "Français",
+            "flag" => "fr",
+            "dir" => "ltr",
+        ],
         "ar" => [
             "name" => "Arabic",
             "native" => "العربية",

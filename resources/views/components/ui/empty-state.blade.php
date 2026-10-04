@@ -28,7 +28,7 @@
 
     @if($actionLabel && $actionRoute)
         <div class="mt-6">
-            <a href="{{ $actionRoute }}" class="inline-flex items-center justify-center rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white shadow-theme-xs transition-colors hover:bg-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 motion-reduce:transition-none">
+            <a href="{{ $actionRoute }}" class="button-base button-primary px-4 py-2.5 text-sm">
                 {{ $actionLabel }}
             </a>
         </div>

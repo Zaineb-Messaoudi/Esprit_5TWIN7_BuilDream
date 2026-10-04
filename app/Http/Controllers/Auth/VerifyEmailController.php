@@ -21,11 +21,11 @@ class VerifyEmailController extends Controller
         $user = $request->user();
 
         if ($user->hasVerifiedEmail()) {
-            return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+            return redirect()->route('dashboard', ['verified' => 1]);
         }
 
         $this->userService->verifyEmail($user);
 
-        return redirect()->intended(route('dashboard', absolute: false).'?verified=1');
+        return redirect()->route('dashboard', ['verified' => 1]);
     }
 }

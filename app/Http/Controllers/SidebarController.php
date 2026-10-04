@@ -176,7 +176,7 @@ class SidebarController extends Controller
                         'icon' => 'plug-in-icon',
                         'name' => 'Authentication',
                         'subItems' => [
-                            ['name' => 'Sign In', 'path' => '/signin', 'pro' => false],
+                            ['name' => 'Sign in', 'path' => '/signin', 'pro' => false],
                             ['name' => 'Sign Up', 'path' => '/signup', 'pro' => false],
                             ['name' => 'Reset Password', 'path' => '/reset-password', 'pro' => false],
                             ['name' => 'Two Step Verification', 'path' => '/two-step-verification', 'pro' => false],

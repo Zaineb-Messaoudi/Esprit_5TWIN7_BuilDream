@@ -12,7 +12,6 @@ readonly class UserRegistrationData
         public string $password,
         public ?string $phone_number = null,
         public ?string $address = null,
-        public string $role = 'user',
         public ?UploadedFile $profile_photo = null,
     ) {}
 
@@ -24,7 +23,6 @@ readonly class UserRegistrationData
             password: $request->validated('password'),
             phone_number: $request->validated('phone_number'),
             address: $request->validated('address'),
-            role: $request->validated('role', 'user'),
             profile_photo: $request->file('profile_photo'),
         );
     }

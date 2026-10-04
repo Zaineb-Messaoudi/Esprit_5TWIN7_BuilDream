@@ -30,7 +30,7 @@ test('email can be verified', function () {
 
     $response = $this->actingAs($user)->get($verificationUrl);
 
-    $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
+    $response->assertRedirect(route('dashboard', ['verified' => 1]));
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
     Event::assertDispatched(Verified::class);
 });
