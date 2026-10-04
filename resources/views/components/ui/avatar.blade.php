@@ -26,24 +26,33 @@
     ];
 
     $statusColorClasses = [
-        'online' => 'bg-green-500',
-        'offline' => 'bg-red-400',
-        'busy' => 'bg-yellow-500',
+        'online' => 'bg-success-500',
+        'offline' => 'bg-gray-400',
+        'busy' => 'bg-error-500',
     ];
 
     $sizeClass = $sizeClasses[$size] ?? $sizeClasses['medium'];
     $statusSizeClass = $statusSizeClasses[$size] ?? $statusSizeClasses['medium'];
     $statusColorClass = $statusColorClasses[$status] ?? '';
+    $initials = collect(preg_split('/\s+/', trim($alt)))->filter()->take(2)->map(fn ($word) => mb_strtoupper(mb_substr($word, 0, 1)))->implode('');
 @endphp
 
-<div class="relative rounded-full {{ $sizeClass }}">
-    <img 
-        src="{{ $src }}" 
-        alt="{{ $alt }}" 
-        class="h-full w-full object-cover rounded-full"
-    />
+<div class="relative shrink-0 rounded-full {{ $sizeClass }}">
+    @if ($src)
+        <img
+            src="{{ $src }}"
+            alt="{{ $alt }}"
+            loading="lazy"
+            decoding="async"
+            class="h-full w-full rounded-full object-cover"
+        />
+    @else
+        <span role="img" aria-label="{{ $alt }}" class="flex h-full w-full items-center justify-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700 dark:bg-brand-500/15 dark:text-brand-300">
+            {{ $initials }}
+        </span>
+    @endif
     
     @if($status !== 'none')
-        <span class="absolute bottom-0 right-0 rounded-full border-[1.5px] border-white dark:border-gray-900 {{ $statusSizeClass }} {{ $statusColorClass }}"></span>
+        <span aria-hidden="true" class="absolute bottom-0 end-0 rounded-full border-[1.5px] border-white dark:border-gray-900 {{ $statusSizeClass }} {{ $statusColorClass }}"></span>
     @endif
 </div>

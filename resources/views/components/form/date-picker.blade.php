@@ -6,23 +6,31 @@
     'placeholder' => 'Select date',
     'name' => null,
     'dateFormat' => 'Y-m-d',
+    'disabled' => false,
+    'required' => false,
+    'error' => null,
+    'hint' => null,
 ])
+
+@php
+    $mode = in_array($mode, ['single', 'multiple', 'range', 'time'], true) ? $mode : 'single';
+    $defaultDate = $defaultDate;
+@endphp
 
 <div x-data="{
     flatpickrInstance: null,
     init() {
         this.$nextTick(() => {
             this.flatpickrInstance = flatpickr(this.$refs.dateInput, {
-                mode: '{{ $mode }}',
+                mode: @js($mode),
                 static: true,
                 monthSelectorType: 'static',
-                dateFormat: '{{ $dateFormat }}',
-                defaultDate: {{ $defaultDate ? (is_array($defaultDate) ? json_encode($defaultDate) : "'" . $defaultDate . "'") : 'null' }},
+                dateFormat: @js($dateFormat),
+                defaultDate: @js($defaultDate),
                 onChange: (selectedDates, dateStr, instance) => {
                     this.$dispatch('date-change', {
                         selectedDates,
-                        dateStr,
-                        instance
+                        dateStr
                     });
                 }
             });
@@ -34,21 +42,28 @@
             this.flatpickrInstance = null;
         }
     }
-}" x-init="init()" x-destroy="destroy()">
+}" x-init="init()">
     @if($label)
         <label for="{{ $id }}" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-400">
             {{ $label }}
         </label>
     @endif
 
-    <div class="relative custom-datepicker">
+    <div class="relative custom-datepicker" @if($error) aria-describedby="{{ $id }}-error" @elseif($hint) aria-describedby="{{ $id }}-hint" @endif>
         <input
             x-ref="dateInput"
             type="text"
             id="{{ $id }}"
             name="{{ $name }}"
             placeholder="{{ $placeholder }}"
-            class="h-11 w-full rounded-lg border appearance-none ltr:pl-4 ltr:pr-11 rtl:pr-4 rtl:pl-11 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800"
+            @disabled($disabled)
+            @required($required)
+            @if($error) aria-invalid="true" @endif
+            {{ $attributes->class([
+                'h-11 w-full rounded-lg border appearance-none ltr:pl-4 ltr:pr-11 rtl:pr-4 rtl:pl-11 py-2.5 text-sm shadow-theme-xs placeholder:text-gray-400 focus:outline-hidden focus:ring-3 dark:bg-gray-900 dark:text-white/90 dark:placeholder:text-white/30 bg-transparent text-gray-800 border-gray-300 focus:border-brand-300 focus:ring-brand-500/20 dark:border-gray-700 dark:focus:border-brand-800',
+                'border-error-500 focus:border-error-500 focus:ring-error-500/10' => $error,
+                'disabled:cursor-not-allowed disabled:bg-gray-50 disabled:text-gray-400 dark:disabled:bg-gray-800' => $disabled,
+            ]) }}
             autocomplete="off"
         />
         <span class="absolute text-gray-500 -translate-y-1/2 pointer-events-none ltr:right-3.5 rtl:left-3.5 top-1/2 dark:text-gray-400">
@@ -57,4 +72,9 @@
             </svg>
         </span>
     </div>
+    @if($error)
+        <p id="{{ $id }}-error" class="mt-1.5 text-sm text-error-600 dark:text-error-400">{{ $error }}</p>
+    @elseif($hint)
+        <p id="{{ $id }}-hint" class="mt-1.5 text-sm text-gray-500 dark:text-gray-400">{{ $hint }}</p>
+    @endif
 </div>

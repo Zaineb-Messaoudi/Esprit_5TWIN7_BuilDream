@@ -1,5 +1,6 @@
 <?php
 
+use App\Enums\UserRole;
 use App\Models\User;
 
 test('profile page is displayed', function () {
@@ -9,7 +10,13 @@ test('profile page is displayed', function () {
         ->actingAs($user)
         ->get('/profile');
 
-    $response->assertOk();
+    $response
+        ->assertOk()
+        ->assertSee('Profile information')
+        ->assertSee('action="'.route('profile.update').'"', false)
+        ->assertSee('action="'.route('password.update').'"', false)
+        ->assertSee('action="'.route('profile.destroy').'"', false)
+        ->assertSee('action="'.route('logout').'"', false);
 });
 
 test('profile information can be updated', function () {
@@ -82,4 +89,19 @@ test('correct password must be provided to delete account', function () {
         ->assertRedirect('/profile');
 
     $this->assertNotNull($user->fresh());
+});
+
+test('administrators cannot delete their account from the profile page', function () {
+    $admin = User::factory()->create(['role' => UserRole::ADMIN]);
+
+    $this->actingAs($admin)
+        ->from('/profile')
+        ->delete('/profile', [
+            'password' => 'password',
+        ])
+        ->assertSessionHasErrors('user')
+        ->assertRedirect('/profile');
+
+    $this->assertAuthenticatedAs($admin);
+    $this->assertNotNull($admin->fresh());
 });

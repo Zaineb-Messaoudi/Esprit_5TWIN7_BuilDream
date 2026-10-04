@@ -10,7 +10,11 @@ test('email verification screen can be rendered', function () {
 
     $response = $this->actingAs($user)->get('/verify-email');
 
-    $response->assertStatus(200);
+    $response
+        ->assertStatus(200)
+        ->assertSee('Verify your email address | SolarShare Admin')
+        ->assertSee('action="'.route('verification.send').'"', false)
+        ->assertSee('action="'.route('logout').'"', false);
 });
 
 test('email can be verified', function () {
@@ -26,9 +30,9 @@ test('email can be verified', function () {
 
     $response = $this->actingAs($user)->get($verificationUrl);
 
-    Event::assertDispatched(Verified::class);
+    $response->assertRedirect(route('dashboard', ['verified' => 1]));
     expect($user->fresh()->hasVerifiedEmail())->toBeTrue();
-    $response->assertRedirect(route('dashboard', absolute: false).'?verified=1');
+    Event::assertDispatched(Verified::class);
 });
 
 test('email is not verified with invalid hash', function () {
@@ -40,7 +44,7 @@ test('email is not verified with invalid hash', function () {
         ['id' => $user->id, 'hash' => sha1('wrong-email')]
     );
 
-    $this->actingAs($user)->get($verificationUrl);
+    $this->actingAs($user)->get($verificationUrl)->assertForbidden();
 
     expect($user->fresh()->hasVerifiedEmail())->toBeFalse();
 });

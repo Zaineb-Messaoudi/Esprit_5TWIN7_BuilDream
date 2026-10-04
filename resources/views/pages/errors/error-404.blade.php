@@ -1,33 +1,22 @@
 @extends('layouts.fullscreen-layout')
 
+@php($title = $title ?? __('Page not found'))
+
 @section('content')
-@php
-    $currentYear = date('Y');
-@endphp
-  <div class="relative flex flex-col items-center justify-center min-h-screen p-6 overflow-hidden z-1">
-      {{-- common grid shape --}}
-      <x-common.common-grid-shape />
-      <!-- Centered Content -->
-      <div class="mx-auto w-full max-w-[242px] text-center sm:max-w-[472px]">
-          <h1 class="mb-8 font-bold text-gray-800 text-title-md dark:text-white/90 xl:text-title-2xl">
-              ERROR
-          </h1>
-
-          <img src="/images/error/404.svg" alt="404" class="dark:hidden" />
-          <img src="/images/error/404-dark.svg" alt="404" class="hidden dark:block" />
-
-          <p class="mt-10 mb-6 text-base text-gray-700 dark:text-gray-400 sm:text-lg">
-              We can't seem to find the page you are looking for!
-          </p>
-
-          <a href="/"
-              class="inline-flex items-center justify-center rounded-lg border border-gray-300 bg-white px-5 py-3.5 text-sm font-medium text-gray-700 shadow-theme-xs hover:bg-gray-50 hover:text-gray-800 dark:border-gray-700 dark:bg-gray-800 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-200">
-              Back to Home Page
-          </a>
-      </div>
-      <!-- Footer -->
-      <p class="absolute text-sm text-center text-gray-500 -translate-x-1/2 bottom-6 left-1/2 dark:text-gray-400">
-          &copy; {{ $currentYear }} - TailAdmin
-      </p>
-  </div>
+    <main class="relative flex min-h-[calc(100vh-2rem)] w-full flex-col items-center justify-center overflow-hidden p-6 text-center" aria-labelledby="not-found-title">
+        <x-common.common-grid-shape />
+        <div class="relative z-1 mx-auto w-full max-w-xl">
+            <img src="{{ asset('images/error/404.svg') }}" alt="" class="mx-auto w-full max-w-[360px] dark:hidden" />
+            <img src="{{ asset('images/error/404-dark.svg') }}" alt="" class="mx-auto hidden w-full max-w-[360px] dark:block" />
+            <p class="mt-8 text-sm font-semibold uppercase tracking-wide text-brand-600 dark:text-brand-300">{{ __('Error 404') }}</p>
+            <h1 id="not-found-title" class="mt-2 text-title-md font-semibold text-gray-800 dark:text-white/90 sm:text-title-lg">{{ __('Page not found') }}</h1>
+            <p class="mx-auto mt-3 max-w-md text-sm leading-6 text-gray-600 dark:text-gray-400 sm:text-base">{{ __("We can't seem to find the page you are looking for.") }}</p>
+            <a href="{{ route('dashboard') }}" class="mt-7 inline-flex items-center justify-center rounded-lg bg-brand-500 px-5 py-3 text-sm font-medium text-white shadow-theme-xs transition hover:bg-brand-600 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2">
+                {{ __('Back to dashboard') }}
+            </a>
+        </div>
+        <footer class="relative z-1 mt-12 text-xs text-gray-500 dark:text-gray-400">
+            &copy; {{ now()->year }} {{ __('SolarShare Admin') }}
+        </footer>
+    </main>
 @endsection

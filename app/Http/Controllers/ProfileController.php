@@ -9,6 +9,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
 class ProfileController extends Controller
@@ -34,12 +35,14 @@ class ProfileController extends Controller
     {
         $user = $request->user();
         $profileData = UserProfileData::fromRequest($request);
+        $emailChanged = $user->email !== $profileData->email;
 
         $this->userService->updateProfile($user, $profileData);
 
-        if ($user->isDirty('email')) {
+        if ($emailChanged) {
             $user->email_verified_at = null;
             $user->save();
+            $user->sendEmailVerificationNotification();
         }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
@@ -55,6 +58,12 @@ class ProfileController extends Controller
         ]);
 
         $user = $request->user();
+
+        if ($user->isAdmin()) {
+            throw ValidationException::withMessages([
+                'user' => __('Administrator accounts cannot be deleted from the profile page.'),
+            ]);
+        }
 
         Auth::logout();
 

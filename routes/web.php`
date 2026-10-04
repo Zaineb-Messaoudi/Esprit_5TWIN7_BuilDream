@@ -1,0 +1,84 @@
+<?php
+
+use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
+
+Route::get('/', function () {
+    return view('pages.dashboard.ecommerce', [
+        'title' => 'E-commerce Dashboard'
+    ]);
+})->name('dashboard');
+
+Route::middleware(['auth', 'verified'])->group(function () {
+    Route::get('/dashboard', function () {
+        return view('dashboard');
+    })->name('dashboard.main');
+
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Admin User Management
+    Route::middleware('can:admin-only')->prefix('admin')->name('admin.')->group(function () {
+        Route::resource('users', AdminUserController::class);
+    });
+
+    // Dashboard Routes
+    Route::get('/analytics', function () { return view('pages.dashboard.analytics', ['title' => 'Analytics Dashboard']); })->name('dashboard.analytics');
+    Route::get('/marketing', function () { return view('pages.dashboard.marketing', ['title' => 'Marketing Dashboard']); })->name('dashboard.marketing');
+    Route::get('/crm', function () { return view('pages.dashboard.crm', ['title' => 'CRM Dashboard']); })->name('dashboard.crm');
+    Route::get('/saas', function () { return view('pages.dashboard.saas', ['title' => 'SaaS Dashboard']); })->name('dashboard.saas');
+    Route::get('/ai-dashboard', function () { return view('pages.dashboard.ai', ['title' => 'AI Dashboard']); })->name('dashboard.ai');
+
+    // Calendar
+    Route::get('/calendar', function () { return view('pages.calendar', ['title' => 'Calendar']); })->name('calendar');
+
+    // Forms
+    Route::get('/form-elements', function () { return view('pages.form.elements', ['title' => 'Form Elements']); })->name('form.elements');
+    Route::get('/advanced-forms', function () { return view('pages.form.advanced', ['title' => 'Advanced Forms']); })->name('form.advanced');
+
+    // Tables
+    Route::get('/basic-tables', function () { return view('pages.tables.basic', ['title' => 'Basic Tables']); })->name('tables.basic');
+    Route::get('/advanced-tables', function () { return view('pages.tables.advanced', ['title' => 'Advanced Tables']); })->name('tables.advanced');
+
+    // Pages
+    Route::get('/blank', function () { return view('pages.blank', ['title' => 'Blank Page']); })->name('pages.blank');
+    Route::get('/error-404', function () { return view('pages.error-404', ['title' => '404 Not Found']); })->name('pages.error-404');
+
+    // Charts
+    Route::get('/line-chart', function () { return view('pages.chart.line', ['title' => 'Line Chart']); })->name('chart.line');
+    Route::get('/bar-chart', function () { return view('pages.chart.bar', ['title' => 'Bar Chart']); })->name('chart.bar');
+    Route::get('/area-chart', function () { return view('pages.chart.area', ['title' => 'Area Chart']); })->name('chart.area');
+    Route::get('/pie-chart', function () { return view('pages.chart.pie', ['title' => 'Pie Chart']); })->name('chart.pie');
+    Route::get('/donut-chart', function () { return view('pages.chart.donut', ['title' => 'Donut Chart']); })->name('chart.donut');
+    Route::get('/radial-chart', function () { return view('pages.chart.radial', ['title' => 'Radial Chart']); })->name('chart.radial');
+
+    // UI Elements
+    Route::get('/alerts', function () { return view('pages.ui-elements.alerts', ['title' => 'Alerts']); })->name('ui.alerts');
+    Route::get('/avatars', function () { return view('pages.ui-elements.avatars', ['title' => 'Avatars']); })->name('ui.avatars');
+    Route::get('/badge', function () { return view('pages.ui-elements.badge', ['title' => 'Badges']); })->name('ui.badge');
+    Route::get('/buttons', function () { return view('pages.ui-elements.buttons', ['title' => 'Buttons']); })->name('ui.buttons');
+    Route::get('/image', function () { return view('pages.ui-elements.image', ['title' => 'Images']); })->name('ui.image');
+    Route::get('/videos', function () { return view('pages.ui-elements.videos', ['title' => 'Videos']); })->name('ui.videos');
+    Route::get('/modals', function () { return view('pages.ui-elements.modals', ['title' => 'Modals']); })->name('ui.modals');
+    Route::get('/skeletons', function () { return view('pages.ui-elements.skeletons', ['title' => 'Skeletons']); })->name('ui.skeletons');
+    Route::get('/empty-state', function () { return view('pages.ui-elements.empty-state', ['title' => 'Empty State']); })->name('ui.empty-state');
+
+    // Applications
+    Route::get('/chat', function () { return view('pages.applications.chat', ['title' => 'Chat App']); })->name('app.chat');
+    Route::get('/email', function () { return view('pages.applications.email', ['title' => 'Email App']); })->name('app.email');
+    Route::get('/support-ticket', function () { return view('pages.applications.support', ['title' => 'Support Tickets']); })->name('app.support');
+
+    // Ecommerce
+    Route::get('/product-list', function () { return view('pages.ecommerce.list', ['title' => 'Product List']); })->name('ecommerce.list');
+    Route::get('/product-detail', function () { return view('pages.ecommerce.detail', ['title' => 'Product Detail']); })->name('ecommerce.detail');
+    Route::get('/cart', function () { return view('pages.ecommerce.cart', ['title' => 'Shopping Cart']); })->name('ecommerce.cart');
+    Route::get('/checkout', function () { return view('pages.ecommerce.checkout', ['title' => 'Checkout']); })->name('ecommerce.checkout');
+
+    // AI & Maps
+    Route::get('/ai-assistant', function () { return view('pages.ai.assistant', ['title' => 'AI Assistant']); })->name('ai.assistant');
+    Route::get('/map-view', function () { return view('pages.ai.map', ['title' => 'Map View']); })->name('ai.map');
+});
+
+require __DIR__.'/auth.php';

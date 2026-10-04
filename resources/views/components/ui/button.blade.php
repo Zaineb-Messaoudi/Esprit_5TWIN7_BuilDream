@@ -1,6 +1,6 @@
 @props([
-    'size' => 'md',          
     'variant' => 'primary',
+    'size' => 'md',
     'startIcon' => null,
     'endIcon' => null,
     'className' => '',
@@ -8,27 +8,29 @@
 ])
 
 @php
-    // Base classes
-    $base = 'inline-flex items-center justify-center font-medium gap-2 rounded-lg transition';
+    $base = 'button-base';
 
-    // Size map
     $sizeMap = [
-        'sm' => 'px-4 py-3 text-sm',
-        'md' => 'px-5 py-3.5 text-sm',
+        'xs' => 'px-2 py-1.5 text-xs',
+        'sm' => 'px-3 py-2 text-sm',
+        'md' => 'px-4 py-3 text-sm',
+        'lg' => 'px-5 py-3 text-base',
     ];
     $sizeClass = $sizeMap[$size] ?? $sizeMap['md'];
 
-    // Variant map
     $variantMap = [
-        'primary' => 'bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300',
+        'primary' => 'button-primary',
+        'secondary' => 'bg-gray-800 text-white hover:bg-gray-900 dark:bg-gray-700 dark:hover:bg-gray-600 disabled:bg-gray-300',
         'outline' => 'bg-white text-gray-700 ring-1 ring-inset ring-gray-300 hover:bg-gray-50 dark:bg-gray-800 dark:text-gray-400 dark:ring-gray-700 dark:hover:bg-white/[0.03] dark:hover:text-gray-300',
+        'ghost' => 'bg-transparent text-gray-700 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-white/[0.03] dark:hover:text-gray-300',
+        'success' => 'bg-success-500 text-white hover:bg-success-600 disabled:bg-success-300',
+        'error' => 'bg-error-500 text-white hover:bg-error-600 disabled:bg-error-300',
+        'warning' => 'bg-warning-700 text-white hover:bg-warning-800 disabled:bg-warning-300',
     ];
     $variantClass = $variantMap[$variant] ?? $variantMap['primary'];
 
-    // disabled classes
     $disabledClass = $disabled ? 'cursor-not-allowed opacity-50' : '';
 
-    // final classes (merge user className too)
     $classes = trim("{$base} {$sizeClass} {$variantClass} {$className} {$disabledClass}");
 @endphp
 
@@ -36,26 +38,13 @@
     {{ $attributes->merge(['class' => $classes, 'type' => $attributes->get('type', 'button')]) }}
     @if($disabled) disabled @endif
 >
-    {{-- start icon: priority — named slot 'startIcon' first, then startIcon prop if it's a HtmlString --}}
-    @if (isset($__env) && $slot->isEmpty() === false) @endif
-
-    @hasSection('startIcon')
-        <span class="flex items-center">
-            @yield('startIcon')
-        </span>
-    @elseif($startIcon)
-        <span class="flex items-center">{!! $startIcon !!}</span>
+    @if($startIcon)
+        <span class="flex items-center shrink-0">{!! $startIcon !!}</span>
     @endif
 
-    {{-- main slot --}}
     {{ $slot }}
 
-    {{-- end icon: named slot 'endIcon' first, then endIcon prop --}}
-    @hasSection('endIcon')
-        <span class="flex items-center">
-            @yield('endIcon')
-        </span>
-    @elseif($endIcon)
-        <span class="flex items-center">{!! $endIcon !!}</span>
+    @if($endIcon)
+        <span class="flex items-center shrink-0">{!! $endIcon !!}</span>
     @endif
 </button>

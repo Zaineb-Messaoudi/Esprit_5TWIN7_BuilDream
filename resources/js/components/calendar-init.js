@@ -48,6 +48,7 @@ export function calendarInit() {
   const modalEndDateInput = document.querySelector("#event-end-date");
   const modalAddBtn = document.querySelector(".btn-add-event");
   const modalUpdateBtn = document.querySelector(".btn-update-event");
+  const modalDeleteBtn = document.querySelector(".btn-delete-event");
   const modalHeaderTitle = document.querySelector("#eventModalLabel");
 
   const CALENDAR_VIEW_OPTIONS = [
@@ -185,6 +186,7 @@ export function calendarInit() {
     if (modalHeaderTitle) modalHeaderTitle.textContent = "Add Event";
     if (modalAddBtn) modalAddBtn.style.display = "flex";
     if (modalUpdateBtn) modalUpdateBtn.style.display = "none";
+    if (modalDeleteBtn) modalDeleteBtn.style.display = "none";
 
     const currentDate = new Date();
     const yyyy = currentDate.getFullYear();
@@ -206,6 +208,7 @@ export function calendarInit() {
     if (modalHeaderTitle) modalHeaderTitle.textContent = "Add Event";
     if (modalAddBtn) modalAddBtn.style.display = "flex";
     if (modalUpdateBtn) modalUpdateBtn.style.display = "none";
+    if (modalDeleteBtn) modalDeleteBtn.style.display = "none";
 
     if (modalStartDateInput)
       modalStartDateInput.value = info.startStr ? info.startStr.split("T")[0] : "";
@@ -241,6 +244,7 @@ export function calendarInit() {
       modalUpdateBtn.style.display = "flex";
       modalUpdateBtn.dataset.fcEventPublicId = eventObj.id;
     }
+    if (modalDeleteBtn) modalDeleteBtn.style.display = "flex";
 
     if (modalTitleInput) modalTitleInput.value = eventObj.title;
     if (modalStartDateInput)
@@ -725,6 +729,16 @@ export function calendarInit() {
       selectedEvent.setEnd(end || start);
       selectedEvent.setExtendedProp("calendar", level);
 
+      closeModal();
+    });
+  }
+
+  if (modalDeleteBtn) {
+    modalDeleteBtn.addEventListener("click", (e) => {
+      e.preventDefault();
+      if (!selectedEvent) return;
+
+      selectedEvent.remove();
       closeModal();
     });
   }

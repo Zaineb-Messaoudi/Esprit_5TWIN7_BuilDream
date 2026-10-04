@@ -58,7 +58,7 @@
         </div>
     </div>
 
-    <x-ui.modal @open-profile-address-modal.window="open = true" :isOpen="false" class="max-w-[700px] p-4 lg:p-11">
+    <x-ui.modal @open-profile-address-modal.window="open = true" :isOpen="false" :label="__('Edit Address')" class="max-w-[700px] p-4 lg:p-11">
         <div class="no-scrollbar">
             <div class="px-2 pe-14">
                 <h4 class="mb-2 text-2xl font-semibold text-gray-800 dark:text-white/90">

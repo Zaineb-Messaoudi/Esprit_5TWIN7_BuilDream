@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Auth\Events\Verified;
 use Illuminate\Contracts\Auth\UpdatablePasswordInterface;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
+use RuntimeException;
+use Throwable;
 
 class UserService
 {
@@ -21,16 +24,45 @@ class UserService
      */
     public function register(UserRegistrationData $data): User
     {
-        return DB::transaction(function () use ($data) {
-            return User::create([
-                'name' => $data->name,
-                'email' => $data->email,
-                'password' => Hash::make($data->password),
-                'phone_number' => $data->phone_number,
-                'address' => $data->address,
-                'role' => $data->role,
-            ]);
-        });
+        $photoPath = $data->profile_photo?->store('profile-photos', 'public');
+
+        if ($data->profile_photo && !$photoPath) {
+            throw new RuntimeException('The profile photo could not be stored.');
+        }
+
+        try {
+            return DB::transaction(function () use ($data, $photoPath) {
+                return User::create([
+                    'name' => $data->name,
+                    'email' => $data->email,
+                    'password' => Hash::make($data->password),
+                    'phone_number' => $data->phone_number,
+                    'address' => $data->address,
+                    'role' => UserRole::BUYER,
+                    'role_setup_completed' => false,
+                    'profile_photo_path' => $photoPath,
+                ]);
+            });
+        } catch (Throwable $exception) {
+            if ($photoPath) {
+                Storage::disk('public')->delete($photoPath);
+            }
+
+            throw $exception;
+        }
+    }
+
+    public function createByAdministrator(array $attributes): User
+    {
+        return User::create([
+            'name' => $attributes['name'],
+            'email' => $attributes['email'],
+            'password' => Hash::make($attributes['password']),
+            'phone_number' => $attributes['phone_number'] ?? null,
+            'address' => $attributes['address'] ?? null,
+            'role' => UserRole::from($attributes['role']),
+            'role_setup_completed' => true,
+        ]);
     }
 
     /**

@@ -10,7 +10,7 @@ class AdminUserUpdateRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true; // Authorization handled by Gate/Middleware
+        return $this->user()?->isAdmin() ?? false;
     }
 
     public function rules(): array
@@ -24,7 +24,7 @@ class AdminUserUpdateRequest extends FormRequest
                 'max:255',
                 Rule::unique(User::class)->ignore($this->route('user')),
             ],
-            'role' => ['required', 'string', 'in:admin,user'],
+            'role' => ['required', 'string', 'in:admin,owner,buyer,user'],
             'phone_number' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],
         ];

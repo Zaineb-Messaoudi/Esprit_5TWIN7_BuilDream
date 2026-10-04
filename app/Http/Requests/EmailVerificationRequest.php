@@ -8,14 +8,15 @@ class EmailVerificationRequest extends FormRequest
 {
     public function authorize(): bool
     {
-        return true;
+        $user = $this->user();
+
+        return $user !== null
+            && (string) $user->getKey() === (string) $this->route('id')
+            && hash_equals(sha1($user->getEmailForVerification()), (string) $this->route('hash'));
     }
 
     public function rules(): array
     {
-        return [
-            'id' => ['required', 'exists:users,id'],
-            'hash' => ['required', 'string'],
-        ];
+        return [];
     }
 }

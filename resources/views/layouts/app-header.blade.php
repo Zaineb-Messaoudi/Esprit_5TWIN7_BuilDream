@@ -2,19 +2,53 @@
     class="sticky top-0 flex w-full bg-white border-gray-200 z-99999 dark:border-gray-800 dark:bg-gray-900 xl:border-b"
     x-data="{
         isApplicationMenuOpen: false,
+        isFullscreen: false,
+        fullscreenError: false,
+        init() {
+            document.addEventListener('fullscreenchange', () => {
+                this.isFullscreen = Boolean(document.fullscreenElement);
+            });
+            this.searchShortcut = (event) => {
+                if ((event.metaKey || event.ctrlKey) && event.key.toLowerCase() === 'k' && window.innerWidth >= 1280) {
+                    event.preventDefault();
+                    this.$refs.searchInput.focus();
+                }
+            };
+            window.addEventListener('keydown', this.searchShortcut);
+        },
+        destroy() {
+            window.removeEventListener('keydown', this.searchShortcut);
+        },
         toggleApplicationMenu() {
             this.isApplicationMenuOpen = !this.isApplicationMenuOpen;
+        },
+        async toggleFullscreen() {
+            try {
+                if (document.fullscreenElement) {
+                    await document.exitFullscreen();
+                } else {
+                    await document.documentElement.requestFullscreen();
+                }
+                this.fullscreenError = false;
+            } catch (error) {
+                if (error instanceof DOMException && ['NotAllowedError', 'SecurityError'].includes(error.name)) {
+                    this.fullscreenError = true;
+                    return;
+                }
+
+                throw error;
+            }
         }
     }">
-    <div class="flex flex-col items-center justify-between grow xl:flex-row xl:px-6">
+    <div class="flex w-full flex-col items-center justify-between xl:flex-row xl:px-6">
         <div
-            class="flex items-center justify-between w-full gap-2 px-3 py-3 border-b border-gray-200 dark:border-gray-800 sm:gap-4 xl:justify-normal xl:border-b-0 xl:px-0 lg:py-4">
+            class="flex min-w-0 w-full items-center justify-between gap-2 border-b border-gray-200 px-3 py-3 dark:border-gray-800 sm:gap-4 xl:w-auto xl:flex-1 xl:justify-normal xl:border-b-0 xl:px-0 lg:py-4">
 
             <!-- Desktop Sidebar Toggle Button (visible on xl and up) -->
             <button
                 class="hidden xl:flex items-center justify-center w-10 h-10 text-gray-500 border border-gray-200 rounded-lg dark:border-gray-800 dark:text-gray-400 lg:h-11 lg:w-11"
                 :class="{ 'bg-gray-100 dark:bg-white/[0.03]': !$store.sidebar.isExpanded }"
-                @click="$store.sidebar.toggleExpanded()" aria-label="Toggle Sidebar">
+                @click="$store.sidebar.toggleExpanded()" aria-controls="sidebar" :aria-expanded="$store.sidebar.isExpanded" aria-label="{{ __('Toggle Sidebar') }}">
                 <svg x-show="!$store.sidebar.isMobileOpen" width="16" height="12" viewBox="0 0 16 12" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" clip-rule="evenodd"
@@ -33,7 +67,7 @@
             <button
                 class="flex xl:hidden items-center justify-center w-10 h-10 text-gray-500 rounded-lg dark:text-gray-400 lg:h-11 lg:w-11"
                 :class="{ 'bg-gray-100 dark:bg-white/[0.03]': $store.sidebar.isMobileOpen }"
-                @click="$store.sidebar.toggleMobileOpen()" aria-label="Toggle Mobile Menu">
+                @click="$store.sidebar.toggleMobileOpen()" aria-controls="sidebar" :aria-expanded="$store.sidebar.isMobileOpen" aria-label="{{ __('Toggle Mobile Menu') }}">
                 <svg x-show="!$store.sidebar.isMobileOpen" width="16" height="12" viewBox="0 0 16 12" fill="none"
                     xmlns="http://www.w3.org/2000/svg">
                     <path fill-rule="evenodd" clip-rule="evenodd"
@@ -49,13 +83,12 @@
             </button>
 
             <!-- Logo (mobile only) -->
-            <a href="/" class="xl:hidden">
-                <img class="dark:hidden" src="/images/logo/logo.svg" alt="Logo" />
-                <img class="hidden dark:block" src="/images/logo/logo-dark.svg" alt="Logo" />
+            <a href="{{ route('home') }}" aria-label="{{ __('SolarShare home') }}" class="xl:hidden">
+                <x-front.logo />
             </a>
 
             <!-- Application Menu Toggle (mobile only) -->
-            <button @click="toggleApplicationMenu()"
+            <button @click="toggleApplicationMenu()" :aria-expanded="isApplicationMenuOpen" aria-label="{{ __('Toggle application menu') }}"
                 class="flex items-center justify-center w-10 h-10 text-gray-700 rounded-lg z-99999 hover:bg-gray-100 dark:text-gray-400 dark:hover:bg-gray-800 xl:hidden">
                 <!-- Dots Icon -->
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none">
@@ -78,14 +111,16 @@
                                     fill="" />
                             </svg>
                         </span>
-                        <input type="text"
+                        <label for="header-search" class="sr-only">{{ __('Search dashboard pages') }}</label>
+                        <input id="header-search" type="search"
                             x-ref="searchInput"
-                            placeholder="Search or type command..."
+                            placeholder="{{ __('Search or type command...') }}"
                             class="dark:bg-dark-900 h-11 w-full rounded-lg border border-gray-200 bg-transparent py-2.5 ltr:pl-12 ltr:pr-14 rtl:pr-12 rtl:pl-14 text-sm text-gray-800 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-800 dark:bg-white/3 dark:text-white/90 dark:placeholder:text-white/30 dark:focus:border-brand-800 xl:w-[430px]" />
                         <button
                             type="button"
                             tabindex="-1"
                             @click="$refs.searchInput?.focus()"
+                            aria-hidden="true"
                             class="absolute ltr:right-2.5 rtl:left-2.5 top-1/2 inline-flex -translate-y-1/2 items-center gap-0.5 rounded-lg border border-gray-200 bg-gray-50 px-[7px] py-[4.5px] text-xs -tracking-[0.2px] text-gray-500 dark:border-gray-800 dark:bg-white/[0.03] dark:text-gray-400">
                             <span> ⌘ </span>
                             <span> K </span>
@@ -97,12 +132,26 @@
 
         <!-- Application Menu (mobile) and Right Side Actions (desktop) -->
         <div :class="isApplicationMenuOpen ? 'flex' : 'hidden'"
-            class="items-center justify-between w-full gap-4 px-5 py-4 xl:flex shadow-theme-md xl:justify-end xl:px-0 xl:shadow-none">
+            class="w-full items-center justify-between gap-4 px-5 py-4 shadow-theme-md xl:w-auto xl:shrink-0 xl:flex xl:justify-end xl:px-0 xl:shadow-none">
             <div class="flex items-center gap-2 2xsm:gap-3">
+                <x-locale-switcher />
+                <button
+                    type="button"
+                    @click="toggleFullscreen()"
+                    :aria-pressed="isFullscreen"
+                    :aria-label="isFullscreen ? @js(__('Exit fullscreen')) : @js(__('Enter fullscreen'))"
+                    class="relative flex h-11 w-11 items-center justify-center rounded-full border border-gray-200 bg-white text-gray-500 transition hover:bg-gray-100 hover:text-gray-700 focus:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
+                >
+                    <svg class="h-5 w-5" viewBox="0 0 20 20" fill="none" aria-hidden="true">
+                        <path d="M7 3H3v4M13 3h4v4M3 13v4h4m10-4v4h-4" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                </button>
+                <span x-show="fullscreenError" x-cloak role="status" class="sr-only">{{ __('Fullscreen could not be changed.') }}</span>
                 <!-- Theme Toggle Button -->
                 <button
+                    type="button"
                     class="relative flex items-center justify-center text-gray-500 transition-colors bg-white border border-gray-200 rounded-full hover:text-dark-900 h-11 w-11 hover:bg-gray-100 hover:text-gray-700 dark:border-gray-800 dark:bg-gray-900 dark:text-gray-400 dark:hover:bg-gray-800 dark:hover:text-white"
-                    @click="$store.theme.toggle()">
+                    @click="$store.theme.toggle()" :aria-label="$store.theme.resolvedTheme === 'dark' ? @js(__('Switch to light theme')) : @js(__('Switch to dark theme'))">
                     <svg class="hidden dark:block" width="20" height="20" viewBox="0 0 20 20" fill="none"
                         xmlns="http://www.w3.org/2000/svg">
                         <path fill-rule="evenodd" clip-rule="evenodd"
