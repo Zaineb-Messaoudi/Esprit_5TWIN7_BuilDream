@@ -86,6 +86,14 @@ class MenuHelper
                 'name' => 'User Management',
                 'path' => route('admin.users.index'),
             ]]);
+            
+            // Rentals link (Student 3 module), visible to admins only.
+            // Added at the end of the "Menu" group.
+            $items[] = [
+                'icon' => 'logistics',
+                'name' => 'Rentals',
+                'path' => route('admin.rentals.index'),
+            ];
         }
 
         return $items;

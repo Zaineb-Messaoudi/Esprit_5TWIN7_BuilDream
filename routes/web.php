@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\RentalController;
 use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\AuthDemoController;
 use App\Http\Controllers\ChartShowcaseController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\FaqController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SpecialPageController;
 use Illuminate\Support\Facades\Route;
+
 
 Route::get('/', function () {
     return redirect()->route('dashboard.ecommerce');
@@ -86,7 +88,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Admin User Management
     Route::middleware('can:admin-only')->prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', AdminUserController::class);
+        Route::resource('rentals', RentalController::class);
     });
+
 
     // Dashboard Routes
     Route::get('/ecommerce', function () {
