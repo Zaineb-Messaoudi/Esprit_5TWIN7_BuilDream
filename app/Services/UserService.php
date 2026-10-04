@@ -38,7 +38,8 @@ class UserService
                     'password' => Hash::make($data->password),
                     'phone_number' => $data->phone_number,
                     'address' => $data->address,
-                    'role' => $data->role,
+                    'role' => UserRole::BUYER,
+                    'role_setup_completed' => false,
                     'profile_photo_path' => $photoPath,
                 ]);
             });
@@ -49,6 +50,19 @@ class UserService
 
             throw $exception;
         }
+    }
+
+    public function createByAdministrator(array $attributes): User
+    {
+        return User::create([
+            'name' => $attributes['name'],
+            'email' => $attributes['email'],
+            'password' => Hash::make($attributes['password']),
+            'phone_number' => $attributes['phone_number'] ?? null,
+            'address' => $attributes['address'] ?? null,
+            'role' => UserRole::from($attributes['role']),
+            'role_setup_completed' => true,
+        ]);
     }
 
     /**

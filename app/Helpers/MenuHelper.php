@@ -33,7 +33,7 @@ class MenuHelper
                 'name' => 'User Profile',
                 'subItems' => [
                     ['name' => 'Profile Overview', 'path' => route('profile.overview'), 'pro' => false],
-                    ['name' => 'Edit Profile', 'path' => route('profile.edit'), 'pro' => false],
+                    ['name' => 'Edit profile', 'path' => route('profile.edit'), 'pro' => false],
                     ['name' => 'Preferences', 'path' => route('settings.preferences'), 'pro' => false],
                     ['name' => 'Sessions & Security', 'path' => route('settings.sessions'), 'pro' => false],
                     ['name' => 'Notifications', 'path' => route('settings.notifications'), 'pro' => false],
@@ -63,7 +63,7 @@ class MenuHelper
                     ['name' => 'Blank Page', 'path' => route('pages.blank'), 'pro' => false],
                     ['name' => '404 Error', 'path' => route('pages.error-404'), 'pro' => false],
                     ['name' => '505 Error', 'path' => route('special.error-505'), 'pro' => false],
-                    ['name' => 'Account Settings', 'path' => route('settings'), 'pro' => false],
+                    ['name' => 'Account settings', 'path' => route('settings'), 'pro' => false],
                     ['name' => 'Integrations', 'path' => route('integrations'), 'pro' => false],
                     ['name' => 'API Keys', 'path' => route('api-keys'), 'pro' => false],
                     ['name' => 'FAQ', 'path' => route('faq.index'), 'pro' => false],
@@ -132,7 +132,7 @@ class MenuHelper
                 'icon' => 'authentication',
                 'name' => 'Authentication',
                 'subItems' => [
-                    ['name' => 'Sign In', 'path' => route('login'), 'pro' => false],
+                    ['name' => 'Sign in', 'path' => route('login'), 'pro' => false],
                     ['name' => 'Sign Up', 'path' => route('register'), 'pro' => false],
                     ['name' => 'Forgot Password', 'path' => route('password.request'), 'pro' => false],
                     ['name' => 'Two-Factor Demo', 'path' => route('auth.two-factor'), 'pro' => false],

@@ -2,18 +2,57 @@
 
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AiDemoController;
+use App\Http\Controllers\Auth\RoleSetupController;
 use App\Http\Controllers\AuthDemoController;
 use App\Http\Controllers\ChartShowcaseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EcommerceController;
 use App\Http\Controllers\FaqController;
+use App\Http\Controllers\FrontController;
+use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SpecialPageController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return redirect()->route('dashboard.ecommerce');
-})->middleware('auth')->name('dashboard');
+// Front Office (public)
+Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
+    ->whereIn('locale', array_keys(LocaleController::SUPPORTED_LOCALES))
+    ->name('locale.switch');
+Route::get('/', [FrontController::class, 'home'])->name('home');
+Route::get('/catalog', [FrontController::class, 'catalog'])->name('front.catalog');
+Route::get('/equipment/{id}', [FrontController::class, 'show'])
+    ->whereNumber('id')
+    ->name('front.equipment.show');
+
+foreach (config('front.pages') as $slug => $page) {
+    $route = Route::get($page['path'], PageController::class)
+        ->defaults('slug', $slug)
+        ->name('front.'.$slug);
+
+    if (($page['shell'] ?? null) === 'account') {
+        $route->middleware(['auth', 'verified', 'role.selected']);
+    }
+}
+
+// Post-login landing: admins -> Back Office, everyone else -> Front Office.
+// Keeps the `dashboard` route name used by the auth controllers.
+Route::get('/portal', function () {
+    $user = auth()->user();
+
+    if ($user->isAdmin()) {
+        return redirect()->route('dashboard.ecommerce');
+    }
+
+    return $user->isOwner()
+        ? redirect()->route('front.owner-dashboard')
+        : redirect()->route('front.my-dashboard');
+})->middleware(['auth', 'role.selected'])->name('dashboard');
+
+Route::middleware('auth')->group(function () {
+    Route::get('/choose-role', [RoleSetupController::class, 'show'])->name('role.setup');
+    Route::post('/choose-role', [RoleSetupController::class, 'store'])->name('role.setup.store');
+});
 
 foreach ([
     'error-403',
@@ -40,7 +79,16 @@ Route::get('/two-factor', [AuthDemoController::class, 'show'])
     ->defaults('demo', 'two-factor')
     ->name('auth.two-factor');
 
-Route::middleware(['auth', 'verified'])->group(function () {
+Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
+    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
+    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/overview', function () {
+        return view('pages.account.profile-overview', ['title' => 'Profile Overview']);
+    })->name('profile.overview');
+});
+
+Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
     Route::get('/dashboard', function () {
         return view('dashboard');
     })->name('dashboard.main');
@@ -49,9 +97,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/sales', [DashboardController::class, 'sector'])->defaults('dashboard', 'sales')->name('dashboard.sales');
     Route::get('/logistics', [DashboardController::class, 'sector'])->defaults('dashboard', 'logistics')->name('dashboard.logistics');
 
-    Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
-    Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
-    Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/settings', function () {
         return view('pages.account.settings', ['title' => 'Account Settings', 'pageTitle' => 'General Settings', 'section' => 'general']);
     })->name('settings');
@@ -73,9 +118,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/settings/connections', function () {
         return view('pages.account.settings', ['title' => 'Connected Accounts', 'pageTitle' => 'Connected Accounts', 'section' => 'integrations']);
     })->name('settings.connections');
-    Route::get('/profile/overview', function () {
-        return view('pages.account.profile-overview', ['title' => 'Profile Overview']);
-    })->name('profile.overview');
     Route::get('/api-keys', function () {
         return view('pages.account.settings', ['title' => 'API Keys', 'pageTitle' => 'API Keys', 'section' => 'api-keys']);
     })->name('api-keys');
@@ -84,7 +126,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     })->name('integrations');
 
     // Admin User Management
-    Route::middleware('can:admin-only')->prefix('admin')->name('admin.')->group(function () {
+    Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', AdminUserController::class);
     });
 

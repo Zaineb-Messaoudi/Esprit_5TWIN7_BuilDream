@@ -53,7 +53,7 @@ class UserController extends Controller
 
     public function store(AdminUserStoreRequest $request): RedirectResponse
     {
-        $user = $this->userService->register(\App\DTOs\UserRegistrationData::fromRequest($request));
+        $user = $this->userService->createByAdministrator($request->validated());
         event(new Registered($user));
 
         return redirect()->route('admin.users.index')->with('status', 'user-created');
@@ -80,11 +80,11 @@ class UserController extends Controller
         $data = $request->validated();
         $emailChanged = $user->email !== $data['email'];
 
-        if ($user->isAdmin() && $data['role'] !== UserRole::ADMIN->value) {
-            $this->ensureAnotherAdministratorRemains($user);
-        }
-
         DB::transaction(function () use ($user, $data, $emailChanged): void {
+            if ($user->isAdmin() && $data['role'] !== UserRole::ADMIN->value) {
+                $this->ensureAnotherAdministratorRemains($user);
+            }
+
             $this->userService->updateUserProfile($user, $data);
 
             if ($emailChanged) {
@@ -102,8 +102,10 @@ class UserController extends Controller
 
     public function destroy(User $user): RedirectResponse
     {
-        $this->ensureAnotherAdministratorRemains($user);
-        $this->userService->deleteUser($user);
+        DB::transaction(function () use ($user): void {
+            $this->ensureAnotherAdministratorRemains($user);
+            $this->userService->deleteUser($user);
+        });
 
         return redirect()->route('admin.users.index')->with('status', 'user-deleted');
     }
@@ -116,7 +118,18 @@ class UserController extends Controller
             ]);
         }
 
-        if ($user->isAdmin() && User::where('role', UserRole::ADMIN->value)->count() <= 1) {
+        if (! $user->isAdmin()) {
+            return;
+        }
+
+        $adminCount = User::query()
+            ->where('role', UserRole::ADMIN->value)
+            ->orderBy('id')
+            ->lockForUpdate()
+            ->get(['id'])
+            ->count();
+
+        if ($adminCount <= 1) {
             throw ValidationException::withMessages([
                 'user' => __('At least one administrator account must remain active.'),
             ]);

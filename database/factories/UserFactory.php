@@ -32,6 +32,7 @@ class UserFactory extends Factory
             'phone_number' => fake()->phoneNumber(),
             'address' => fake()->address(),
             'role' => fake()->randomElement(\App\Enums\UserRole::cases()),
+            'role_setup_completed' => true,
         ];
     }
 

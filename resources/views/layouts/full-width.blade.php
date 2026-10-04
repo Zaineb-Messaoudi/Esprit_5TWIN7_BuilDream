@@ -6,7 +6,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
 
-    <title>{{ $title ?? __('Full-width layout') }} | SolarShare Admin</title>
+    <title>{{ $title ?? __('Full-width Layout') }} | SolarShare Admin</title>
 
     <style>
         [x-cloak] {

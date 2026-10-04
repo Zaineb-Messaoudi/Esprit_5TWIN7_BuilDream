@@ -6,8 +6,9 @@
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <meta name="csrf-token" content="{{ csrf_token() }}">
+        <meta name="theme-color" content="#ffffff">
 
-        <title>{{ $title }} | SolarShare Admin</title>
+        <title>{{ __($title) }} | SolarShare Admin</title>
 
         <script>
             const savedDir = localStorage.getItem('dir');
@@ -23,8 +24,10 @@
         @vite(['resources/css/app.css', 'resources/js/app.js'])
     </head>
     <body class="antialiased">
+        <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-999999 focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-medium focus:text-brand-700 focus:shadow-theme-lg dark:focus:bg-gray-900 dark:focus:text-brand-300">{{ __('Skip to main content') }}</a>
+        <div class="fixed end-4 top-4 z-999999"><x-locale-switcher /></div>
         <div class="flex min-h-screen items-center justify-center p-4">
-            <main class="grid min-h-[calc(100vh-2rem)] w-full max-w-6xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-xl dark:border-gray-800 dark:bg-gray-900 lg:grid-cols-2">
+            <main id="main-content" tabindex="-1" class="grid min-h-[calc(100vh-2rem)] w-full max-w-6xl overflow-hidden rounded-2xl border border-gray-200 bg-white shadow-theme-xl outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:border-gray-800 dark:bg-gray-900 lg:grid-cols-2">
                 <section class="flex items-center justify-center px-5 py-10 sm:px-10 lg:px-12">
                     <div class="w-full max-w-md">
                         <a href="{{ route('login') }}" class="mb-8 inline-flex items-center gap-3 rounded-sm text-lg font-semibold text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:text-white lg:hidden">

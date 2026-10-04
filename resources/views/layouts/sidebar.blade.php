@@ -62,12 +62,11 @@
     @mouseleave="$store.sidebar.setHovered(false)">
     <!-- Logo Section -->
     <div class="pt-8 pb-7 flex shrink-0 items-center gap-2" :class="(!$store.sidebar.isExpanded && !$store.sidebar.isHovered && !$store.sidebar.isMobileOpen) ? 'justify-center' : 'justify-between'">
-        <a href="/">
+        <a href="{{ route('home') }}" aria-label="{{ __('SolarShare home') }}">
             <div class="hidden [.sidebar-expanded_&]:block">
-                <img class="dark:hidden" src="/images/logo/logo.svg" alt="Logo" width="150" height="40" />
-                <img class="hidden dark:block" src="/images/logo/logo-dark.svg" alt="Logo" width="150" height="40" />
+                <x-front.logo />
             </div>
-            <img class="block [.sidebar-expanded_&]:hidden" src="/images/logo/logo-icon.svg" alt="Logo" width="32" height="32" />
+            <img class="block size-9 [.sidebar-expanded_&]:hidden" src="{{ asset('images/brand/solarshare-icon.png') }}" alt="" width="36" height="36" />
         </a>
     </div>
 
@@ -129,7 +128,7 @@
                                                         :class="isActive('{{ $item['path'] ?? '' }}') ?
                                                             'menu-dropdown-badge menu-dropdown-badge-active' :
                                                             'menu-dropdown-badge menu-dropdown-badge-inactive'">
-                                                        {{ __('new') }}
+                                                        {{ __('New badge') }}
                                                     </span>
                                                 @endif
                                             </span>
@@ -174,7 +173,7 @@
                                                                         :class="isActive('{{ $subItem['path'] }}') ?
                                                                             'menu-dropdown-badge menu-dropdown-badge-active' :
                                                                             'menu-dropdown-badge menu-dropdown-badge-inactive'">
-                                                                        {{ __('new') }}
+                                                                        {{ __('New badge') }}
                                                                     </span>
                                                                 @endif
                                                                 @if (!empty($subItem['pro']))
@@ -216,7 +215,7 @@
                                                 @if (!empty($item['new']))
                                                     <span
                                                         class="ltr:ml-2 rtl:mr-2 inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold bg-brand-500 text-white">
-                                                        {{ __('new') }}
+                                                        {{ __('New badge') }}
                                                     </span>
                                                 @endif
                                             </span>

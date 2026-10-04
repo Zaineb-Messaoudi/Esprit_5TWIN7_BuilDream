@@ -1,7 +1,7 @@
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900 dark:text-gray-100">
-            {{ __('Profile Information') }}
+            {{ __('Profile information') }}
         </h2>
 
         <p class="mt-1 text-sm text-gray-600 dark:text-gray-400">
@@ -48,7 +48,7 @@
         </div>
 
         <div class="mt-4">
-            <x-input-label for="phone_number" :value="__('Phone Number')" />
+            <x-input-label for="phone_number" :value="__('Phone number')" />
             <x-text-input id="phone_number" name="phone_number" type="text" class="mt-1 block w-full" :value="old('phone_number', $user->phone_number)" />
             <x-input-error class="mt-2" :messages="$errors->get('phone_number')" />
         </div>

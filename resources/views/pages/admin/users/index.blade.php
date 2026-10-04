@@ -4,16 +4,16 @@
 <div class="space-y-6">
     <x-common.page-breadcrumb>
         <div class="flex items-center gap-2">
-            <a href="{{ route('dashboard') }}" class="text-gray-500 transition-colors hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:text-gray-400">Dashboard</a>
+            <a href="{{ route('dashboard') }}" class="text-gray-500 transition-colors hover:text-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:text-gray-400">{{ __('Dashboard') }}</a>
             <span class="text-gray-400">/</span>
-            <span class="text-gray-800 dark:text-white">User Management</span>
+            <span class="text-gray-800 dark:text-white">{{ __('User Management') }}</span>
         </div>
     </x-common.page-breadcrumb>
 
     <div class="flex flex-wrap items-center justify-between gap-4">
-        <h1 class="text-title-md font-semibold text-gray-800 dark:text-white/90">All Users</h1>
+        <h1 class="text-title-md font-semibold text-gray-800 dark:text-white/90">{{ __('All Users') }}</h1>
         <a href="{{ route('admin.users.create') }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-theme-xs transition-colors hover:bg-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 motion-reduce:transition-none">
-            + Create User
+            + {{ __('Create user') }}
         </a>
     </div>
 
@@ -34,17 +34,19 @@
     <x-common.component-card>
         <div class="mb-4">
             <form method="GET" action="{{ route('admin.users.index') }}" class="flex flex-col gap-3 sm:flex-row">
-                <label class="sr-only" for="user-search">Search users</label>
-                <input id="user-search" type="search" name="search" value="{{ request('search') }}" placeholder="Search users..." class="min-h-10 w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white sm:max-w-64">
-                <label class="sr-only" for="user-role">Filter by role</label>
+                <label class="sr-only" for="user-search">{{ __('Search users') }}</label>
+                <input id="user-search" type="search" name="search" value="{{ request('search') }}" placeholder="{{ __('Search users...') }}" class="min-h-10 w-full min-w-0 rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-theme-xs placeholder:text-gray-400 focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white sm:max-w-64">
+                <label class="sr-only" for="user-role">{{ __('Filter by role') }}</label>
                 <select id="user-role" name="role" class="min-h-10 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-sm text-gray-700 shadow-theme-xs focus:border-brand-500 focus:ring-2 focus:ring-brand-500/20 dark:border-gray-700 dark:bg-gray-900 dark:text-white sm:w-auto">
-                    <option value="">All Roles</option>
-                    <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>Admin</option>
-                    <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>User</option>
+                    <option value="">{{ __('All roles') }}</option>
+                    <option value="admin" {{ request('role') == 'admin' ? 'selected' : '' }}>{{ __('Admin') }}</option>
+                    <option value="owner" {{ request('role') == 'owner' ? 'selected' : '' }}>{{ __('Owner') }}</option>
+                    <option value="buyer" {{ request('role') == 'buyer' ? 'selected' : '' }}>{{ __('Buyer') }}</option>
+                    <option value="user" {{ request('role') == 'user' ? 'selected' : '' }}>{{ __('Legacy buyer') }}</option>
                 </select>
                 <div class="flex items-center gap-3">
-                    <button type="submit" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900">Filter</button>
-                    <a href="{{ route('admin.users.index') }}" class="rounded text-sm font-medium text-gray-500 underline-offset-4 hover:text-gray-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:text-gray-400 dark:hover:text-gray-200">Reset</a>
+                    <button type="submit" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white transition-colors hover:bg-brand-600 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900">{{ __('Filter') }}</button>
+                    <a href="{{ route('admin.users.index') }}" class="rounded text-sm font-medium text-gray-500 underline-offset-4 hover:text-gray-700 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:text-gray-400 dark:hover:text-gray-200">{{ __('Reset') }}</a>
                 </div>
             </form>
         </div>
@@ -53,10 +55,10 @@
             <table class="w-full min-w-[600px] border-collapse text-start">
                 <thead>
                     <tr class="bg-gray-50 text-xs uppercase text-gray-600 dark:bg-gray-800 dark:text-gray-400">
-                        <th class="p-3 border-b dark:border-gray-700">User</th>
-                        <th class="p-3 border-b dark:border-gray-700">Role</th>
-                        <th class="p-3 border-b dark:border-gray-700">Status</th>
-                        <th class="p-3 border-b dark:border-gray-700 text-end">Actions</th>
+                        <th class="p-3 border-b dark:border-gray-700">{{ __('User') }}</th>
+                        <th class="p-3 border-b dark:border-gray-700">{{ __('Role') }}</th>
+                        <th class="p-3 border-b dark:border-gray-700">{{ __('Status') }}</th>
+                        <th class="p-3 border-b dark:border-gray-700 text-end">{{ __('Actions') }}</th>
                     </tr>
                 </thead>
                 <tbody class="text-gray-800 dark:text-white">
@@ -79,27 +81,27 @@
                             <td class="p-3">
                                 @if($user->hasVerifiedEmail())
                                     <span class="text-success-500 text-xs flex items-center gap-1">
-                                        <span class="w-2 h-2 bg-success-500 rounded-full"></span> Verified
+                                        <span class="w-2 h-2 bg-success-500 rounded-full"></span> {{ __('Verified') }}
                                     </span>
                                 @else
                                     <span class="text-warning-500 text-xs flex items-center gap-1">
-                                        <span class="w-2 h-2 bg-warning-500 rounded-full"></span> Unverified
+                                        <span class="w-2 h-2 bg-warning-500 rounded-full"></span> {{ __('Unverified') }}
                                     </span>
                                 @endif
                             </td>
                             <td class="space-x-2 p-3 text-end">
                                 <a href="{{ route('admin.users.show', $user) }}" class="rounded text-sm text-gray-600 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:text-gray-300">{{ __('View') }}</a>
-                                <a href="{{ route('admin.users.edit', $user) }}" class="rounded text-sm text-brand-600 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:text-brand-400">Edit</a>
+                                <a href="{{ route('admin.users.edit', $user) }}" class="rounded text-sm text-brand-600 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:text-brand-400">{{ __('Edit') }}</a>
                                 <form action="{{ route('admin.users.destroy', $user) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')
-                                    <button type="submit" onclick="return confirm('Are you sure?')" class="rounded text-sm text-error-600 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error-500 dark:text-error-400">Delete</button>
+                                    <button type="submit" onclick="return confirm(@js(__('Are you sure?')))" class="rounded text-sm text-error-600 underline-offset-4 hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-error-500 dark:text-error-400">{{ __('Delete') }}</button>
                                 </form>
                             </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="4" class="p-8 text-center text-sm text-gray-500 dark:text-gray-400">No users found.</td>
+                            <td colspan="4" class="p-8 text-center text-sm text-gray-500 dark:text-gray-400">{{ __('No users found.') }}</td>
                         </tr>
                     @endforelse
                 </tbody>

@@ -83,9 +83,8 @@
             </button>
 
             <!-- Logo (mobile only) -->
-            <a href="/" class="xl:hidden">
-                <img class="dark:hidden" src="/images/logo/logo.svg" alt="Logo" />
-                <img class="hidden dark:block" src="/images/logo/logo-dark.svg" alt="Logo" />
+            <a href="{{ route('home') }}" aria-label="{{ __('SolarShare home') }}" class="xl:hidden">
+                <x-front.logo />
             </a>
 
             <!-- Application Menu Toggle (mobile only) -->
@@ -135,6 +134,7 @@
         <div :class="isApplicationMenuOpen ? 'flex' : 'hidden'"
             class="w-full items-center justify-between gap-4 px-5 py-4 shadow-theme-md xl:w-auto xl:shrink-0 xl:flex xl:justify-end xl:px-0 xl:shadow-none">
             <div class="flex items-center gap-2 2xsm:gap-3">
+                <x-locale-switcher />
                 <button
                     type="button"
                     @click="toggleFullscreen()"

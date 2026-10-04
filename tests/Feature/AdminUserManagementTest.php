@@ -45,7 +45,7 @@ test('administrators can create view update and delete users', function () {
         ->assertSee(route('admin.users.show', $target), false);
 
     $this->get(route('admin.users.create'))->assertOk()->assertSee(route('admin.users.store'), false);
-    $this->get(route('admin.users.show', $target))->assertOk()->assertSee('Standard User');
+    $this->get(route('admin.users.show', $target))->assertOk()->assertSee('Buyer (legacy)');
     $this->get(route('admin.users.edit', $target))->assertOk()->assertSee('value="user"', false);
 
     $this->post(route('admin.users.store'), [
@@ -101,6 +101,23 @@ test('administrators cannot remove their own access', function () {
 
     expect($admin->fresh()->role)->toBe(UserRole::ADMIN)
         ->and($secondAdmin->fresh())->toBeNull();
+});
+
+test('administrators cannot demote or delete the last administrator', function () {
+    $admin = User::factory()->create(['role' => UserRole::ADMIN]);
+
+    $this->actingAs($admin)
+        ->put(route('admin.users.update', $admin), [
+            'name' => $admin->name,
+            'email' => $admin->email,
+            'role' => UserRole::BUYER->value,
+        ])
+        ->assertSessionHasErrors('user');
+
+    $this->delete(route('admin.users.destroy', $admin))
+        ->assertSessionHasErrors('user');
+
+    expect($admin->fresh()->role)->toBe(UserRole::ADMIN);
 });
 
 test('guest is redirected before accessing admin user pages', function () {

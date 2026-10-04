@@ -17,6 +17,10 @@
 
 @custom-variant dark (&:is(.dark *));
 
+html.dark {
+  color-scheme: dark;
+}
+
 @theme {
   --font-*: initial;
   --font-outfit: Outfit, sans-serif;
@@ -53,18 +57,18 @@
   --color-white: #ffffff;
   --color-black: #101828;
 
-  --color-brand-25: #f2f7ff;
-  --color-brand-50: #ecf3ff;
-  --color-brand-100: #dde9ff;
-  --color-brand-200: #c2d6ff;
-  --color-brand-300: #9cb9ff;
-  --color-brand-400: #7592ff;
-  --color-brand-500: #465fff;
-  --color-brand-600: #3641f5;
-  --color-brand-700: #2a31d8;
-  --color-brand-800: #252dae;
-  --color-brand-900: #262e89;
-  --color-brand-950: #161950;
+  --color-brand-25: #f5fbf7;
+  --color-brand-50: #edf7f0;
+  --color-brand-100: #d9eddf;
+  --color-brand-200: #b5dec2;
+  --color-brand-300: #87c99e;
+  --color-brand-400: #54aa75;
+  --color-brand-500: #1f7a45;
+  --color-brand-600: #19683a;
+  --color-brand-700: #175531;
+  --color-brand-800: #164529;
+  --color-brand-900: #143a24;
+  --color-brand-950: #0d2819;
 
   --color-blue-light-25: #f5fbff;
   --color-blue-light-50: #f0f9ff;
@@ -194,6 +198,13 @@
   [role='button']:not(:disabled) {
     cursor: pointer;
   }
+  a,
+  button,
+  input,
+  select,
+  textarea {
+    touch-action: manipulation;
+  }
   body {
     @apply relative font-normal font-outfit z-1 bg-gray-50 dark:bg-gray-900;
   }
@@ -201,6 +212,95 @@
 
 @utility menu-item {
   @apply relative flex items-center w-full gap-3 px-3 py-2 font-medium rounded-lg text-theme-sm;
+}
+
+@utility button-base {
+  @apply inline-flex min-h-11 items-center justify-center gap-2 rounded-lg font-medium transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 focus-visible:ring-offset-2 dark:focus-visible:ring-offset-gray-900 motion-reduce:transition-none;
+}
+
+@utility button-primary {
+  @apply bg-brand-500 text-white shadow-theme-xs hover:bg-brand-600 disabled:bg-brand-300;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html,
+  *,
+  *::before,
+  *::after {
+    scroll-behavior: auto !important;
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+
+.animate-energy-enter {
+  animation: energy-enter 500ms both;
+}
+
+.animate-energy-enter:nth-child(2) {
+  animation-delay: 70ms;
+}
+
+.animate-energy-enter:nth-child(3) {
+  animation-delay: 140ms;
+}
+
+.animate-energy-enter:nth-child(4) {
+  animation-delay: 210ms;
+}
+
+.hero-energy-grid {
+  background-image:
+    linear-gradient(to right, color-mix(in srgb, var(--color-brand-500) 8%, transparent) 1px, transparent 1px),
+    linear-gradient(to bottom, color-mix(in srgb, var(--color-brand-500) 8%, transparent) 1px, transparent 1px);
+  background-size: 56px 56px;
+  mask-image: linear-gradient(to bottom, black, transparent 90%);
+}
+
+.dark .hero-energy-grid {
+  background-image:
+    linear-gradient(to right, rgb(255 255 255 / 5%) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(255 255 255 / 5%) 1px, transparent 1px);
+}
+
+.hero-title-accent {
+  background-image: linear-gradient(100deg, var(--color-brand-300), var(--color-warning-300) 70%, var(--color-warning-200));
+  background-clip: text;
+  color: transparent;
+}
+
+.hero-energy-orbit {
+  transform: rotate(-12deg) scaleX(0.72);
+}
+
+.hero-energy-orbit-delayed {
+  transform: rotate(22deg) scaleX(0.76);
+}
+
+.hero-energy-route {
+  stroke: var(--color-brand-300);
+  stroke-dasharray: 3 11;
+  stroke-linecap: round;
+  stroke-width: 2;
+  opacity: 0.8;
+}
+
+@keyframes energy-enter {
+  from {
+    opacity: 0;
+    transform: translateY(10px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-energy-enter {
+    animation: none !important;
+  }
 }
 
 @utility menu-item-active {
@@ -1317,4 +1417,127 @@ pre code,
   direction: ltr !important;
   text-align: left !important;
   unicode-bidi: isolate;
+}
+
+.front-sidebar-panel {
+  display: none;
+}
+
+.front-sidebar-link {
+  display: flex;
+  width: 100%;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.75rem;
+  border-radius: 0.75rem;
+  padding-inline: 0.75rem;
+  color: var(--color-gray-600);
+  font-size: 0.8125rem;
+  font-weight: 600;
+  transition: color 150ms ease, background-color 150ms ease;
+}
+
+.front-sidebar-link:hover {
+  background: var(--color-gray-100);
+  color: var(--color-gray-950);
+}
+
+.front-sidebar-link:focus-visible {
+  outline: 2px solid var(--color-brand-500);
+  outline-offset: 2px;
+}
+
+.front-sidebar-link.is-active {
+  background: var(--color-brand-50);
+  color: var(--color-brand-800);
+}
+
+.front-sidebar-divider {
+  height: 1px;
+  margin-block: 0.75rem;
+  background: var(--color-gray-200);
+}
+
+html.dark .front-sidebar-link {
+  color: var(--color-gray-300);
+}
+
+html.dark .front-sidebar-link:hover {
+  background: var(--color-gray-800);
+  color: var(--color-white);
+}
+
+html.dark .front-sidebar-link.is-active {
+  background: color-mix(in srgb, var(--color-brand-500) 20%, transparent);
+  color: var(--color-brand-200);
+}
+
+html.dark .front-sidebar-divider {
+  background: var(--color-gray-800);
+}
+
+html.nav-sidebar .front-main-navigation,
+html.nav-sidebar .workspace-navigation-shell {
+  display: none;
+}
+
+html.nav-sidebar .front-sidebar-panel {
+  position: fixed;
+  z-index: 100000;
+  inset-block-start: calc(4.5rem + 0.75rem);
+  inset-block-end: 0.75rem;
+  inset-inline-start: 0.75rem;
+  display: flex;
+  flex-direction: column;
+  width: min(19rem, calc(100vw - 1.5rem));
+  overflow-y: auto;
+  border: 1px solid var(--color-gray-200);
+  border-radius: 1rem;
+  border-inline-end: 1px solid var(--color-gray-200);
+  background: var(--color-white);
+  box-shadow: var(--shadow-theme-lg);
+}
+
+html.nav-sidebar #front-sidebar nav {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  flex: 1;
+  gap: 0.25rem;
+  padding: 0.75rem;
+}
+
+html.dark.nav-sidebar .front-sidebar-panel {
+  border-inline-end-color: var(--color-gray-800);
+  background: var(--color-gray-900);
+}
+
+html.nav-sidebar #front-navigation-toggle-mobile {
+  display: none;
+}
+
+@media (min-width: 1280px) {
+  html.nav-sidebar .front-content-shell {
+    width: calc(100% - 20rem);
+    margin-inline-start: 20rem;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  html:focus-within {
+    scroll-behavior: auto;
+  }
+}
+
+html {
+  scroll-padding-top: 6rem;
+}
+
+button,
+a,
+input,
+select,
+textarea {
+  touch-action: manipulation;
 }

@@ -3,10 +3,11 @@
 namespace App\Models;
 
 // use Illuminate\Contracts\Auth\MustVerifyEmail;
+use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
@@ -25,7 +26,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'phone_number',
         'address',
         'role',
+        'role_setup_completed',
         'profile_photo_path',
+        'google_id',
+        'facebook_id',
     ];
 
     /**
@@ -49,6 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail
             'email_verified_at' => 'datetime',
             'password' => 'hashed',
             'role' => \App\Enums\UserRole::class,
+            'role_setup_completed' => 'boolean',
         ];
     }
 
@@ -66,20 +71,30 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function isUser(): bool
     {
-        return $this->role === \App\Enums\UserRole::USER;
+        return $this->isBuyer();
     }
 
-    public function equipment()
+    public function isOwner(): bool
+    {
+        return $this->role === \App\Enums\UserRole::OWNER;
+    }
+
+    public function isBuyer(): bool
+    {
+        return in_array($this->role, [\App\Enums\UserRole::BUYER, \App\Enums\UserRole::USER], true);
+    }
+
+    public function equipment(): HasMany
     {
         return $this->hasMany(\App\Models\Equipment::class, 'owner_id');
     }
 
-    public function rentals()
+    public function rentals(): HasMany
     {
         return $this->hasMany(\App\Models\Rental::class);
     }
 
-    public function reservations()
+    public function reservations(): HasMany
     {
         return $this->hasMany(\App\Models\Reservation::class);
     }

@@ -5,8 +5,10 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="theme-color" content="#ffffff">
+    <link rel="icon" type="image/png" href="{{ asset('images/brand/solarshare-icon.png') }}">
 
-    <title>@hasSection('title')@yield('title')@else{{ $title ?? 'Page' }}@endif | SolarShare Admin</title>
+    <title>@hasSection('title'){{ __($__env->yieldContent('title')) }}@else{{ __($title ?? 'Page') }}@endif | SolarShare Admin</title>
 
     <style>
         [x-cloak] {
@@ -60,11 +62,19 @@
 </head>
 
 <body class="antialiased">
+    <a href="#main-content" class="sr-only focus:not-sr-only focus:fixed focus:start-4 focus:top-4 focus:z-999999 focus:rounded-lg focus:bg-white focus:px-4 focus:py-3 focus:text-sm focus:font-medium focus:text-brand-700 focus:shadow-theme-lg dark:focus:bg-gray-900 dark:focus:text-brand-300">
+        {{ __('Skip to main content') }}
+    </a>
+    <div class="fixed end-4 top-4 z-999999"><x-locale-switcher /></div>
     @if (View::hasSection('full-bleed'))
-        @yield('content')
+        <div id="main-content" tabindex="-1" class="outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-500">
+            @yield('content')
+        </div>
     @else
         <div class="flex min-h-screen items-center justify-center p-4">
-            @yield('content')
+            <div id="main-content" tabindex="-1" class="outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand-500">
+                @yield('content')
+            </div>
         </div>
     @endif
 </body>

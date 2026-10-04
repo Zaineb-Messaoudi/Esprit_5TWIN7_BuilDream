@@ -13,9 +13,17 @@ return Application::configure(basePath: dirname(__DIR__))
         health: '/up',
     )
     ->withMiddleware(function (Middleware $middleware): void {
-        $middleware->trustProxies(at: '*');
+        $trustedProxies = array_values(array_filter(array_map(
+            'trim',
+            explode(',', (string) env('TRUSTED_PROXIES', ''))
+        )));
+        $middleware->trustProxies(at: $trustedProxies ?: null);
+        $middleware->redirectUsersTo(fn () => route('dashboard'));
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
+        ]);
+        $middleware->alias([
+            'role.selected' => \App\Http\Middleware\EnsureRoleSelected::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
