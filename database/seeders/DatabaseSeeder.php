@@ -17,17 +17,23 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Solar Admin',
             'email' => 'admin@solarshare.com',
-            'password' => bcrypt('password'),
+            'password' => 'password',
+            'phone_number' => '+216 70 000 001',
+            'address' => 'Tunis, Tunisia',
             'role' => UserRole::ADMIN,
+            'role_setup_completed' => true,
             'email_verified_at' => now(),
         ]);
 
         // Persona 2: Buyer
         User::factory()->create([
-            'name' => 'John Doe',
+            'name' => 'Leila Buyer',
             'email' => 'user@solarshare.com',
-            'password' => bcrypt('password'),
+            'password' => 'password',
+            'phone_number' => '+216 70 000 002',
+            'address' => 'Sousse, Tunisia',
             'role' => UserRole::BUYER,
+            'role_setup_completed' => true,
             'email_verified_at' => now(),
         ]);
 
@@ -35,12 +41,25 @@ class DatabaseSeeder extends Seeder
         User::factory()->create([
             'name' => 'Sami Owner',
             'email' => 'owner@solarshare.com',
-            'password' => bcrypt('password'),
+            'password' => 'password',
+            'phone_number' => '+216 70 000 003',
+            'address' => 'Sfax, Tunisia',
             'role' => UserRole::OWNER,
+            'role_setup_completed' => true,
             'email_verified_at' => now(),
         ]);
 
-        // Generic users for testing
+        // Persona 4: New account that still needs to select a buyer or owner role.
+        User::factory()->create([
+            'name' => 'New SolarShare Member',
+            'email' => 'new-member@solarshare.com',
+            'password' => 'password',
+            'role' => UserRole::USER,
+            'role_setup_completed' => false,
+            'email_verified_at' => now(),
+        ]);
+
+        // Additional buyer accounts; elevated roles are assigned explicitly above.
         User::factory(10)->create();
     }
 }
