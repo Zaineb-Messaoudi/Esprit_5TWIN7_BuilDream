@@ -14,9 +14,8 @@ class DatabaseSeeder extends Seeder
     public function run(): void
     {
         // Persona 1: Super Admin
-        User::factory()->create([
+        User::firstOrCreate(['email' => 'admin@solarshare.com'], [
             'name' => 'Solar Admin',
-            'email' => 'admin@solarshare.com',
             'password' => 'password',
             'phone_number' => '+216 70 000 001',
             'address' => 'Tunis, Tunisia',
@@ -26,9 +25,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Persona 2: Buyer
-        User::factory()->create([
+        User::firstOrCreate(['email' => 'user@solarshare.com'], [
             'name' => 'Leila Buyer',
-            'email' => 'user@solarshare.com',
             'password' => 'password',
             'phone_number' => '+216 70 000 002',
             'address' => 'Sousse, Tunisia',
@@ -38,9 +36,8 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Persona 3: Equipment Owner
-        User::factory()->create([
+        User::firstOrCreate(['email' => 'owner@solarshare.com'], [
             'name' => 'Sami Owner',
-            'email' => 'owner@solarshare.com',
             'password' => 'password',
             'phone_number' => '+216 70 000 003',
             'address' => 'Sfax, Tunisia',
@@ -50,16 +47,25 @@ class DatabaseSeeder extends Seeder
         ]);
 
         // Persona 4: New account that still needs to select a buyer or owner role.
-        User::factory()->create([
+        User::firstOrCreate(['email' => 'new-member@solarshare.com'], [
             'name' => 'New SolarShare Member',
-            'email' => 'new-member@solarshare.com',
             'password' => 'password',
             'role' => UserRole::USER,
             'role_setup_completed' => false,
             'email_verified_at' => now(),
         ]);
 
-        // Additional buyer accounts; elevated roles are assigned explicitly above.
-        User::factory(10)->create();
+        // Stable additional buyer accounts avoid growing the database on each seed.
+        foreach (range(1, 10) as $number) {
+            $suffix = str_pad((string) $number, 2, '0', STR_PAD_LEFT);
+
+            User::firstOrCreate(["email" => "buyer{$suffix}@solarshare.com"], [
+                'name' => "SolarShare Buyer {$suffix}",
+                'password' => 'password',
+                'role' => UserRole::BUYER,
+                'role_setup_completed' => true,
+                'email_verified_at' => now(),
+            ]);
+        }
     }
 }
