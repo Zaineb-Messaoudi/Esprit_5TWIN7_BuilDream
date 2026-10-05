@@ -92,6 +92,10 @@
 
         {{-- Extension requests (relation 1-N: $rental->extensions, a list that can be empty) --}}
         <x-common.component-card :title="__('Extension requests')">
+            {{-- Opens the request form with this rental already selected (?rental_id=...) --}}
+            <div class="mb-4">
+                <a href="{{ route('admin.rental-extensions.create', ['rental_id' => $rental->id]) }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">Request extension</a>
+            </div>
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[500px] border-collapse text-start text-sm">
                     <thead>
@@ -101,6 +105,7 @@
                             <th class="p-3 border-b dark:border-gray-700">New end date</th>
                             <th class="p-3 border-b dark:border-gray-700">Extra amount</th>
                             <th class="p-3 border-b dark:border-gray-700">Status</th>
+                            <th class="p-3 border-b dark:border-gray-700 text-end">Details</th>
                         </tr>
                     </thead>
                     <tbody class="text-gray-800 dark:text-white">
@@ -113,10 +118,13 @@
                                 <td class="p-3">
                                     <x-ui.badge :color="$extension->status->color()">{{ $extension->status->label() }}</x-ui.badge>
                                 </td>
+                                <td class="p-3 text-end">
+                                    <a href="{{ route('admin.rental-extensions.show', $extension) }}" class="text-sm text-brand-600 underline-offset-4 hover:underline dark:text-brand-400">View</a>
+                                </td>
                             </tr>
                         @empty
                             <tr>
-                                <td colspan="5" class="p-6 text-center text-gray-500 dark:text-gray-400">No extension requests.</td>
+                                <td colspan="6" class="p-6 text-center text-gray-500 dark:text-gray-400">No extension requests.</td>
                             </tr>
                         @endforelse
                     </tbody>
