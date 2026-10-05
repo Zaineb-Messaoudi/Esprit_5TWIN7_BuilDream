@@ -87,12 +87,14 @@ class MenuHelper
                 'path' => route('admin.users.index'),
             ]]);
             
-            // Rentals link (Student 3 module), visible to admins only.
-            // Added at the end of the "Menu" group.
-            $items[] = [
-                'icon' => 'logistics',
-                'name' => 'Rentals',
-                'path' => route('admin.rentals.index'),
+            // Rentals module (Student 3), visible to admins only
+        $items[] = [
+            'icon' => 'logistics',
+            'name' => 'Rentals',
+            'subItems' => [
+                ['name' => 'Rentals', 'path' => route('admin.rentals.index'), 'activePrefix' => '/admin/rentals', 'pro' => false],
+                ['name' => 'Contracts', 'path' => route('admin.rental-contracts.index'), 'activePrefix' => '/admin/rental-contracts', 'pro' => false],
+                ],
             ];
         }
 

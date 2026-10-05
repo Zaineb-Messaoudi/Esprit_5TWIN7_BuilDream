@@ -81,8 +81,12 @@
                         <dd class="mt-1 font-medium text-gray-800 dark:text-white">{{ $rental->contract->signed_at?->format('d/m/Y H:i') ?? 'Not signed yet' }}</dd>
                     </div>
                 </dl>
+                {{-- Link to the full contract page --}}
+                <a href="{{ route('admin.rental-contracts.show', $rental->contract) }}" class="mt-4 inline-block text-sm font-medium text-brand-600 underline-offset-4 hover:underline dark:text-brand-400">View contract</a>
             @else
                 <p class="text-sm text-gray-500 dark:text-gray-400">No contract for this rental yet.</p>
+                {{-- Opens the contract form with this rental already selected (?rental_id=...) --}}
+                <a href="{{ route('admin.rental-contracts.create', ['rental_id' => $rental->id]) }}" class="mt-4 inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">Create contract</a>
             @endif
         </x-common.component-card>
 

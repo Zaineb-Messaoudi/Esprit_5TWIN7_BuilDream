@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\RentalController;
+use App\Http\Controllers\Admin\RentalContractController;
 use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\Auth\RoleSetupController;
 use App\Http\Controllers\AuthDemoController;
@@ -131,6 +132,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', AdminUserController::class);
         Route::resource('rentals', RentalController::class);
+        Route::resource('rental-contracts', RentalContractController::class);
     });
 
 
