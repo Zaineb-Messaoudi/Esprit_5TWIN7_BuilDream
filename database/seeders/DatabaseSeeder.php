@@ -67,5 +67,8 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]);
         }
+
+        // Rental module (Student 3): rentals, contracts and extension requests
+        $this->call(RentalSeeder::class);
     }
 }
