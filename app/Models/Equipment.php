@@ -6,6 +6,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * A renewable-energy item published in the SolarShare catalogue.
@@ -16,18 +17,18 @@ use Illuminate\Database\Eloquent\Relations\HasOne;
  */
 class Equipment extends Model
 {
-    use HasFactory;
+    use HasFactory, SoftDeletes;
 
     protected $table = 'equipment';
 
     protected $fillable = [
         'category_id', 'owner_id', 'name', 'description', 'image_url', 'brand', 'model',
-        'price_per_day', 'condition', 'location', 'status',
+        'price_per_day', 'condition', 'location', 'status', 'approval_status', 'reviewed_at',
     ];
 
     protected function casts(): array
     {
-        return ['price_per_day' => 'decimal:2'];
+        return ['price_per_day' => 'decimal:2', 'reviewed_at' => 'datetime'];
     }
 
     /** The catalogue category for this listing. */

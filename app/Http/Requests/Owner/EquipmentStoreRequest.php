@@ -4,10 +4,12 @@ namespace App\Http\Requests\Owner;
 
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
+use App\Http\Requests\Concerns\ValidatesEnergyProfile;
 
 /** Validates equipment published from the Owner Front Office. */
 class EquipmentStoreRequest extends FormRequest
 {
+    use ValidatesEnergyProfile;
     public function authorize(): bool
     {
         // Route middleware also checks the role; this protects direct request use.
@@ -21,6 +23,7 @@ class EquipmentStoreRequest extends FormRequest
             'name' => ['required', 'string', 'max:150'],
             'description' => ['nullable', 'string', 'max:3000'],
             'image_url' => ['nullable', 'url:http,https', 'max:2048'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand' => ['nullable', 'string', 'max:100'],
             'model' => ['nullable', 'string', 'max:100'],
             'price_per_day' => ['required', 'numeric', 'min:0', 'max:99999999.99'],

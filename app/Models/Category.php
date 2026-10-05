@@ -16,7 +16,7 @@ class Category extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['name', 'description', 'status'];
+    protected $fillable = ['name', 'description', 'image_url', 'status'];
 
     /** Equipment listings assigned to this category. */
     public function equipment(): HasMany
