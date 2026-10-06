@@ -1,0 +1,52 @@
+<?php
+
+namespace App\Http\Requests;
+
+use Illuminate\Foundation\Http\FormRequest;
+use App\Models\Reservation;
+
+class ReservationRequest extends FormRequest
+{
+    /**
+     * Determine if the user is authorized to make this request.
+     */
+    public function authorize(): bool
+    {
+        return $this->user()?->isAdmin() || $this->user()?->isBuyer() || $this->user()?->isOwner();
+    }
+
+    /**
+     * Get the validation rules that apply to the request.
+     *
+     * @return array<string, \Illuminate\Contracts\Validation\ValidationRule|array<mixed>|string>
+     */
+    public function rules(): array
+    {
+        return [
+            'equipment_id' => ['required', 'exists:equipment,id'],
+            'user_id' => ['sometimes', 'exists:users,id'],
+            'start_date' => ['required', 'date', 'after_or_equal:today'],
+            'end_date' => ['required', 'date', 'after_or_equal:start_date'],
+            'total_amount' => ['required', 'numeric', 'min:0'],
+            'status' => ['sometimes', 'in:pending,confirmed,cancelled'],
+        ];
+    }
+
+    public function withValidator($validator): void
+    {
+        $validator->after(function ($validator): void {
+            $reservationId = $this->route('reservation')?->id;
+            $overlap = Reservation::query()
+                ->where('equipment_id', $this->input('equipment_id'))
+                ->where('status', '!=', 'cancelled')
+                ->when($reservationId, fn ($query) => $query->where('id', '!=', $reservationId))
+                ->where('start_date', '<=', $this->input('end_date'))
+                ->where('end_date', '>=', $this->input('start_date'))
+                ->exists();
+
+            if ($overlap) {
+                $validator->errors()->add('start_date', __('This equipment is already reserved for the selected dates.'));
+            }
+        });
+    }
+}
