@@ -74,6 +74,7 @@ class PaymentController extends Controller
     {
         $payment = Payment::findOrFail($id);
         abort_unless(request()->user()->isAdmin() || $payment->reservation->user_id === request()->user()->id, 403);
+        abort_unless(request()->user()->isAdmin(), 403);
         $payment->update($request->validate(['status' => ['required', 'in:pending,paid,failed']]));
         return redirect()->route('rental.payments.index')->with('success', __('Payment updated successfully.'));
     }
