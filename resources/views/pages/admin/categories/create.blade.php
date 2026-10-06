@@ -1,0 +1,4 @@
+@extends('layouts.app')
+@section('content')
+<div class="mx-auto max-w-3xl space-y-6"><x-common.page-breadcrumb><a href="{{ route('admin.categories.index') }}" class="text-gray-500 hover:text-brand-600">{{ __('Categories') }}</a> / {{ __('Create category') }}</x-common.page-breadcrumb><x-common.component-card :title="__('Create category')"><form method="POST" enctype="multipart/form-data" action="{{ route('admin.categories.store') }}" class="space-y-5">@csrf @include('pages.admin.categories._form')<div class="flex justify-end gap-3"><a href="{{ route('admin.categories.index') }}" class="rounded-lg border px-4 py-2 text-sm">{{ __('Cancel') }}</a><button class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white" type="submit">{{ __('Create category') }}</button></div></form></x-common.component-card></div>
+@endsection

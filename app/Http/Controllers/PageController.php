@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Support\FrontDemo;
+use App\Models\Rental;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 
@@ -17,8 +18,19 @@ class PageController extends Controller
 
         if (in_array($slug, ['reserve', 'booking-summary', 'payment', 'confirmed', 'invoice'], true)) {
             $equipmentId = $request->integer('equipment', 1);
-            $equipment = FrontDemo::equipment()->firstWhere('id', $equipmentId);
+            $equipment = FrontDemo::findEquipment($equipmentId);
             abort_unless($equipment, 404);
+
+            $blockedIntervals = Rental::query()
+                ->where('equipment_id', $equipmentId)
+                ->whereIn('status', ['pending', 'active'])
+                ->get(['start_date', 'end_date'])
+                ->map(fn (Rental $rental) => [
+                    'start' => $rental->start_date->toDateString(),
+                    'end' => $rental->end_date->toDateString(),
+                ])
+                ->values()
+                ->all();
 
             return view('pages.front.booking-flow', [
                 'title' => __($page['title']),
@@ -26,6 +38,7 @@ class PageController extends Controller
                 'item' => $equipment,
                 'startDate' => $request->query('start', ''),
                 'endDate' => $request->query('end', ''),
+                'blockedIntervals' => $blockedIntervals,
             ]);
         }
 

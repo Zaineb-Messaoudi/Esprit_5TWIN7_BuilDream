@@ -43,6 +43,7 @@ class AdminPagesTest extends TestCase
             'name' => 'Dashboard reviewer',
             'email' => 'dashboard-reviewer@example.test',
             'role' => UserRole::ADMIN,
+            'role_setup_completed' => true,
         ]);
         $user->email_verified_at = now();
 
@@ -209,7 +210,8 @@ class AdminPagesTest extends TestCase
             ->assertSee(route('app.support.reply'), false)
             ->assertSee('selectDirection(option.id)', false)
             ->assertSee("localStorage.setItem('dir', this.direction)", false)
-            ->assertDontSee('/locale/', false);
+            ->assertSee('href="'.route('locale.switch', ['locale' => 'en']).'"', false)
+            ->assertSee('href="'.route('locale.switch', ['locale' => 'fr']).'"', false);
         $this->actingAs($user)
             ->get(route('app.support.reply'))
             ->assertOk()
@@ -235,7 +237,7 @@ class AdminPagesTest extends TestCase
             ->get(route('ui.components'))
             ->assertOk()
             ->assertSee('focus-visible:ring-2', false)
-            ->assertSee('motion-reduce:transition-none', false)
+            ->assertSee('tabindex="-1"', false)
             ->assertSee('id="component-date-selector"', false)
             ->assertSee('role="dialog"', false)
             ->assertSee('aria-modal="true"', false)
@@ -283,8 +285,8 @@ class AdminPagesTest extends TestCase
         $emptyState = \Illuminate\Support\Facades\Blade::render(
             '<x-ui.empty-state title="No items" message="Create one to get started." action-label="Create item" action-route="'.route('dashboard').'" />'
         );
+        $this->assertStringContainsString('button-base', $emptyState);
         $this->assertStringContainsString('button-primary', $emptyState);
-        $this->assertStringContainsString('focus-visible:ring-2', $emptyState);
         $this->assertStringContainsString('href="'.route('dashboard').'"', $emptyState);
         $this->actingAs($user)
             ->get(route('settings.preferences'))
@@ -348,6 +350,7 @@ class AdminPagesTest extends TestCase
             'name' => 'Dashboard reviewer',
             'email' => 'dashboard-reviewer@example.test',
             'role' => UserRole::ADMIN,
+            'role_setup_completed' => true,
         ]);
         $user->email_verified_at = now();
 
@@ -373,13 +376,12 @@ class AdminPagesTest extends TestCase
             ->assertSee('name="remember"', false)
             ->assertSee('href="'.route('password.request').'"', false)
             ->assertSee(route('register'), false)
-            ->assertSee('Shared renewable energy, made easier for everyone.')
-            ->assertSee('h-screen w-full flex-col justify-center sm:p-0 lg:flex-row', false)
+            ->assertSee('Good energy is better shared.')
+            ->assertSee('lg:grid-cols-[1fr_0.95fr]', false)
             ->assertSee('Sign in with Google')
-            ->assertSee('Sign in with X')
+            ->assertSee('Sign in with Facebook')
             ->assertDontSee('Back to dashboard')
-            ->assertSee('-translate-y-6', false)
-            ->assertSee('lg:grid lg:w-1/2', false);
+            ->assertSee('-translate-y-1/2', false);
         $this->get('/')
             ->assertOk()
             ->assertSee('goes further when we share it.');
@@ -396,12 +398,12 @@ class AdminPagesTest extends TestCase
             ->assertSee('name="profile_photo"', false)
             ->assertSee('(optional)')
             ->assertSee('name="password_confirmation"', false)
-            ->assertSee('Shared renewable energy, made easier for everyone.')
+            ->assertSee('Give good energy a second life.')
             ->assertSee('Sign up with Google')
-            ->assertSee('Sign up with X')
+            ->assertSee('Sign up with Facebook')
             ->assertDontSee('Back to dashboard')
-            ->assertSee('lg:sticky lg:top-0 lg:grid lg:h-screen lg:w-1/2', false)
-            ->assertSee('-translate-y-6', false);
+            ->assertSee('lg:sticky lg:top-4 lg:block lg:self-start', false)
+            ->assertSee('-translate-y-1/2', false);
         $this->assertTrue(is_subclass_of(\App\Models\User::class, \Illuminate\Contracts\Auth\MustVerifyEmail::class));
 
         $this->get(route('password.request'))

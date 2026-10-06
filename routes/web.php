@@ -1,6 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
+use App\Http\Controllers\Admin\RentalController;
+use App\Http\Controllers\Admin\RentalContractController;
+use App\Http\Controllers\Admin\RentalExtensionController;
 use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\Auth\RoleSetupController;
 use App\Http\Controllers\AuthDemoController;
@@ -12,13 +17,14 @@ use App\Http\Controllers\FrontController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\OwnerEquipmentController;
 use App\Http\Controllers\SpecialPageController;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\InvoiceController;
 
-// Front Office (public)
+// Front Office public catalogue. Booking and payment routes belong to Student 4.
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
     ->whereIn('locale', array_keys(LocaleController::SUPPORTED_LOCALES))
     ->name('locale.switch');
@@ -28,12 +34,32 @@ Route::get('/equipment/{id}', [FrontController::class, 'show'])
     ->whereNumber('id')
     ->name('front.equipment.show');
 
+Route::middleware(['auth', 'verified', 'role.selected', 'can:owner-only'])->group(function () {
+    // Owner listings are live CRUD pages, unlike the remaining preview account pages.
+    Route::get('/my/equipment', [OwnerEquipmentController::class, 'index'])->name('front.my-equipment');
+    Route::get('/my/equipment/new', [OwnerEquipmentController::class, 'create'])->name('front.my-publish');
+    Route::post('/my/equipment', [OwnerEquipmentController::class, 'store'])->name('front.my-equipment.store');
+    Route::get('/my/equipment/{equipment}', [OwnerEquipmentController::class, 'show'])->defaults('equipment', 1)->name('front.my-equipment-detail');
+    Route::get('/my/equipment/{equipment}/edit', [OwnerEquipmentController::class, 'edit'])->defaults('equipment', 1)->name('front.my-equipment-edit');
+    Route::put('/my/equipment/{equipment}', [OwnerEquipmentController::class, 'update'])->name('front.my-equipment.update');
+    Route::delete('/my/equipment/{equipment}', [OwnerEquipmentController::class, 'destroy'])->name('front.my-equipment.destroy');
+});
+
 foreach (config('front.pages') as $slug => $page) {
+    if (in_array($slug, ['my-equipment', 'my-publish', 'my-equipment-detail', 'my-equipment-edit'], true)) {
+        continue;
+    }
     $route = Route::get($page['path'], PageController::class)
         ->defaults('slug', $slug)
         ->name('front.'.$slug);
 
     if (($page['shell'] ?? null) === 'account') {
+        $route->middleware(['auth', 'verified', 'role.selected']);
+    }
+
+    // Guests and users who have not selected a role can browse the catalogue,
+    // but booking/payment preview pages require an authenticated account.
+    if (in_array($slug, ['reserve', 'booking-summary', 'payment', 'confirmed', 'invoice'], true)) {
         $route->middleware(['auth', 'verified', 'role.selected']);
     }
 }
@@ -131,6 +157,15 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     // Admin User Management
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', AdminUserController::class);
+        Route::resource('categories', AdminCategoryController::class)->except(['show']);
+        Route::resource('equipment', AdminEquipmentController::class);
+        Route::resource('rentals', RentalController::class);
+        Route::resource('rental-contracts', RentalContractController::class);
+        Route::resource('rental-extensions', RentalExtensionController::class);
+        Route::post('rental-extensions/{rental_extension}/approve', [RentalExtensionController::class, 'approve'])
+            ->name('rental-extensions.approve');
+        Route::post('rental-extensions/{rental_extension}/reject', [RentalExtensionController::class, 'reject'])
+            ->name('rental-extensions.reject');
     });
 
     // Dashboard Routes
