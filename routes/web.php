@@ -14,6 +14,9 @@ use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SpecialPageController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\InvoiceController;
 
 // Front Office (public)
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
@@ -319,6 +322,16 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/vector-maps', function () {
         return view('pages.applications.vector-maps', ['title' => __('Vector Maps')]);
     })->name('maps.vector');
+});
+
+// Reservations, payments and invoices are available to authenticated buyers and owners.
+// Controllers scope every record to the signed-in user; administrators can see all records.
+Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    Route::prefix('rental')->name('rental.')->group(function () {
+        Route::resource('reservations', ReservationController::class);
+        Route::resource('payments', PaymentController::class);
+        Route::resource('invoices', InvoiceController::class);
+    });
 });
 
 require __DIR__.'/auth.php';

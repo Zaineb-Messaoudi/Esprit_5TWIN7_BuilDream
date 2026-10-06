@@ -55,6 +55,7 @@ class DatabaseSeeder extends Seeder
             'email_verified_at' => now(),
         ]);
 
+
         // Stable additional buyer accounts avoid growing the database on each seed.
         foreach (range(1, 10) as $number) {
             $suffix = str_pad((string) $number, 2, '0', STR_PAD_LEFT);
@@ -67,5 +68,9 @@ class DatabaseSeeder extends Seeder
                 'email_verified_at' => now(),
             ]);
         }
+        // Generic users for testing
+        User::factory(10)->create();
+        $this->call(ReservationSeeder::class);
+
     }
 }
