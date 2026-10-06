@@ -42,6 +42,7 @@ class PaymentController extends Controller
         $reservation = Reservation::findOrFail($data['reservation_id']);
         abort_unless(request()->user()->isAdmin() || $reservation->user_id === request()->user()->id, 403);
         $data['transaction_reference'] = 'PAY-'.strtoupper(Str::random(10));
+        $data['status'] = 'pending';
         $payment = Payment::create($data);
         if ($payment->status === 'paid') $reservation->update(['status' => 'confirmed']);
         return redirect()->route('rental.payments.index')->with('success', __('Payment recorded successfully.'));
