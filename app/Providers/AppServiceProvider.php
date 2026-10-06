@@ -12,7 +12,11 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        //
+        // Keep the technical module usable with a local fixture until the
+        // teammate's Equipment model is merged. A real model always wins.
+        if (! class_exists(\App\Models\Equipment::class)) {
+            class_alias(\App\Support\TechnicalPreviewEquipment::class, \App\Models\Equipment::class);
+        }
     }
 
     /**
