@@ -35,10 +35,8 @@ class RentalController extends Controller
         // with('user') loads the renters in ONE extra query (avoids the N+1 problem)
         $query = Rental::query()->with('user');
 
-        // Student 1's Equipment model may not be merged yet: only load it if it exists
-        if (class_exists(\App\Models\Equipment::class)) {
-            $query->with('equipment');
-        }
+        // Load the catalogue listing so rental rows show the actual equipment name.
+        $query->with('equipment.category');
 
         // Filter by status (dropdown)
         if ($request->filled('status')) {
@@ -50,7 +48,11 @@ class RentalController extends Controller
             $search = $request->search;
             $query->where(function ($q) use ($search) {
                 $q->where('reference', 'like', '%' . $search . '%')
-                  ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%' . $search . '%'));
+                  ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%' . $search . '%'))
+                  ->orWhereHas('equipment', fn ($equipment) => $equipment
+                      ->where('name', 'like', '%' . $search . '%')
+                      ->orWhere('brand', 'like', '%' . $search . '%')
+                      ->orWhere('model', 'like', '%' . $search . '%'));
             });
         }
 
@@ -94,7 +96,7 @@ class RentalController extends Controller
     public function show(Rental $rental): View
     {
         // Route model binding: Laravel already found the Rental from the {rental} id in the URL
-        $rental->load(['user', 'contract', 'extensions']);
+        $rental->load(['user', 'equipment.category', 'contract', 'extensions']);
 
         return view('pages.admin.rentals.show', [
             'rental' => $rental,
@@ -137,9 +139,11 @@ class RentalController extends Controller
     {
         return [
             'users' => User::orderBy('name')->get(['id', 'name', 'email']),
-            'equipments' => class_exists(\App\Models\Equipment::class)
-                ? \App\Models\Equipment::orderBy('name')->get(['id', 'name'])
-                : collect(),
+            'equipments' => \App\Models\Equipment::query()
+                ->with('category')
+                ->where('approval_status', 'published')
+                ->orderBy('name')
+                ->get(['id', 'category_id', 'name', 'brand', 'model', 'status']),
         ];
     }
 }

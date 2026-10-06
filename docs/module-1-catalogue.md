@@ -95,6 +95,14 @@ The seeded demo accounts are documented in `DatabaseSeeder.php`. The demo owner 
 
 ## Testing
 
+## Rental module integration
+
+The rentals table now references real catalogue equipment through a database
+foreign key. The Equipment model exposes the inverse rentals relation, while
+the Rental back office loads the equipment and category and supports searching
+by equipment name, brand, or model. Rental demo data is seeded after the
+catalogue, so every seeded rental points to an existing equipment listing.
+
 The module is covered by:
 
 - `tests/Feature/AdminCatalogTest.php`

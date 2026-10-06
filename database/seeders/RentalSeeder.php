@@ -3,6 +3,7 @@
 namespace Database\Seeders;
 
 use App\Enums\RentalStatus;
+use App\Models\Equipment;
 use App\Models\Rental;
 use App\Models\RentalContract;
 use App\Models\RentalExtension;
@@ -25,6 +26,11 @@ class RentalSeeder extends Seeder
         // Rentals need renters. DatabaseSeeder already creates users, this is just a safety net.
         if (User::count() === 0) {
             User::factory(5)->create();
+        }
+
+        // Rental records must always point to real catalogue listings.
+        if (Equipment::count() === 0) {
+            Equipment::factory()->count(3)->create();
         }
 
         // ---- 1) Rentals, grouped by status ----------------------------------

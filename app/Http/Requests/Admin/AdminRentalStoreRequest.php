@@ -4,7 +4,6 @@ namespace App\Http\Requests\Admin;
 
 use App\Enums\RentalStatus;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
 /**
@@ -27,13 +26,7 @@ class AdminRentalStoreRequest extends FormRequest
             // The renter must be an existing user
             'user_id' => ['required', 'integer', 'exists:users,id'],
 
-            // The "equipment" table belongs to Student 1. Until it is merged we only
-            // check that it is a number; afterwards we also check that it exists.
-            'equipment_id' => [
-                'required',
-                'integer',
-                Schema::hasTable('equipment') ? Rule::exists('equipment', 'id') : 'min:1',
-            ],
+            'equipment_id' => ['required', 'integer', 'exists:equipment,id'],
 
             // Optional. A reservation can become only ONE rental, hence "unique".
             // (We do not check "exists" yet: Student 4's table is not merged.)

@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -47,5 +48,11 @@ class Equipment extends Model
     public function energyProfile(): HasOne
     {
         return $this->hasOne(EnergyProfile::class);
+    }
+
+    /** Rentals created from this catalogue listing. */
+    public function rentals(): HasMany
+    {
+        return $this->hasMany(Rental::class);
     }
 }

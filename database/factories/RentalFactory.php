@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\RentalStatus;
+use App\Models\Equipment;
 use App\Models\Rental;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -130,19 +131,22 @@ class RentalFactory extends Factory
      * An existing equipment id when Student 1's Equipment model and table exist,
      * otherwise a made-up id (there is no foreign key yet, so it is accepted).
      */
-    private function randomEquipmentId(): int
+    private function randomEquipmentId(): int|Factory
     {
-        if (class_exists(\App\Models\Equipment::class)) {
-            $table = (new \App\Models\Equipment())->getTable();
+        if (Schema::hasTable('equipment')) {
+            $id = Equipment::query()
+                ->where('status', 'available')
+                ->where('approval_status', 'published')
+                ->inRandomOrder()
+                ->value('id');
 
-            if (Schema::hasTable($table)) {
-                $id = \App\Models\Equipment::query()->inRandomOrder()->value('id');
-                if ($id) {
-                    return (int) $id;
-                }
+            if ($id) {
+                return (int) $id;
             }
+
+            return Equipment::factory();
         }
 
-        return fake()->numberBetween(1, 10);
+        return Equipment::factory();
     }
 }
