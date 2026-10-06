@@ -85,6 +85,13 @@ class MenuHelper
                 'icon' => 'user-profile',
                 'name' => 'User Management',
                 'path' => route('admin.users.index'),
+            ], [
+                'icon' => 'ecommerce',
+                'name' => 'Catalog',
+                'subItems' => [
+                    ['name' => 'Categories', 'path' => route('admin.categories.index'), 'pro' => false],
+                    ['name' => 'Equipment', 'path' => route('admin.equipment.index'), 'pro' => false],
+                ],
             ]]);
         }
 

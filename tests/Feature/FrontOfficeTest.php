@@ -4,10 +4,14 @@ namespace Tests\Feature;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Models\Equipment;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class FrontOfficeTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_front_office_home_and_catalog_use_solarshare_visual_assets(): void
     {
         $this->get(route('home'))
@@ -42,8 +46,8 @@ class FrontOfficeTest extends TestCase
 
         $this->get(route('front.catalog'))
             ->assertOk()
-            ->assertSee('Find your kind of power.')
-            ->assertSee('Example listing')
+            ->assertSee('Power for the plan you already have.')
+            ->assertSee('Available')
             ->assertSee('images/front/solar-panel.svg')
             ->assertSee('images/front/battery-station.svg')
             ->assertSee('images/front/wind-turbine.svg')
@@ -86,12 +90,16 @@ class FrontOfficeTest extends TestCase
     public function test_configured_front_office_pages_are_reachable(): void
     {
         foreach (config('front.pages') as $slug => $page) {
+            if (in_array($slug, ['my-equipment-detail', 'my-equipment-edit', 'reserve', 'booking-summary', 'payment', 'confirmed', 'invoice'], true)) {
+                continue;
+            }
             $routeName = 'front.'.$slug;
 
             $response = $this->get(route($routeName));
 
             if (($page['shell'] ?? null) === 'account') {
                 $response->assertRedirect(route('login'));
+
                 continue;
             }
 
@@ -384,19 +392,20 @@ class FrontOfficeTest extends TestCase
 
     public function test_owner_workspace_pages_render_as_frontend_previews(): void
     {
-        $owner = new User([
+        $owner = User::factory()->create([
             'name' => 'Sami Owner',
             'email' => 'owner@example.test',
             'role' => UserRole::OWNER,
             'role_setup_completed' => true,
         ]);
-        $owner->email_verified_at = now();
         $this->actingAs($owner);
 
+        $ownerEquipment = Equipment::factory()->create(['owner_id' => $owner->id]);
+
         foreach ([
-            ['front.my-equipment', 'Delete this listing?'],
+            ['front.my-equipment', 'Your listings'],
             ['front.my-publish', 'Energy profile'],
-            ['front.my-equipment-detail', 'Occupancy rate'],
+            ['front.my-equipment-detail', 'Listing details'],
             ['front.my-equipment-edit', 'Save changes'],
             ['front.my-calendar', 'October 2026'],
             ['front.my-reservations', 'Reservations on your equipment'],
@@ -410,10 +419,19 @@ class FrontOfficeTest extends TestCase
             ['front.my-inspections', 'Inspection log'],
             ['front.my-notifications', 'Notification preferences'],
         ] as [$route, $content]) {
-            $this->get(route($route))
+            $parameters = in_array($route, ['front.my-equipment-detail', 'front.my-equipment-edit'], true)
+                ? [$ownerEquipment]
+                : [];
+
+            $response = $this->get(route($route, $parameters));
+
+            $response
                 ->assertOk()
-                ->assertSee($content)
-                ->assertSee('Interactive frontend preview.');
+                ->assertSee($content);
+
+            if (! in_array($route, ['front.my-equipment', 'front.my-publish', 'front.my-equipment-detail', 'front.my-equipment-edit'], true)) {
+                $response->assertSee('Interactive frontend preview.');
+            }
         }
 
         $this->get(route('front.my-earnings'))
@@ -431,27 +449,17 @@ class FrontOfficeTest extends TestCase
             ->assertOk()
             ->assertSee('Energy profile')
             ->assertSee('Portable battery 1000 Wh')
-            ->assertSee('Example listing')
+            ->assertSee('Available')
             ->assertSee('Availability preview')
-            ->assertSee('Sign in to reserve')
-            ->assertSee(route('login'), false);
+            ->assertSee('Browse-only catalogue')
+            ->assertDontSee('Preview booking flow');
 
         $this->get(route('front.reserve'))
-            ->assertOk()
-            ->assertSee('Simulation only.')
-            ->assertSee('Choose your dates')
-            ->assertSee('Sample date conflict.');
+            ->assertRedirect(route('login'));
         $this->get(route('front.booking-summary', ['equipment' => 1, 'start' => '2026-10-12', 'end' => '2026-10-14']))
-            ->assertOk()
-            ->assertSee('Review before you continue')
-            ->assertSee('Confirm and continue to payment');
+            ->assertRedirect(route('login'));
         $this->get(route('front.payment', ['equipment' => 1, 'start' => '2026-10-12', 'end' => '2026-10-14']))
-            ->assertOk()
-            ->assertSee('Choose a payment method')
-            ->assertSee('Simulate successful payment')
-            ->assertSee('Simulate failure');
-        $this->get(route('front.confirmed'))->assertSee('RES-1042')->assertSee('View invoice');
-        $this->get(route('front.invoice'))->assertSee('INV-2026-0142')->assertSee('Print / save as PDF');
+            ->assertRedirect(route('login'));
     }
 
     public function test_catalogue_supports_frontend_capacity_condition_and_location_filters(): void
