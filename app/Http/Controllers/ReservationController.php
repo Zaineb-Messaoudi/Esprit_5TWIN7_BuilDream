@@ -9,6 +9,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Requests\ReservationRequest;
 use Illuminate\Http\JsonResponse;
+use Carbon\Carbon;
 
 class ReservationController extends Controller
 {
@@ -33,6 +34,12 @@ class ReservationController extends Controller
     $data['reference'] = 'RES-' . strtoupper(Str::random(8));
     $data['user_id'] = request()->user()->isAdmin() && isset($data['user_id'])
         ? $data['user_id'] : request()->user()->id;
+    $data['status'] = 'pending';
+    $data['total_amount'] = $this->computeTotalAmount(
+        (int) $data['equipment_id'],
+        (string) $data['start_date'],
+        (string) $data['end_date']
+    );
 
     $reservation = Reservation::create($data);
 
@@ -57,7 +64,17 @@ class ReservationController extends Controller
 {
     abort_unless(request()->user()->isAdmin() || $reservation->user_id === request()->user()->id, 403);
     $data = $request->validated();
-    unset($data['user_id']);
+    unset($data['user_id'], $data['total_amount']);
+
+    if (! request()->user()->isAdmin()) {
+        unset($data['status']);
+    }
+
+    $equipmentId = isset($data['equipment_id']) ? (int) $data['equipment_id'] : (int) $reservation->equipment_id;
+    $startDate = isset($data['start_date']) ? (string) $data['start_date'] : (string) $reservation->start_date;
+    $endDate = isset($data['end_date']) ? (string) $data['end_date'] : (string) $reservation->end_date;
+    $data['total_amount'] = $this->computeTotalAmount($equipmentId, $startDate, $endDate);
+
     $reservation->update($data);
 
     return redirect()->route('rental.reservations.index')->with('success', __('Reservation updated successfully.'));
@@ -69,5 +86,15 @@ class ReservationController extends Controller
         abort_unless(request()->user()->isAdmin() || $reservation->user_id === request()->user()->id, 403);
         $reservation->delete();
         return response()->noContent();
+    }
+
+    private function computeTotalAmount(int $equipmentId, string $startDate, string $endDate): float
+    {
+        $equipment = Equipment::findOrFail($equipmentId);
+        $start = Carbon::parse($startDate)->startOfDay();
+        $end = Carbon::parse($endDate)->startOfDay();
+        $days = max(1, $start->diffInDays($end) + 1);
+
+        return (float) $equipment->rental_price_per_day * $days;
     }
 }
