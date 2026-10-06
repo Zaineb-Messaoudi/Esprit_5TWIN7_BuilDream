@@ -111,14 +111,21 @@ class FrontController extends Controller
 
     public function show(int $id): View
     {
-        $all = FrontDemo::equipment();
-        $item = $all->firstWhere('id', $id);
+        $item = FrontDemo::findEquipment($id);
         abort_unless($item, 404);
+
+        $related = FrontDemo::publishedEquipmentQuery()
+            ->where('category_id', $item->category->id)
+            ->where('id', '!=', $id)
+            ->latest()
+            ->limit(3)
+            ->get()
+            ->map(fn (Equipment $equipment) => FrontDemo::equipmentViewModel($equipment));
 
         return view('pages.front.equipment', [
             'title' => $item->name,
             'item' => $item,
-            'related' => $all->where('category.id', $item->category->id)->where('id', '!=', $id)->take(3),
+            'related' => $related,
         ]);
     }
 }

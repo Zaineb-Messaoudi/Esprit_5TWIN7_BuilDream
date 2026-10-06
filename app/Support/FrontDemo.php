@@ -84,6 +84,18 @@ class FrontDemo
         return self::mapEquipment($item);
     }
 
+    /** Resolve one public listing from the database, with the demo fallback only before seeding. */
+    public static function findEquipment(int $id): ?object
+    {
+        if (Schema::hasTable('equipment') && Equipment::query()->exists()) {
+            $item = self::publishedEquipmentQuery()->find($id);
+
+            return $item ? self::mapEquipment($item) : null;
+        }
+
+        return self::equipment()->firstWhere('id', $id);
+    }
+
     private static function mapEquipment(Equipment $item): object
     {
         $category = (object) [
