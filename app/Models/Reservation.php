@@ -38,4 +38,9 @@ class Reservation extends Model
     {
         return $this->hasOne(Invoice::class);
     }
+
+    public function rental()
+    {
+        return $this->hasOne(Rental::class);
+    }
 }

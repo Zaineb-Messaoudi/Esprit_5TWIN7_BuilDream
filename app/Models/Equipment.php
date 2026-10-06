@@ -55,4 +55,10 @@ class Equipment extends Model
     {
         return $this->hasMany(Rental::class);
     }
+
+    /** Reservations made against this catalogue listing. */
+    public function reservations(): HasMany
+    {
+        return $this->hasMany(Reservation::class);
+    }
 }

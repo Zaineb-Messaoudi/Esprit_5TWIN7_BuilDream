@@ -5,7 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\PaymentRequest;
 use App\Models\Payment;
 use App\Models\Reservation;
-use Illuminate\Http\JsonResponse;
+use App\Models\Rental;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 
@@ -36,15 +36,17 @@ class PaymentController extends Controller
     /**
      * Store a newly created resource in storage.
      */
-    public function store(PaymentRequest $request): JsonResponse
+    public function store(PaymentRequest $request)
     {
         $data = $request->validated();
         $reservation = Reservation::findOrFail($data['reservation_id']);
         abort_unless(request()->user()->isAdmin() || $reservation->user_id === request()->user()->id, 403);
         $data['transaction_reference'] = 'PAY-'.strtoupper(Str::random(10));
-        $data['status'] = 'pending';
         $payment = Payment::create($data);
-        if ($payment->status === 'paid') $reservation->update(['status' => 'confirmed']);
+        if ($payment->status === 'paid') {
+            $reservation->update(['status' => 'confirmed']);
+            $this->createRentalFromReservation($reservation);
+        }
         return redirect()->route('rental.payments.index')->with('success', __('Payment recorded successfully.'));
     }
 
@@ -76,6 +78,10 @@ class PaymentController extends Controller
         abort_unless(request()->user()->isAdmin() || $payment->reservation->user_id === request()->user()->id, 403);
         abort_unless(request()->user()->isAdmin(), 403);
         $payment->update($request->validate(['status' => ['required', 'in:pending,paid,failed']]));
+        if ($payment->status === 'paid') {
+            $payment->reservation->update(['status' => 'confirmed']);
+            $this->createRentalFromReservation($payment->reservation);
+        }
         return redirect()->route('rental.payments.index')->with('success', __('Payment updated successfully.'));
     }
 
@@ -88,5 +94,21 @@ class PaymentController extends Controller
         abort_unless(request()->user()->isAdmin() || $payment->reservation->user_id === request()->user()->id, 403);
         $payment->delete();
         return redirect()->route('rental.payments.index')->with('success', __('Payment deleted successfully.'));
+    }
+
+    private function createRentalFromReservation(Reservation $reservation): void
+    {
+        Rental::firstOrCreate(
+            ['reservation_id' => $reservation->id],
+            [
+                'reference' => 'RNT-'.now()->format('Ymd').'-'.strtoupper(Str::random(6)),
+                'equipment_id' => $reservation->equipment_id,
+                'user_id' => $reservation->user_id,
+                'start_date' => $reservation->start_date,
+                'end_date' => $reservation->end_date,
+                'total_amount' => $reservation->total_amount,
+                'status' => 'pending',
+            ],
+        );
     }
 }
