@@ -98,16 +98,19 @@ class FrontDemo
 
     private static function mapEquipment(Equipment $item): object
     {
+        $item->loadMissing(['category', 'owner', 'energyProfile']);
+        $categoryModel = $item->category;
+        $categoryName = $categoryModel?->name ?: __('Uncategorized');
         $category = (object) [
-            'id' => $item->category->id, 'name' => $item->category->name,
-            'description' => $item->category->description, 'icon' => self::categoryIcon($item->category->name),
-            'technology' => $item->energyProfile?->technology ?: self::categoryTechnology($item->category->name),
+            'id' => $categoryModel?->id, 'name' => $categoryName,
+            'description' => $categoryModel?->description, 'icon' => self::categoryIcon($categoryName),
+            'technology' => $item->energyProfile?->technology ?: self::categoryTechnology($categoryName),
         ];
 
         return (object) [
             'id' => $item->id, 'name' => $item->name, 'brand' => $item->brand, 'model' => $item->model,
             'description' => $item->description, 'price_per_day' => $item->price_per_day, 'location' => $item->location,
-            'status' => $item->status, 'condition' => ucfirst($item->condition), 'owner' => $item->owner->name,
+            'status' => $item->status, 'condition' => ucfirst($item->condition ?: 'good'), 'owner' => $item->owner?->name ?: __('SolarShare owner'),
             'image' => $item->image_url ?: self::categoryImage($category->name), 'category' => $category,
             'energyProfile' => (object) [
                 'power_watts' => $item->energyProfile?->power_watts,
