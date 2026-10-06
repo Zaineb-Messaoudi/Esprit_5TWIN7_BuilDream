@@ -30,11 +30,11 @@ class InvoiceController extends Controller
             'reservation_id' => 'required|exists:reservations,id|unique:invoices,reservation_id',
             'issue_date'     => 'required|date',
             'subtotal'       => 'required|numeric|min:0',
-            'status'         => 'required|in:unpaid,paid',
         ]);
 
         $data['tax']            = round($data['subtotal'] * 0.19, 2);
         $data['total']          = $data['subtotal'] + $data['tax'];
+        $data['status']         = 'unpaid';
         $data['invoice_number'] = 'INV-' . random_int(100000, 999999);
 
         $reservation = Reservation::findOrFail($data['reservation_id']);
@@ -62,7 +62,6 @@ class InvoiceController extends Controller
         $data = $request->validate([
             'issue_date' => 'required|date',
             'subtotal'   => 'required|numeric|min:0',
-            'status'     => 'required|in:unpaid,paid',
         ]);
 
         $data['tax']   = round($data['subtotal'] * 0.19, 2);
