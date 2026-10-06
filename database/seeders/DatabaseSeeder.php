@@ -144,5 +144,8 @@ class DatabaseSeeder extends Seeder
 
         // Keep the old validation-only category out of the public catalogue when unused.
         Category::where('name', 'Batteries')->whereDoesntHave('equipment')->update(['status' => 'inactive']);
+
+        // Rental module (Student 3): rentals, contracts and extension requests.
+        $this->call(RentalSeeder::class);
     }
 }
