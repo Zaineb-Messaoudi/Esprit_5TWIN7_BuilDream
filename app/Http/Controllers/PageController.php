@@ -4,12 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Support\FrontDemo;
 use Illuminate\Contracts\View\View;
+use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Schema;
 
 /** Renders any page declared in config/front.php (section-based pages). */
 class PageController extends Controller
 {
-    public function __invoke(Request $request): View
+    public function __invoke(Request $request): View|RedirectResponse
     {
         $slug = $request->route('slug');
         $page = config("front.pages.$slug");
@@ -33,6 +35,25 @@ class PageController extends Controller
             abort_unless($request->user()?->isOwner(), 403);
         } elseif (($page['role'] ?? null) === 'buyer') {
             abort_unless($request->user()?->isBuyer(), 403);
+        }
+
+        if (in_array($slug, ['my-maintenance', 'my-inspections'], true)) {
+            $ready = class_exists(\App\Models\Equipment::class)
+                && Schema::hasTable('equipment')
+                && Schema::hasColumn('equipment', 'owner_id')
+                && Schema::hasTable('maintenances')
+                && Schema::hasTable('maintenance_reports')
+                && Schema::hasTable('inspections');
+
+            if (! $ready) {
+                return view('pages.front.technical-pending', [
+                    'title' => __($page['title']),
+                ]);
+            }
+
+            return redirect()->route($slug === 'my-maintenance'
+                ? 'technical.maintenances.index'
+                : 'technical.inspections.index');
         }
 
         if (in_array($slug, ['my-dashboard', 'owner-dashboard'], true)) {

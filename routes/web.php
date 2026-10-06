@@ -13,6 +13,9 @@ use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SpecialPageController;
+use App\Http\Controllers\Technical\InspectionController;
+use App\Http\Controllers\Technical\MaintenanceController;
+use App\Http\Controllers\Technical\MaintenanceReportController;
 use Illuminate\Support\Facades\Route;
 
 // Front Office (public)
@@ -320,5 +323,19 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         return view('pages.applications.vector-maps', ['title' => __('Vector Maps')]);
     })->name('maps.vector');
 });
+
+// Isolated technical module. Owner access is scoped to equipment ownership in the controllers.
+Route::middleware(['auth', 'verified', 'role.selected'])->prefix('technical')->name('technical.')->group(function () {
+    Route::resource('maintenances', MaintenanceController::class);
+    Route::resource('reports', MaintenanceReportController::class);
+    Route::resource('inspections', InspectionController::class);
+});
+
+Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])
+    ->prefix('admin/technical')->name('admin.technical.')->group(function () {
+        Route::resource('maintenances', MaintenanceController::class);
+        Route::resource('reports', MaintenanceReportController::class);
+        Route::resource('inspections', InspectionController::class);
+    });
 
 require __DIR__.'/auth.php';
