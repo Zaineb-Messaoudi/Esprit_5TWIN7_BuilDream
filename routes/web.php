@@ -1,6 +1,11 @@
 <?php
 
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
+use App\Http\Controllers\Admin\RentalController;
+use App\Http\Controllers\Admin\RentalContractController;
+use App\Http\Controllers\Admin\RentalExtensionController;
 use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\Auth\RoleSetupController;
 use App\Http\Controllers\AuthDemoController;
@@ -12,13 +17,18 @@ use App\Http\Controllers\FrontController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\OwnerEquipmentController;
 use App\Http\Controllers\SpecialPageController;
 use App\Http\Controllers\Technical\InspectionController;
 use App\Http\Controllers\Technical\MaintenanceController;
 use App\Http\Controllers\Technical\MaintenanceReportController;
 use Illuminate\Support\Facades\Route;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\MarketplaceController;
 
-// Front Office (public)
+// Front Office public catalogue and live equipment booking workflow.
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
     ->whereIn('locale', array_keys(LocaleController::SUPPORTED_LOCALES))
     ->name('locale.switch');
@@ -28,12 +38,48 @@ Route::get('/equipment/{id}', [FrontController::class, 'show'])
     ->whereNumber('id')
     ->name('front.equipment.show');
 
+Route::middleware(['auth', 'verified', 'role.selected', 'can:owner-only'])->group(function () {
+    // Owner listings are live CRUD pages, unlike the remaining preview account pages.
+    Route::get('/my/equipment', [OwnerEquipmentController::class, 'index'])->name('front.my-equipment');
+    Route::get('/my/equipment/new', [OwnerEquipmentController::class, 'create'])->name('front.my-publish');
+    Route::post('/my/equipment', [OwnerEquipmentController::class, 'store'])->name('front.my-equipment.store');
+    Route::get('/my/equipment/{equipment}', [OwnerEquipmentController::class, 'show'])->defaults('equipment', 1)->name('front.my-equipment-detail');
+    Route::get('/my/equipment/{equipment}/edit', [OwnerEquipmentController::class, 'edit'])->defaults('equipment', 1)->name('front.my-equipment-edit');
+    Route::put('/my/equipment/{equipment}', [OwnerEquipmentController::class, 'update'])->name('front.my-equipment.update');
+    Route::delete('/my/equipment/{equipment}', [OwnerEquipmentController::class, 'destroy'])->name('front.my-equipment.destroy');
+});
+
+Route::middleware(['auth', 'verified', 'role.selected', 'can:buyer-only'])->get(
+    '/my/reservations/{reservation:reference}', [PageController::class, 'buyerReservation']
+)->name('front.buyer-reservation-detail');
+Route::middleware(['auth', 'verified', 'role.selected', 'can:buyer-only'])->get(
+    '/my/rentals/{rental:reference}', [PageController::class, 'buyerRental']
+)->name('front.buyer-rental-detail');
+Route::middleware(['auth', 'verified', 'role.selected', 'can:owner-only'])->get(
+    '/owner/reservations/{reservation:reference}', [PageController::class, 'ownerReservation']
+)->name('front.my-reservation-detail');
+Route::middleware(['auth', 'verified', 'role.selected', 'can:owner-only'])->get(
+    '/owner/rentals/{rental:reference}', [PageController::class, 'ownerRental']
+)->name('front.my-rental-detail');
+
 foreach (config('front.pages') as $slug => $page) {
+    if (in_array($slug, [
+        'my-equipment', 'my-publish', 'my-equipment-detail', 'my-equipment-edit',
+        'buyer-reservation-detail', 'buyer-rental-detail', 'my-reservation-detail', 'my-rental-detail',
+    ], true)) {
+        continue;
+    }
     $route = Route::get($page['path'], PageController::class)
         ->defaults('slug', $slug)
         ->name('front.'.$slug);
 
     if (($page['shell'] ?? null) === 'account') {
+        $route->middleware(['auth', 'verified', 'role.selected']);
+    }
+
+    // Guests and users who have not selected a role can browse the catalogue,
+    // but booking/payment preview pages require an authenticated account.
+    if (in_array($slug, ['reserve', 'booking-summary', 'payment', 'confirmed', 'invoice'], true)) {
         $route->middleware(['auth', 'verified', 'role.selected']);
     }
 }
@@ -131,6 +177,15 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     // Admin User Management
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', AdminUserController::class);
+        Route::resource('categories', AdminCategoryController::class)->except(['show']);
+        Route::resource('equipment', AdminEquipmentController::class);
+        Route::resource('rentals', RentalController::class);
+        Route::resource('rental-contracts', RentalContractController::class);
+        Route::resource('rental-extensions', RentalExtensionController::class);
+        Route::post('rental-extensions/{rental_extension}/approve', [RentalExtensionController::class, 'approve'])
+            ->name('rental-extensions.approve');
+        Route::post('rental-extensions/{rental_extension}/reject', [RentalExtensionController::class, 'reject'])
+            ->name('rental-extensions.reject');
     });
 
     // Dashboard Routes
@@ -323,7 +378,6 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         return view('pages.applications.vector-maps', ['title' => __('Vector Maps')]);
     })->name('maps.vector');
 });
-
 // Isolated technical module. Owner access is scoped to equipment ownership in the controllers.
 Route::middleware(['auth', 'verified', 'role.selected'])->prefix('technical')->name('technical.')->group(function () {
     Route::resource('maintenances', MaintenanceController::class);
@@ -338,4 +392,18 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])
         Route::resource('inspections', InspectionController::class);
     });
 
+// Reservations, payments and invoices are available to authenticated buyers and owners.
+// Controllers scope every record to the signed-in user; administrators can see all records.
+Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    Route::post('/booking/reservations', [MarketplaceController::class, 'storeReservation'])->name('booking.reservations.store');
+    Route::post('/booking/reservations/{reservation}/payment', [MarketplaceController::class, 'pay'])->name('booking.reservations.pay');
+    Route::post('/rental-contracts/{contract}/sign', [MarketplaceController::class, 'signContract'])->name('buyer.contracts.sign');
+    Route::post('/owner/reservations/{reservation}/decision', [MarketplaceController::class, 'decideReservation'])
+        ->middleware('can:owner-only')->name('owner.reservations.decision');
+    Route::prefix('rental')->name('rental.')->group(function () {
+        Route::resource('reservations', ReservationController::class);
+        Route::resource('payments', PaymentController::class);
+        Route::resource('invoices', InvoiceController::class);
+    });
+});
 require __DIR__.'/auth.php';

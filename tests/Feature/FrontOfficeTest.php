@@ -4,10 +4,14 @@ namespace Tests\Feature;
 
 use App\Enums\UserRole;
 use App\Models\User;
+use App\Models\Equipment;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class FrontOfficeTest extends TestCase
 {
+    use RefreshDatabase;
+
     public function test_front_office_home_and_catalog_use_solarshare_visual_assets(): void
     {
         $this->get(route('home'))
@@ -42,8 +46,8 @@ class FrontOfficeTest extends TestCase
 
         $this->get(route('front.catalog'))
             ->assertOk()
-            ->assertSee('Find your kind of power.')
-            ->assertSee('Example listing')
+            ->assertSee('Power for the plan you already have.')
+            ->assertSee('Available')
             ->assertSee('images/front/solar-panel.svg')
             ->assertSee('images/front/battery-station.svg')
             ->assertSee('images/front/wind-turbine.svg')
@@ -86,12 +90,16 @@ class FrontOfficeTest extends TestCase
     public function test_configured_front_office_pages_are_reachable(): void
     {
         foreach (config('front.pages') as $slug => $page) {
+            if (in_array($slug, ['my-equipment-detail', 'my-equipment-edit', 'buyer-reservation-detail', 'buyer-rental-detail', 'my-reservation-detail', 'my-rental-detail', 'reserve', 'booking-summary', 'payment', 'confirmed', 'invoice'], true)) {
+                continue;
+            }
             $routeName = 'front.'.$slug;
 
             $response = $this->get(route($routeName));
 
             if (($page['shell'] ?? null) === 'account') {
                 $response->assertRedirect(route('login'));
+
                 continue;
             }
 
@@ -202,36 +210,22 @@ class FrontOfficeTest extends TestCase
             ->assertSee('<html lang="fr"', false)
             ->assertSee('Accueil')
             ->assertSee('Catalogue')
-            ->assertSee('lang="fr"', false)
             ->assertSee('aria-label="Langue"', false);
 
-        $this->get(route('login'))
-            ->assertOk()
-            ->assertSee('<html lang="fr"', false)
-            ->assertSee('Passer en anglais')
-            ->assertSee('Passer en français');
-
-        $owner = new User([
-            'name' => 'Sami Owner',
-            'email' => 'owner@example.test',
+        $owner = User::factory()->create([
             'role' => UserRole::OWNER,
             'role_setup_completed' => true,
+            'email_verified_at' => now(),
         ]);
-        $owner->email_verified_at = now();
 
         $this->actingAs($owner)
             ->get(route('front.owner-dashboard'))
             ->assertOk()
-            ->assertSee('ESPACE PROPRIÉTAIRE')
-            ->assertSee('Revenus par mois')
-            ->assertSee('Accès rapide');
+            ->assertSee('Recent reservations')
+            ->assertSee('Pending reservation requests');
 
-        $this->get(route('locale.switch', ['locale' => 'en']))
-            ->assertRedirect();
-        $this->get(route('home'))
-            ->assertOk()
-            ->assertSee('<html lang="en"', false)
-            ->assertSee('Catalog');
+        $this->get(route('locale.switch', ['locale' => 'en']))->assertRedirect();
+        $this->get(route('home'))->assertOk()->assertSee('<html lang="en"', false)->assertSee('Catalog');
     }
 
     public function test_signup_defers_renter_or_owner_choice_until_after_account_creation(): void
@@ -245,184 +239,95 @@ class FrontOfficeTest extends TestCase
             ->assertRedirect(route('login'));
     }
 
-    public function test_owner_and_buyer_receive_separate_workspace_dashboards(): void
+    public function test_owner_and_buyer_receive_live_workspace_dashboards(): void
     {
-        $owner = new User([
-            'name' => 'Sami Owner',
-            'email' => 'owner@example.test',
-            'role' => UserRole::OWNER,
-            'role_setup_completed' => true,
-        ]);
-        $owner->email_verified_at = now();
+        $owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true]);
+        $ownerDashboard = $this->actingAs($owner)->get(route('front.owner-dashboard'))
+            ->assertOk()
+            ->assertSee('Owner workspace')
+            ->assertSee('Equipment listings')
+            ->assertSee('Pending reservation requests')
+            ->assertSee('Recent reservations')
+            ->assertDontSee('Illustrative dashboard data.');
 
-        $this->actingAs($owner)
-            ->get(route('front.owner-dashboard'))
-            ->assertOk()
-            ->assertSee('Owner workspace')
-            ->assertSee('Your performance at a glance')
-            ->assertSee('Quick access')
-            ->assertSee(route('front.my-publish'), false);
-        $ownerDashboard = $this->get(route('front.owner-dashboard'));
-        $ownerDashboard
-            ->assertSee(route('home'), false)
-            ->assertSee(route('front.catalog'), false)
-            ->assertSee('Home')
-            ->assertSee('Catalog')
-            ->assertSee('Owner workspace')
-            ->assertSee('Reservations')
-            ->assertSee('Rentals')
-            ->assertSee('Contract')
-            ->assertSee('Extensions')
-            ->assertSee('Notifications')
-            ->assertSee('Profile')
-            ->assertSee('Equipment')
-            ->assertSee('Inspections')
-            ->assertSee('Quick access')
-            ->assertSee('Availability')
-            ->assertSee('Earnings')
-            ->assertSee('Illustrative dashboard data.')
-            ->assertSee('Revenue per month')
-            ->assertSee('Reservations by status')
-            ->assertSee('Equipment status')
-            ->assertSee('Rentals by equipment')
-            ->assertSee('Total equipment')
-            ->assertSee('Available now')
-            ->assertSee('Active rentals')
-            ->assertSee('Pending reservations')
-            ->assertSee('Extension requests')
-            ->assertSee('Revenue this month')
-            ->assertSee('Returns due this week')
-            ->assertSee('In maintenance')
-            ->assertSee('To do now')
-            ->assertSee('Inspections')
-            ->assertSee('Latest activity')
-            ->assertSee('1,240 TND');
-        preg_match('/<nav[^>]*aria-label="Main navigation"[^>]*>(.*?)<\\/nav>/s', (string) $ownerDashboard->getContent(), $navigation);
+        preg_match('/<nav[^>]*aria-label="Main navigation"[^>]*>(.*?)<\/nav>/s', (string) $ownerDashboard->getContent(), $navigation);
         expect($navigation[1] ?? '')->not->toContain('How it works')->not->toContain('For owners');
-        $this->assertStringContainsString('2xl:flex', (string) $ownerDashboard->getContent());
-        $this->assertStringNotContainsString('overflow-x-auto rounded-full', (string) $ownerDashboard->getContent());
-        preg_match('/<nav[^>]*aria-label="Owner workspace navigation"[^>]*>(.*?)<\\/nav>/s', (string) $ownerDashboard->getContent(), $ownerNavigation);
-        expect($ownerNavigation[1] ?? '')->not->toContain('overflow-x-auto');
-        $this->get(route('front.my-reservations'))
-            ->assertOk()
-            ->assertDontSee('aria-label="My space"', false)
-            ->assertDontSee('lg:grid-cols-[15rem_1fr]', false)
-            ->assertSee('aria-label="Main navigation"', false);
+
+        $this->get(route('front.my-reservations'))->assertOk()->assertSee('Owner workspace');
         $this->get(route('front.my-dashboard'))->assertForbidden();
         $this->get(route('front.my-equipment'))->assertOk();
 
-        $buyer = new User([
-            'name' => 'Leila Buyer',
-            'email' => 'buyer@example.test',
-            'role' => UserRole::BUYER,
-            'role_setup_completed' => true,
-        ]);
-        $buyer->email_verified_at = now();
-
-        $this->actingAs($buyer)
-            ->get(route('front.my-dashboard'))
+        $buyer = User::factory()->create(['role' => UserRole::BUYER, 'role_setup_completed' => true]);
+        $this->actingAs($buyer)->get(route('front.my-dashboard'))
             ->assertOk()
-            ->assertSee('Your SolarShare')
-            ->assertSee(route('front.my-reservations'), false)
-            ->assertSee('Buyer dashboard statistics')
-            ->assertSee('Active rentals')
-            ->assertSee('Upcoming reservations')
-            ->assertSee('Pending reservations')
-            ->assertSee('Total spent')
-            ->assertSee('Total rental days')
-            ->assertSee('Extensions awaiting owner')
-            ->assertSee('Spending per month')
-            ->assertSee('Rentals by category')
-            ->assertSee('Reservations by status')
-            ->assertSee('Up next · RES-1042')
-            ->assertSee('To do now');
+            ->assertSee('Renter workspace')
+            ->assertSee('Reservations')
+            ->assertSee('Awaiting owner review')
+            ->assertSee('Verified payments')
+            ->assertDontSee('Buyer dashboard statistics');
         $this->get(route('front.my-equipment'))->assertForbidden();
     }
 
-    public function test_buyer_workspace_screens_render_as_frontend_previews(): void
+    public function test_buyer_workspace_screens_render_live_records(): void
     {
-        $buyer = new User([
-            'name' => 'Leila Buyer',
-            'email' => 'buyer-workspace@example.test',
-            'role' => UserRole::BUYER,
-            'role_setup_completed' => true,
+        $buyer = User::factory()->create(['role' => UserRole::BUYER, 'role_setup_completed' => true]);
+        $owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true]);
+        $equipment = Equipment::factory()->create(['owner_id' => $owner->id]);
+        $reservation = \App\Models\Reservation::factory()->create([
+            'user_id' => $buyer->id, 'equipment_id' => $equipment->id, 'status' => 'pending',
         ]);
-        $buyer->email_verified_at = now();
-        $this->actingAs($buyer);
+        $rental = \App\Models\Rental::factory()->create([
+            'user_id' => $buyer->id, 'equipment_id' => $equipment->id,
+        ]);
 
+        $this->actingAs($buyer);
         foreach ([
-            ['front.my-reservations', 'Your reservations'],
-            ['front.buyer-reservation-detail', 'Booking journey'],
-            ['front.my-rentals', 'Rental days per month'],
-            ['front.buyer-rental-detail', 'Contract CTR-2031-01'],
-            ['front.my-contract', 'Terms of use'],
-            ['front.my-extensions', 'Request more time'],
-            ['front.my-payments', 'Payments & invoices'],
-            ['front.my-notifications', 'Your updates'],
-        ] as [$route, $content]) {
-            $this->get(route($route))
-                ->assertOk()
-                ->assertSee($content)
-                ->assertSee('Frontend preview with sample data.')
-                ->assertSee('Buyer account navigation');
+            ['front.my-reservations', [], $reservation->reference],
+            ['front.buyer-reservation-detail', [$reservation->reference], $reservation->reference],
+            ['front.my-rentals', [], $rental->reference],
+            ['front.buyer-rental-detail', [$rental->reference], $rental->reference],
+            ['front.my-contract', [], 'No rental contracts yet.'],
+            ['front.my-extensions', [], 'No extension requests yet.'],
+            ['front.my-payments', [], 'No payments yet.'],
+            ['front.my-notifications', [], 'Your updates'],
+        ] as [$route, $parameters, $content]) {
+            $response = $this->get(route($route, $parameters))->assertOk()->assertSee($content);
+            if ($route !== 'front.my-notifications') {
+                $response->assertDontSee('Frontend preview with sample data.');
+            }
+            $response->assertSee('Buyer account navigation');
         }
 
-        $this->get(route('front.my-rentals'))
-            ->assertSee('Extensions')
-            ->assertSee('Payments & invoices');
-        $this->get(route('front.my-reservations'))
-            ->assertSee('Cancel this pending reservation?')
-            ->assertSee('Confirm cancellation');
-        $this->get(route('front.my-payments'))
-            ->assertSee('Spending per month')
-            ->assertSee('Payments by method')
-            ->assertSee('INV-2026-0142');
-        $this->get(route('front.my-dashboard'))
-            ->assertSee('aria-label="Buyer account navigation"', false)
-            ->assertSee('rounded-2xl border border-gray-200 bg-white/95', false);
+        $this->get(route('front.my-rentals'))->assertSee('Extensions')->assertSee('Payments & invoices');
+        $this->get(route('front.my-payments'))->assertSee('Invoices')->assertSee('No invoices yet.');
     }
 
-    public function test_owner_workspace_pages_render_as_frontend_previews(): void
+    public function test_owner_workspace_pages_show_live_reservations_and_rentals(): void
     {
-        $owner = new User([
-            'name' => 'Sami Owner',
-            'email' => 'owner@example.test',
-            'role' => UserRole::OWNER,
-            'role_setup_completed' => true,
+        $owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true]);
+        $buyer = User::factory()->create(['role' => UserRole::BUYER, 'role_setup_completed' => true]);
+        $equipment = Equipment::factory()->create(['owner_id' => $owner->id]);
+        $reservation = \App\Models\Reservation::factory()->create([
+            'equipment_id' => $equipment->id, 'user_id' => $buyer->id, 'status' => 'pending',
         ]);
-        $owner->email_verified_at = now();
+        $rental = \App\Models\Rental::factory()->create([
+            'equipment_id' => $equipment->id, 'user_id' => $buyer->id,
+        ]);
+
         $this->actingAs($owner);
-
-        foreach ([
-            ['front.my-equipment', 'Delete this listing?'],
-            ['front.my-publish', 'Energy profile'],
-            ['front.my-equipment-detail', 'Occupancy rate'],
-            ['front.my-equipment-edit', 'Save changes'],
-            ['front.my-calendar', 'October 2026'],
-            ['front.my-reservations', 'Reservations on your equipment'],
-            ['front.my-reservation-detail', 'Payment & invoice'],
-            ['front.my-rentals', 'Rental history'],
-            ['front.my-rental-detail', 'Rental RNT-2031'],
-            ['front.my-contract', 'Print contract'],
-            ['front.my-extensions', 'Extension requests over time'],
-            ['front.my-earnings', 'Payments & invoices'],
-            ['front.my-maintenance', 'Maintenance cost by equipment'],
-            ['front.my-inspections', 'Inspection log'],
-            ['front.my-notifications', 'Notification preferences'],
-        ] as [$route, $content]) {
-            $this->get(route($route))
-                ->assertOk()
-                ->assertSee($content)
-                ->assertSee('Interactive frontend preview.');
-        }
-
-        $this->get(route('front.my-earnings'))
-            ->assertSee('Revenue by category')
-            ->assertSee('Payments by method')
-            ->assertSee('Revenue vs maintenance cost');
-        $this->get(route('front.my-calendar'))->assertSee('SERVICE');
+        $this->get(route('front.my-reservations'))
+            ->assertOk()->assertSee($reservation->reference)->assertSee('Approve')->assertSee('Decline');
+        $this->get(route('front.my-reservation-detail', $reservation->reference))
+            ->assertOk()->assertSee($reservation->reference);
+        $this->get(route('front.my-rentals'))
+            ->assertOk()->assertSee($rental->reference);
+        $this->get(route('front.my-rental-detail', $rental->reference))
+            ->assertOk()->assertSee($rental->reference);
+        $this->get(route('front.my-contract'))->assertOk()->assertSee('No rental contracts yet.');
+        $this->get(route('front.my-extensions'))->assertOk()->assertSee('No extension requests yet.');
+        $this->get(route('front.my-earnings'))->assertOk()->assertSee('Invoices');
+        $this->get(route('front.my-calendar'))->assertOk()->assertSee('SERVICE');
         $this->get(route('front.my-maintenance'))->assertSee('Maintenance cost by equipment');
-        $this->get(route('front.my-extensions'))->assertSee('Extension requests over time');
     }
 
     public function test_equipment_detail_and_demo_booking_pages_render_without_claiming_live_booking(): void
@@ -431,27 +336,17 @@ class FrontOfficeTest extends TestCase
             ->assertOk()
             ->assertSee('Energy profile')
             ->assertSee('Portable battery 1000 Wh')
-            ->assertSee('Example listing')
+            ->assertSee('Available')
             ->assertSee('Availability preview')
-            ->assertSee('Sign in to reserve')
-            ->assertSee(route('login'), false);
+            ->assertSee('Browse-only catalogue')
+            ->assertDontSee('Preview booking flow');
 
         $this->get(route('front.reserve'))
-            ->assertOk()
-            ->assertSee('Simulation only.')
-            ->assertSee('Choose your dates')
-            ->assertSee('Sample date conflict.');
+            ->assertRedirect(route('login'));
         $this->get(route('front.booking-summary', ['equipment' => 1, 'start' => '2026-10-12', 'end' => '2026-10-14']))
-            ->assertOk()
-            ->assertSee('Review before you continue')
-            ->assertSee('Confirm and continue to payment');
+            ->assertRedirect(route('login'));
         $this->get(route('front.payment', ['equipment' => 1, 'start' => '2026-10-12', 'end' => '2026-10-14']))
-            ->assertOk()
-            ->assertSee('Choose a payment method')
-            ->assertSee('Simulate successful payment')
-            ->assertSee('Simulate failure');
-        $this->get(route('front.confirmed'))->assertSee('RES-1042')->assertSee('View invoice');
-        $this->get(route('front.invoice'))->assertSee('INV-2026-0142')->assertSee('Print / save as PDF');
+            ->assertRedirect(route('login'));
     }
 
     public function test_catalogue_supports_frontend_capacity_condition_and_location_filters(): void

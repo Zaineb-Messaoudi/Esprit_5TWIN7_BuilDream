@@ -1,0 +1,4 @@
+@extends('layouts.app')
+@section('content')
+<div class="mx-auto max-w-5xl space-y-6"><x-common.page-breadcrumb><a href="{{ route('admin.equipment.index') }}" class="text-gray-500 hover:text-brand-600">{{ __('Equipment') }}</a> / {{ __('Edit equipment') }}</x-common.page-breadcrumb><x-common.component-card :title="__('Edit equipment')"><form method="POST" enctype="multipart/form-data" action="{{ route('admin.equipment.update', $equipment) }}" class="space-y-6">@csrf @method('PUT') @include('pages.admin.equipment._form')<div class="flex justify-end gap-3"><a href="{{ route('admin.equipment.index') }}" class="rounded-lg border px-4 py-2 text-sm">{{ __('Cancel') }}</a><button class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white" type="submit">{{ __('Save changes') }}</button></div></form></x-common.component-card></div>
+@endsection

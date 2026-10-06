@@ -1,0 +1,2 @@
+@extends('layouts.app')
+@section('content')<div class="mx-auto max-w-2xl p-6"><h1 class="mb-6 text-title-lg font-semibold">{{ __('Edit reservation') }}</h1><form method="POST" action="{{ route('rental.reservations.update',$reservation) }}" class="space-y-4 rounded-xl bg-white p-6 shadow-theme-xs dark:bg-gray-900">@csrf @method('PUT') @include('reservations.form')<button class="button-base button-primary">{{ __('Update') }}</button></form></div>@endsection

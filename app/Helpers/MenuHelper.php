@@ -85,7 +85,28 @@ class MenuHelper
                 'icon' => 'user-profile',
                 'name' => 'User Management',
                 'path' => route('admin.users.index'),
+            ], [
+                'icon' => 'ecommerce',
+                'name' => 'Catalog',
+                'subItems' => [
+                    ['name' => 'Categories', 'path' => route('admin.categories.index'), 'pro' => false],
+                    ['name' => 'Equipment', 'path' => route('admin.equipment.index'), 'pro' => false],
+                ],
             ]]);
+
+            // Rentals module (Student 3), visible to admins only
+            $items[] = [
+            'icon' => 'logistics',
+            'name' => 'Rentals',
+            'subItems' => [
+                ['name' => 'Reservations', 'path' => route('rental.reservations.index'), 'activePrefix' => '/rental/reservations', 'pro' => false],
+                ['name' => 'Rentals', 'path' => route('admin.rentals.index'), 'activePrefix' => '/admin/rentals', 'pro' => false],
+                ['name' => 'Payments', 'path' => route('rental.payments.index'), 'activePrefix' => '/rental/payments', 'pro' => false],
+                ['name' => 'Invoices', 'path' => route('rental.invoices.index'), 'activePrefix' => '/rental/invoices', 'pro' => false],
+                ['name' => 'Contracts', 'path' => route('admin.rental-contracts.index'), 'activePrefix' => '/admin/rental-contracts', 'pro' => false],
+                ['name' => 'Extensions', 'path' => route('admin.rental-extensions.index'), 'activePrefix' => '/admin/rental-extensions', 'pro' => false],
+                ],
+            ];
         }
 
         return $items;

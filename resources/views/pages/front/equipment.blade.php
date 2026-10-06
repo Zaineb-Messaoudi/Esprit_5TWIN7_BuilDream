@@ -4,12 +4,13 @@
     @php
         $p = $item->energyProfile;
         $available = $item->status === 'available';
+        $imageSrc = filter_var($item->image, FILTER_VALIDATE_URL) ? $item->image : asset($item->image);
         $specs = [
             __('Power') => $p->power_watts.' W',
             __('Capacity') => $p->capacity_wh ? $p->capacity_wh.' Wh' : '—',
             __('Voltage') => $p->voltage,
-            __('Technology') => $p->technology,
-            __('Condition') => $item->condition,
+            __('Technology') => $p->technology ? __($p->technology) : '—',
+            __('Condition') => $item->condition ? __(ucfirst($item->condition)) : '—',
             __('City') => $item->location,
         ];
     @endphp
@@ -20,22 +21,22 @@
             <span aria-hidden="true">/</span>
             <a href="{{ route('front.catalog') }}" class="inline-flex min-h-11 items-center hover:text-gray-900 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-500 dark:hover:text-white">{{ __('Catalog') }}</a>
             <span aria-hidden="true">/</span>
-            <span aria-current="page" class="text-gray-800 dark:text-white/90">{{ $item->name }}</span>
+            <span aria-current="page" class="text-gray-800 dark:text-white/90">{{ __($item->name) }}</span>
         </nav>
 
         <div class="mt-7 grid items-start gap-8 lg:grid-cols-[minmax(0,1fr)_24rem] xl:gap-12">
             <div class="min-w-0">
                 <div class="relative overflow-hidden rounded-[2rem] border border-gray-200 bg-brand-50 shadow-theme-md dark:border-gray-800">
-                    <img src="{{ asset($item->image) }}" alt="{{ $item->name }}" width="800" height="600" fetchpriority="high" class="aspect-16/10 w-full object-cover" />
+                    <img src="{{ $imageSrc }}" alt="{{ __($item->name) }}" width="800" height="600" fetchpriority="high" class="aspect-16/10 w-full object-cover" />
                     <span class="absolute start-5 top-5 inline-flex items-center gap-2 rounded-full border border-white/60 bg-white/95 px-3 py-2 text-theme-xs font-semibold text-brand-900 shadow-theme-sm">
-                        <span class="size-2 rounded-full {{ $available ? 'bg-success-500' : 'bg-warning-500' }}" aria-hidden="true"></span>{{ $available ? __('Example listing') : __('Maintenance example') }}
+                        <span class="size-2 rounded-full {{ $available ? 'bg-success-500' : 'bg-warning-500' }}" aria-hidden="true"></span>{{ $available ? __('Available') : __(ucfirst($item->status)) }}
                     </span>
                     <span class="absolute bottom-5 end-5 rounded-full bg-gray-950/85 px-3 py-2 text-theme-xs font-medium text-white backdrop-blur">{{ __('SolarShare · illustrative listing') }}</span>
                 </div>
                 <div class="mt-7 flex flex-wrap items-start justify-between gap-4">
                     <div>
                         <p class="text-theme-xs font-semibold uppercase tracking-[0.16em] text-brand-700 dark:text-brand-300">{{ __($item->category->name) }} <span class="px-1 text-warning-500" aria-hidden="true">/</span> {{ $item->location }}</p>
-                        <h1 class="mt-2 text-title-sm font-semibold tracking-tight text-gray-950 dark:text-white sm:text-title-md">{{ $item->name }}</h1>
+                        <h1 class="mt-2 text-title-sm font-semibold tracking-tight text-gray-950 dark:text-white sm:text-title-md">{{ __($item->name) }}</h1>
                         <p class="mt-2 text-theme-sm text-gray-500 dark:text-gray-400">{{ $item->brand }} {{ $item->model }} · {{ __('shared by') }} {{ $item->owner }}</p>
                     </div>
                     <p class="rounded-2xl bg-brand-50 px-4 py-3 text-end dark:bg-brand-500/10">
@@ -104,11 +105,15 @@
 
                     @if ($available)
                         @auth
-                            <a href="{{ route('front.reserve', ['equipment' => $item->id]) }}" class="button-base button-primary mt-5 min-h-12 w-full text-theme-sm">{{ __('Preview booking flow') }}</a>
+                            @if (auth()->user()->isBuyer())
+                                @if ($item->status === 'available')<a href="{{ route('front.reserve', ['equipment' => $item->id]) }}" class="button-base button-primary mt-5 min-h-12 w-full text-theme-sm">{{ __('Reserve equipment') }}</a>@else<p class="mt-5 rounded-lg bg-warning-50 p-3 text-center text-theme-xs font-semibold text-warning-800 dark:bg-warning-500/10 dark:text-warning-300">{{ __('Currently unavailable') }}</p>@endif
+                            @else
+                                <p class="mt-5 rounded-lg bg-brand-50 px-4 py-3 text-center text-theme-sm text-brand-800 dark:bg-brand-500/10 dark:text-brand-200">{{ __('Browse-only catalogue. Buyer access is required to continue.') }}</p>
+                            @endif
                         @else
-                            <a href="{{ route('login') }}" class="button-base button-primary mt-5 min-h-12 w-full text-theme-sm">{{ __('Sign in to reserve') }}</a>
+                            <p class="mt-5 rounded-lg bg-brand-50 px-4 py-3 text-center text-theme-sm text-brand-800 dark:bg-brand-500/10 dark:text-brand-200">{{ __('Browse-only catalogue. Sign in as a buyer to continue.') }}</p>
                         @endauth
-                        <p class="mt-3 text-center text-theme-xs leading-5 text-gray-500 dark:text-gray-400">{{ __('Date totals are a preview. Availability checks, ownership checks and reservations are not live yet.') }}</p>
+                        <p class="mt-3 text-center text-theme-xs leading-5 text-gray-500 dark:text-gray-400">{{ __('Availability checks, reservations and payments are handled after buyer access.') }}</p>
                     @else
                         <p class="mt-5 rounded-lg bg-warning-50 px-4 py-3 text-theme-sm text-warning-700 dark:bg-warning-500/15 dark:text-warning-400">{{ __('This equipment is in maintenance and cannot be reserved right now.') }}</p>
                     @endif
