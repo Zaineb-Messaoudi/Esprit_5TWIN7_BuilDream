@@ -76,4 +76,53 @@ class StudentFourWorkflowTest extends TestCase
             'total_amount' => 100,
         ])->assertSessionHasErrors('start_date');
     }
+
+    public function test_reservation_payment_and_invoice_update_and_delete_actions_work(): void
+    {
+        $admin = User::factory()->create(['role' => UserRole::ADMIN]);
+        $buyer = User::factory()->create(['role' => UserRole::BUYER]);
+        $equipment = Equipment::factory()->create();
+        $reservation = Reservation::factory()->create([
+            'user_id' => $buyer->id,
+            'equipment_id' => $equipment->id,
+            'status' => 'pending',
+        ]);
+        $payment = $reservation->payments()->create([
+            'amount' => 50,
+            'payment_date' => now(),
+            'transaction_reference' => 'PAY-TEST-'.uniqid(),
+            'status' => 'pending',
+            'payment_method' => 'CARD',
+        ]);
+        $invoice = $reservation->invoice()->create([
+            'invoice_number' => 'INV-TEST-'.uniqid(),
+            'issue_date' => now(),
+            'subtotal' => 50,
+            'tax' => 9.5,
+            'total' => 59.5,
+            'status' => 'unpaid',
+        ]);
+
+        $this->actingAs($buyer)->put(route('rental.reservations.update', $reservation), [
+            'equipment_id' => $equipment->id,
+            'start_date' => now()->addDays(2)->toDateString(),
+            'end_date' => now()->addDays(4)->toDateString(),
+            'total_amount' => 75,
+        ])->assertRedirect(route('rental.reservations.index'));
+
+        $this->actingAs($admin)->put(route('rental.payments.update', $payment), ['status' => 'paid'])
+            ->assertRedirect(route('rental.payments.index'));
+        $this->assertDatabaseHas('payments', ['id' => $payment->id, 'status' => 'paid']);
+
+        $this->actingAs($admin)->put(route('rental.invoices.update', $invoice), [
+            'issue_date' => now()->toDateString(), 'subtotal' => 80, 'status' => 'paid',
+        ])->assertRedirect(route('rental.invoices.index'));
+
+        $this->actingAs($buyer)->delete(route('rental.payments.destroy', $payment))
+            ->assertRedirect(route('rental.payments.index'));
+        $this->actingAs($buyer)->delete(route('rental.invoices.destroy', $invoice))
+            ->assertRedirect(route('rental.invoices.index'));
+        $this->actingAs($buyer)->delete(route('rental.reservations.destroy', $reservation))
+            ->assertNoContent();
+    }
 }
