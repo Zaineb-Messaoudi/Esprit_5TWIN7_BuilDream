@@ -26,7 +26,7 @@ test('public equipment detail reads a persisted catalogue listing', function () 
         ->assertSee($equipment->location);
 });
 
-test('booking preview reads persisted equipment and existing rental availability', function () {
+test('live booking reads persisted equipment and server checks existing rental availability', function () {
     $owner = User::factory()->create([
         'role' => UserRole::OWNER,
         'role_setup_completed' => true,
@@ -54,7 +54,7 @@ test('booking preview reads persisted equipment and existing rental availability
         ->get(route('front.reserve', ['equipment' => $equipment->id]))
         ->assertOk()
         ->assertSee('Availability Connected Battery')
-        ->assertSee('2026-10-09')
-        ->assertSee('2026-10-11')
-        ->assertSee('Backend-connected preview.');
+        ->assertSee('Choose your rental dates')
+        ->assertSee('Availability is checked again when you submit the request.')
+        ->assertDontSee('Backend-connected preview.');
 });

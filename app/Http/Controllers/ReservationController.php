@@ -8,8 +8,8 @@ use App\Models\User;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
 use App\Http\Requests\ReservationRequest;
-use Illuminate\Http\JsonResponse;
 use Carbon\Carbon;
+use Illuminate\Contracts\View\View;
 
 class ReservationController extends Controller
 {
@@ -47,7 +47,7 @@ class ReservationController extends Controller
 }
 
 
-    public function show(Reservation $reservation): JsonResponse
+    public function show(Reservation $reservation): View
     {
         abort_unless(request()->user()->isAdmin() || $reservation->user_id === request()->user()->id, 403);
         $reservation->load(['equipment', 'user', 'payments', 'invoice']);
@@ -57,12 +57,18 @@ class ReservationController extends Controller
     public function edit(Reservation $reservation)
     {
         abort_unless(request()->user()->isAdmin() || $reservation->user_id === request()->user()->id, 403);
+        if (! request()->user()->isAdmin()) {
+            abort_unless($reservation->status === 'pending' && ! $reservation->payments()->exists(), 409);
+        }
         return view('reservations.edit', ['reservation' => $reservation, 'equipments' => Equipment::all()]);
     }
 
     public function update(ReservationRequest $request, Reservation $reservation)
 {
     abort_unless(request()->user()->isAdmin() || $reservation->user_id === request()->user()->id, 403);
+    if (! request()->user()->isAdmin()) {
+        abort_unless($reservation->status === 'pending' && ! $reservation->payments()->exists(), 409);
+    }
     $data = $request->validated();
     unset($data['user_id'], $data['total_amount']);
 
@@ -84,6 +90,7 @@ class ReservationController extends Controller
     public function destroy(Reservation $reservation)
     {
         abort_unless(request()->user()->isAdmin() || $reservation->user_id === request()->user()->id, 403);
+        abort_unless(! $reservation->payments()->where('status', 'paid')->exists() && ! $reservation->rental()->exists(), 409);
         $reservation->delete();
         return response()->noContent();
     }
@@ -95,6 +102,6 @@ class ReservationController extends Controller
         $end = Carbon::parse($endDate)->startOfDay();
         $days = max(1, $start->diffInDays($end) + 1);
 
-        return (float) $equipment->rental_price_per_day * $days;
+        return (float) $equipment->price_per_day * $days;
     }
 }

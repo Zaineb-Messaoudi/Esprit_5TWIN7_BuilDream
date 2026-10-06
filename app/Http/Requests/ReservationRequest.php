@@ -4,6 +4,7 @@ namespace App\Http\Requests;
 
 use Illuminate\Foundation\Http\FormRequest;
 use App\Models\Reservation;
+use App\Models\Rental;
 
 class ReservationRequest extends FormRequest
 {
@@ -27,8 +28,9 @@ class ReservationRequest extends FormRequest
             'user_id' => ['sometimes', 'exists:users,id'],
             'start_date' => ['required', 'date', 'after_or_equal:today'],
             'end_date' => ['required', 'date', 'after_or_equal:start_date'],
-            'total_amount' => ['required', 'numeric', 'min:0'],
-            'status' => ['sometimes', 'in:pending,confirmed,cancelled'],
+            // Totals and lifecycle state are computed/controlled server-side.
+            'total_amount' => ['prohibited'],
+            'status' => [$this->user()?->isAdmin() ? 'sometimes' : 'prohibited', 'in:pending,confirmed,cancelled'],
         ];
     }
 
@@ -44,7 +46,15 @@ class ReservationRequest extends FormRequest
                 ->where('end_date', '>=', $this->input('start_date'))
                 ->exists();
 
-            if ($overlap) {
+            $rentalOverlap = Rental::query()
+                ->where('equipment_id', $this->input('equipment_id'))
+                ->whereNotIn('status', ['cancelled', 'completed'])
+                ->when($reservationId, fn ($query) => $query->whereDoesntHave('reservation', fn ($reservation) => $reservation->whereKey($reservationId)))
+                ->where('start_date', '<=', $this->input('end_date'))
+                ->where('end_date', '>=', $this->input('start_date'))
+                ->exists();
+
+            if ($overlap || $rentalOverlap) {
                 $validator->errors()->add('start_date', __('This equipment is already reserved for the selected dates.'));
             }
         });

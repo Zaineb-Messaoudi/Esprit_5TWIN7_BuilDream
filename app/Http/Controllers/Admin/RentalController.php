@@ -7,6 +7,7 @@ use App\Http\Requests\Admin\AdminRentalStoreRequest;
 use App\Http\Requests\Admin\AdminRentalUpdateRequest;
 use App\Models\Rental;
 use App\Models\User;
+use App\Models\Reservation;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -80,7 +81,8 @@ class RentalController extends Controller
         // 1) insert with a temporary unique reference, 2) replace it with the final one.
         // The transaction makes both steps succeed or fail together.
         DB::transaction(function () use ($request) {
-            $rental = Rental::create($request->validated() + [
+            $attributes = $this->reservationAttributes($request->validated());
+            $rental = Rental::create($attributes + [
                 'reference' => 'TMP-' . Str::uuid(),
             ]);
 
@@ -116,7 +118,7 @@ class RentalController extends Controller
     /** Save the changes (validation done by AdminRentalUpdateRequest). */
     public function update(AdminRentalUpdateRequest $request, Rental $rental): RedirectResponse
     {
-        $rental->update($request->validated());
+        $rental->update($this->reservationAttributes($request->validated()));
 
         return redirect()->route('admin.rentals.index')->with('status', 'rental-updated');
     }
@@ -145,5 +147,25 @@ class RentalController extends Controller
                 ->orderBy('name')
                 ->get(['id', 'category_id', 'name', 'brand', 'model', 'status']),
         ];
+    }
+
+    /** Keep a manually linked rental identical to its paid, owner-approved reservation. */
+    private function reservationAttributes(array $attributes): array
+    {
+        if (empty($attributes['reservation_id'])) {
+            return $attributes;
+        }
+
+        $reservation = Reservation::with('payments')->findOrFail($attributes['reservation_id']);
+        $payment = $reservation->payments->firstWhere('status', 'paid');
+        abort_unless($reservation->status === 'confirmed' && $payment, 422, __('A linked rental requires an approved reservation with verified payment.'));
+
+        return array_merge($attributes, [
+            'user_id' => $reservation->user_id,
+            'equipment_id' => $reservation->equipment_id,
+            'start_date' => $reservation->start_date,
+            'end_date' => $reservation->end_date,
+            'total_amount' => $payment->amount,
+        ]);
     }
 }

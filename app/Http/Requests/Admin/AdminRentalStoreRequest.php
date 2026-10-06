@@ -30,7 +30,7 @@ class AdminRentalStoreRequest extends FormRequest
 
             // Optional. A reservation can become only ONE rental, hence "unique".
             // (We do not check "exists" yet: Student 4's table is not merged.)
-            'reservation_id' => ['nullable', 'integer', 'min:1', 'unique:rentals,reservation_id'],
+            'reservation_id' => ['nullable', 'integer', 'exists:reservations,id', 'unique:rentals,reservation_id'],
 
             'start_date' => ['required', 'date'],
             // The rental cannot end before it starts

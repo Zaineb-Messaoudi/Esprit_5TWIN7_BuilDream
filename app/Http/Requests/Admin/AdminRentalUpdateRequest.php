@@ -31,7 +31,7 @@ class AdminRentalUpdateRequest extends FormRequest
             'reservation_id' => [
                 'nullable',
                 'integer',
-                'min:1',
+                'exists:reservations,id',
                 Rule::unique('rentals', 'reservation_id')->ignore($this->route('rental')),
             ],
 

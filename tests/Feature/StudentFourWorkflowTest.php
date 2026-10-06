@@ -6,7 +6,9 @@ use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\Invoice;
+use App\Models\Payment;
 use App\Models\Rental;
+use App\Models\RentalContract;
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -16,51 +18,71 @@ class StudentFourWorkflowTest extends TestCase
 {
     use RefreshDatabase;
 
-    public function test_buyer_can_create_reservation_pay_and_receive_rental_and_invoice(): void
+    public function test_buyer_reservation_owner_approval_and_verified_payment_create_rental_contract_and_invoice(): void
     {
-        $buyer = User::factory()->create(['role' => UserRole::BUYER]);
-        $owner = User::factory()->create(['role' => UserRole::OWNER]);
+        $buyer = User::factory()->create(['role' => UserRole::BUYER, 'role_setup_completed' => true]);
+        $owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true]);
+        $admin = User::factory()->create(['role' => UserRole::ADMIN, 'role_setup_completed' => true]);
         $equipment = Equipment::factory()->create([
             'owner_id' => $owner->id,
             'category_id' => Category::factory()->create()->id,
+            'approval_status' => 'published',
+            'status' => 'available',
+            'price_per_day' => 30,
         ]);
 
-        $reservationResponse = $this->actingAs($buyer)->post(route('rental.reservations.store'), [
+        $this->actingAs($buyer)->post(route('booking.reservations.store'), [
             'equipment_id' => $equipment->id,
             'start_date' => now()->addDay()->toDateString(),
             'end_date' => now()->addDays(3)->toDateString(),
-            'total_amount' => 120,
-        ]);
+            'total_amount' => 1,
+        ])->assertRedirect();
 
-        $reservationResponse->assertRedirect(route('rental.reservations.index'));
         $reservation = Reservation::firstOrFail();
+        $this->assertSame(90.0, (float) $reservation->total_amount);
+        $this->assertSame('pending', $reservation->status);
+        $this->assertDatabaseHas('equipment', ['id' => $equipment->id]);
         $this->assertTrue($equipment->reservations()->whereKey($reservation->id)->exists());
 
-        $this->actingAs($buyer)->post(route('rental.payments.store'), [
-            'reservation_id' => $reservation->id,
-            'amount' => 120,
-            'payment_date' => now()->toDateTimeString(),
-            'status' => 'paid',
+        $this->actingAs($owner)->post(route('owner.reservations.decision', $reservation), [
+            'decision' => 'approve',
+        ])->assertRedirect();
+        $this->assertDatabaseHas('reservations', ['id' => $reservation->id, 'status' => 'confirmed']);
+
+        $this->actingAs($buyer)->post(route('booking.reservations.pay', $reservation), [
             'payment_method' => 'CARD',
-        ])->assertRedirect(route('rental.payments.index'));
+        ])->assertRedirect(route('front.confirmed', ['equipment' => $equipment->id, 'reservation' => $reservation->id]));
 
-        $this->assertDatabaseHas('rentals', ['reservation_id' => $reservation->id, 'equipment_id' => $equipment->id]);
-        $this->assertSame($reservation->id, Rental::firstOrFail()->reservation->id);
+        $payment = Payment::where('reservation_id', $reservation->id)->firstOrFail();
+        $this->assertSame('pending', $payment->status);
+        $this->assertSame(107.1, (float) $payment->amount);
+        $this->assertDatabaseMissing('rentals', ['reservation_id' => $reservation->id]);
 
-        $this->actingAs($buyer)->post(route('rental.invoices.store'), [
-            'reservation_id' => $reservation->id,
-            'issue_date' => now()->toDateString(),
-            'subtotal' => 120,
-            'status' => 'unpaid',
-        ])->assertRedirect(route('rental.invoices.index'));
+        $this->actingAs($admin)->put(route('rental.payments.update', $payment), ['status' => 'paid'])
+            ->assertRedirect(route('rental.payments.index'));
 
-        $this->assertTrue(Invoice::where('reservation_id', $reservation->id)->exists());
+        $rental = Rental::where('reservation_id', $reservation->id)->firstOrFail();
+        $this->assertSame($equipment->id, $rental->equipment_id);
+        $this->assertSame($buyer->id, $rental->user_id);
+        $this->assertSame(107.1, (float) $rental->total_amount);
+        $this->assertTrue(RentalContract::where('rental_id', $rental->id)->exists());
+        $invoice = Invoice::where('reservation_id', $reservation->id)->firstOrFail();
+        $this->assertSame('paid', $invoice->status);
+        $this->assertSame(90.0, (float) $invoice->subtotal);
+        $this->assertSame(17.1, (float) $invoice->tax);
+
+        $this->actingAs($buyer)->get(route('front.my-reservations'))->assertOk()->assertSee($reservation->reference);
+        $this->actingAs($owner)->get(route('front.my-reservations'))->assertOk()->assertSee($reservation->reference);
+        $this->actingAs($buyer)->get(route('front.my-rentals'))->assertOk()->assertSee($rental->reference);
+        $this->actingAs($owner)->get(route('front.my-rentals'))->assertOk()->assertSee($rental->reference);
+        $this->actingAs($buyer)->get(route('front.my-contract'))->assertOk()->assertSee($rental->contract->contract_number);
+        $this->actingAs($buyer)->get(route('front.my-payments'))->assertOk()->assertSee($invoice->invoice_number);
     }
 
     public function test_overlapping_reservation_is_rejected(): void
     {
-        $buyer = User::factory()->create(['role' => UserRole::BUYER]);
-        $equipment = Equipment::factory()->create();
+        $buyer = User::factory()->create(['role' => UserRole::BUYER, 'role_setup_completed' => true]);
+        $equipment = Equipment::factory()->create(['approval_status' => 'published', 'status' => 'available']);
         Reservation::factory()->create([
             'equipment_id' => $equipment->id,
             'user_id' => $buyer->id,
@@ -69,60 +91,32 @@ class StudentFourWorkflowTest extends TestCase
             'status' => 'confirmed',
         ]);
 
-        $this->actingAs($buyer)->post(route('rental.reservations.store'), [
+        $this->actingAs($buyer)->post(route('booking.reservations.store'), [
             'equipment_id' => $equipment->id,
             'start_date' => now()->addDays(4)->toDateString(),
             'end_date' => now()->addDays(6)->toDateString(),
-            'total_amount' => 100,
         ])->assertSessionHasErrors('start_date');
     }
 
-    public function test_reservation_payment_and_invoice_update_and_delete_actions_work(): void
+    public function test_owner_cannot_approve_another_owners_reservation_and_paid_records_cannot_be_deleted(): void
     {
-        $admin = User::factory()->create(['role' => UserRole::ADMIN]);
-        $buyer = User::factory()->create(['role' => UserRole::BUYER]);
-        $equipment = Equipment::factory()->create();
+        $buyer = User::factory()->create(['role' => UserRole::BUYER, 'role_setup_completed' => true]);
+        $owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true]);
+        $otherOwner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true]);
+        $equipment = Equipment::factory()->create(['owner_id' => $owner->id]);
         $reservation = Reservation::factory()->create([
+            'equipment_id' => $equipment->id,
             'user_id' => $buyer->id,
-            'equipment_id' => $equipment->id,
             'status' => 'pending',
         ]);
-        $payment = $reservation->payments()->create([
-            'amount' => 50,
-            'payment_date' => now(),
-            'transaction_reference' => 'PAY-TEST-'.uniqid(),
-            'status' => 'pending',
-            'payment_method' => 'CARD',
-        ]);
-        $invoice = $reservation->invoice()->create([
-            'invoice_number' => 'INV-TEST-'.uniqid(),
-            'issue_date' => now(),
-            'subtotal' => 50,
-            'tax' => 9.5,
-            'total' => 59.5,
-            'status' => 'unpaid',
-        ]);
 
-        $this->actingAs($buyer)->put(route('rental.reservations.update', $reservation), [
-            'equipment_id' => $equipment->id,
-            'start_date' => now()->addDays(2)->toDateString(),
-            'end_date' => now()->addDays(4)->toDateString(),
-            'total_amount' => 75,
-        ])->assertRedirect(route('rental.reservations.index'));
+        $this->actingAs($otherOwner)->post(route('owner.reservations.decision', $reservation), [
+            'decision' => 'approve',
+        ])->assertForbidden();
 
-        $this->actingAs($admin)->put(route('rental.payments.update', $payment), ['status' => 'paid'])
-            ->assertRedirect(route('rental.payments.index'));
-        $this->assertDatabaseHas('payments', ['id' => $payment->id, 'status' => 'paid']);
-
-        $this->actingAs($admin)->put(route('rental.invoices.update', $invoice), [
-            'issue_date' => now()->toDateString(), 'subtotal' => 80, 'status' => 'paid',
-        ])->assertRedirect(route('rental.invoices.index'));
-
-        $this->actingAs($buyer)->delete(route('rental.payments.destroy', $payment))
-            ->assertRedirect(route('rental.payments.index'));
-        $this->actingAs($buyer)->delete(route('rental.invoices.destroy', $invoice))
-            ->assertRedirect(route('rental.invoices.index'));
-        $this->actingAs($buyer)->delete(route('rental.reservations.destroy', $reservation))
-            ->assertNoContent();
+        $this->actingAs($buyer)->get(route('front.buyer-reservation-detail', $reservation->reference))
+            ->assertOk()->assertSee($reservation->reference);
+        $this->actingAs($otherOwner)->get(route('front.buyer-reservation-detail', $reservation->reference))
+            ->assertForbidden();
     }
 }

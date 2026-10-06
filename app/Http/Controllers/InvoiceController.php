@@ -19,6 +19,7 @@ class InvoiceController extends Controller
 
     public function create()
     {
+        abort_unless(request()->user()->isAdmin(), 403);
         $query = Reservation::doesntHave('invoice');
         if (! request()->user()->isAdmin()) $query->where('user_id', request()->user()->id);
         return view('invoices.create', ['reservations' => $query->get()]);
@@ -26,6 +27,7 @@ class InvoiceController extends Controller
 
     public function store(Request $request)
     {
+        abort_unless($request->user()->isAdmin(), 403);
         $data = $request->validate([
             'reservation_id' => 'required|exists:reservations,id|unique:invoices,reservation_id',
             'issue_date'     => 'required|date',
@@ -57,18 +59,17 @@ class InvoiceController extends Controller
 
     public function edit(Invoice $invoice)
     {
-        abort_unless(request()->user()->isAdmin() || $invoice->reservation->user_id === request()->user()->id, 403);
+        abort_unless(request()->user()->isAdmin(), 403);
         return view('invoices.edit', compact('invoice'));
     }
 
     public function update(Request $request, Invoice $invoice)
     {
+        abort_unless($request->user()->isAdmin(), 403);
         $data = $request->validate([
             'issue_date' => 'required|date',
             'subtotal'   => 'nullable|numeric|min:0',
         ]);
-
-        abort_unless(request()->user()->isAdmin() || $invoice->reservation->user_id === request()->user()->id, 403);
 
         $data['subtotal'] = request()->user()->isAdmin() && isset($data['subtotal'])
             ? $data['subtotal']
@@ -83,7 +84,8 @@ class InvoiceController extends Controller
 
     public function destroy(Invoice $invoice)
     {
-        abort_unless(request()->user()->isAdmin() || $invoice->reservation->user_id === request()->user()->id, 403);
+        abort_unless(request()->user()->isAdmin(), 403);
+        abort_unless($invoice->status !== 'paid', 409);
         $invoice->delete();
         return redirect()->route('rental.invoices.index')->with('success', __('Invoice deleted successfully.'));
     }
