@@ -11,7 +11,7 @@ class Maintenance extends Model
 {
     use HasFactory;
 
-    protected $fillable = ['equipment_id', 'start_date', 'end_date', 'reason', 'cost', 'status', 'notes'];
+    protected $fillable = ['equipment_id', 'rental_id', 'start_date', 'end_date', 'reason', 'cost', 'status', 'notes'];
 
     protected function casts(): array
     {
@@ -21,6 +21,11 @@ class Maintenance extends Model
     public function equipment(): BelongsTo
     {
         return $this->belongsTo(Equipment::class);
+    }
+
+    public function rental(): BelongsTo
+    {
+        return $this->belongsTo(Rental::class);
     }
 
     public function report(): HasOne
