@@ -2,7 +2,14 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\Equipment;
+use App\Models\Reservation;
+use App\Models\Rental;
+use App\Models\Payment;
+use App\Models\Invoice;
+use App\Models\Maintenance;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -12,7 +19,7 @@ class DashboardController extends Controller
             'description' => 'A live-style overview of portfolio performance and market activity.',
             'metrics' => [
                 ['label' => 'Portfolio value', 'value' => '$284,590', 'change' => '+8.4%', 'tone' => 'success'],
-                ['label' => 'Today’s return', 'value' => '$2,840', 'change' => '+1.2%', 'tone' => 'success'],
+                ['label' => 'Today\'s return', 'value' => '$2,840', 'change' => '+1.2%', 'tone' => 'success'],
                 ['label' => 'Open positions', 'value' => '18', 'change' => '3 watchlisted', 'tone' => 'primary'],
                 ['label' => 'Available cash', 'value' => '$32,450', 'change' => '11.4% of portfolio', 'tone' => 'primary'],
             ],
@@ -91,5 +98,125 @@ class DashboardController extends Controller
         abort_unless(isset(self::SECTOR_DASHBOARDS[$dashboard]), 404);
 
         return view('pages.dashboard.sector', self::SECTOR_DASHBOARDS[$dashboard]);
+    }
+
+    public function ecommerce(): View
+    {
+        // Fetch real SolarShare statistics
+        $totalEquipment = Equipment::count();
+        $availableEquipment = Equipment::where('status', 'available')->where('approval_status', 'published')->count();
+        $totalReservations = Reservation::count();
+        $pendingReservations = Reservation::where('status', 'pending')->count();
+        $activeRentals = Rental::where('status', 'active')->count();
+        $completedRentals = Rental::where('status', 'completed')->count();
+        $totalRevenue = Payment::where('status', 'paid')->sum('amount');
+        $pendingRevenue = Payment::where('status', 'pending')->sum('amount');
+        $totalInvoices = Invoice::count();
+        $paidInvoices = Invoice::where('status', 'paid')->count();
+        $equipmentInMaintenance = Equipment::where('status', 'maintenance')->count();
+        $totalMaintenanceCost = Maintenance::sum('cost');
+
+        // Monthly revenue for chart (last 12 months)
+        $monthlyRevenue = Payment::where('status', 'paid')
+            ->where('payment_date', '>=', now()->subMonths(11)->startOfMonth())
+            ->selectRaw('YEAR(payment_date) as year, MONTH(payment_date) as month, SUM(amount) as total')
+            ->groupBy('year', 'month')
+            ->orderBy('year')
+            ->orderBy('month')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                $key = sprintf('%04d-%02d', $item->year, $item->month);
+                return [$key => (float) $item->total];
+            });
+
+        // Fill missing months with 0
+        $chartData = [];
+        for ($i = 11; $i >= 0; $i--) {
+            $date = now()->subMonths($i)->startOfMonth();
+            $key = $date->format('Y-m');
+            $chartData[] = $monthlyRevenue->get($key, 0);
+        }
+
+        // Equipment by category
+        $equipmentByCategory = Equipment::with('category')
+            ->selectRaw('category_id, count(*) as count')
+            ->groupBy('category_id')
+            ->orderByDesc('count')
+            ->limit(5)
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [$item->category->name ?? 'Unknown' => $item->count];
+            });
+
+        // Equipment by status
+        $equipmentByStatus = Equipment::selectRaw('status, count(*) as count')
+            ->groupBy('status')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [ucfirst($item->status) => $item->count];
+            });
+
+        // Reservations by status
+        $reservationsByStatus = Reservation::selectRaw('status, count(*) as count')
+            ->groupBy('status')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [ucfirst($item->status) => $item->count];
+            });
+
+        // Rentals by status
+        $rentalsByStatus = Rental::selectRaw('status, count(*) as count')
+            ->groupBy('status')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                return [ucfirst($item->status) => $item->count];
+            });
+
+        // Recent orders (rentals with payments)
+        $recentOrders = Rental::with(['equipment', 'user', 'contract'])
+            ->latest('created_at')
+            ->limit(5)
+            ->get();
+
+        // Top equipment by rental count
+        $topEquipment = Equipment::withCount('rentals')
+            ->orderByDesc('rentals_count')
+            ->limit(5)
+            ->get();
+
+        // Customer demographics (simplified)
+        $customersByRole = \App\Models\User::selectRaw('role, count(*) as count')
+            ->whereNotNull('role')
+            ->groupBy('role')
+            ->get()
+            ->mapWithKeys(function ($item) {
+                $role = $item->role ?? $item['role'] ?? '';
+                if ($role instanceof \App\Enums\UserRole) {
+                    $role = $role->value;
+                }
+                $count = $item->count ?? $item['count'] ?? 0;
+                return [$role => $count];
+            });
+
+        $data = [
+            'title' => 'E-commerce Dashboard',
+            'metrics' => [
+                ['label' => 'Total Equipment', 'value' => $totalEquipment, 'change' => $availableEquipment . ' available', 'tone' => 'primary'],
+                ['label' => 'Active Rentals', 'value' => $activeRentals, 'change' => $completedRentals . ' completed', 'tone' => 'success'],
+                ['label' => 'Total Revenue', 'value' => number_format($totalRevenue, 2) . ' TND', 'change' => number_format($pendingRevenue, 2) . ' TND pending', 'tone' => 'success'],
+                ['label' => 'Maintenance', 'value' => $equipmentInMaintenance, 'change' => number_format($totalMaintenanceCost, 2) . ' TND total cost', 'tone' => $equipmentInMaintenance > 0 ? 'warning' : 'success'],
+            ],
+            'chartData' => $chartData,
+            'chartLabel' => 'Monthly Revenue (TND)',
+            'equipmentByCategory' => $equipmentByCategory,
+            'equipmentByStatus' => $equipmentByStatus,
+            'reservationsByStatus' => $reservationsByStatus,
+            'rentalsByStatus' => $rentalsByStatus,
+            'recentOrders' => $recentOrders,
+            'topEquipment' => $topEquipment,
+            'customersByRole' => $customersByRole,
+        ];
+
+        return view('pages.dashboard.ecommerce', $data);
     }
 }

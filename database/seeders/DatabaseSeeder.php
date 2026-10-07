@@ -468,7 +468,7 @@ class DatabaseSeeder extends Seeder
         $this->call(RentalSeeder::class);
 
         // Technical data (Student 2): maintenances, reports, inspections.
-        // Runs in all environments so demo has data.
-        $this->call(\Database\Seeders\TechnicalPreviewSeeder::class);
+        // Uses the real seeded equipment and rentals, and is safe in every environment.
+        $this->call(TechnicalSeeder::class);
     }
 }

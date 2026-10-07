@@ -5,6 +5,11 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
+    <meta name="pusher-key" content="{{ env('PUSHER_APP_KEY') }}">
+    <meta name="pusher-cluster" content="{{ env('PUSHER_APP_CLUSTER', 'mt1') }}">
+    @if(auth()->check())
+        <meta name="user-id" content="{{ auth()->id() }}">
+    @endif
     <link rel="icon" type="image/png" href="{{ asset('images/brand/solarshare-icon.png') }}">
 
     <title>{{ __($title ?? 'Dashboard') }} | SolarShare Admin</title>

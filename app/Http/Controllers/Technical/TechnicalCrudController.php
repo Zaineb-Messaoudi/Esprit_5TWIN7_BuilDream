@@ -107,8 +107,10 @@ abstract class TechnicalCrudController extends Controller
 
         // Dispatch events for Maintenance model
         if ($class === Maintenance::class) {
-            $record->load('equipment');
-            MaintenanceCreated::dispatch($record, $record->equipment->owner);
+            $record->load('equipment.owner');
+            if ($record->equipment?->owner) {
+                MaintenanceCreated::dispatch($record, $record->equipment->owner);
+            }
         }
 
         return redirect()->route($this->prefix($request).$this->resource().'.show', $record)
@@ -137,8 +139,10 @@ abstract class TechnicalCrudController extends Controller
         
         // Dispatch MaintenanceCompleted event when maintenance is completed
         if ($record instanceof Maintenance && ! $wasCompleted && $record->status === 'completed') {
-            $record->load('equipment');
-            MaintenanceCompleted::dispatch($record, $record->equipment->owner);
+            $record->load('equipment.owner');
+            if ($record->equipment?->owner) {
+                MaintenanceCompleted::dispatch($record, $record->equipment->owner);
+            }
         }
 
         return redirect()->route($this->prefix($request).$this->resource().'.show', $record)

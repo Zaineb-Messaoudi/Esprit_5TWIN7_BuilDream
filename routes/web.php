@@ -205,9 +205,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     });
 
     // Dashboard Routes
-    Route::get('/ecommerce', function () {
-        return view('pages.dashboard.ecommerce', ['title' => 'E-commerce Dashboard']);
-    })->name('dashboard.ecommerce');
+    Route::get('/ecommerce', [DashboardController::class, 'ecommerce'])->name('dashboard.ecommerce');
     Route::get('/analytics', function () {
         return view('pages.dashboard.analytics', ['title' => 'Analytics Dashboard']);
     })->name('dashboard.analytics');

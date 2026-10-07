@@ -30,7 +30,9 @@
         "flatpickr": "^4.6.13",
         "fullcalendar": "^7.0.2",
         "jsvectormap": "^1.7.0",
+        "laravel-echo": "^2.2.0",
         "prismjs": "^1.30.0",
+        "pusher-js": "^8.4.0",
         "swiper": "^14.2.0",
         "temporal-polyfill": "^1.0.4"
     },

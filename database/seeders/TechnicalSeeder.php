@@ -25,15 +25,17 @@ class TechnicalSeeder extends Seeder
         $rentalsReady = class_exists(Rental::class) && Schema::hasTable('rentals');
 
         $query = Equipment::query()->orderBy('id');
-        // Seed every local preview item so every owner account can test its own pages.
+        // Seed for all real equipment (skip technical_preview items if they exist)
         $equipment = Schema::hasColumn('equipment', 'technical_preview')
-            ? $query->where('technical_preview', true)->get()
-            : $query->limit(5)->get();
+            ? $query->where('technical_preview', false)->get()
+            : $query->get();
         if ($equipment->isEmpty()) {
             throw new RuntimeException('TechnicalSeeder needs at least one real equipment row.');
         }
 
-        $equipment->each(function (Equipment $item) use ($rentalsReady): void {
+        // Seed without model events: factory-generated statuses must not flip the
+        // catalogue's equipment statuses through the observers.
+        \Illuminate\Database\Eloquent\Model::withoutEvents(fn () => $equipment->each(function (Equipment $item) use ($rentalsReady): void {
             $maintenance = Maintenance::query()->firstOrCreate(
                 ['equipment_id' => $item->getKey(), 'reason' => 'Routine electrical safety check'],
                 Maintenance::factory()->make([
@@ -60,6 +62,6 @@ class TechnicalSeeder extends Seeder
                     'comments' => 'Routine return inspection',
                 ])->getAttributes(),
             );
-        });
+        }));
     }
 }
