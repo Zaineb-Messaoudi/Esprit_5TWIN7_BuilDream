@@ -7,6 +7,9 @@ use App\Models\Payment;
 use App\Models\Rental;
 use App\Models\Reservation;
 use App\Models\RentalContract;
+use App\Events\ReservationCreated;
+use App\Events\ReservationApproved;
+use App\Events\ReservationRejected;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -63,6 +66,9 @@ class MarketplaceController extends Controller
             'status' => 'pending',
         ]);
 
+        // Fire event for real-time notification to owner
+        ReservationCreated::dispatch($reservation->load('equipment', 'user'), $equipment->owner);
+
         return redirect()->route('front.booking-summary', [
             'equipment' => $equipment->id,
             'reservation' => $reservation->id,
@@ -76,6 +82,13 @@ class MarketplaceController extends Controller
         abort_unless($reservation->status === 'pending', 409);
 
         $reservation->update(['status' => $data['decision'] === 'approve' ? 'confirmed' : 'cancelled']);
+
+        // Fire real-time notification events
+        if ($data['decision'] === 'approve') {
+            ReservationApproved::dispatch($reservation->load('equipment'), $reservation->user);
+        } else {
+            ReservationRejected::dispatch($reservation->load('equipment'), $reservation->user);
+        }
 
         return back()->with('status', $data['decision'] === 'approve'
             ? __('Reservation approved. The renter can now record payment.')

@@ -9,10 +9,15 @@ use App\Models\Payment;
 use App\Models\RentalContract;
 use App\Models\RentalExtension;
 use App\Models\Equipment;
+use App\Models\Inspection;
+use App\Events\EquipmentReturned;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 /** Renders any page declared in config/front.php (section-based pages). */
 class PageController extends Controller
@@ -55,6 +60,96 @@ class PageController extends Controller
         return view('pages.front.live-record-detail', [
             'title' => __('Rental details'), 'record' => $rental, 'recordType' => 'rental', 'owner' => true,
         ]);
+    }
+
+    /** Export rental contract as PDF for the front office. */
+    public function exportContractPdf(Request $request, Rental $rental): \Illuminate\Http\Response
+    {
+        abort_unless($rental->contract, 404);
+
+        // Buyer or owner can download
+        abort_unless(
+            $request->user()->isBuyer() && (int) $rental->user_id === (int) $request->user()->id ||
+            $request->user()->isOwner() && (int) $rental->equipment?->owner_id === (int) $request->user()->id,
+            403
+        );
+
+        $rental->load(['equipment.category', 'user', 'contract']);
+        $pdf = Pdf::loadView('pdf.rental-contract', ['contract' => $rental->contract]);
+        return $pdf->download($rental->contract->contract_number . '.pdf');
+    }
+
+    /** Show the return equipment form (inspection) for an active rental. */
+    public function showReturnForm(Request $request, Rental $rental): View|RedirectResponse
+    {
+        // Only owner or admin can access
+        abort_unless(
+            $request->user()->isAdmin() ||
+            ($request->user()->isOwner() && (int) $rental->equipment?->owner_id === (int) $request->user()->id),
+            403
+        );
+
+        // Only active or completed rentals can be returned
+        abort_unless(in_array($rental->status->value, ['active', 'completed']), 409, 'Rental cannot be returned in its current state.');
+
+        // Check if inspection already exists
+        $existingInspection = Inspection::where('rental_id', $rental->id)->first();
+        if ($existingInspection) {
+            return redirect()->route('technical.inspections.show', $existingInspection)
+                ->with('status', 'inspection-already-exists');
+        }
+
+        $rental->load(['equipment.category', 'user', 'contract']);
+        return view('pages.front.rental-return', [
+            'title' => __('Return equipment'),
+            'rental' => $rental,
+        ]);
+    }
+
+    /** Process the return equipment form submission. */
+    public function processReturn(Request $request, Rental $rental): RedirectResponse
+    {
+        // Only owner or admin can access
+        abort_unless(
+            $request->user()->isAdmin() ||
+            ($request->user()->isOwner() && (int) $rental->equipment?->owner_id === (int) $request->user()->id),
+            403
+        );
+
+        abort_unless(in_array($rental->status->value, ['active', 'completed']), 409);
+
+        $data = $request->validate([
+            'condition_before' => ['required', 'string', 'max:255'],
+            'condition_after' => ['required', 'string', 'max:255'],
+            'damage_detected' => ['required', 'boolean'],
+            'comments' => ['nullable', 'string', 'max:10000'],
+        ]);
+
+        DB::transaction(function () use ($rental, $data) {
+            // Create the inspection
+            $inspection = Inspection::create([
+                'equipment_id' => $rental->equipment_id,
+                'rental_id' => $rental->id,
+                'inspection_date' => now(),
+                'condition_before' => $data['condition_before'],
+                'condition_after' => $data['condition_after'],
+                'damage_detected' => $data['damage_detected'],
+                'comments' => $data['comments'] ?? null,
+            ]);
+
+            // Update rental status to completed if it was active
+            if ($rental->status->value === 'active') {
+                $rental->update(['status' => \App\Enums\RentalStatus::COMPLETED]);
+            }
+        });
+
+        // Fire real-time notification for equipment returned
+        $rental->load('equipment', 'user');
+        $inspection = $rental->inspections->first();
+        EquipmentReturned::dispatch($rental, $inspection, $rental->equipment->owner, $rental->user);
+
+        return redirect()->route('front.my-rental-detail', $rental->reference)
+            ->with('status', 'equipment-returned');
     }
 
     public function __invoke(Request $request): View|RedirectResponse

@@ -327,7 +327,7 @@ class FrontOfficeTest extends TestCase
         $this->get(route('front.my-extensions'))->assertOk()->assertSee('No extension requests yet.');
         $this->get(route('front.my-earnings'))->assertOk()->assertSee('Invoices');
         $this->get(route('front.my-calendar'))->assertOk()->assertSee('SERVICE');
-        $this->get(route('front.my-maintenance'))->assertSee('Maintenance cost by equipment');
+        $this->get(route('front.my-maintenance'))->assertRedirect(route('technical.maintenances.index'));
     }
 
     public function test_equipment_detail_and_demo_booking_pages_render_without_claiming_live_booking(): void

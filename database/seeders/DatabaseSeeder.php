@@ -466,5 +466,9 @@ class DatabaseSeeder extends Seeder
 
         // Rental module (Student 3): rentals, contracts and extension requests.
         $this->call(RentalSeeder::class);
+
+        // Technical data (Student 2): maintenances, reports, inspections.
+        // Runs in all environments so demo has data.
+        $this->call(\Database\Seeders\TechnicalPreviewSeeder::class);
     }
 }

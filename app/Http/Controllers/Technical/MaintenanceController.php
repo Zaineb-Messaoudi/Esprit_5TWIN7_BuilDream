@@ -53,4 +53,5 @@ class MaintenanceController extends TechnicalCrudController
             'notes' => ['nullable', 'string', 'max:10000'],
         ];
     }
+
 }

@@ -61,4 +61,16 @@ class Equipment extends Model
     {
         return $this->hasMany(Reservation::class);
     }
+
+    /** Maintenance interventions recorded for this listing. Equipment 1-N Maintenance. */
+    public function maintenances(): HasMany
+    {
+        return $this->hasMany(Maintenance::class);
+    }
+
+    /** Return/condition inspections recorded for this listing. Equipment 1-N Inspection. */
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(Inspection::class);
+    }
 }

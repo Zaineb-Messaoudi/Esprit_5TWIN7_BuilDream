@@ -4,6 +4,9 @@ namespace App\Http\Controllers\Technical;
 
 use App\Http\Controllers\Controller;
 use App\Models\Equipment;
+use App\Models\Maintenance;
+use App\Events\MaintenanceCreated;
+use App\Events\MaintenanceCompleted;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
@@ -102,6 +105,12 @@ abstract class TechnicalCrudController extends Controller
         $class = $this->modelClass();
         $record = $class::create($data);
 
+        // Dispatch events for Maintenance model
+        if ($class === Maintenance::class) {
+            $record->load('equipment');
+            MaintenanceCreated::dispatch($record, $record->equipment->owner);
+        }
+
         return redirect()->route($this->prefix($request).$this->resource().'.show', $record)
             ->with('status', __('Record created.'));
     }
@@ -123,7 +132,14 @@ abstract class TechnicalCrudController extends Controller
     public function update(Request $request, int $id): RedirectResponse
     {
         $record = $this->find($request, $id);
+        $wasCompleted = $record instanceof Maintenance && $record->status === 'completed';
         $record->update($request->validate($this->rules($request, $record)));
+        
+        // Dispatch MaintenanceCompleted event when maintenance is completed
+        if ($record instanceof Maintenance && ! $wasCompleted && $record->status === 'completed') {
+            $record->load('equipment');
+            MaintenanceCompleted::dispatch($record, $record->equipment->owner);
+        }
 
         return redirect()->route($this->prefix($request).$this->resource().'.show', $record)
             ->with('status', __('Record updated.'));

@@ -48,7 +48,7 @@ class EquipmentController extends Controller
 
     public function show(Equipment $equipment): View
     {
-        $equipment->load(['category', 'owner', 'energyProfile']);
+        $equipment->load(['category', 'owner', 'energyProfile', 'maintenances.report']);
         return view('pages.admin.equipment.show', compact('equipment') + ['title' => $equipment->name]);
     }
 

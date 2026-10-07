@@ -8,6 +8,8 @@ use App\Models\Reservation;
 use App\Models\Rental;
 use App\Models\Invoice;
 use App\Models\RentalContract;
+use App\Events\PaymentReceived;
+use App\Events\RentalStarted;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
 use Illuminate\Support\Str;
@@ -85,14 +87,20 @@ class PaymentController extends Controller
     {
         $payment = Payment::findOrFail($id);
         abort_unless(request()->user()->isAdmin() || $payment->reservation->user_id === request()->user()->id, 403);
-        abort_unless(request()->user()->isAdmin(), 403);
         $data = $request->validate(['status' => ['required', 'in:pending,paid,failed']]);
-        DB::transaction(function () use ($payment, $data): void {
+        $wasPaid = $payment->status === 'paid';
+        DB::transaction(function () use ($payment, $data, $wasPaid): void {
             $payment->update($data);
-            if ($payment->status === 'paid') {
+            if ($payment->status === 'paid' && ! $wasPaid) {
                 $this->completePaidReservation($payment->reservation, $payment->amount);
             }
         });
+        
+        // Fire real-time notification when payment is marked as paid
+        if ($payment->status === 'paid' && ! $wasPaid) {
+            PaymentReceived::dispatch($payment->load('reservation.equipment'), $payment->reservation->equipment->owner);
+        }
+
         return redirect()->route('rental.payments.index')->with('success', __('Payment updated successfully.'));
     }
 
@@ -151,5 +159,9 @@ class PaymentController extends Controller
             'total' => $amount,
             'status' => 'paid',
         ])->save();
+
+        // Fire real-time notification for rental started
+        $rental->load('equipment', 'user');
+        RentalStarted::dispatch($rental, $rental->equipment->owner, $rental->user);
     }
 }

@@ -16,6 +16,12 @@ class TechnicalMysqlCrudTest extends TestCase
 {
     use DatabaseTransactions;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+        $this->seed(\Database\Seeders\TechnicalPreviewSeeder::class);
+    }
+
     private function ownerWithEquipment(): array
     {
         $equipment = Equipment::query()->first();

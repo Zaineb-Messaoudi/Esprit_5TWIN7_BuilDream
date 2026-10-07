@@ -89,6 +89,12 @@ class Rental extends Model
         return $this->hasMany(RentalExtension::class);
     }
 
+    /** Inspections done on the return of this rental. Rental 1-N Inspection. */
+    public function inspections(): HasMany
+    {
+        return $this->hasMany(Inspection::class);
+    }
+
     // ------------------------------------------------------------------
     // Accessors
     // ------------------------------------------------------------------

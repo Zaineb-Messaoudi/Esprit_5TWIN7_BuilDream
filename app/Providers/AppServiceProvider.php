@@ -2,6 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Inspection;
+use App\Models\Maintenance;
+use App\Observers\InspectionObserver;
+use App\Observers\MaintenanceObserver;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -12,11 +16,7 @@ class AppServiceProvider extends ServiceProvider
      */
     public function register(): void
     {
-        // Keep the technical module usable with a local fixture until the
-        // teammate's Equipment model is merged. A real model always wins.
-        if (! class_exists(\App\Models\Equipment::class)) {
-            class_alias(\App\Support\TechnicalPreviewEquipment::class, \App\Models\Equipment::class);
-        }
+        //
     }
 
     /**
@@ -35,6 +35,10 @@ class AppServiceProvider extends ServiceProvider
         \Illuminate\Support\Facades\Gate::define('buyer-only', function (\App\Models\User $user) {
             return $user->isBuyer();
         });
+
+        // Register model observers
+        Inspection::observe(InspectionObserver::class);
+        Maintenance::observe(MaintenanceObserver::class);
 
         // Force HTTPS in production
         if (config('app.env') === 'production') {

@@ -9,6 +9,9 @@ use App\Http\Requests\Admin\AdminRentalExtensionStoreRequest;
 use App\Http\Requests\Admin\AdminRentalExtensionUpdateRequest;
 use App\Models\Rental;
 use App\Models\RentalExtension;
+use App\Events\ExtensionRequested;
+use App\Events\ExtensionApproved;
+use App\Events\ExtensionRejected;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -87,7 +90,7 @@ class RentalExtensionController extends Controller
         $rental = Rental::findOrFail($data['rental_id']);
         $newEnd = Carbon::parse($data['new_end_date']);
 
-        RentalExtension::create([
+        $extension = RentalExtension::create([
             'rental_id'         => $rental->id,
             'requested_date'    => now()->toDateString(),   // the request is made today
             'old_end_date'      => $rental->end_date,       // snapshot of the current end date
@@ -97,6 +100,9 @@ class RentalExtensionController extends Controller
             'reason'            => $data['reason'] ?? null,
             'status'            => ExtensionStatus::PENDING,
         ]);
+
+        // Fire real-time notification for extension requested
+        ExtensionRequested::dispatch($extension->load('rental.equipment', 'rental.user'), $rental->equipment->owner);
 
         return redirect()->route('admin.rental-extensions.index')->with('status', 'extension-created');
     }
@@ -212,6 +218,10 @@ class RentalExtensionController extends Controller
             return back()->withErrors(['extension' => $error]);
         }
 
+        // Fire real-time notification for extension approved
+        $rentalExtension->load('rental.equipment', 'rental.user');
+        ExtensionApproved::dispatch($rentalExtension, $rentalExtension->rental->user);
+
         return back()->with('status', 'extension-approved');
     }
 
@@ -223,6 +233,10 @@ class RentalExtensionController extends Controller
         }
 
         $rentalExtension->update(['status' => ExtensionStatus::REJECTED]);
+
+        // Fire real-time notification for extension rejected
+        $rentalExtension->load('rental.equipment', 'rental.user');
+        ExtensionRejected::dispatch($rentalExtension, $rentalExtension->rental->user);
 
         return back()->with('status', 'extension-rejected');
     }

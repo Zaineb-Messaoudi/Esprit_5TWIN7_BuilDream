@@ -12,18 +12,18 @@ $cta = ['type' => 'cta', 'title' => 'Ready to power your next adventure?', 'text
 $hero = fn (string $eyebrow, string $title, string $sub, array $extra = []) => ['type' => 'hero', 'eyebrow' => $eyebrow, 'title' => $title, 'sub' => $sub] + $extra;
 
 $faq = ['type' => 'faq', 'title' => 'Frequently asked questions', 'items' => [
-    ['q' => 'How is renting intended to work?', 'a' => 'The planned flow is to choose equipment and dates, review the terms, then confirm. This frontend is a visual prototype: it does not create reservations, process payments or issue invoices.'],
-    ['q' => 'Can two people request the same dates?', 'a' => 'Preventing overlapping reservations is a core product requirement. Availability checks are not connected in this frontend preview.'],
-    ['q' => 'Can I keep the equipment longer?', 'a' => 'Rental extensions are part of the planned product flow. Requests and owner decisions are not saved in this visual prototype.'],
-    ['q' => 'What happens if equipment is damaged?', 'a' => 'The intended workflow includes a return inspection and maintenance report. This preview does not record inspections or service work.'],
-    ['q' => 'How do owners get paid?', 'a' => 'Payouts are not active. Any fees shown on the Plans page are proposed examples, not real charges.'],
-    ['q' => 'Which payment methods are accepted?', 'a' => 'Payments are not enabled in this prototype, so no payment method is currently accepted.'],
+    ['q' => 'How does renting work?', 'a' => 'Choose equipment and dates, the system checks availability, the owner approves, you pay, and a rental contract + invoice are created automatically.'],
+    ['q' => 'Can two people request the same dates?', 'a' => 'No, the system prevents overlapping reservations for the same equipment.'],
+    ['q' => 'Can I keep the equipment longer?', 'a' => 'Yes, request an extension. The owner can approve or reject, and the rental dates + amount update automatically.'],
+    ['q' => 'What happens if equipment is damaged?', 'a' => 'On return, the owner inspects it. If damage is detected, the equipment is automatically set to maintenance status and a report is created.'],
+    ['q' => 'How do owners get paid?', 'a' => 'After payment is verified, the rental is created. The owner receives the rental amount (minus platform commission) when the rental is completed.'],
+    ['q' => 'Which payment methods are accepted?', 'a' => 'Card, bank transfer, and cash on pickup are supported.'],
 ]];
 
-$plans = ['type' => 'plans', 'id' => 'pricing', 'title' => 'A fair exchange, by design.', 'intro' => 'Pricing concept for the SolarShare prototype. Fees and plans shown here are illustrative, not active charges.', 'items' => [
-    ['name' => 'Renter', 'price' => '0 TND', 'period' => 'proposed', 'tagline' => 'For campers, makers and event planners.', 'features' => ['Browse the example catalog', 'Availability checks (planned)', 'Illustrative service fee: 8%', 'Invoice and contract flow (planned)'], 'label' => 'Explore the catalog', 'href' => 'front.catalog'],
-    ['name' => 'Owner', 'price' => '0 TND', 'period' => 'proposed', 'tagline' => 'Put idle equipment to work.', 'features' => ['Equipment listing flow (planned)', 'Illustrative commission: 10%', 'Inspection records (planned)', 'Extension requests (planned)'], 'label' => 'See owner features', 'href' => 'front.owners', 'highlight' => true],
-    ['name' => 'Pro owner', 'price' => '29 TND', 'period' => '/ month · proposed', 'tagline' => 'A concept for fleets and small businesses.', 'features' => ['Owner features (proposed)', 'Illustrative commission: 5%', 'Priority placement concept', 'Technical report templates'], 'label' => 'Talk to us', 'href' => 'front.contact'],
+$plans = ['type' => 'plans', 'id' => 'pricing', 'title' => 'A fair exchange, by design.', 'intro' => 'SolarShare pricing. Fees shown here are the actual platform charges.', 'items' => [
+    ['name' => 'Renter', 'price' => '0 TND', 'period' => '', 'tagline' => 'For campers, makers and event planners.', 'features' => ['Browse the catalog', 'Availability checks', 'Service fee: 8%', 'Invoice and contract flow'], 'label' => 'Explore the catalog', 'href' => 'front.catalog'],
+    ['name' => 'Owner', 'price' => '0 TND', 'period' => '', 'tagline' => 'Put idle equipment to work.', 'features' => ['Equipment listing', 'Commission: 10%', 'Inspection records', 'Extension requests'], 'label' => 'See owner features', 'href' => 'front.owners', 'highlight' => true],
+    ['name' => 'Pro owner', 'price' => '29 TND', 'period' => '/ month', 'tagline' => 'For fleets and small businesses.', 'features' => ['Owner features', 'Commission: 5%', 'Priority placement', 'Technical report templates'], 'label' => 'Talk to us', 'href' => 'front.contact'],
 ]];
 
 $guarantees = ['type' => 'features', 'title' => 'Designed around trust', 'items' => [
@@ -34,11 +34,11 @@ $guarantees = ['type' => 'features', 'title' => 'Designed around trust', 'items'
 ]];
 
 $steps = ['type' => 'steps', 'id' => 'how-it-works', 'title' => 'How SolarShare works', 'items' => [
-    ['title' => 'Publish', 'text' => 'The planned owner flow captures category, daily price and energy specifications.'],
-    ['title' => 'Search & request', 'text' => 'Explore example listings and select dates. Availability checks are planned, not active.'],
-    ['title' => 'Review the terms', 'text' => 'Payment, invoices and rental contracts belong in the proposed booking flow.'],
-    ['title' => 'Use & extend', 'text' => 'The concept includes a rental period and a request path for extra time.'],
-    ['title' => 'Return & inspect', 'text' => 'The proposed process records condition and routes damaged equipment to maintenance.'],
+    ['title' => 'Publish', 'text' => 'Owner adds category, daily price and energy specifications.'],
+    ['title' => 'Search & request', 'text' => 'Explore listings and select dates. Availability is checked in real-time.'],
+    ['title' => 'Review the terms', 'text' => 'Payment, invoices and rental contracts are created automatically.'],
+    ['title' => 'Use & extend', 'text' => 'Rental period with option to request extra time.'],
+    ['title' => 'Return & inspect', 'text' => 'Equipment is inspected on return. Damage routes to maintenance.'],
 ]];
 
 $rentals = [['RNT-2031', 'Portable battery 1000 Wh', '9 – 11 Oct 2026', '54 TND', ['text' => 'Upcoming', 'tone' => 'info']], ['RNT-2024', 'Foldable solar panel 200 W', '2 – 4 Oct 2026', '27 TND', ['text' => 'Active', 'tone' => 'success']], ['RNT-2009', 'Compact battery 500 Wh', '12 – 14 Sep 2026', '30 TND', ['text' => 'Returned', 'tone' => 'success']]];

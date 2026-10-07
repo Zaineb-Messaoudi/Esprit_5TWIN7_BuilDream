@@ -62,6 +62,14 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:owner-only'])->get(
     '/owner/rentals/{rental:reference}', [PageController::class, 'ownerRental']
 )->name('front.my-rental-detail');
 
+// PDF export for rental contracts (buyer and owner)
+Route::middleware(['auth', 'verified', 'role.selected'])->get(
+    '/my/rentals/{rental:reference}/contract/pdf', [PageController::class, 'exportContractPdf']
+)->name('front.rental-contract.export-pdf');
+Route::middleware(['auth', 'verified', 'role.selected'])->get(
+    '/owner/rentals/{rental:reference}/contract/pdf', [PageController::class, 'exportContractPdf']
+)->name('front.owner-rental-contract.export-pdf');
+
 foreach (config('front.pages') as $slug => $page) {
     if (in_array($slug, [
         'my-equipment', 'my-publish', 'my-equipment-detail', 'my-equipment-edit',
@@ -174,13 +182,21 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         return view('pages.account.settings', ['title' => 'Integrations', 'pageTitle' => 'Integrations', 'section' => 'integrations']);
     })->name('integrations');
 
-    // Admin User Management
+// Admin User Management
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', AdminUserController::class);
         Route::resource('categories', AdminCategoryController::class)->except(['show']);
         Route::resource('equipment', AdminEquipmentController::class);
         Route::resource('rentals', RentalController::class);
         Route::resource('rental-contracts', RentalContractController::class);
+        Route::get('rental-contracts/{rental_contract}/export-pdf', [RentalContractController::class, 'exportPdf'])
+            ->name('rental-contracts.export-pdf');
+        // Deposit management (admin)
+        Route::middleware('can:admin-only')->prefix('rental-contracts/{rental_contract}/deposit')->name('rental-contracts.deposit.')->group(function () {
+            Route::post('hold', [RentalContractController::class, 'holdDeposit'])->name('hold');
+            Route::post('release', [RentalContractController::class, 'releaseDeposit'])->name('release');
+            Route::post('forfeit', [RentalContractController::class, 'forfeitDeposit'])->name('forfeit');
+        });
         Route::resource('rental-extensions', RentalExtensionController::class);
         Route::post('rental-extensions/{rental_extension}/approve', [RentalExtensionController::class, 'approve'])
             ->name('rental-extensions.approve');
@@ -393,17 +409,33 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])
     });
 
 // Reservations, payments and invoices are available to authenticated buyers and owners.
-// Controllers scope every record to the signed-in user; administrators can see all records.
-Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
-    Route::post('/booking/reservations', [MarketplaceController::class, 'storeReservation'])->name('booking.reservations.store');
-    Route::post('/booking/reservations/{reservation}/payment', [MarketplaceController::class, 'pay'])->name('booking.reservations.pay');
-    Route::post('/rental-contracts/{contract}/sign', [MarketplaceController::class, 'signContract'])->name('buyer.contracts.sign');
-    Route::post('/owner/reservations/{reservation}/decision', [MarketplaceController::class, 'decideReservation'])
-        ->middleware('can:owner-only')->name('owner.reservations.decision');
-    Route::prefix('rental')->name('rental.')->group(function () {
-        Route::resource('reservations', ReservationController::class);
-        Route::resource('payments', PaymentController::class);
-        Route::resource('invoices', InvoiceController::class);
+    // Controllers scope every record to the signed-in user; administrators can see all records.
+    Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+        Route::post('/booking/reservations', [MarketplaceController::class, 'storeReservation'])->name('booking.reservations.store');
+        Route::post('/booking/reservations/{reservation}/payment', [MarketplaceController::class, 'pay'])->name('booking.reservations.pay');
+        Route::post('/rental-contracts/{contract}/sign', [MarketplaceController::class, 'signContract'])->name('buyer.contracts.sign');
+        Route::post('/owner/reservations/{reservation}/decision', [MarketplaceController::class, 'decideReservation'])
+            ->middleware('can:owner-only')->name('owner.reservations.decision');
+
+        // Deposit management (owner only)
+        Route::middleware('can:owner-only')->prefix('owner/rental-contracts/{rental_contract}/deposit')->name('owner.rental-contracts.deposit.')->group(function () {
+            Route::post('hold', [RentalContractController::class, 'holdDeposit'])->name('hold');
+            Route::post('release', [RentalContractController::class, 'releaseDeposit'])->name('release');
+            Route::post('forfeit', [RentalContractController::class, 'forfeitDeposit'])->name('forfeit');
+        });
+
+        Route::prefix('rental')->name('rental.')->group(function () {
+            Route::resource('reservations', ReservationController::class);
+            Route::resource('payments', PaymentController::class);
+            Route::resource('invoices', InvoiceController::class);
+            Route::get('invoices/{invoice}/export-pdf', [InvoiceController::class, 'exportPdf'])
+                ->name('invoices.export-pdf');
+        });
+
+        // Return equipment flow: create inspection from rental
+        Route::get('/rentals/{rental}/return', [\App\Http\Controllers\PageController::class, 'showReturnForm'])
+            ->name('rental.return.form');
+        Route::post('/rentals/{rental}/return', [\App\Http\Controllers\PageController::class, 'processReturn'])
+            ->name('rental.return.process');
     });
-});
 require __DIR__.'/auth.php';

@@ -5,8 +5,8 @@ namespace App\Http\Controllers;
 use App\Models\Invoice;
 use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Support\Str;
-use Illuminate\Http\JsonResponse;
 
 class InvoiceController extends Controller
 {
@@ -88,5 +88,14 @@ class InvoiceController extends Controller
         abort_unless($invoice->status !== 'paid', 409);
         $invoice->delete();
         return redirect()->route('rental.invoices.index')->with('success', __('Invoice deleted successfully.'));
+    }
+
+    /** Export invoice as PDF. */
+    public function exportPdf(Invoice $invoice)
+    {
+        abort_unless(request()->user()->isAdmin() || $invoice->reservation->user_id === request()->user()->id, 403);
+        $invoice->load('reservation.equipment.category', 'reservation.user');
+        $pdf = Pdf::loadView('pdf.invoice', ['invoice' => $invoice]);
+        return $pdf->download($invoice->invoice_number . '.pdf');
     }
 }

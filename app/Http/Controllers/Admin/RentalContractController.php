@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\ContractStatus;
+use App\Enums\DepositStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminRentalContractStoreRequest;
 use App\Http\Requests\Admin\AdminRentalContractUpdateRequest;
 use App\Models\Rental;
 use App\Models\RentalContract;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -134,6 +136,14 @@ class RentalContractController extends Controller
         return redirect()->route('admin.rental-contracts.index')->with('status', 'contract-deleted');
     }
 
+    /** Export contract as PDF. */
+    public function exportPdf(RentalContract $rentalContract)
+    {
+        $rentalContract->load('rental.user', 'rental.equipment.category');
+        $pdf = Pdf::loadView('pdf.rental-contract', ['contract' => $rentalContract]);
+        return $pdf->download($rentalContract->contract_number . '.pdf');
+    }
+
     /**
      * Keep the signature date consistent with the status:
      * - draft      -> not signed, so signed_at is emptied
@@ -148,5 +158,35 @@ class RentalContractController extends Controller
         }
 
         return $data;
+    }
+
+    /** Hold deposit (admin). */
+    public function holdDeposit(RentalContract $rentalContract): RedirectResponse
+    {
+        if (! $rentalContract->canHoldDeposit()) {
+            return back()->with('error', 'Deposit cannot be held in current state.');
+        }
+        $rentalContract->holdDeposit(request('notes'));
+        return back()->with('status', 'deposit-held');
+    }
+
+    /** Release deposit (admin). */
+    public function releaseDeposit(RentalContract $rentalContract): RedirectResponse
+    {
+        if (! $rentalContract->canReleaseDeposit()) {
+            return back()->with('error', 'Deposit cannot be released in current state.');
+        }
+        $rentalContract->releaseDeposit(request('notes'));
+        return back()->with('status', 'deposit-released');
+    }
+
+    /** Forfeit deposit (admin). */
+    public function forfeitDeposit(RentalContract $rentalContract): RedirectResponse
+    {
+        if (! $rentalContract->canForfeitDeposit()) {
+            return back()->with('error', 'Deposit cannot be forfeited in current state.');
+        }
+        $rentalContract->forfeitDeposit(request('notes'));
+        return back()->with('status', 'deposit-forfeited');
     }
 }
