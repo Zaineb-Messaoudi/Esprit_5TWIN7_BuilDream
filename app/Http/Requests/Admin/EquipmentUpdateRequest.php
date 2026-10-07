@@ -8,6 +8,7 @@ class EquipmentUpdateRequest extends EquipmentStoreRequest
 {
     public function rules(): array
     {
-        return self::equipmentRules((int) $this->route('equipment'));
+        $equipment = $this->route('equipment');
+        return self::equipmentRules($equipment?->id);
     }
 }

@@ -3,12 +3,12 @@
 @section('content')
     <section class="bg-gray-950 text-white">
         <div class="mx-auto max-w-7xl px-4 py-9 sm:px-8 lg:px-10">
-            <p class="text-theme-xs font-semibold uppercase tracking-[0.2em] text-warning-300">{{ $owner ? __('Owner workspace') : __('Renter workspace') }}</p>
+            <p class="text-theme-xs font-semibold uppercase tracking-[0.2em] text-warning-300">{{ $isBuyer ? __('Renter workspace') : ($owner ? __('Owner workspace') : __('Renter workspace')) }}</p>
             <h1 class="mt-2 text-title-sm font-semibold sm:text-title-md">{{ $title }}</h1>
             <p class="mt-2 text-theme-sm text-gray-300">{{ $rental->equipment->name }} · {{ $rental->reference }}</p>
         </div>
     </section>
-    @if ($owner) @include('pages.front.partials.owner-nav') @else @include('pages.front.partials.buyer-nav') @endif
+    @if ($isBuyer) @include('pages.front.partials.buyer-nav') @elseif ($owner) @include('pages.front.partials.owner-nav') @else @include('pages.front.partials.buyer-nav') @endif
     <main class="mx-auto max-w-2xl px-4 py-8 sm:px-8 lg:px-10">
         @if (session('status'))
             <div role="status" class="mb-6 rounded-xl border border-success-200 bg-success-50 p-4 text-theme-sm text-success-800 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-200">
@@ -44,7 +44,7 @@
 
                 <div>
                     <h3 class="text-lg font-semibold text-gray-900 dark:text-white">{{ __('Inspection details') }}</h3>
-                    <p class="mt-1 text-theme-xs text-gray-500">{{ __('Record the equipment condition before and after the rental period.') }}</p>
+                    <p class="mt-1 text-theme-xs text-gray-500">{{ $isBuyer ? __('Record the equipment condition when you return it.') : __('Record the equipment condition upon return.') }}</p>
                 </div>
 
                 <div>

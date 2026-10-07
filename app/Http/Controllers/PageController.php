@@ -82,9 +82,10 @@ class PageController extends Controller
     /** Show the return equipment form (inspection) for an active rental. */
     public function showReturnForm(Request $request, Rental $rental): View|RedirectResponse
     {
-        // Only owner or admin can access
+        // Buyer (renter) or admin can initiate return; owner can also view
         abort_unless(
             $request->user()->isAdmin() ||
+            ($request->user()->isBuyer() && (int) $rental->user_id === (int) $request->user()->id) ||
             ($request->user()->isOwner() && (int) $rental->equipment?->owner_id === (int) $request->user()->id),
             403
         );
@@ -101,17 +102,20 @@ class PageController extends Controller
 
         $rental->load(['equipment.category', 'user', 'contract']);
         return view('pages.front.rental-return', [
-            'title' => __('Return equipment'),
+            'title'  => __('Return equipment'),
             'rental' => $rental,
+            'owner'  => $request->user()->isOwner(),
+            'isBuyer' => $request->user()->isBuyer(),
         ]);
     }
 
-    /** Process the return equipment form submission. */
+    /** Process the return equipment form submission (buyer initiates return). */
     public function processReturn(Request $request, Rental $rental): RedirectResponse
     {
-        // Only owner or admin can access
+        // Buyer initiates return, owner can also process (for manual inspection)
         abort_unless(
             $request->user()->isAdmin() ||
+            ($request->user()->isBuyer() && (int) $rental->user_id === (int) $request->user()->id) ||
             ($request->user()->isOwner() && (int) $rental->equipment?->owner_id === (int) $request->user()->id),
             403
         );
@@ -148,8 +152,10 @@ class PageController extends Controller
         $inspection = $rental->inspections->first();
         EquipmentReturned::dispatch($rental, $inspection, $rental->equipment->owner, $rental->user);
 
-        return redirect()->route('front.my-rental-detail', $rental->reference)
-            ->with('status', 'equipment-returned');
+        return redirect()->route(
+            $request->user()->isBuyer() ? 'front.buyer-rental-detail' : 'front.my-rental-detail',
+            $rental->reference
+        )->with('status', 'equipment-returned');
     }
 
     public function __invoke(Request $request): View|RedirectResponse

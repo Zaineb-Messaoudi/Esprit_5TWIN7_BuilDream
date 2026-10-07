@@ -4,7 +4,7 @@ namespace App\Helpers;
 
 class MenuHelper
 {
-    public static function getMainNavItems()
+public static function getMainNavItems()
     {
         $items = [
             [
@@ -38,44 +38,6 @@ class MenuHelper
                     ['name' => 'Sessions & Security', 'path' => route('settings.sessions'), 'pro' => false],
                     ['name' => 'Notifications', 'path' => route('settings.notifications'), 'pro' => false],
                     ['name' => 'Connected Accounts', 'path' => route('settings.connections'), 'pro' => false],
-                ],
-            ],
-            [
-                'name' => 'Forms',
-                'icon' => 'forms',
-                'subItems' => [
-                    ['name' => 'Form Elements', 'path' => route('form.elements'), 'pro' => false],
-                    ['name' => 'Advanced Forms', 'path' => route('form.advanced'), 'pro' => false],
-                ],
-            ],
-            [
-                'name' => 'Tables',
-                'icon' => 'tables',
-                'subItems' => [
-                    ['name' => 'Basic Tables', 'path' => route('tables.basic'), 'pro' => false],
-                    ['name' => 'Advanced Tables', 'path' => route('tables.advanced'), 'pro' => false],
-                ],
-            ],
-            [
-                'name' => 'Pages',
-                'icon' => 'pages',
-                'subItems' => [
-                    ['name' => 'Blank Page', 'path' => route('pages.blank'), 'pro' => false],
-                    ['name' => '404 Error', 'path' => route('pages.error-404'), 'pro' => false],
-                    ['name' => '505 Error', 'path' => route('special.error-505'), 'pro' => false],
-                    ['name' => 'Account settings', 'path' => route('settings'), 'pro' => false],
-                    ['name' => 'Integrations', 'path' => route('integrations'), 'pro' => false],
-                    ['name' => 'API Keys', 'path' => route('api-keys'), 'pro' => false],
-                    ['name' => 'FAQ', 'path' => route('faq.index'), 'pro' => false],
-                    ['name' => 'Access Denied', 'path' => route('special.access-denied'), 'pro' => false],
-                    ['name' => '403 Error', 'path' => route('special.error-403'), 'pro' => false],
-                    ['name' => '500 Error', 'path' => route('special.error-500'), 'pro' => false],
-                    ['name' => '503 Error', 'path' => route('special.error-503'), 'pro' => false],
-                    ['name' => 'Maintenance', 'path' => route('special.maintenance'), 'pro' => false],
-                    ['name' => 'Coming Soon', 'path' => route('special.coming-soon'), 'pro' => false],
-                    ['name' => 'Success', 'path' => route('special.success'), 'pro' => false],
-                    ['name' => 'Under Construction', 'path' => route('special.under-construction'), 'pro' => false],
-                    ['name' => 'Full-width Layout', 'path' => route('layouts.full-width'), 'pro' => false],
                 ],
             ],
         ];
@@ -217,6 +179,44 @@ class MenuHelper
                     ['name' => 'AI Usage', 'path' => route('ai.usage'), 'pro' => false],
                     ['name' => 'Map View', 'path' => route('ai.map'), 'pro' => false],
                     ['name' => 'Map Examples', 'path' => route('maps.index'), 'pro' => false],
+                ],
+            ],
+            [
+                'icon' => 'forms',
+                'name' => 'Forms',
+                'subItems' => [
+                    ['name' => 'Form Elements', 'path' => route('form.elements'), 'pro' => false],
+                    ['name' => 'Advanced Forms', 'path' => route('form.advanced'), 'pro' => false],
+                ],
+            ],
+            [
+                'icon' => 'tables',
+                'name' => 'Tables',
+                'subItems' => [
+                    ['name' => 'Basic Tables', 'path' => route('tables.basic'), 'pro' => false],
+                    ['name' => 'Advanced Tables', 'path' => route('tables.advanced'), 'pro' => false],
+                ],
+            ],
+            [
+                'icon' => 'pages',
+                'name' => 'Pages',
+                'subItems' => [
+                    ['name' => 'Blank Page', 'path' => route('pages.blank'), 'pro' => false],
+                    ['name' => '404 Error', 'path' => route('pages.error-404'), 'pro' => false],
+                    ['name' => '505 Error', 'path' => route('special.error-505'), 'pro' => false],
+                    ['name' => 'Account settings', 'path' => route('settings'), 'pro' => false],
+                    ['name' => 'Integrations', 'path' => route('integrations'), 'pro' => false],
+                    ['name' => 'API Keys', 'path' => route('api-keys'), 'pro' => false],
+                    ['name' => 'FAQ', 'path' => route('faq.index'), 'pro' => false],
+                    ['name' => 'Access Denied', 'path' => route('special.access-denied'), 'pro' => false],
+                    ['name' => '403 Error', 'path' => route('special.error-403'), 'pro' => false],
+                    ['name' => '500 Error', 'path' => route('special.error-500'), 'pro' => false],
+                    ['name' => '503 Error', 'path' => route('special.error-503'), 'pro' => false],
+                    ['name' => 'Maintenance', 'path' => route('special.maintenance'), 'pro' => false],
+                    ['name' => 'Coming Soon', 'path' => route('special.coming-soon'), 'pro' => false],
+                    ['name' => 'Success', 'path' => route('special.success'), 'pro' => false],
+                    ['name' => 'Under Construction', 'path' => route('special.under-construction'), 'pro' => false],
+                    ['name' => 'Full-width Layout', 'path' => route('layouts.full-width'), 'pro' => false],
                 ],
             ],
         ];

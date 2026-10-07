@@ -105,6 +105,55 @@
                 </div>
                 @endif
                 @if ($reservation?->invoice)<a href="{{ route('front.invoice', ['equipment' => $equipment->id, 'reservation' => $reservation->id]) }}" class="mt-5 inline-flex button-base button-secondary min-h-10 items-center px-4 text-theme-xs">{{ __('View invoice') }}</a>@endif
+
+                {{-- Request Extension (Buyer only) --}}
+                @if (! $owner && $record->status->value === 'active')
+                <div class="mt-5">
+                    <a href="{{ route('rental.extensions.create', $record) }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-warning-500 px-4 py-2 text-sm font-medium text-white hover:bg-warning-600">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6v6m0 0v6m0-6h6m-6 0H6"/></svg>
+                        {{ __('Request extension') }}
+                    </a>
+                </div>
+                @endif
+
+                {{-- Extension Requests (Owner only) --}}
+                @if ($owner && $record->extensions->where('status', 'pending')->first())
+                <div class="mt-5">
+                    @foreach ($record->extensions->where('status', 'pending') as $extension)
+                    <div class="mt-4 rounded-xl border border-warning-200 bg-warning-50 p-4 dark:border-warning-500/30 dark:bg-warning-500/10">
+                        <div class="flex flex-wrap items-center justify-between gap-3">
+                            <div>
+                                <p class="text-theme-xs font-semibold text-warning-800 dark:text-warning-300">{{ __('Extension requested') }}</p>
+                                <p class="mt-1 text-theme-sm text-gray-700 dark:text-gray-300">
+                                    {{ __('Extend to') }} {{ $extension->new_end_date->format('M j, Y') }}
+                                    ({{ __('+') }}{{ $extension->old_end_date->diffInDays($extension->new_end_date) }} {{ __('days') }},
+                                    {{ number_format($extension->additional_amount, 2) }} TND)
+                                </p>
+                                @if ($extension->reason)
+                                <p class="mt-1 text-theme-xs text-gray-500">{{ $extension->reason }}</p>
+                                @endif
+                            </div>
+                            <div class="flex gap-3">
+                                <form method="POST" action="{{ route('rental.extensions.approve', $extension) }}" class="inline">
+                                    @csrf
+                                    <button type="submit" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-success-500 px-4 py-2 text-sm font-medium text-white hover:bg-success-600">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        {{ __('Approve') }}
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ route('rental.extensions.reject', $extension) }}" class="inline" onsubmit="return confirm('{{ __('Reject this extension request?') }}')">
+                                    @csrf
+                                    <button type="submit" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-error-500 px-4 py-2 text-sm font-medium text-white hover:bg-error-600">
+                                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 14l2-2m0 0l2-2m-2 2l-2-2m2 2l2 2m7-2a9 9 0 11-18 0 9 9 0 0118 0z"/></svg>
+                                        {{ __('Reject') }}
+                                    </button>
+                                </form>
+                            </div>
+                        </div>
+                    </div>
+                    @endforeach
+                </div>
+                @endif
             </section>
         @endif
     </main>

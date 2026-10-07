@@ -15,7 +15,7 @@
     </div>
 
     <div class="col-span-12 xl:col-span-5">
-      <x-ecommerce.customer-demographic :customersByRole="$customersByRole" />
+      <x-ecommerce.customer-demographic :customersByRole="$customersByRole" :totalUsers="$totalUsers" />
     </div>
 
     <div class="col-span-12 xl:col-span-7">

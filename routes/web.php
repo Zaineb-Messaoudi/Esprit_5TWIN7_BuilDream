@@ -428,6 +428,14 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])
             Route::resource('invoices', InvoiceController::class);
             Route::get('invoices/{invoice}/export-pdf', [InvoiceController::class, 'exportPdf'])
                 ->name('invoices.export-pdf');
+
+            // Rental extensions (buyer requests, owner approves/rejects)
+            Route::prefix('extensions')->name('extensions.')->group(function () {
+                Route::get('{rental}', [\App\Http\Controllers\Front\RentalExtensionController::class, 'create'])->name('create');
+                Route::post('{rental}', [\App\Http\Controllers\Front\RentalExtensionController::class, 'store'])->name('store');
+                Route::post('{rental_extension}/approve', [\App\Http\Controllers\Front\RentalExtensionController::class, 'approve'])->name('approve');
+                Route::post('{rental_extension}/reject', [\App\Http\Controllers\Front\RentalExtensionController::class, 'reject'])->name('reject');
+            });
         });
 
         // Return equipment flow: create inspection from rental

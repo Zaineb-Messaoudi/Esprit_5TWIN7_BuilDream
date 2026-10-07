@@ -9,7 +9,6 @@ use App\Models\Payment;
 use App\Models\Invoice;
 use App\Models\Maintenance;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -104,28 +103,47 @@ class DashboardController extends Controller
     {
         // Fetch real SolarShare statistics
         $totalEquipment = Equipment::count();
-        $availableEquipment = Equipment::where('status', 'available')->where('approval_status', 'published')->count();
+        $availableEquipment = Equipment::where('status', 'available')
+            ->where('approval_status', 'published')
+            ->count();
         $totalReservations = Reservation::count();
-        $pendingReservations = Reservation::where('status', 'pending')->count();
-        $activeRentals = Rental::where('status', 'active')->count();
-        $completedRentals = Rental::where('status', 'completed')->count();
-        $totalRevenue = Payment::where('status', 'paid')->sum('amount');
-        $pendingRevenue = Payment::where('status', 'pending')->sum('amount');
+        $pendingReservations = Reservation::where('status', 'pending')
+            ->count();
+        $activeRentals = Rental::where('status', 'active')
+            ->count();
+        $completedRentals = Rental::where('status', 'completed')
+            ->count();
+        $totalRevenue = Payment::where('status', 'paid')
+            ->sum('amount');
+        $pendingRevenue = Payment::where('status', 'pending')
+            ->sum('amount');
         $totalInvoices = Invoice::count();
-        $paidInvoices = Invoice::where('status', 'paid')->count();
-        $equipmentInMaintenance = Equipment::where('status', 'maintenance')->count();
+        $paidInvoices = Invoice::where('status', 'paid')
+            ->count();
+        $equipmentInMaintenance = Equipment::where('status', 'maintenance')
+            ->count();
         $totalMaintenanceCost = Maintenance::sum('cost');
 
         // Monthly revenue for chart (last 12 months)
         $monthlyRevenue = Payment::where('status', 'paid')
-            ->where('payment_date', '>=', now()->subMonths(11)->startOfMonth())
-            ->selectRaw('YEAR(payment_date) as year, MONTH(payment_date) as month, SUM(amount) as total')
+            ->where(
+                'payment_date',
+                '>=',
+                now()->subMonths(11)->startOfMonth()
+            )
+            ->selectRaw(
+                'YEAR(payment_date) as year, MONTH(payment_date) as month, SUM(amount) as total'
+            )
             ->groupBy('year', 'month')
             ->orderBy('year')
             ->orderBy('month')
             ->get()
             ->mapWithKeys(function ($item) {
-                $key = sprintf('%04d-%02d', $item->year, $item->month);
+                $key = sprintf(
+                    '%04d-%02d',
+                    $item->year,
+                    $item->month
+                );
                 return [$key => (float) $item->total];
             });
 
@@ -145,15 +163,31 @@ class DashboardController extends Controller
             ->limit(5)
             ->get()
             ->mapWithKeys(function ($item) {
-                return [$item->category->name ?? 'Unknown' => $item->count];
+                return [
+                    $item->category->name ?? 'Unknown' => $item->count
+                ];
             });
+
+        /*
+         * Status statistics
+         *
+         * IMPORTANT:
+         * selectRaw() returns the status column as a raw database value.
+         * Depending on the model configuration, this can be either a string
+         * or a BackedEnum. We normalize both cases before displaying it.
+         */
 
         // Equipment by status
         $equipmentByStatus = Equipment::selectRaw('status, count(*) as count')
             ->groupBy('status')
             ->get()
             ->mapWithKeys(function ($item) {
-                return [ucfirst($item->status) => $item->count];
+                $status = $item->status instanceof \BackedEnum
+                    ? $item->status->value
+                    : $item->status;
+                return [
+                    ucfirst((string) $status) => $item->count
+                ];
             });
 
         // Reservations by status
@@ -161,7 +195,12 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->get()
             ->mapWithKeys(function ($item) {
-                return [ucfirst($item->status) => $item->count];
+                $status = $item->status instanceof \BackedEnum
+                    ? $item->status->value
+                    : $item->status;
+                return [
+                    ucfirst((string) $status) => $item->count
+                ];
             });
 
         // Rentals by status
@@ -169,11 +208,20 @@ class DashboardController extends Controller
             ->groupBy('status')
             ->get()
             ->mapWithKeys(function ($item) {
-                return [ucfirst($item->status) => $item->count];
+                $status = $item->status instanceof \BackedEnum
+                    ? $item->status->value
+                    : $item->status;
+                return [
+                    ucfirst((string) $status) => $item->count
+                ];
             });
 
         // Recent orders (rentals with payments)
-        $recentOrders = Rental::with(['equipment', 'user', 'contract'])
+        $recentOrders = Rental::with([
+            'equipment',
+            'user',
+            'contract'
+        ])
             ->latest('created_at')
             ->limit(5)
             ->get();
@@ -184,7 +232,7 @@ class DashboardController extends Controller
             ->limit(5)
             ->get();
 
-        // Customer demographics (simplified)
+        // Customer demographics
         $customersByRole = \App\Models\User::selectRaw('role, count(*) as count')
             ->whereNotNull('role')
             ->groupBy('role')
@@ -198,13 +246,38 @@ class DashboardController extends Controller
                 return [$role => $count];
             });
 
+        // Total users for display
+        $totalUsers = \App\Models\User::whereNotNull('role')->count();
+
         $data = [
             'title' => 'E-commerce Dashboard',
             'metrics' => [
-                ['label' => 'Total Equipment', 'value' => $totalEquipment, 'change' => $availableEquipment . ' available', 'tone' => 'primary'],
-                ['label' => 'Active Rentals', 'value' => $activeRentals, 'change' => $completedRentals . ' completed', 'tone' => 'success'],
-                ['label' => 'Total Revenue', 'value' => number_format($totalRevenue, 2) . ' TND', 'change' => number_format($pendingRevenue, 2) . ' TND pending', 'tone' => 'success'],
-                ['label' => 'Maintenance', 'value' => $equipmentInMaintenance, 'change' => number_format($totalMaintenanceCost, 2) . ' TND total cost', 'tone' => $equipmentInMaintenance > 0 ? 'warning' : 'success'],
+                [
+                    'label' => 'Total Equipment',
+                    'value' => $totalEquipment,
+                    'change' => $availableEquipment . ' available',
+                    'tone' => 'primary',
+                ],
+                [
+                    'label' => 'Active Rentals',
+                    'value' => $activeRentals,
+                    'change' => $completedRentals . ' completed',
+                    'tone' => 'success',
+                ],
+                [
+                    'label' => 'Total Revenue',
+                    'value' => number_format($totalRevenue, 2) . ' TND',
+                    'change' => number_format($pendingRevenue, 2) . ' TND pending',
+                    'tone' => 'success',
+                ],
+                [
+                    'label' => 'Maintenance',
+                    'value' => $equipmentInMaintenance,
+                    'change' => number_format($totalMaintenanceCost, 2) . ' TND total cost',
+                    'tone' => $equipmentInMaintenance > 0
+                        ? 'warning'
+                        : 'success',
+                ],
             ],
             'chartData' => $chartData,
             'chartLabel' => 'Monthly Revenue (TND)',
@@ -215,6 +288,7 @@ class DashboardController extends Controller
             'recentOrders' => $recentOrders,
             'topEquipment' => $topEquipment,
             'customersByRole' => $customersByRole,
+            'totalUsers' => $totalUsers,
         ];
 
         return view('pages.dashboard.ecommerce', $data);

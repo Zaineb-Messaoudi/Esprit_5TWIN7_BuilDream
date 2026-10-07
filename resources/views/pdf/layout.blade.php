@@ -167,12 +167,12 @@
     <div class="header">
         <div class="logo">Solar<span>Share</span></div>
         <div class="document-title">
-            <h1>{{ $documentTitle }}</h1>
-            <div class="number">{{ $documentNumber }}</div>
+            <h1>@yield('documentTitle')</h1>
+            <div class="number">@yield('documentNumber')</div>
         </div>
     </div>
 
-    {{ $content }}
+    @yield('content')
 
     <div class="footer">
         <p>Generated on {{ now()->format('d/m/Y H:i') }} · SolarShare Platform</p>
