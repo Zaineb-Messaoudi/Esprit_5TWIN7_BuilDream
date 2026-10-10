@@ -76,7 +76,7 @@ class AnalyticsMetric extends Model
     }
 
     /** Increment a counter metric. */
-    public static function increment(
+    public static function incrementCounter(
         string $metricName,
         string $category,
         float $increment = 1,

@@ -36,7 +36,7 @@ class AnalyticsService
         array $dimensions = [],
         ?Carbon $recordedAt = null
     ): \App\Models\AnalyticsMetric {
-        return AnalyticsMetric::increment($metricName, $category, $increment, $dimensions, $recordedAt);
+        return AnalyticsMetric::incrementCounter($metricName, $category, $increment, $dimensions, $recordedAt);
     }
 
     /**
@@ -115,19 +115,19 @@ class AnalyticsService
 
         switch ($eventType) {
             case 'created':
-                AnalyticsMetric::increment('bookings_created', 'bookings', 1, $dimensions);
+                AnalyticsMetric::incrementCounter('bookings_created', 'bookings', 1, $dimensions);
                 break;
             case 'confirmed':
-                AnalyticsMetric::increment('bookings_confirmed', 'bookings', 1, $dimensions);
+                AnalyticsMetric::incrementCounter('bookings_confirmed', 'bookings', 1, $dimensions);
                 break;
             case 'cancelled':
-                AnalyticsMetric::increment('bookings_cancelled', 'bookings', 1, $dimensions);
+                AnalyticsMetric::incrementCounter('bookings_cancelled', 'bookings', 1, $dimensions);
                 break;
             case 'started':
-                AnalyticsMetric::increment('rentals_started', 'rentals', 1, $dimensions);
+                AnalyticsMetric::incrementCounter('rentals_started', 'rentals', 1, $dimensions);
                 break;
             case 'completed':
-                AnalyticsMetric::increment('rentals_completed', 'rentals', 1, $dimensions);
+                AnalyticsMetric::incrementCounter('rentals_completed', 'rentals', 1, $dimensions);
                 AnalyticsMetric::record('rental_duration_days', 'rentals', $rental->start_date->diffInDays($rental->end_date), [
                     'equipment_id' => $rental->equipment_id,
                     'category_id' => $rental->equipment->category_id,
@@ -151,13 +151,13 @@ class AnalyticsService
         AnalyticsMetric::record('payment_amount', 'revenue', (float) $payment->amount, $dimensions, 'counter');
 
         if ($payment->status === 'paid') {
-            AnalyticsMetric::increment('payments_successful', 'revenue', 1, $dimensions);
+            AnalyticsMetric::incrementCounter('payments_successful', 'revenue', 1, $dimensions);
             AnalyticsMetric::record('revenue_tnd', 'revenue', (float) $payment->amount, [
                 'payment_method' => $payment->payment_method,
                 'currency' => $payment->currency ?? 'TND',
             ], 'counter');
         } elseif ($payment->status === 'failed') {
-            AnalyticsMetric::increment('payments_failed', 'revenue', 1, $dimensions);
+            AnalyticsMetric::incrementCounter('payments_failed', 'revenue', 1, $dimensions);
         }
     }
 
@@ -199,7 +199,7 @@ class AnalyticsService
             'role' => $user->role->value ?? 'unknown',
         ];
 
-        AnalyticsMetric::increment("user_activity_{$action}", 'users', 1, $dimensions);
+        AnalyticsMetric::incrementCounter("user_activity_{$action}", 'users', 1, $dimensions);
     }
 
     /**

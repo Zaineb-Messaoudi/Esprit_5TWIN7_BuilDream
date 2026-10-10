@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Models\Notification as NotificationModel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -78,6 +79,9 @@ class User extends Authenticatable implements MustVerifyEmail
         'two_factor_secret',
         'two_factor_confirmed_at',
         'two_factor_recovery_codes',
+        'current_organization_id',
+        'current_team_id',
+        'organization_preferences',
     ];
 
     /**
@@ -108,6 +112,9 @@ class User extends Authenticatable implements MustVerifyEmail
             'two_factor_secret' => 'encrypted',
             'two_factor_confirmed_at' => 'datetime',
             'two_factor_recovery_codes' => 'array',
+            'current_organization_id' => 'integer',
+            'current_team_id' => 'integer',
+            'organization_preferences' => 'array',
         ];
     }
 
@@ -222,5 +229,193 @@ class User extends Authenticatable implements MustVerifyEmail
     public function reviewResponses(): HasMany
     {
         return $this->hasMany(\App\Models\ReviewResponse::class);
+    }
+
+    /**
+     * Get the user's current organization.
+     */
+    public function currentOrganization(): BelongsTo
+    {
+        return $this->belongsTo(Organization::class, 'current_organization_id');
+    }
+
+    /**
+     * Get the user's current team.
+     */
+    public function currentTeam(): BelongsTo
+    {
+        return $this->belongsTo(Team::class, 'current_team_id');
+    }
+
+    /**
+     * Get all organization memberships.
+     */
+    public function organizationMemberships(): HasMany
+    {
+        return $this->hasMany(OrganizationMember::class);
+    }
+
+    /**
+     * Get accepted organization memberships.
+     */
+    public function acceptedOrganizations(): HasMany
+    {
+        return $this->organizationMemberships()->accepted();
+    }
+
+    /**
+     * Get team memberships.
+     */
+    public function teamMemberships(): HasMany
+    {
+        return $this->hasMany(TeamMember::class);
+    }
+
+    /**
+     * Get active team memberships.
+     */
+    public function activeTeamMemberships(): HasMany
+    {
+        return $this->teamMemberships()->active();
+    }
+
+    /**
+     * Get teams the user is a member of.
+     */
+    public function teams(): HasMany
+    {
+        return $this->hasMany(Team::class, 'lead_id');
+    }
+
+    /**
+     * Get organization invitations sent by this user.
+     */
+    public function sentOrganizationInvitations(): HasMany
+    {
+        return $this->hasMany(OrganizationInvitation::class, 'invited_by');
+    }
+
+    /**
+     * Get team invitations sent by this user.
+     */
+    public function sentTeamInvitations(): HasMany
+    {
+        return $this->hasMany(TeamInvitation::class, 'invited_by');
+    }
+
+    /**
+     * Get organization invitations received by this user.
+     */
+    public function receivedOrganizationInvitations(): HasMany
+    {
+        return OrganizationInvitation::where('email', $this->email)
+            ->where('status', 'pending');
+    }
+
+    /**
+     * Get team invitations received by this user.
+     */
+    public function receivedTeamInvitations(): HasMany
+    {
+        return TeamInvitation::where('email', $this->email)
+            ->where('status', 'pending');
+    }
+
+    /**
+     * Switch current organization.
+     */
+    public function switchOrganization(Organization $organization): bool
+    {
+        // Verify user is a member of the organization
+        $membership = $this->acceptedOrganizations()
+            ->where('organization_id', $organization->id)
+            ->first();
+
+        if (! $membership) {
+            return false;
+        }
+
+        $this->update(['current_organization_id' => $organization->id]);
+        $this->update(['current_team_id' => null]); // Reset team when switching org
+
+        return true;
+    }
+
+    /**
+     * Switch current team.
+     */
+    public function switchTeam(Team $team): bool
+    {
+        // Verify team belongs to current organization
+        if ($this->current_organization_id && $team->organization_id !== $this->current_organization_id) {
+            return false;
+        }
+
+        // Verify user is a member of the team
+        $membership = $this->activeTeamMemberships()
+            ->where('team_id', $team->id)
+            ->first();
+
+        if (! $membership) {
+            return false;
+        }
+
+        $this->update(['current_team_id' => $team->id]);
+
+        return true;
+    }
+
+    /**
+     * Check if user is member of an organization.
+     */
+    public function isMemberOf(Organization $organization): bool
+    {
+        return $this->acceptedOrganizations()
+            ->where('organization_id', $organization->id)
+            ->exists();
+    }
+
+    /**
+     * Check if user has role in organization.
+     */
+    public function hasRoleInOrganization(Organization $organization, string $role): bool
+    {
+        return $this->organizationMemberships()
+            ->where('organization_id', $organization->id)
+            ->where('role', $role)
+            ->accepted()
+            ->exists();
+    }
+
+    /**
+     * Check if user is admin of organization.
+     */
+    public function isOrganizationAdmin(Organization $organization): bool
+    {
+        return $this->hasRoleInOrganization($organization, 'admin') || $this->hasRoleInOrganization($organization, 'owner');
+    }
+
+    /**
+     * Get user's organization preferences.
+     */
+    public function getOrganizationPreferences(): array
+    {
+        return $this->organization_preferences ?? [
+            'theme' => 'system',
+            'language' => 'en',
+            'notifications' => true,
+            'timezone' => 'UTC',
+        ];
+    }
+
+    /**
+     * Set organization preference.
+     */
+    public function setOrganizationPreference(string $key, $value): void
+    {
+        $preferences = $this->getOrganizationPreferences();
+        $preferences[$key] = $value;
+        $this->organization_preferences = $preferences;
+        $this->save();
     }
 }
