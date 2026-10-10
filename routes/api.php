@@ -4,6 +4,7 @@ use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\BuyerController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\DeliveryController;
+use App\Http\Controllers\Api\DocumentController;
 use App\Http\Controllers\Api\MarketplaceController;
 use App\Http\Controllers\Api\OwnerController;
 use App\Http\Controllers\Api\ReviewController;
@@ -119,6 +120,29 @@ Route::middleware('auth:sanctum')->group(function () {
         Route::post('/escrow/{escrow}/release', [StripeConnectController::class, 'release'])->name('escrow.release');
         Route::post('/escrow/{escrow}/refund', [StripeConnectController::class, 'refund'])->name('escrow.refund');
         Route::get('/escrow/{escrow}', [StripeConnectController::class, 'show'])->name('escrow.show');
+    });
+
+    // ---- Documents -----------------------------------------------------------
+    Route::prefix('documents')->name('documents.')->group(function () {
+        Route::get('/', [DocumentController::class, 'index'])->name('index');
+        Route::get('/templates', [DocumentController::class, 'templates'])->name('templates');
+        Route::get('/templates/{template}', [DocumentController::class, 'showTemplate'])->name('templates.show');
+        Route::get('/stats', [DocumentController::class, 'stats'])->name('stats');
+        Route::post('/', [DocumentController::class, 'store'])->name('store');
+        Route::get('/{document}', [DocumentController::class, 'show'])->name('show');
+        Route::patch('/{document}', [DocumentController::class, 'update'])->name('update');
+        Route::post('/{document}/send', [DocumentController::class, 'sendForSignatures'])->name('send');
+        Route::post('/{document}/share', [DocumentController::class, 'share'])->name('share');
+        Route::get('/{document}/shares', [DocumentController::class, 'shares'])->name('shares');
+        Route::delete('/{document}/shares/{share}', [DocumentController::class, 'revokeShare'])->name('shares.revoke');
+        Route::get('/{document}/versions', [DocumentController::class, 'versions'])->name('versions');
+        Route::post('/{document}/versions/{version}/restore', [DocumentController::class, 'restoreVersion'])->name('versions.restore');
+        Route::get('/{document}/audit', [DocumentController::class, 'auditTrail'])->name('audit');
+
+        Route::prefix('{document}/signatures')->name('signatures.')->group(function () {
+            Route::post('/{signature}/sign', [DocumentController::class, 'sign'])->name('sign');
+            Route::post('/{signature}/decline', [DocumentController::class, 'decline'])->name('decline');
+        });
     });
 });
 
