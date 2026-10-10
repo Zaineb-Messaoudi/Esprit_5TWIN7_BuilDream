@@ -2,22 +2,21 @@
 
 namespace App\Http\Controllers;
 
-use App\Support\FrontDemo;
-use App\Models\Rental;
-use App\Models\Reservation;
-use App\Models\Payment;
-use App\Models\RentalContract;
-use App\Models\RentalExtension;
+use App\Events\EquipmentReturned;
 use App\Models\Equipment;
 use App\Models\Inspection;
-use App\Events\EquipmentReturned;
+use App\Models\Payment;
+use App\Models\Rental;
+use App\Models\RentalContract;
+use App\Models\RentalExtension;
+use App\Models\Reservation;
+use App\Support\FrontDemo;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Barryvdh\DomPDF\Facade\Pdf;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Validation\Rule;
+use Illuminate\Support\Facades\Schema;
 
 /** Renders any page declared in config/front.php (section-based pages). */
 class PageController extends Controller
@@ -76,7 +75,8 @@ class PageController extends Controller
 
         $rental->load(['equipment.category', 'user', 'contract']);
         $pdf = Pdf::loadView('pdf.rental-contract', ['contract' => $rental->contract]);
-        return $pdf->download($rental->contract->contract_number . '.pdf');
+
+        return $pdf->download($rental->contract->contract_number.'.pdf');
     }
 
     /** Show the return equipment form (inspection) for an active rental. */
@@ -101,10 +101,11 @@ class PageController extends Controller
         }
 
         $rental->load(['equipment.category', 'user', 'contract']);
+
         return view('pages.front.rental-return', [
-            'title'  => __('Return equipment'),
+            'title' => __('Return equipment'),
             'rental' => $rental,
-            'owner'  => $request->user()->isOwner(),
+            'owner' => $request->user()->isOwner(),
             'isBuyer' => $request->user()->isBuyer(),
         ]);
     }

@@ -164,6 +164,7 @@ class FrontDemo
     {
         if (is_string($category)) {
             $category = strtolower($category);
+
             return str_contains($category, 'battery')
                 ? 'images/front/battery-station.svg'
                 : (str_contains($category, 'wind') ? 'images/front/wind-turbine.svg' : 'images/front/solar-panel.svg');

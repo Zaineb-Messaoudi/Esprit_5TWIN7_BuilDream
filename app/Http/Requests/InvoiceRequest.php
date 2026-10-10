@@ -27,13 +27,13 @@ class InvoiceRequest extends FormRequest
 
         return [
             'reservation_id' => [
-            $invoice ? 'sometimes' : 'required',
-            'exists:reservations,id',
-            Rule::unique('invoices', 'reservation_id')->ignore($invoice?->id),
-        ],
-        'issue_date' => ['required', 'date'],
-        'subtotal'   => ['required', 'numeric', 'min:0'],
-        'status'     => ['required', 'in:unpaid,paid'],
+                $invoice ? 'sometimes' : 'required',
+                'exists:reservations,id',
+                Rule::unique('invoices', 'reservation_id')->ignore($invoice?->id),
+            ],
+            'issue_date' => ['required', 'date'],
+            'subtotal' => ['required', 'numeric', 'min:0'],
+            'status' => ['required', 'in:unpaid,paid'],
         ];
     }
 }

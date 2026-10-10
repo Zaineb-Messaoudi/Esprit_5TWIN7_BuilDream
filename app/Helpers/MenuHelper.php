@@ -4,7 +4,7 @@ namespace App\Helpers;
 
 class MenuHelper
 {
-public static function getMainNavItems()
+    public static function getMainNavItems()
     {
         $items = [
             [
@@ -58,15 +58,15 @@ public static function getMainNavItems()
 
             // Rentals module (Student 3), visible to admins only
             $items[] = [
-            'icon' => 'logistics',
-            'name' => 'Rentals',
-            'subItems' => [
-                ['name' => 'Reservations', 'path' => route('rental.reservations.index'), 'activePrefix' => '/rental/reservations', 'pro' => false],
-                ['name' => 'Rentals', 'path' => route('admin.rentals.index'), 'activePrefix' => '/admin/rentals', 'pro' => false],
-                ['name' => 'Payments', 'path' => route('rental.payments.index'), 'activePrefix' => '/rental/payments', 'pro' => false],
-                ['name' => 'Invoices', 'path' => route('rental.invoices.index'), 'activePrefix' => '/rental/invoices', 'pro' => false],
-                ['name' => 'Contracts', 'path' => route('admin.rental-contracts.index'), 'activePrefix' => '/admin/rental-contracts', 'pro' => false],
-                ['name' => 'Extensions', 'path' => route('admin.rental-extensions.index'), 'activePrefix' => '/admin/rental-extensions', 'pro' => false],
+                'icon' => 'logistics',
+                'name' => 'Rentals',
+                'subItems' => [
+                    ['name' => 'Reservations', 'path' => route('rental.reservations.index'), 'activePrefix' => '/rental/reservations', 'pro' => false],
+                    ['name' => 'Rentals', 'path' => route('admin.rentals.index'), 'activePrefix' => '/admin/rentals', 'pro' => false],
+                    ['name' => 'Payments', 'path' => route('rental.payments.index'), 'activePrefix' => '/rental/payments', 'pro' => false],
+                    ['name' => 'Invoices', 'path' => route('rental.invoices.index'), 'activePrefix' => '/rental/invoices', 'pro' => false],
+                    ['name' => 'Contracts', 'path' => route('admin.rental-contracts.index'), 'activePrefix' => '/admin/rental-contracts', 'pro' => false],
+                    ['name' => 'Extensions', 'path' => route('admin.rental-extensions.index'), 'activePrefix' => '/admin/rental-extensions', 'pro' => false],
                 ],
             ];
 

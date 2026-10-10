@@ -49,10 +49,10 @@ class InspectionObserver
                 'equipment_id' => $inspection->equipment_id,
                 'rental_id' => $inspection->rental_id,
                 'start_date' => now()->toDateString(),
-                'reason' => 'Damage detected during return inspection: ' . ($inspection->comments ?? 'No comments provided'),
+                'reason' => 'Damage detected during return inspection: '.($inspection->comments ?? 'No comments provided'),
                 'status' => 'in_progress',
                 'cost' => 0,
-                'notes' => 'Auto-created from return inspection #' . $inspection->id,
+                'notes' => 'Auto-created from return inspection #'.$inspection->id,
             ]);
 
             // Optionally, we could store the maintenance_id on the inspection

@@ -12,9 +12,21 @@ use Illuminate\Validation\Rule;
 
 class InspectionController extends TechnicalCrudController
 {
-    protected function modelClass(): string { return Inspection::class; }
-    protected function resource(): string { return 'inspections'; }
-    protected function title(): string { return 'Inspections'; }
+    protected function modelClass(): string
+    {
+        return Inspection::class;
+    }
+
+    protected function resource(): string
+    {
+        return 'inspections';
+    }
+
+    protected function title(): string
+    {
+        return 'Inspections';
+    }
+
     protected function eagerLoads(): array
     {
         return $this->rentalsReady() ? ['equipment', 'rental'] : ['equipment'];
@@ -46,8 +58,7 @@ class InspectionController extends TechnicalCrudController
     protected function formOptions(Request $request, ?Model $record = null): array
     {
         $rentals = $this->rentalsReady()
-            ? Rental::query()->when(! $this->isAdmin($request), fn (Builder $query) =>
-                $query->whereHas('equipment', fn (Builder $q) => $q->where('owner_id', $request->user()->id))
+            ? Rental::query()->when(! $this->isAdmin($request), fn (Builder $query) => $query->whereHas('equipment', fn (Builder $q) => $q->where('owner_id', $request->user()->id))
             )->orderBy('id')->get(['id', 'equipment_id'])
             : collect();
 

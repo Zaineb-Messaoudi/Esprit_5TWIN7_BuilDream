@@ -3,13 +3,21 @@
 namespace App\Listeners;
 
 use App\Events\MaintenanceCompleted;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Notifications\MaintenanceCompletedNotification;
 
+/** Fires when maintenance is completed; notifies the owner. */
 class SendMaintenanceCompletedNotification
 {
     public function handle(MaintenanceCompleted $event): void
     {
-        // Event is automatically broadcast via ShouldBroadcast
+        $owner = $event->owner;
+
+        if (! $owner) {
+            return;
+        }
+
+        $event->maintenance->load('equipment');
+
+        $owner->notify(new MaintenanceCompletedNotification($event->maintenance));
     }
 }

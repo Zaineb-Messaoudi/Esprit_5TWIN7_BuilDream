@@ -2,10 +2,10 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Equipment;
-use App\Enums\UserRole;
+use App\Models\User;
 use Illuminate\Database\Seeder;
 
 class DatabaseSeeder extends Seeder
@@ -61,7 +61,7 @@ class DatabaseSeeder extends Seeder
         foreach (range(1, 10) as $number) {
             $suffix = str_pad((string) $number, 2, '0', STR_PAD_LEFT);
 
-            User::firstOrCreate(["email" => "buyer{$suffix}@solarshare.com"], [
+            User::firstOrCreate(['email' => "buyer{$suffix}@solarshare.com"], [
                 'name' => "SolarShare Buyer {$suffix}",
                 'password' => 'password',
                 'role' => UserRole::BUYER,

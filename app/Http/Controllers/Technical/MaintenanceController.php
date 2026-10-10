@@ -10,10 +10,25 @@ use Illuminate\Validation\Rule;
 
 class MaintenanceController extends TechnicalCrudController
 {
-    protected function modelClass(): string { return Maintenance::class; }
-    protected function resource(): string { return 'maintenances'; }
-    protected function title(): string { return 'Maintenances'; }
-    protected function eagerLoads(): array { return ['equipment', 'report']; }
+    protected function modelClass(): string
+    {
+        return Maintenance::class;
+    }
+
+    protected function resource(): string
+    {
+        return 'maintenances';
+    }
+
+    protected function title(): string
+    {
+        return 'Maintenances';
+    }
+
+    protected function eagerLoads(): array
+    {
+        return ['equipment', 'report'];
+    }
 
     protected function scope(Builder $query, Request $request): Builder
     {
@@ -53,5 +68,4 @@ class MaintenanceController extends TechnicalCrudController
             'notes' => ['nullable', 'string', 'max:10000'],
         ];
     }
-
 }

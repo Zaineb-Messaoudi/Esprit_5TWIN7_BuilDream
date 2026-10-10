@@ -2,12 +2,10 @@
 
 namespace App\Events;
 
-use App\Models\Rental;
 use App\Models\Inspection;
+use App\Models\Rental;
 use App\Models\User;
-use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
-use Illuminate\Broadcasting\PresenceChannel;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -40,6 +38,7 @@ class EquipmentReturned implements ShouldBroadcast
     public function broadcastWith(): array
     {
         $damageText = $this->inspection->damage_detected ? ' (damage detected)' : ' (no damage)';
+
         return [
             'rental' => $this->rental->load('equipment'),
             'inspection' => $this->inspection,

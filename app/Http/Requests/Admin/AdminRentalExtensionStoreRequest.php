@@ -57,7 +57,7 @@ class AdminRentalExtensionStoreRequest extends FormRequest
                     $rental = Rental::find($this->input('rental_id'));
                     if ($rental && Carbon::parse($value)->lte($rental->end_date)) {
                         $fail('The new end date must be after the current end date of the rental ('
-                            . $rental->end_date->format('d/m/Y') . ').');
+                            .$rental->end_date->format('d/m/Y').').');
                     }
                 },
             ],
@@ -74,8 +74,8 @@ class AdminRentalExtensionStoreRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'rental_id'         => 'rental',
-            'new_end_date'      => 'new end date',
+            'rental_id' => 'rental',
+            'new_end_date' => 'new end date',
             'additional_amount' => 'additional amount',
         ];
     }

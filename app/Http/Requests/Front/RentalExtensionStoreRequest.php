@@ -14,9 +14,9 @@ class RentalExtensionStoreRequest extends FormRequest
     public function rules(): array
     {
         $rental = $this->route('rental');
-        
+
         return [
-            'new_end_date' => ['required', 'date', 'after:' . ($rental?->end_date?->toDateString() ?? 'today')],
+            'new_end_date' => ['required', 'date', 'after:'.($rental?->end_date?->toDateString() ?? 'today')],
             'reason' => ['nullable', 'string', 'max:1000'],
         ];
     }

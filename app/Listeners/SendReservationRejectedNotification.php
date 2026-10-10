@@ -3,13 +3,19 @@
 namespace App\Listeners;
 
 use App\Events\ReservationRejected;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Notifications\ReservationRejectedNotification;
 
+/** Fires when the owner declines a reservation; notifies the buyer. */
 class SendReservationRejectedNotification
 {
     public function handle(ReservationRejected $event): void
     {
-        // Event is automatically broadcast via ShouldBroadcast
+        $buyer = $event->buyer;
+
+        if (! $buyer) {
+            return;
+        }
+
+        $buyer->notify(new ReservationRejectedNotification($event->reservation));
     }
 }

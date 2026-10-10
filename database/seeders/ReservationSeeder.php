@@ -14,7 +14,7 @@ class ReservationSeeder extends Seeder
     public function run(): void
     {
         $equipments = Equipment::all();
-        $users      = User::all();
+        $users = User::all();
 
         // Equipment belongs to Student 1. This module reuses existing equipment
         // instead of creating duplicate or incomplete equipment records.
@@ -28,7 +28,7 @@ class ReservationSeeder extends Seeder
         for ($i = 0; $i < 10; $i++) {
             $reservation = Reservation::factory()->create([
                 'equipment_id' => $equipments->random()->id,
-                'user_id'      => $users->random()->id,
+                'user_id' => $users->random()->id,
             ]);
 
             Payment::factory(rand(1, 2))->create([
@@ -37,9 +37,9 @@ class ReservationSeeder extends Seeder
 
             Invoice::factory()->create([
                 'reservation_id' => $reservation->id,
-                'subtotal'       => $reservation->total_amount,
-                'tax'            => round($reservation->total_amount * 0.19, 2),
-                'total'          => round($reservation->total_amount * 1.19, 2),
+                'subtotal' => $reservation->total_amount,
+                'tax' => round($reservation->total_amount * 0.19, 2),
+                'total' => round($reservation->total_amount * 1.19, 2),
             ]);
         }
     }

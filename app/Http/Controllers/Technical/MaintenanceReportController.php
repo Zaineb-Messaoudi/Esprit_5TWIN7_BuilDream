@@ -11,10 +11,25 @@ use Illuminate\Validation\Rule;
 
 class MaintenanceReportController extends TechnicalCrudController
 {
-    protected function modelClass(): string { return MaintenanceReport::class; }
-    protected function resource(): string { return 'reports'; }
-    protected function title(): string { return 'Maintenance reports'; }
-    protected function eagerLoads(): array { return ['maintenance.equipment']; }
+    protected function modelClass(): string
+    {
+        return MaintenanceReport::class;
+    }
+
+    protected function resource(): string
+    {
+        return 'reports';
+    }
+
+    protected function title(): string
+    {
+        return 'Maintenance reports';
+    }
+
+    protected function eagerLoads(): array
+    {
+        return ['maintenance.equipment'];
+    }
 
     protected function scope(Builder $query, Request $request): Builder
     {
@@ -37,9 +52,13 @@ class MaintenanceReportController extends TechnicalCrudController
     {
         $query = Maintenance::query()->with('equipment')->where(function (Builder $q) use ($record) {
             $q->whereDoesntHave('report');
-            if ($record) $q->orWhere('id', $record->maintenance_id);
+            if ($record) {
+                $q->orWhere('id', $record->maintenance_id);
+            }
         });
-        if (! $this->isAdmin($request)) $query->whereHas('equipment', fn (Builder $q) => $q->where('owner_id', $request->user()->id));
+        if (! $this->isAdmin($request)) {
+            $query->whereHas('equipment', fn (Builder $q) => $q->where('owner_id', $request->user()->id));
+        }
 
         return ['maintenance_id' => $query->orderBy('id')->get()->mapWithKeys(
             fn ($maintenance) => [$maintenance->id => '#'.$maintenance->id.' — '.$maintenance->equipment->name]

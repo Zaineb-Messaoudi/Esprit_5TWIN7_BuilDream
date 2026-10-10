@@ -3,13 +3,19 @@
 namespace App\Listeners;
 
 use App\Events\ReservationApproved;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Notifications\ReservationApprovedNotification;
 
+/** Fires when the owner approves a reservation; notifies the buyer. */
 class SendReservationApprovedNotification
 {
     public function handle(ReservationApproved $event): void
     {
-        // Event is automatically broadcast via ShouldBroadcast
+        $buyer = $event->buyer;
+
+        if (! $buyer) {
+            return;
+        }
+
+        $buyer->notify(new ReservationApprovedNotification($event->reservation));
     }
 }

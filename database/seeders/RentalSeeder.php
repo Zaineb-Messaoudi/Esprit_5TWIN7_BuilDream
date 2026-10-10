@@ -39,8 +39,8 @@ class RentalSeeder extends Seeder
         $demoBuyerState = $demoBuyer ? ['user_id' => $demoBuyer->id] : [];
 
         // ---- 1) Rentals, grouped by status ----------------------------------
-        $pending   = Rental::factory()->count(3)->state($demoBuyerState)->pending()->create();
-        $active    = Rental::factory()->count(4)->state($demoBuyerState)->active()->create();
+        $pending = Rental::factory()->count(3)->state($demoBuyerState)->pending()->create();
+        $active = Rental::factory()->count(4)->state($demoBuyerState)->active()->create();
         $completed = Rental::factory()->count(4)->state($demoBuyerState)->completed()->create();
         $cancelled = Rental::factory()->count(1)->state($demoBuyerState)->cancelled()->create();
 
@@ -53,8 +53,8 @@ class RentalSeeder extends Seeder
             // The contract status follows the rental status
             $contract = match ($rental->status) {
                 RentalStatus::PENDING => $contract->draft(),   // not started: still a draft
-                RentalStatus::ACTIVE  => $contract->signed(),  // running: signed
-                default               => $contract->terminated(), // completed or cancelled: over
+                RentalStatus::ACTIVE => $contract->signed(),  // running: signed
+                default => $contract->terminated(), // completed or cancelled: over
             };
 
             $contract->create();
@@ -85,7 +85,7 @@ class RentalSeeder extends Seeder
         $extension = RentalExtension::factory()->approved()->create(['rental_id' => $rental->id]);
 
         $rental->update([
-            'end_date'     => $extension->new_end_date,
+            'end_date' => $extension->new_end_date,
             'total_amount' => round((float) $rental->total_amount + (float) $extension->additional_amount, 2),
         ]);
     }

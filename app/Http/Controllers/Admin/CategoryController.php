@@ -31,6 +31,7 @@ class CategoryController extends Controller
     public function store(CategoryStoreRequest $request): RedirectResponse
     {
         $this->catalog->createCategory($request->validated());
+
         return redirect()->route('admin.categories.index')->with('status', 'category-created');
     }
 
@@ -42,6 +43,7 @@ class CategoryController extends Controller
     public function update(CategoryUpdateRequest $request, Category $category): RedirectResponse
     {
         $this->catalog->updateCategory($category, $request->validated());
+
         return redirect()->route('admin.categories.index')->with('status', 'category-updated');
     }
 

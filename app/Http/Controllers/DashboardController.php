@@ -3,11 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Models\Equipment;
-use App\Models\Reservation;
-use App\Models\Rental;
-use App\Models\Payment;
 use App\Models\Invoice;
 use App\Models\Maintenance;
+use App\Models\Payment;
+use App\Models\Rental;
+use App\Models\Reservation;
 use Illuminate\Contracts\View\View;
 
 class DashboardController extends Controller
@@ -144,6 +144,7 @@ class DashboardController extends Controller
                     $item->year,
                     $item->month
                 );
+
                 return [$key => (float) $item->total];
             });
 
@@ -164,7 +165,7 @@ class DashboardController extends Controller
             ->get()
             ->mapWithKeys(function ($item) {
                 return [
-                    $item->category->name ?? 'Unknown' => $item->count
+                    $item->category->name ?? 'Unknown' => $item->count,
                 ];
             });
 
@@ -185,8 +186,9 @@ class DashboardController extends Controller
                 $status = $item->status instanceof \BackedEnum
                     ? $item->status->value
                     : $item->status;
+
                 return [
-                    ucfirst((string) $status) => $item->count
+                    ucfirst((string) $status) => $item->count,
                 ];
             });
 
@@ -198,8 +200,9 @@ class DashboardController extends Controller
                 $status = $item->status instanceof \BackedEnum
                     ? $item->status->value
                     : $item->status;
+
                 return [
-                    ucfirst((string) $status) => $item->count
+                    ucfirst((string) $status) => $item->count,
                 ];
             });
 
@@ -211,8 +214,9 @@ class DashboardController extends Controller
                 $status = $item->status instanceof \BackedEnum
                     ? $item->status->value
                     : $item->status;
+
                 return [
-                    ucfirst((string) $status) => $item->count
+                    ucfirst((string) $status) => $item->count,
                 ];
             });
 
@@ -220,7 +224,7 @@ class DashboardController extends Controller
         $recentOrders = Rental::with([
             'equipment',
             'user',
-            'contract'
+            'contract',
         ])
             ->latest('created_at')
             ->limit(5)
@@ -243,6 +247,7 @@ class DashboardController extends Controller
                     $role = $role->value;
                 }
                 $count = $item->count ?? $item['count'] ?? 0;
+
                 return [$role => $count];
             });
 
@@ -255,25 +260,25 @@ class DashboardController extends Controller
                 [
                     'label' => 'Total Equipment',
                     'value' => $totalEquipment,
-                    'change' => $availableEquipment . ' available',
+                    'change' => $availableEquipment.' available',
                     'tone' => 'primary',
                 ],
                 [
                     'label' => 'Active Rentals',
                     'value' => $activeRentals,
-                    'change' => $completedRentals . ' completed',
+                    'change' => $completedRentals.' completed',
                     'tone' => 'success',
                 ],
                 [
                     'label' => 'Total Revenue',
-                    'value' => number_format($totalRevenue, 2) . ' TND',
-                    'change' => number_format($pendingRevenue, 2) . ' TND pending',
+                    'value' => number_format($totalRevenue, 2).' TND',
+                    'change' => number_format($pendingRevenue, 2).' TND pending',
                     'tone' => 'success',
                 ],
                 [
                     'label' => 'Maintenance',
                     'value' => $equipmentInMaintenance,
-                    'change' => number_format($totalMaintenanceCost, 2) . ' TND total cost',
+                    'change' => number_format($totalMaintenanceCost, 2).' TND total cost',
                     'tone' => $equipmentInMaintenance > 0
                         ? 'warning'
                         : 'success',

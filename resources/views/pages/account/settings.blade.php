@@ -91,27 +91,31 @@
                     </x-common.component-card>
                 @elseif ($section === 'notifications')
                     <x-common.component-card title="Email notifications" desc="Choose which workspace updates should send an email.">
-                        <div class="divide-y divide-gray-100 dark:divide-gray-800">
-                            @foreach ([
-                                ['orders', 'Orders', 'New orders, payment status, and fulfillment updates'],
-                                ['inventory', 'Inventory', 'Low-stock alerts and catalog changes'],
-                                ['team', 'Team activity', 'Mentions, assignments, and comments'],
-                                ['updates', 'Product updates', 'New features and service announcements'],
-                            ] as [$key, $name, $description])
+                        <form method="POST" action="{{ route('settings.notifications.update') }}" class="divide-y divide-gray-100 dark:divide-gray-800">
+                            @csrf
+                            @foreach (\App\Support\NotificationPreferenceCatalog::all() as $pref)
+                                @php
+                                    $key = $pref['key'];
+                                    $name = $pref['name'];
+                                    $description = $pref['description'];
+                                @endphp
                                 <label class="flex cursor-pointer items-center justify-between gap-4 py-4">
                                     <span><span class="block text-sm font-medium text-gray-800 dark:text-white/90">{{ $name }}</span><span class="mt-1 block text-xs text-gray-500 dark:text-gray-400">{{ $description }}</span></span>
-                                    <input type="checkbox" x-model="notificationPreferences.{{ $key }}" class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" />
+                                    <input type="checkbox" name="preferences[{{ $key }}]" value="1"
+                                        @checked(old("preferences.$key", $user->wantsEmail($key)))
+                                        class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" />
                                 </label>
                             @endforeach
-                        </div>
-                        <button type="button" @click="saveNotifications()" class="mt-4 rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">Save notification settings</button>
-                        <p x-show="saved" x-cloak role="status" class="mt-3 text-sm text-success-600">{{ __('Demo preferences saved in this browser only.') }}</p>
+                            <div class="flex flex-wrap items-center gap-3 pt-5">
+                                <button type="submit" class="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">Save notification settings</button>
+                                @if (session('status'))
+                                    <p role="status" class="text-sm text-success-600">{{ __('Notification preferences saved.') }}</p>
+                                @endif
+                            </div>
+                        </form>
                     </x-common.component-card>
                     <x-common.component-card title="In-app notifications">
-                        <label class="flex cursor-pointer items-center justify-between gap-4">
-                            <span><span class="block text-sm font-medium text-gray-800 dark:text-white/90">Desktop notifications</span><span class="mt-1 block text-xs text-gray-500 dark:text-gray-400">Show updates while this page is open.</span></span>
-                            <input type="checkbox" x-model="notificationPreferences.desktop" class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" />
-                        </label>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">Real-time notifications are always on: every reservation, payment, rental, extension, maintenance and return event is pushed to your notification centre and, when this page is open, to your browser.</p>
                     </x-common.component-card>
                 @elseif ($section === 'security')
                     <x-common.component-card title="Password" desc="Password changes continue to use the existing Breeze authentication flow.">

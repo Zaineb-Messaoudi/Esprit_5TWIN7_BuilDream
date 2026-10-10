@@ -15,7 +15,7 @@ class InspectionUpdateRequest extends FormRequest
     public function rules(): array
     {
         $isAdmin = $this->user()?->isAdmin();
-        
+
         return [
             'equipment_id' => ['required', 'integer', Rule::exists('equipment', 'id')->when(! $isAdmin, fn ($rule) => $rule->where('owner_id', $this->user()->id))],
             'rental_id' => ['nullable', 'integer', Rule::exists('rentals', 'id')->where('equipment_id', $this->input('equipment_id'))],

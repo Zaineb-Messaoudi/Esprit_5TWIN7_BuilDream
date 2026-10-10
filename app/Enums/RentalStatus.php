@@ -10,8 +10,8 @@ namespace App\Enums;
  */
 enum RentalStatus: string
 {
-    case PENDING   = 'pending';    // created, rental period not started yet
-    case ACTIVE    = 'active';     // equipment is currently with the renter
+    case PENDING = 'pending';    // created, rental period not started yet
+    case ACTIVE = 'active';     // equipment is currently with the renter
     case COMPLETED = 'completed';  // equipment returned, rental finished
     case CANCELLED = 'cancelled';  // rental cancelled before completion
 
@@ -19,8 +19,8 @@ enum RentalStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::PENDING   => 'Pending',
-            self::ACTIVE    => 'Active',
+            self::PENDING => 'Pending',
+            self::ACTIVE => 'Active',
             self::COMPLETED => 'Completed',
             self::CANCELLED => 'Cancelled',
         };
@@ -30,8 +30,8 @@ enum RentalStatus: string
     public function color(): string
     {
         return match ($this) {
-            self::PENDING   => 'warning',
-            self::ACTIVE    => 'success',
+            self::PENDING => 'warning',
+            self::ACTIVE => 'success',
             self::COMPLETED => 'gray',
             self::CANCELLED => 'error',
         };
@@ -47,6 +47,7 @@ enum RentalStatus: string
         foreach (self::cases() as $case) {
             $options[$case->value] = $case->label();
         }
+
         return $options;
     }
 }

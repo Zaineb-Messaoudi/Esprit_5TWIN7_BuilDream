@@ -6,7 +6,6 @@ use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\User;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
 use RuntimeException;

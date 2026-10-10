@@ -3,13 +3,12 @@
 namespace App\Http\Controllers\Front;
 
 use App\Enums\ExtensionStatus;
-use App\Enums\RentalStatus;
-use App\Http\Controllers\Controller;
-use App\Models\Rental;
-use App\Models\RentalExtension;
 use App\Events\ExtensionApproved;
 use App\Events\ExtensionRejected;
 use App\Events\ExtensionRequested;
+use App\Http\Controllers\Controller;
+use App\Models\Rental;
+use App\Models\RentalExtension;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -36,8 +35,8 @@ class RentalExtensionController extends Controller
 
         return view('pages.front.rental-extension.create', [
             'rental' => $rental->load('equipment'),
-            'title'  => __('Request Extension'),
-            'owner'  => $owner,
+            'title' => __('Request Extension'),
+            'owner' => $owner,
         ]);
     }
 
@@ -50,21 +49,21 @@ class RentalExtensionController extends Controller
         abort_unless(in_array($rental->status->value, ['active']), 409);
 
         $data = $request->validate([
-            'new_end_date' => ['required', 'date', 'after:' . $rental->end_date->toDateString()],
-            'reason'       => ['nullable', 'string', 'max:1000'],
+            'new_end_date' => ['required', 'date', 'after:'.$rental->end_date->toDateString()],
+            'reason' => ['nullable', 'string', 'max:1000'],
         ]);
 
         $newEnd = Carbon::parse($data['new_end_date']);
         $additionalAmount = $this->suggestedAmount($rental, $rental->end_date, $newEnd);
 
         $extension = RentalExtension::create([
-            'rental_id'         => $rental->id,
-            'requested_date'    => now()->toDateString(),
-            'old_end_date'      => $rental->end_date,
-            'new_end_date'      => $newEnd,
+            'rental_id' => $rental->id,
+            'requested_date' => now()->toDateString(),
+            'old_end_date' => $rental->end_date,
+            'new_end_date' => $newEnd,
             'additional_amount' => $additionalAmount,
-            'reason'            => $data['reason'] ?? null,
-            'status'            => ExtensionStatus::PENDING,
+            'reason' => $data['reason'] ?? null,
+            'status' => ExtensionStatus::PENDING,
         ]);
 
         // Fire real-time notification for extension requested
@@ -87,7 +86,7 @@ class RentalExtensionController extends Controller
 
         $rental = $rentalExtension->rental;
         $rental->update([
-            'end_date'     => $rentalExtension->new_end_date,
+            'end_date' => $rentalExtension->new_end_date,
             'total_amount' => round((float) $rental->total_amount + (float) $rentalExtension->additional_amount, 2),
         ]);
 
@@ -127,8 +126,8 @@ class RentalExtensionController extends Controller
     private function suggestedAmount(Rental $rental, Carbon $oldEnd, Carbon $newEnd): float
     {
         $rentalDays = max(1, (int) $rental->start_date->diffInDays($rental->end_date));
-        $extraDays  = max(1, (int) $oldEnd->diffInDays($newEnd));
-        $dailyRate  = (float) $rental->total_amount / $rentalDays;
+        $extraDays = max(1, (int) $oldEnd->diffInDays($newEnd));
+        $dailyRate = (float) $rental->total_amount / $rentalDays;
 
         return round($dailyRate * $extraDays, 2);
     }

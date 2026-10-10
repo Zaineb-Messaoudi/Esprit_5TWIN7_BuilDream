@@ -47,12 +47,12 @@ class AdminRentalStoreRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'user_id'        => 'renter',
-            'equipment_id'   => 'equipment',
+            'user_id' => 'renter',
+            'equipment_id' => 'equipment',
             'reservation_id' => 'reservation',
-            'start_date'     => 'start date',
-            'end_date'       => 'end date',
-            'total_amount'   => 'total amount',
+            'start_date' => 'start date',
+            'end_date' => 'end date',
+            'total_amount' => 'total amount',
         ];
     }
 }

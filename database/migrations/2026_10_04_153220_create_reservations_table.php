@@ -14,13 +14,13 @@ return new class extends Migration
         Schema::create('reservations', function (Blueprint $table) {
             $table->id();
             $table->string('reference')->unique();
-             $table->unsignedBigInteger('equipment_id');
-              $table->foreignId('user_id')->constrained()->cascadeOnDelete();
-              $table->date('start_date');
-               $table->date('end_date');
-               $table->decimal('total_amount', 10, 2);
-               $table->string('status')->default('pending'); 
-                $table->timestamps();
+            $table->unsignedBigInteger('equipment_id');
+            $table->foreignId('user_id')->constrained()->cascadeOnDelete();
+            $table->date('start_date');
+            $table->date('end_date');
+            $table->decimal('total_amount', 10, 2);
+            $table->string('status')->default('pending');
+            $table->timestamps();
         });
     }
 

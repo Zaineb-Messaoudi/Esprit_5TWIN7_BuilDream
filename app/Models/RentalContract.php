@@ -39,12 +39,12 @@ class RentalContract extends Model
     protected function casts(): array
     {
         return [
-            'signed_at'        => 'datetime',
-            'deposit_amount'   => 'decimal:2',
-            'deposit_held_at'  => 'datetime',
+            'signed_at' => 'datetime',
+            'deposit_amount' => 'decimal:2',
+            'deposit_held_at' => 'datetime',
             'deposit_released_at' => 'datetime',
-            'contract_status'  => ContractStatus::class,
-            'deposit_status'   => \App\Enums\DepositStatus::class,
+            'contract_status' => ContractStatus::class,
+            'deposit_status' => \App\Enums\DepositStatus::class,
         ];
     }
 
@@ -55,7 +55,7 @@ class RentalContract extends Model
     }
 
     /** Hold the deposit when rental starts. */
-    public function holdDeposit(string $notes = null): void
+    public function holdDeposit(?string $notes = null): void
     {
         $this->update([
             'deposit_status' => DepositStatus::HELD,
@@ -65,7 +65,7 @@ class RentalContract extends Model
     }
 
     /** Release the deposit when equipment returns undamaged. */
-    public function releaseDeposit(string $notes = null): void
+    public function releaseDeposit(?string $notes = null): void
     {
         $this->update([
             'deposit_status' => DepositStatus::RELEASED,
@@ -75,7 +75,7 @@ class RentalContract extends Model
     }
 
     /** Forfeit the deposit (partial or full) due to damage. */
-    public function forfeitDeposit(string $notes = null): void
+    public function forfeitDeposit(?string $notes = null): void
     {
         $this->update([
             'deposit_status' => DepositStatus::FORFEITED,

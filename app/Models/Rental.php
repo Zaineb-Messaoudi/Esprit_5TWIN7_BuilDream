@@ -41,10 +41,10 @@ class Rental extends Model
     protected function casts(): array
     {
         return [
-            'start_date'   => 'date',
-            'end_date'     => 'date',
+            'start_date' => 'date',
+            'end_date' => 'date',
             'total_amount' => 'decimal:2',
-            'status'       => RentalStatus::class,
+            'status' => RentalStatus::class,
         ];
     }
 
@@ -110,6 +110,6 @@ class Rental extends Model
             return $this->equipment->name;
         }
 
-        return 'Equipment #' . $this->equipment_id;
+        return 'Equipment #'.$this->equipment_id;
     }
 }

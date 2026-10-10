@@ -15,7 +15,7 @@ class MaintenanceStoreRequest extends FormRequest
     public function rules(): array
     {
         $isAdmin = $this->user()?->isAdmin();
-        
+
         return [
             'equipment_id' => ['required', 'integer', Rule::exists('equipment', 'id')->when(! $isAdmin, fn ($rule) => $rule->where('owner_id', $this->user()->id))],
             'start_date' => ['required', 'date'],

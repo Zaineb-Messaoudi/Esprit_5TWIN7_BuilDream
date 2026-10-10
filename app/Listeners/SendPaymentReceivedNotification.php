@@ -3,13 +3,21 @@
 namespace App\Listeners;
 
 use App\Events\PaymentReceived;
-use Illuminate\Contracts\Queue\ShouldQueue;
-use Illuminate\Queue\InteractsWithQueue;
+use App\Notifications\PaymentReceivedNotification;
 
+/** Fires when an administrator marks a payment as paid; notifies the owner. */
 class SendPaymentReceivedNotification
 {
     public function handle(PaymentReceived $event): void
     {
-        // Event is automatically broadcast via ShouldBroadcast
+        $event->payment->load('reservation.equipment');
+
+        $owner = $event->owner;
+
+        if (! $owner) {
+            return;
+        }
+
+        $owner->notify(new PaymentReceivedNotification($event->payment));
     }
 }

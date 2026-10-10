@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Technical;
 
+use App\Events\MaintenanceCompleted;
+use App\Events\MaintenanceCreated;
 use App\Http\Controllers\Controller;
 use App\Models\Equipment;
 use App\Models\Maintenance;
-use App\Events\MaintenanceCreated;
-use App\Events\MaintenanceCompleted;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
@@ -136,7 +136,7 @@ abstract class TechnicalCrudController extends Controller
         $record = $this->find($request, $id);
         $wasCompleted = $record instanceof Maintenance && $record->status === 'completed';
         $record->update($request->validate($this->rules($request, $record)));
-        
+
         // Dispatch MaintenanceCompleted event when maintenance is completed
         if ($record instanceof Maintenance && ! $wasCompleted && $record->status === 'completed') {
             $record->load('equipment.owner');

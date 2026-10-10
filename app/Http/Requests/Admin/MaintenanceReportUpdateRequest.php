@@ -15,7 +15,7 @@ class MaintenanceReportUpdateRequest extends FormRequest
     public function rules(): array
     {
         $isAdmin = $this->user()?->isAdmin();
-        
+
         $exists = Rule::exists('maintenances', 'id');
         if (! $isAdmin) {
             $exists->whereIn('equipment_id', fn ($q) => $q->select('id')->from('equipment')->where('owner_id', $this->user()->id));

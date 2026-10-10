@@ -6,8 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminRentalStoreRequest;
 use App\Http\Requests\Admin\AdminRentalUpdateRequest;
 use App\Models\Rental;
-use App\Models\User;
 use App\Models\Reservation;
+use App\Models\User;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -48,12 +48,12 @@ class RentalController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('reference', 'like', '%' . $search . '%')
-                  ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%' . $search . '%'))
-                  ->orWhereHas('equipment', fn ($equipment) => $equipment
-                      ->where('name', 'like', '%' . $search . '%')
-                      ->orWhere('brand', 'like', '%' . $search . '%')
-                      ->orWhere('model', 'like', '%' . $search . '%'));
+                $q->where('reference', 'like', '%'.$search.'%')
+                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%'.$search.'%'))
+                    ->orWhereHas('equipment', fn ($equipment) => $equipment
+                        ->where('name', 'like', '%'.$search.'%')
+                        ->orWhere('brand', 'like', '%'.$search.'%')
+                        ->orWhere('model', 'like', '%'.$search.'%'));
             });
         }
 
@@ -62,7 +62,7 @@ class RentalController extends Controller
 
         return view('pages.admin.rentals.index', [
             'rentals' => $rentals,
-            'title'   => __('Rentals'),
+            'title' => __('Rentals'),
         ]);
     }
 
@@ -83,7 +83,7 @@ class RentalController extends Controller
         DB::transaction(function () use ($request) {
             $attributes = $this->reservationAttributes($request->validated());
             $rental = Rental::create($attributes + [
-                'reference' => 'TMP-' . Str::uuid(),
+                'reference' => 'TMP-'.Str::uuid(),
             ]);
 
             $rental->update([
@@ -102,7 +102,7 @@ class RentalController extends Controller
 
         return view('pages.admin.rentals.show', [
             'rental' => $rental,
-            'title'  => __('Rental Details'),
+            'title' => __('Rental Details'),
         ]);
     }
 
@@ -111,7 +111,7 @@ class RentalController extends Controller
     {
         return view('pages.admin.rentals.edit', $this->formData() + [
             'rental' => $rental,
-            'title'  => __('Edit Rental'),
+            'title' => __('Edit Rental'),
         ]);
     }
 

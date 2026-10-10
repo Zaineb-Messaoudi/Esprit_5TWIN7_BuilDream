@@ -23,7 +23,7 @@ class AdminRentalExtensionUpdateRequest extends FormRequest
 
         return [
             // The new end date must stay after the end date the rental had at request time
-            'new_end_date' => ['required', 'date', 'after:' . $oldEndDate],
+            'new_end_date' => ['required', 'date', 'after:'.$oldEndDate],
             'additional_amount' => ['nullable', 'numeric', 'min:0', 'max:99999999.99'],
             'reason' => ['nullable', 'string', 'max:1000'],
         ];
@@ -32,7 +32,7 @@ class AdminRentalExtensionUpdateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'new_end_date'      => 'new end date',
+            'new_end_date' => 'new end date',
             'additional_amount' => 'additional amount',
         ];
     }

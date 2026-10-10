@@ -4,14 +4,14 @@ namespace App\Http\Controllers\Admin;
 
 use App\Enums\ExtensionStatus;
 use App\Enums\RentalStatus;
+use App\Events\ExtensionApproved;
+use App\Events\ExtensionRejected;
+use App\Events\ExtensionRequested;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminRentalExtensionStoreRequest;
 use App\Http\Requests\Admin\AdminRentalExtensionUpdateRequest;
 use App\Models\Rental;
 use App\Models\RentalExtension;
-use App\Events\ExtensionRequested;
-use App\Events\ExtensionApproved;
-use App\Events\ExtensionRejected;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -49,8 +49,8 @@ class RentalExtensionController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->whereHas('rental', function ($r) use ($search) {
-                $r->where('reference', 'like', '%' . $search . '%')
-                  ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%' . $search . '%'));
+                $r->where('reference', 'like', '%'.$search.'%')
+                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%'.$search.'%'));
             });
         }
 
@@ -58,7 +58,7 @@ class RentalExtensionController extends Controller
 
         return view('pages.admin.rental-extensions.index', [
             'extensions' => $extensions,
-            'title'      => __('Rental Extensions'),
+            'title' => __('Rental Extensions'),
         ]);
     }
 
@@ -77,9 +77,9 @@ class RentalExtensionController extends Controller
             ->get();
 
         return view('pages.admin.rental-extensions.create', [
-            'rentals'          => $rentals,
+            'rentals' => $rentals,
             'selectedRentalId' => $request->query('rental_id'),
-            'title'            => __('Create Extension Request'),
+            'title' => __('Create Extension Request'),
         ]);
     }
 
@@ -91,14 +91,14 @@ class RentalExtensionController extends Controller
         $newEnd = Carbon::parse($data['new_end_date']);
 
         $extension = RentalExtension::create([
-            'rental_id'         => $rental->id,
-            'requested_date'    => now()->toDateString(),   // the request is made today
-            'old_end_date'      => $rental->end_date,       // snapshot of the current end date
-            'new_end_date'      => $newEnd,
+            'rental_id' => $rental->id,
+            'requested_date' => now()->toDateString(),   // the request is made today
+            'old_end_date' => $rental->end_date,       // snapshot of the current end date
+            'new_end_date' => $newEnd,
             // If the admin left the amount empty, compute it from the rental daily rate
             'additional_amount' => $data['additional_amount'] ?? $this->suggestedAmount($rental, $rental->end_date, $newEnd),
-            'reason'            => $data['reason'] ?? null,
-            'status'            => ExtensionStatus::PENDING,
+            'reason' => $data['reason'] ?? null,
+            'status' => ExtensionStatus::PENDING,
         ]);
 
         // Fire real-time notification for extension requested
@@ -115,7 +115,7 @@ class RentalExtensionController extends Controller
 
         return view('pages.admin.rental-extensions.show', [
             'extension' => $rentalExtension,
-            'title'     => __('Extension Details'),
+            'title' => __('Extension Details'),
         ]);
     }
 
@@ -132,7 +132,7 @@ class RentalExtensionController extends Controller
 
         return view('pages.admin.rental-extensions.edit', [
             'extension' => $rentalExtension,
-            'title'     => __('Edit Extension Request'),
+            'title' => __('Edit Extension Request'),
         ]);
     }
 
@@ -149,10 +149,10 @@ class RentalExtensionController extends Controller
         $newEnd = Carbon::parse($data['new_end_date']);
 
         $rentalExtension->update([
-            'new_end_date'      => $newEnd,
+            'new_end_date' => $newEnd,
             'additional_amount' => $data['additional_amount']
                 ?? $this->suggestedAmount($rentalExtension->rental, $rentalExtension->old_end_date, $newEnd),
-            'reason'            => $data['reason'] ?? null,
+            'reason' => $data['reason'] ?? null,
         ]);
 
         return redirect()->route('admin.rental-extensions.index')->with('status', 'extension-updated');
@@ -189,17 +189,20 @@ class RentalExtensionController extends Controller
 
             if ($extension->status !== ExtensionStatus::PENDING) {
                 $error = 'This request has already been processed.';
+
                 return;
             }
 
             if (! in_array($rental->status, [RentalStatus::PENDING, RentalStatus::ACTIVE], true)) {
                 $error = 'Only a pending or active rental can be extended.';
+
                 return;
             }
 
             // The rental may have been edited since the request was made
             if ($extension->new_end_date->lte($rental->end_date)) {
                 $error = 'The new end date is no longer after the rental end date. Edit the request first.';
+
                 return;
             }
 
@@ -207,7 +210,7 @@ class RentalExtensionController extends Controller
             // of the same equipment overlaps the extra period (old end date -> new end date).
 
             $rental->update([
-                'end_date'     => $extension->new_end_date,
+                'end_date' => $extension->new_end_date,
                 'total_amount' => round((float) $rental->total_amount + (float) $extension->additional_amount, 2),
             ]);
 
@@ -249,8 +252,8 @@ class RentalExtensionController extends Controller
     private function suggestedAmount(Rental $rental, Carbon $oldEnd, Carbon $newEnd): float
     {
         $rentalDays = max(1, (int) $rental->start_date->diffInDays($rental->end_date));
-        $extraDays  = max(1, (int) $oldEnd->diffInDays($newEnd));
-        $dailyRate  = (float) $rental->total_amount / $rentalDays;
+        $extraDays = max(1, (int) $oldEnd->diffInDays($newEnd));
+        $dailyRate = (float) $rental->total_amount / $rentalDays;
 
         return round($dailyRate * $extraDays, 2);
     }

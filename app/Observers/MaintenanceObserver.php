@@ -65,7 +65,7 @@ class MaintenanceObserver
         MaintenanceReport::create([
             'maintenance_id' => $maintenance->id,
             'diagnosis' => $maintenance->reason ?? 'Maintenance performed',
-            'actions_taken' => 'Maintenance completed on ' . now()->format('Y-m-d') . '. Details to be filled by technician.',
+            'actions_taken' => 'Maintenance completed on '.now()->format('Y-m-d').'. Details to be filled by technician.',
             'parts_replaced' => null,
             'technician_notes' => 'Auto-generated report template. Please fill in actual details.',
             'report_date' => now()->toDateString(),

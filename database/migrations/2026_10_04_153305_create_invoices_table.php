@@ -14,12 +14,12 @@ return new class extends Migration
         Schema::create('invoices', function (Blueprint $table) {
             $table->id();
             $table->foreignId('reservation_id')->unique()->constrained()->cascadeOnDelete();
-             $table->string('invoice_number')->unique();
-             $table->date('issue_date');
-              $table->decimal('subtotal', 10, 2);
-              $table->decimal('tax', 10, 2);
-              $table->decimal('total', 10, 2);
-              $table->string('status')->default('unpaid');
+            $table->string('invoice_number')->unique();
+            $table->date('issue_date');
+            $table->decimal('subtotal', 10, 2);
+            $table->decimal('tax', 10, 2);
+            $table->decimal('total', 10, 2);
+            $table->string('status')->default('unpaid');
             $table->timestamps();
         });
     }

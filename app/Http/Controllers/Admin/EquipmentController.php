@@ -43,18 +43,21 @@ class EquipmentController extends Controller
     public function store(EquipmentStoreRequest $request): RedirectResponse
     {
         $this->catalog->createEquipment($request->validated());
+
         return redirect()->route('admin.equipment.index')->with('status', 'equipment-created');
     }
 
     public function show(Equipment $equipment): View
     {
         $equipment->load(['category', 'owner', 'energyProfile', 'maintenances.report']);
+
         return view('pages.admin.equipment.show', compact('equipment') + ['title' => $equipment->name]);
     }
 
     public function edit(Equipment $equipment): View
     {
         $equipment->load('energyProfile');
+
         return view('pages.admin.equipment.edit', [
             'equipment' => $equipment,
             'categories' => Category::where('status', 'active')->orderBy('name')->get(),
@@ -66,12 +69,14 @@ class EquipmentController extends Controller
     public function update(EquipmentUpdateRequest $request, Equipment $equipment): RedirectResponse
     {
         $this->catalog->updateEquipment($equipment, $request->validated());
+
         return redirect()->route('admin.equipment.index')->with('status', 'equipment-updated');
     }
 
     public function destroy(Equipment $equipment): RedirectResponse
     {
         $this->catalog->deleteEquipment($equipment);
+
         return redirect()->route('admin.equipment.index')->with('status', 'equipment-deleted');
     }
 }

@@ -18,13 +18,27 @@ return new class extends Migration
                 if (! Schema::hasColumn('equipment', 'owner_id')) {
                     $table->foreignId('owner_id')->nullable()->after('category_id');
                 }
-                if (! Schema::hasColumn('equipment', 'description')) $table->text('description')->nullable()->after('name');
-                if (! Schema::hasColumn('equipment', 'brand')) $table->string('brand')->nullable()->after('description');
-                if (! Schema::hasColumn('equipment', 'model')) $table->string('model')->nullable()->after('brand');
-                if (! Schema::hasColumn('equipment', 'price_per_day')) $table->decimal('price_per_day', 10, 2)->nullable()->after('model');
-                if (! Schema::hasColumn('equipment', 'condition')) $table->string('condition', 30)->default('good')->after('price_per_day');
-                if (! Schema::hasColumn('equipment', 'location')) $table->string('location')->nullable()->after('condition');
-                if (! Schema::hasColumn('equipment', 'status')) $table->string('status', 30)->default('available')->after('location');
+                if (! Schema::hasColumn('equipment', 'description')) {
+                    $table->text('description')->nullable()->after('name');
+                }
+                if (! Schema::hasColumn('equipment', 'brand')) {
+                    $table->string('brand')->nullable()->after('description');
+                }
+                if (! Schema::hasColumn('equipment', 'model')) {
+                    $table->string('model')->nullable()->after('brand');
+                }
+                if (! Schema::hasColumn('equipment', 'price_per_day')) {
+                    $table->decimal('price_per_day', 10, 2)->nullable()->after('model');
+                }
+                if (! Schema::hasColumn('equipment', 'condition')) {
+                    $table->string('condition', 30)->default('good')->after('price_per_day');
+                }
+                if (! Schema::hasColumn('equipment', 'location')) {
+                    $table->string('location')->nullable()->after('condition');
+                }
+                if (! Schema::hasColumn('equipment', 'status')) {
+                    $table->string('status', 30)->default('available')->after('location');
+                }
             });
 
             Schema::table('equipment', function (Blueprint $table): void {

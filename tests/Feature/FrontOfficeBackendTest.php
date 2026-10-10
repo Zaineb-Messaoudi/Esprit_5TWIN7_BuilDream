@@ -2,7 +2,6 @@
 
 use App\Enums\RentalStatus;
 use App\Enums\UserRole;
-use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\Rental;
 use App\Models\User;

@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Enums\ContractStatus;
-use App\Enums\DepositStatus;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminRentalContractStoreRequest;
 use App\Http\Requests\Admin\AdminRentalContractUpdateRequest;
@@ -46,11 +45,11 @@ class RentalContractController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('contract_number', 'like', '%' . $search . '%')
-                  ->orWhereHas('rental', function ($r) use ($search) {
-                      $r->where('reference', 'like', '%' . $search . '%')
-                        ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%' . $search . '%'));
-                  });
+                $q->where('contract_number', 'like', '%'.$search.'%')
+                    ->orWhereHas('rental', function ($r) use ($search) {
+                        $r->where('reference', 'like', '%'.$search.'%')
+                            ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%'.$search.'%'));
+                    });
             });
         }
 
@@ -58,7 +57,7 @@ class RentalContractController extends Controller
 
         return view('pages.admin.rental-contracts.index', [
             'contracts' => $contracts,
-            'title'     => __('Rental Contracts'),
+            'title' => __('Rental Contracts'),
         ]);
     }
 
@@ -70,9 +69,9 @@ class RentalContractController extends Controller
     public function create(Request $request): View
     {
         return view('pages.admin.rental-contracts.create', [
-            'rentals'          => Rental::doesntHave('contract')->with('user')->latest()->get(),
+            'rentals' => Rental::doesntHave('contract')->with('user')->latest()->get(),
             'selectedRentalId' => $request->query('rental_id'),
-            'title'            => __('Create Contract'),
+            'title' => __('Create Contract'),
         ]);
     }
 
@@ -86,7 +85,7 @@ class RentalContractController extends Controller
         // The transaction makes both steps succeed or fail together.
         DB::transaction(function () use ($data) {
             $contract = RentalContract::create($data + [
-                'contract_number' => 'TMP-' . Str::uuid(),
+                'contract_number' => 'TMP-'.Str::uuid(),
             ]);
 
             $contract->update([
@@ -105,7 +104,7 @@ class RentalContractController extends Controller
 
         return view('pages.admin.rental-contracts.show', [
             'contract' => $rentalContract,
-            'title'    => __('Contract Details'),
+            'title' => __('Contract Details'),
         ]);
     }
 
@@ -116,7 +115,7 @@ class RentalContractController extends Controller
 
         return view('pages.admin.rental-contracts.edit', [
             'contract' => $rentalContract,
-            'title'    => __('Edit Contract'),
+            'title' => __('Edit Contract'),
         ]);
     }
 
@@ -141,7 +140,8 @@ class RentalContractController extends Controller
     {
         $rentalContract->load('rental.user', 'rental.equipment.category');
         $pdf = Pdf::loadView('pdf.rental-contract', ['contract' => $rentalContract]);
-        return $pdf->download($rentalContract->contract_number . '.pdf');
+
+        return $pdf->download($rentalContract->contract_number.'.pdf');
     }
 
     /**
@@ -167,6 +167,7 @@ class RentalContractController extends Controller
             return back()->with('error', 'Deposit cannot be held in current state.');
         }
         $rentalContract->holdDeposit(request('notes'));
+
         return back()->with('status', 'deposit-held');
     }
 
@@ -177,6 +178,7 @@ class RentalContractController extends Controller
             return back()->with('error', 'Deposit cannot be released in current state.');
         }
         $rentalContract->releaseDeposit(request('notes'));
+
         return back()->with('status', 'deposit-released');
     }
 
@@ -187,6 +189,7 @@ class RentalContractController extends Controller
             return back()->with('error', 'Deposit cannot be forfeited in current state.');
         }
         $rentalContract->forfeitDeposit(request('notes'));
+
         return back()->with('status', 'deposit-forfeited');
     }
 }

@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers;
 
-use App\Http\Requests\PaymentRequest;
-use App\Models\Payment;
-use App\Models\Reservation;
-use App\Models\Rental;
-use App\Models\Invoice;
-use App\Models\RentalContract;
 use App\Events\PaymentReceived;
 use App\Events\RentalStarted;
-use Illuminate\Support\Facades\DB;
+use App\Http\Requests\PaymentRequest;
+use App\Models\Invoice;
+use App\Models\Payment;
+use App\Models\Rental;
+use App\Models\RentalContract;
+use App\Models\Reservation;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class PaymentController extends Controller
@@ -25,6 +25,7 @@ class PaymentController extends Controller
         if (! request()->user()->isAdmin()) {
             $query->whereHas('reservation', fn ($q) => $q->where('user_id', request()->user()->id));
         }
+
         return view('payments.index', ['payments' => $query->latest()->paginate(10)]);
     }
 
@@ -34,7 +35,10 @@ class PaymentController extends Controller
     public function create()
     {
         $query = Reservation::query();
-        if (! request()->user()->isAdmin()) $query->where('user_id', request()->user()->id);
+        if (! request()->user()->isAdmin()) {
+            $query->where('user_id', request()->user()->id);
+        }
+
         return view('payments.create', ['reservations' => $query->with('equipment')->get()]);
     }
 
@@ -58,6 +62,7 @@ class PaymentController extends Controller
                 $this->completePaidReservation($reservation, $payment->amount);
             }
         });
+
         return redirect()->route('rental.payments.index')->with('success', __('Payment recorded successfully.'));
     }
 
@@ -67,6 +72,7 @@ class PaymentController extends Controller
     public function show(Payment $payment)
     {
         abort_unless(request()->user()->isAdmin() || $payment->reservation->user_id === request()->user()->id, 403);
+
         return view('payments.show', compact('payment'));
     }
 
@@ -77,6 +83,7 @@ class PaymentController extends Controller
     {
         $payment = Payment::findOrFail($id);
         abort_unless(request()->user()->isAdmin() || $payment->reservation->user_id === request()->user()->id, 403);
+
         return view('payments.edit', compact('payment'));
     }
 
@@ -95,7 +102,7 @@ class PaymentController extends Controller
                 $this->completePaidReservation($payment->reservation, $payment->amount);
             }
         });
-        
+
         // Fire real-time notification when payment is marked as paid
         if ($payment->status === 'paid' && ! $wasPaid) {
             PaymentReceived::dispatch($payment->load('reservation.equipment'), $payment->reservation->equipment->owner);
@@ -113,6 +120,7 @@ class PaymentController extends Controller
         abort_unless(request()->user()->isAdmin() || $payment->reservation->user_id === request()->user()->id, 403);
         abort_unless($payment->status !== 'paid', 409);
         $payment->delete();
+
         return redirect()->route('rental.payments.index')->with('success', __('Payment deleted successfully.'));
     }
 
