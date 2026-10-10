@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AccountController;
+use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\BuyerController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\DeliveryController;
@@ -22,6 +23,10 @@ use Illuminate\Support\Facades\Route;
  | be assigned to the "api" middleware group. Make something great!
  |
  */
+
+// Stripe webhook (no auth required)
+Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
+    ->name('stripe.webhook');
 
 Route::middleware('auth:sanctum')->group(function () {
     // ---- Authenticated user -------------------------------------------------
@@ -144,8 +149,40 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/{signature}/decline', [DocumentController::class, 'decline'])->name('decline');
         });
     });
-});
 
-// Stripe webhook (no auth required)
-Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
-    ->name('stripe.webhook');
+    // ---- Analytics -----------------------------------------------------------
+    Route::prefix('analytics')->name('analytics.')->group(function () {
+        Route::get('/revenue', [AnalyticsController::class, 'revenue'])->name('revenue');
+        Route::get('/bookings', [AnalyticsController::class, 'bookings'])->name('bookings');
+        Route::get('/utilization', [AnalyticsController::class, 'utilization'])->name('utilization');
+        Route::get('/user-growth', [AnalyticsController::class, 'userGrowth'])->name('user-growth');
+        Route::get('/top-equipment', [AnalyticsController::class, 'topEquipment'])->name('top-equipment');
+        Route::post('/record-event', [AnalyticsController::class, 'recordEvent'])->name('record-event');
+
+        Route::prefix('dashboards')->name('dashboards.')->group(function () {
+            Route::get('/', [AnalyticsController::class, 'dashboards'])->name('index');
+            Route::post('/', [AnalyticsController::class, 'storeDashboard'])->name('store');
+            Route::get('/{dashboard}', [AnalyticsController::class, 'showDashboard'])->name('show');
+            Route::patch('/{dashboard}', [AnalyticsController::class, 'updateDashboard'])->name('update');
+            Route::delete('/{dashboard}', [AnalyticsController::class, 'destroyDashboard'])->name('destroy');
+
+            Route::post('/{dashboard}/widgets', [AnalyticsController::class, 'addWidget'])->name('widgets.store');
+            Route::patch('/widgets/{widget}', [AnalyticsController::class, 'updateWidget'])->name('widgets.update');
+            Route::delete('/widgets/{widget}', [AnalyticsController::class, 'destroyWidget'])->name('widgets.destroy');
+        });
+
+        Route::prefix('reports')->name('reports.')->group(function () {
+            Route::get('/', [AnalyticsController::class, 'reports'])->name('index');
+            Route::post('/', [AnalyticsController::class, 'storeReport'])->name('store');
+            Route::get('/{report}', [AnalyticsController::class, 'showReport'])->name('show');
+            Route::post('/{report}/generate', [AnalyticsController::class, 'generateReport'])->name('generate');
+            Route::get('/runs/{run}', [AnalyticsController::class, 'showReportRun'])->name('runs.show');
+        });
+
+        Route::prefix('models')->name('models.')->group(function () {
+            Route::get('/', [AnalyticsController::class, 'models'])->name('index');
+            Route::get('/{model}/predictions', [AnalyticsController::class, 'modelPredictions'])->name('predictions');
+            Route::post('/{model}/predict', [AnalyticsController::class, 'predict'])->name('predict');
+        });
+    });
+});
