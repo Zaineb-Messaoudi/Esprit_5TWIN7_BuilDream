@@ -7,6 +7,12 @@
     <meta name="csrf-token" content="{{ csrf_token() }}">
     <meta name="pusher-key" content="{{ env('PUSHER_APP_KEY') }}">
     <meta name="pusher-cluster" content="{{ env('PUSHER_APP_CLUSTER', 'mt1') }}">
+    <link rel="manifest" href="{{ asset('manifest.json') }}">
+    <meta name="theme-color" content="#1F7A45">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="default">
+    <meta name="apple-mobile-web-app-title" content="SolarShare">
+    <link rel="apple-touch-icon" href="{{ asset('icons/icon-192x192.png') }}">
     @if(auth()->check())
         <meta name="user-id" content="{{ auth()->id() }}">
     @endif
@@ -160,4 +166,5 @@
 </body>
 
 @stack('scripts')
+    @include('partials.pwa')
 </html>
