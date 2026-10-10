@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\BuyerController;
 use App\Http\Controllers\Api\ChatController;
 use App\Http\Controllers\Api\DeliveryController;
 use App\Http\Controllers\Api\DocumentController;
+use App\Http\Controllers\Api\I18nController;
 use App\Http\Controllers\Api\MarketplaceController;
 use App\Http\Controllers\Api\OwnerController;
 use App\Http\Controllers\Api\ReviewController;
@@ -185,4 +186,21 @@ Route::middleware('auth:sanctum')->group(function () {
             Route::post('/{model}/predict', [AnalyticsController::class, 'predict'])->name('predict');
         });
     });
+});
+
+// I18n & Currency -----------------------------------------------------------
+Route::prefix('i18n')->name('i18n.')->group(function () {
+    Route::get('/locales', [I18nController::class, 'locales'])->name('locales');
+    Route::get('/current', [I18nController::class, 'current'])->name('current');
+    Route::post('/switch', [I18nController::class, 'switch'])->name('switch');
+    Route::get('/currencies', [I18nController::class, 'currencies'])->name('currencies');
+    Route::get('/currency', [I18nController::class, 'currentCurrency'])->name('currency.current');
+    Route::post('/currency/switch', [I18nController::class, 'switchCurrency'])->name('currency.switch');
+    Route::post('/convert', [I18nController::class, 'convert'])->name('convert');
+    Route::get('/exchange-rate', [I18nController::class, 'exchangeRate'])->name('exchange-rate');
+    Route::get('/locale', [I18nController::class, 'userLocale'])->name('user-locale');
+    Route::post('/locale', [I18nController::class, 'updateUserLocale'])->name('user-locale.update');
+    Route::post('/currency', [I18nController::class, 'updateUserCurrency'])->name('user-currency.update');
+    Route::get('/rtl', [I18nController::class, 'rtl'])->name('rtl');
+    Route::get('/switcher', [I18nController::class, 'switcherData'])->name('switcher');
 });
