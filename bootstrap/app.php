@@ -25,11 +25,17 @@ return Application::configure(basePath: dirname(__DIR__))
         )));
         $middleware->trustProxies(at: $trustedProxies ?: null);
         $middleware->redirectUsersTo(fn () => route('dashboard'));
+
+        // Security headers middleware
         $middleware->web(append: [
             \App\Http\Middleware\SetLocale::class,
+            \App\Http\Middleware\SecurityHeaders::class,
+            \App\Http\Middleware\RateLimitHeaders::class,
         ]);
+
         $middleware->alias([
             'role.selected' => \App\Http\Middleware\EnsureRoleSelected::class,
+            '2fa' => \App\Http\Middleware\TwoFactorAuth::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -42,4 +48,8 @@ return Application::configure(basePath: dirname(__DIR__))
                 'title' => __('Page not found'),
             ], 404);
         });
-    })->create();
+    })
+    ->withCommands([
+        \App\Console\Commands\ScoutSetupMeilisearch::class,
+    ])
+    ->create();

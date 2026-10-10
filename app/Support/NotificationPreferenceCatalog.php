@@ -73,6 +73,16 @@ class NotificationPreferenceCatalog
                 'name' => __('Equipment returned'),
                 'description' => __('A rental ended and the inspection report is ready.'),
             ],
+            [
+                'key' => 'payment_reminder',
+                'name' => __('Payment reminder'),
+                'description' => __('Reminder to complete payment before your rental starts.'),
+            ],
+            [
+                'key' => 'maintenance_reminder',
+                'name' => __('Maintenance reminder'),
+                'description' => __('Upcoming scheduled maintenance on your equipment.'),
+            ],
         ];
     }
 

@@ -18,6 +18,17 @@ use App\Http\Controllers\InvoiceController;
 use App\Http\Controllers\LocaleController;
 use App\Http\Controllers\MarketplaceController;
 use App\Http\Controllers\OwnerEquipmentController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
+
+RateLimiter::for('global', function (Request $request) {
+    return \Illuminate\Cache\RateLimit::perMinute(60)->by($request->ip());
+});
+
+RateLimiter::for('auth', function (Request $request) {
+    return \Illuminate\Cache\RateLimit::perMinute(5)->by($request->ip());
+});
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
@@ -26,7 +37,6 @@ use App\Http\Controllers\SpecialPageController;
 use App\Http\Controllers\Technical\InspectionController;
 use App\Http\Controllers\Technical\MaintenanceController;
 use App\Http\Controllers\Technical\MaintenanceReportController;
-use Illuminate\Support\Facades\Route;
 
 // Front Office public catalogue and live equipment booking workflow.
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
@@ -208,6 +218,8 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         Route::resource('users', AdminUserController::class);
         Route::resource('categories', AdminCategoryController::class)->except(['show']);
         Route::resource('equipment', AdminEquipmentController::class);
+        Route::put('equipment/{equipment}/approve', [AdminEquipmentController::class, 'approve'])->name('equipment.approve');
+        Route::put('equipment/{equipment}/reject', [AdminEquipmentController::class, 'reject'])->name('equipment.reject');
         Route::resource('rentals', RentalController::class);
         Route::resource('rental-contracts', RentalContractController::class);
         Route::get('rental-contracts/{rental_contract}/export-pdf', [RentalContractController::class, 'exportPdf'])

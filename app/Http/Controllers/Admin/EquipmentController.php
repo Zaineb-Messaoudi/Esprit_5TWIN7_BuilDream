@@ -79,4 +79,27 @@ class EquipmentController extends Controller
 
         return redirect()->route('admin.equipment.index')->with('status', 'equipment-deleted');
     }
+
+    public function approve(Equipment $equipment): RedirectResponse
+    {
+        $equipment->update([
+            'approval_status' => 'published',
+            'reviewed_at' => now(),
+        ]);
+
+        return redirect()->route('admin.equipment.index')->with('status', 'equipment-approved');
+    }
+
+    public function reject(Request $request, Equipment $equipment): RedirectResponse
+    {
+        $request->validate(['rejection_reason' => ['required', 'string', 'max:500']]);
+
+        $equipment->update([
+            'approval_status' => 'rejected',
+            'reviewed_at' => now(),
+            'rejection_reason' => $request->rejection_reason,
+        ]);
+
+        return redirect()->route('admin.equipment.index')->with('status', 'equipment-rejected');
+    }
 }

@@ -72,6 +72,12 @@ class User extends Authenticatable implements MustVerifyEmail
         'profile_photo_path',
         'google_id',
         'facebook_id',
+        'aggregate_rating',
+        'reviews_count',
+        'detailed_ratings',
+        'two_factor_secret',
+        'two_factor_confirmed_at',
+        'two_factor_recovery_codes',
     ];
 
     /**
@@ -96,6 +102,12 @@ class User extends Authenticatable implements MustVerifyEmail
             'password' => 'hashed',
             'role' => \App\Enums\UserRole::class,
             'role_setup_completed' => 'boolean',
+            'aggregate_rating' => 'decimal:1',
+            'reviews_count' => 'integer',
+            'detailed_ratings' => 'array',
+            'two_factor_secret' => 'encrypted',
+            'two_factor_confirmed_at' => 'datetime',
+            'two_factor_recovery_codes' => 'array',
         ];
     }
 
@@ -170,5 +182,45 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notification_preferences = $preferences;
 
         return $this;
+    }
+
+    /**
+     * Get all reviews written by this user (as reviewer).
+     */
+    public function writtenReviews(): HasMany
+    {
+        return $this->hasMany(\App\Models\Review::class, 'reviewer_id');
+    }
+
+    /**
+     * Get all reviews received by this user (as reviewee).
+     */
+    public function receivedReviews(): HasMany
+    {
+        return $this->hasMany(\App\Models\Review::class, 'reviewee_id');
+    }
+
+    /**
+     * Get public reviews received by this user.
+     */
+    public function publicReceivedReviews(): HasMany
+    {
+        return $this->receivedReviews()->where('is_public', true)->whereNotNull('published_at');
+    }
+
+    /**
+     * Get disputes initiated by this user.
+     */
+    public function initiatedDisputes(): HasMany
+    {
+        return $this->hasMany(\App\Models\ReviewDispute::class, 'initiator_id');
+    }
+
+    /**
+     * Get review responses written by this user.
+     */
+    public function reviewResponses(): HasMany
+    {
+        return $this->hasMany(\App\Models\ReviewResponse::class);
     }
 }
