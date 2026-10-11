@@ -4,8 +4,8 @@ namespace App\Services;
 
 use App\Models\Category;
 use App\Models\Equipment;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -19,6 +19,7 @@ class EquipmentCatalogService
     public function createCategory(array $attributes): Category
     {
         $attributes = $this->storeImage($attributes);
+
         return Category::create($attributes);
     }
 
@@ -26,6 +27,7 @@ class EquipmentCatalogService
     {
         $attributes = $this->storeImage($attributes);
         $category->update($attributes);
+
         return $category->refresh();
     }
 
@@ -90,6 +92,7 @@ class EquipmentCatalogService
         }
 
         unset($attributes['image']);
+
         return $attributes;
     }
 }

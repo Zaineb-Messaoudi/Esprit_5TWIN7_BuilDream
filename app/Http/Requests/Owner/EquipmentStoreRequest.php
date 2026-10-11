@@ -2,14 +2,15 @@
 
 namespace App\Http\Requests\Owner;
 
+use App\Http\Requests\Concerns\ValidatesEnergyProfile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Http\Requests\Concerns\ValidatesEnergyProfile;
 
 /** Validates equipment published from the Owner Front Office. */
 class EquipmentStoreRequest extends FormRequest
 {
     use ValidatesEnergyProfile;
+
     public function authorize(): bool
     {
         // Route middleware also checks the role; this protects direct request use.

@@ -23,20 +23,19 @@ class PaymentRequest extends FormRequest
     {
         return [
             'reservation_id' => ['required', 'exists:reservations,id'],
-        'amount'         => ['required', 'numeric', 'min:0.01'],
-        'payment_date'   => ['required', 'date'],
-        'status'         => ['required', 'in:pending,paid,failed'],
-        'payment_method' => ['required', 'in:CARD,BANK_TRANSFER,CASH'],
+            'amount' => ['required', 'numeric', 'min:0.01'],
+            'payment_date' => ['required', 'date'],
+            'status' => ['required', 'in:pending,paid,failed'],
+            'payment_method' => ['required', 'in:CARD,BANK_TRANSFER,CASH'],
         ];
     }
 
-
     public function messages(): array
-{
-    return [
-        'amount.min'              => 'Le montant doit être supérieur à 0.',
-        'payment_method.in'       => 'Mode de paiement invalide.',
-        'reservation_id.required' => 'Veuillez choisir une réservation.',
-    ];
-}
+    {
+        return [
+            'amount.min' => 'Le montant doit être supérieur à 0.',
+            'payment_method.in' => 'Mode de paiement invalide.',
+            'reservation_id.required' => 'Veuillez choisir une réservation.',
+        ];
+    }
 }

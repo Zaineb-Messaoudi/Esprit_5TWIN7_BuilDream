@@ -11,7 +11,7 @@ namespace App\Enums;
  */
 enum ExtensionStatus: string
 {
-    case PENDING  = 'pending';   // requested, waiting for a decision
+    case PENDING = 'pending';   // requested, waiting for a decision
     case APPROVED = 'approved';  // accepted: the rental end_date and amount get updated
     case REJECTED = 'rejected';  // refused: the rental stays unchanged
 
@@ -19,7 +19,7 @@ enum ExtensionStatus: string
     public function label(): string
     {
         return match ($this) {
-            self::PENDING  => 'Pending',
+            self::PENDING => 'Pending',
             self::APPROVED => 'Approved',
             self::REJECTED => 'Rejected',
         };
@@ -29,7 +29,7 @@ enum ExtensionStatus: string
     public function color(): string
     {
         return match ($this) {
-            self::PENDING  => 'warning',
+            self::PENDING => 'warning',
             self::APPROVED => 'success',
             self::REJECTED => 'error',
         };
@@ -42,6 +42,7 @@ enum ExtensionStatus: string
         foreach (self::cases() as $case) {
             $options[$case->value] = $case->label();
         }
+
         return $options;
     }
 }

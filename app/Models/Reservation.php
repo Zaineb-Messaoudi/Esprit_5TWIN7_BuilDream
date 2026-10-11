@@ -16,7 +16,7 @@ class Reservation extends Model
 
     protected $casts = [
         'start_date' => 'date',
-        'end_date'   => 'date',
+        'end_date' => 'date',
     ];
 
     public function equipment()
@@ -37,5 +37,10 @@ class Reservation extends Model
     public function invoice()
     {
         return $this->hasOne(Invoice::class);
+    }
+
+    public function rental()
+    {
+        return $this->hasOne(Rental::class);
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers;
 
-use App\Support\FrontDemo;
 use App\Models\EnergyProfile;
 use App\Models\Equipment;
+use App\Support\FrontDemo;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;

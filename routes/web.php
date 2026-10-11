@@ -1,11 +1,11 @@
 <?php
 
-use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
-use App\Http\Controllers\Admin\RentalController;
 use App\Http\Controllers\Admin\RentalContractController;
+use App\Http\Controllers\Admin\RentalController;
 use App\Http\Controllers\Admin\RentalExtensionController;
+use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\Auth\RoleSetupController;
 use App\Http\Controllers\AuthDemoController;
@@ -14,17 +14,31 @@ use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EcommerceController;
 use App\Http\Controllers\FaqController;
 use App\Http\Controllers\FrontController;
-use App\Http\Controllers\LocaleController;
-use App\Http\Controllers\PageController;
-use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\OwnerEquipmentController;
-use App\Http\Controllers\SpecialPageController;
-use Illuminate\Support\Facades\Route;
-use App\Http\Controllers\ReservationController;
-use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\InvoiceController;
+use App\Http\Controllers\LocaleController;
+use App\Http\Controllers\MarketplaceController;
+use App\Http\Controllers\OwnerEquipmentController;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\RateLimiter;
+use Illuminate\Support\Facades\Route;
 
-// Front Office public catalogue. Booking and payment routes belong to Student 4.
+RateLimiter::for('global', function (Request $request) {
+    return \Illuminate\Cache\RateLimit::perMinute(60)->by($request->ip());
+});
+
+RateLimiter::for('auth', function (Request $request) {
+    return \Illuminate\Cache\RateLimit::perMinute(5)->by($request->ip());
+});
+use App\Http\Controllers\PageController;
+use App\Http\Controllers\PaymentController;
+use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReservationController;
+use App\Http\Controllers\SpecialPageController;
+use App\Http\Controllers\Technical\InspectionController;
+use App\Http\Controllers\Technical\MaintenanceController;
+use App\Http\Controllers\Technical\MaintenanceReportController;
+
+// Front Office public catalogue and live equipment booking workflow.
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
     ->whereIn('locale', array_keys(LocaleController::SUPPORTED_LOCALES))
     ->name('locale.switch');
@@ -45,8 +59,32 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:owner-only'])->grou
     Route::delete('/my/equipment/{equipment}', [OwnerEquipmentController::class, 'destroy'])->name('front.my-equipment.destroy');
 });
 
+Route::middleware(['auth', 'verified', 'role.selected', 'can:buyer-only'])->get(
+    '/my/reservations/{reservation:reference}', [PageController::class, 'buyerReservation']
+)->name('front.buyer-reservation-detail');
+Route::middleware(['auth', 'verified', 'role.selected', 'can:buyer-only'])->get(
+    '/my/rentals/{rental:reference}', [PageController::class, 'buyerRental']
+)->name('front.buyer-rental-detail');
+Route::middleware(['auth', 'verified', 'role.selected', 'can:owner-only'])->get(
+    '/owner/reservations/{reservation:reference}', [PageController::class, 'ownerReservation']
+)->name('front.my-reservation-detail');
+Route::middleware(['auth', 'verified', 'role.selected', 'can:owner-only'])->get(
+    '/owner/rentals/{rental:reference}', [PageController::class, 'ownerRental']
+)->name('front.my-rental-detail');
+
+// PDF export for rental contracts (buyer and owner)
+Route::middleware(['auth', 'verified', 'role.selected'])->get(
+    '/my/rentals/{rental:reference}/contract/pdf', [PageController::class, 'exportContractPdf']
+)->name('front.rental-contract.export-pdf');
+Route::middleware(['auth', 'verified', 'role.selected'])->get(
+    '/owner/rentals/{rental:reference}/contract/pdf', [PageController::class, 'exportContractPdf']
+)->name('front.owner-rental-contract.export-pdf');
+
 foreach (config('front.pages') as $slug => $page) {
-    if (in_array($slug, ['my-equipment', 'my-publish', 'my-equipment-detail', 'my-equipment-edit'], true)) {
+    if (in_array($slug, [
+        'my-equipment', 'my-publish', 'my-equipment-detail', 'my-equipment-edit',
+        'buyer-reservation-detail', 'buyer-rental-detail', 'my-reservation-detail', 'my-rental-detail',
+    ], true)) {
         continue;
     }
     $route = Route::get($page['path'], PageController::class)
@@ -127,11 +165,32 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/logistics', [DashboardController::class, 'sector'])->defaults('dashboard', 'logistics')->name('dashboard.logistics');
 
     Route::get('/settings', function () {
-        return view('pages.account.settings', ['title' => 'Account Settings', 'pageTitle' => 'General Settings', 'section' => 'general']);
+        return view('pages.account.settings', [
+            'title' => 'Account Settings', 'pageTitle' => 'General Settings', 'section' => 'general',
+            'user' => auth()->user(), 'notificationPreferences' => \App\Support\NotificationPreferenceCatalog::all(),
+        ]);
     })->name('settings');
     Route::get('/settings/notifications', function () {
-        return view('pages.account.settings', ['title' => 'Notification Settings', 'pageTitle' => 'Notifications', 'section' => 'notifications']);
+        return view('pages.account.settings', [
+            'title' => 'Notification Settings', 'pageTitle' => 'Notifications', 'section' => 'notifications',
+            'user' => auth()->user(), 'notificationPreferences' => \App\Support\NotificationPreferenceCatalog::all(),
+        ]);
     })->name('settings.notifications');
+    Route::post('/settings/notifications', function (\Illuminate\Http\Request $request) {
+        $data = $request->validate([
+            'preferences' => ['required', 'array'],
+            'preferences.*' => ['in:0,1,true,false'],
+        ]);
+
+        $preferences = [];
+        foreach ($data['preferences'] as $key => $value) {
+            $preferences[$key] = filter_var($value, FILTER_VALIDATE_BOOLEAN);
+        }
+
+        $request->user()->setNotificationPreferences($preferences)->save();
+
+        return redirect()->route('settings.notifications')->with('status', 'notification-preferences-saved');
+    })->name('settings.notifications.update')->middleware('throttle:60,1');
     Route::get('/settings/security', function () {
         return view('pages.account.settings', ['title' => 'Security Settings', 'pageTitle' => 'Security', 'section' => 'security']);
     })->name('settings.security');
@@ -159,8 +218,18 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         Route::resource('users', AdminUserController::class);
         Route::resource('categories', AdminCategoryController::class)->except(['show']);
         Route::resource('equipment', AdminEquipmentController::class);
+        Route::put('equipment/{equipment}/approve', [AdminEquipmentController::class, 'approve'])->name('equipment.approve');
+        Route::put('equipment/{equipment}/reject', [AdminEquipmentController::class, 'reject'])->name('equipment.reject');
         Route::resource('rentals', RentalController::class);
         Route::resource('rental-contracts', RentalContractController::class);
+        Route::get('rental-contracts/{rental_contract}/export-pdf', [RentalContractController::class, 'exportPdf'])
+            ->name('rental-contracts.export-pdf');
+        // Deposit management (admin)
+        Route::middleware('can:admin-only')->prefix('rental-contracts/{rental_contract}/deposit')->name('rental-contracts.deposit.')->group(function () {
+            Route::post('hold', [RentalContractController::class, 'holdDeposit'])->name('hold');
+            Route::post('release', [RentalContractController::class, 'releaseDeposit'])->name('release');
+            Route::post('forfeit', [RentalContractController::class, 'forfeitDeposit'])->name('forfeit');
+        });
         Route::resource('rental-extensions', RentalExtensionController::class);
         Route::post('rental-extensions/{rental_extension}/approve', [RentalExtensionController::class, 'approve'])
             ->name('rental-extensions.approve');
@@ -169,9 +238,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     });
 
     // Dashboard Routes
-    Route::get('/ecommerce', function () {
-        return view('pages.dashboard.ecommerce', ['title' => 'E-commerce Dashboard']);
-    })->name('dashboard.ecommerce');
+    Route::get('/ecommerce', [DashboardController::class, 'ecommerce'])->name('dashboard.ecommerce');
     Route::get('/analytics', function () {
         return view('pages.dashboard.analytics', ['title' => 'Analytics Dashboard']);
     })->name('dashboard.analytics');
@@ -358,15 +425,56 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         return view('pages.applications.vector-maps', ['title' => __('Vector Maps')]);
     })->name('maps.vector');
 });
+// Isolated technical module. Owner access is scoped to equipment ownership in the controllers.
+Route::middleware(['auth', 'verified', 'role.selected'])->prefix('technical')->name('technical.')->group(function () {
+    Route::resource('maintenances', MaintenanceController::class);
+    Route::resource('reports', MaintenanceReportController::class);
+    Route::resource('inspections', InspectionController::class);
+});
+
+Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])
+    ->prefix('admin/technical')->name('admin.technical.')->group(function () {
+        Route::resource('maintenances', MaintenanceController::class);
+        Route::resource('reports', MaintenanceReportController::class);
+        Route::resource('inspections', InspectionController::class);
+    });
 
 // Reservations, payments and invoices are available to authenticated buyers and owners.
 // Controllers scope every record to the signed-in user; administrators can see all records.
 Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    Route::post('/booking/reservations', [MarketplaceController::class, 'storeReservation'])->name('booking.reservations.store');
+    Route::post('/booking/reservations/{reservation}/payment', [MarketplaceController::class, 'pay'])->name('booking.reservations.pay');
+    Route::post('/rental-contracts/{contract}/sign', [MarketplaceController::class, 'signContract'])->name('buyer.contracts.sign');
+    Route::post('/owner/reservations/{reservation}/decision', [MarketplaceController::class, 'decideReservation'])
+        ->middleware('can:owner-only')->name('owner.reservations.decision');
+
+    // Deposit management (owner only)
+    Route::middleware('can:owner-only')->prefix('owner/rental-contracts/{rental_contract}/deposit')->name('owner.rental-contracts.deposit.')->group(function () {
+        Route::post('hold', [RentalContractController::class, 'holdDeposit'])->name('hold');
+        Route::post('release', [RentalContractController::class, 'releaseDeposit'])->name('release');
+        Route::post('forfeit', [RentalContractController::class, 'forfeitDeposit'])->name('forfeit');
+    });
+
     Route::prefix('rental')->name('rental.')->group(function () {
         Route::resource('reservations', ReservationController::class);
         Route::resource('payments', PaymentController::class);
         Route::resource('invoices', InvoiceController::class);
-    });
-});
+        Route::get('invoices/{invoice}/export-pdf', [InvoiceController::class, 'exportPdf'])
+            ->name('invoices.export-pdf');
 
+        // Rental extensions (buyer requests, owner approves/rejects)
+        Route::prefix('extensions')->name('extensions.')->group(function () {
+            Route::get('{rental}', [\App\Http\Controllers\Front\RentalExtensionController::class, 'create'])->name('create');
+            Route::post('{rental}', [\App\Http\Controllers\Front\RentalExtensionController::class, 'store'])->name('store');
+            Route::post('{rental_extension}/approve', [\App\Http\Controllers\Front\RentalExtensionController::class, 'approve'])->name('approve');
+            Route::post('{rental_extension}/reject', [\App\Http\Controllers\Front\RentalExtensionController::class, 'reject'])->name('reject');
+        });
+    });
+
+    // Return equipment flow: create inspection from rental
+    Route::get('/rentals/{rental}/return', [\App\Http\Controllers\PageController::class, 'showReturnForm'])
+        ->name('rental.return.form');
+    Route::post('/rentals/{rental}/return', [\App\Http\Controllers\PageController::class, 'processReturn'])
+        ->name('rental.return.process');
+});
 require __DIR__.'/auth.php';

@@ -2,17 +2,15 @@
 
 namespace App\Services;
 
-use App\Models\User;
-use App\Enums\UserRole;
-use App\DTOs\UserRegistrationData;
 use App\DTOs\UserProfileData;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Auth;
+use App\DTOs\UserRegistrationData;
+use App\Enums\UserRole;
+use App\Models\User;
 use Illuminate\Auth\Events\Verified;
-use Illuminate\Contracts\Auth\UpdatablePasswordInterface;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Storage;
 use RuntimeException;
 use Throwable;
@@ -26,7 +24,7 @@ class UserService
     {
         $photoPath = $data->profile_photo?->store('profile-photos', 'public');
 
-        if ($data->profile_photo && !$photoPath) {
+        if ($data->profile_photo && ! $photoPath) {
             throw new RuntimeException('The profile photo could not be stored.');
         }
 
@@ -118,7 +116,7 @@ class UserService
      */
     public function verifyEmail(User $user): void
     {
-        if (!$user->hasVerifiedEmail()) {
+        if (! $user->hasVerifiedEmail()) {
             $user->markEmailAsVerified();
             event(new Verified($user));
         }
@@ -146,6 +144,7 @@ class UserService
     public function updateUserProfile(User $user, array $data): User
     {
         $user->update($data);
+
         return $user;
     }
 }

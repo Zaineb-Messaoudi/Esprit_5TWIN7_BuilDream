@@ -48,7 +48,7 @@ class OwnerEquipmentController extends Controller
         $this->ensureOwner($request, $equipment);
 
         return view('pages.front.owner-equipment.show', [
-            'equipment' => $equipment->load(['category', 'energyProfile']),
+            'equipment' => $equipment->load(['category', 'energyProfile', 'maintenances.report']),
             'title' => $equipment->name,
         ]);
     }

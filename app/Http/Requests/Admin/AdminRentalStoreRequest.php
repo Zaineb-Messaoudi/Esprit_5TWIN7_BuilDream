@@ -30,7 +30,7 @@ class AdminRentalStoreRequest extends FormRequest
 
             // Optional. A reservation can become only ONE rental, hence "unique".
             // (We do not check "exists" yet: Student 4's table is not merged.)
-            'reservation_id' => ['nullable', 'integer', 'min:1', 'unique:rentals,reservation_id'],
+            'reservation_id' => ['nullable', 'integer', 'exists:reservations,id', 'unique:rentals,reservation_id'],
 
             'start_date' => ['required', 'date'],
             // The rental cannot end before it starts
@@ -47,12 +47,12 @@ class AdminRentalStoreRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'user_id'        => 'renter',
-            'equipment_id'   => 'equipment',
+            'user_id' => 'renter',
+            'equipment_id' => 'equipment',
             'reservation_id' => 'reservation',
-            'start_date'     => 'start date',
-            'end_date'       => 'end date',
-            'total_amount'   => 'total amount',
+            'start_date' => 'start date',
+            'end_date' => 'end date',
+            'total_amount' => 'total amount',
         ];
     }
 }

@@ -8,7 +8,10 @@ use Illuminate\Validation\Rule;
 
 class CategoryUpdateRequest extends FormRequest
 {
-    public function authorize(): bool { return $this->user()?->isAdmin() ?? false; }
+    public function authorize(): bool
+    {
+        return $this->user()?->isAdmin() ?? false;
+    }
 
     public function rules(): array
     {

@@ -7,16 +7,16 @@ namespace App\Enums;
  */
 enum ContractStatus: string
 {
-    case DRAFT      = 'draft';       // contract written but not signed yet
-    case SIGNED     = 'signed';      // contract signed by the renter
+    case DRAFT = 'draft';       // contract written but not signed yet
+    case SIGNED = 'signed';      // contract signed by the renter
     case TERMINATED = 'terminated';  // contract ended (rental finished or cancelled)
 
     /** Human readable text shown in the views. */
     public function label(): string
     {
         return match ($this) {
-            self::DRAFT      => 'Draft',
-            self::SIGNED     => 'Signed',
+            self::DRAFT => 'Draft',
+            self::SIGNED => 'Signed',
             self::TERMINATED => 'Terminated',
         };
     }
@@ -25,8 +25,8 @@ enum ContractStatus: string
     public function color(): string
     {
         return match ($this) {
-            self::DRAFT      => 'warning',
-            self::SIGNED     => 'success',
+            self::DRAFT => 'warning',
+            self::SIGNED => 'success',
             self::TERMINATED => 'gray',
         };
     }
@@ -38,6 +38,7 @@ enum ContractStatus: string
         foreach (self::cases() as $case) {
             $options[$case->value] = $case->label();
         }
+
         return $options;
     }
 }

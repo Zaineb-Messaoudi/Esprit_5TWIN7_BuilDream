@@ -3,15 +3,19 @@
 namespace App\Http\Requests\Admin;
 
 use App\Enums\UserRole;
+use App\Http\Requests\Concerns\ValidatesEnergyProfile;
 use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Validation\Rule;
-use App\Http\Requests\Concerns\ValidatesEnergyProfile;
 
 /** Validates administrator-created equipment and nested energy data. */
 class EquipmentStoreRequest extends FormRequest
 {
     use ValidatesEnergyProfile;
-    public function authorize(): bool { return $this->user()?->isAdmin() ?? false; }
+
+    public function authorize(): bool
+    {
+        return $this->user()?->isAdmin() ?? false;
+    }
 
     protected function prepareForValidation(): void
     {

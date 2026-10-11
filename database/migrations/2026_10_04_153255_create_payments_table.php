@@ -17,8 +17,8 @@ return new class extends Migration
             $table->decimal('amount', 10, 2);
             $table->dateTime('payment_date');
             $table->string('transaction_reference')->unique();
-             $table->string('status')->default('pending'); 
-             $table->enum('payment_method', ['CARD', 'BANK_TRANSFER', 'CASH']);
+            $table->string('status')->default('pending');
+            $table->enum('payment_method', ['CARD', 'BANK_TRANSFER', 'CASH']);
             $table->timestamps();
         });
     }

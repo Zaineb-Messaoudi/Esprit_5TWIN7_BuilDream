@@ -106,7 +106,7 @@
                     @if ($available)
                         @auth
                             @if (auth()->user()->isBuyer())
-                                <a href="{{ route('front.reserve', ['equipment' => $item->id]) }}" class="button-base button-primary mt-5 min-h-12 w-full text-theme-sm">{{ __('Preview booking flow') }}</a>
+                                @if ($item->status === 'available')<a href="{{ route('front.reserve', ['equipment' => $item->id]) }}" class="button-base button-primary mt-5 min-h-12 w-full text-theme-sm">{{ __('Reserve equipment') }}</a>@else<p class="mt-5 rounded-lg bg-warning-50 p-3 text-center text-theme-xs font-semibold text-warning-800 dark:bg-warning-500/10 dark:text-warning-300">{{ __('Currently unavailable') }}</p>@endif
                             @else
                                 <p class="mt-5 rounded-lg bg-brand-50 px-4 py-3 text-center text-theme-sm text-brand-800 dark:bg-brand-500/10 dark:text-brand-200">{{ __('Browse-only catalogue. Buyer access is required to continue.') }}</p>
                             @endif

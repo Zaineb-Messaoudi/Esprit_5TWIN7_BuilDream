@@ -26,16 +26,16 @@ class RentalContractFactory extends Factory
     {
         return [
             // A new rental is created automatically unless rental_id is given
-            'rental_id'       => Rental::factory(),
+            'rental_id' => Rental::factory(),
             // Temporary unique value: configure() below replaces it with CTR-2026-0001...
-            'contract_number' => 'TMP-' . Str::uuid(),
-            'signed_at'       => now()->subDays(fake()->numberBetween(0, 10)),
-            'terms'           => fake()->randomElement([
+            'contract_number' => 'TMP-'.Str::uuid(),
+            'signed_at' => now()->subDays(fake()->numberBetween(0, 10)),
+            'terms' => fake()->randomElement([
                 'The renter agrees to use the equipment with care and to return it on the end date in the same condition.',
                 'The equipment must be used only for its normal purpose. Any damage or loss is the responsibility of the renter.',
                 'The renter must return the equipment fully charged and clean. Late returns are charged by the day.',
             ]),
-            'deposit_amount'  => fake()->randomElement([0, 20, 50, 100]),
+            'deposit_amount' => fake()->randomElement([0, 20, 50, 100]),
             'contract_status' => ContractStatus::SIGNED->value,
         ];
     }
@@ -59,7 +59,7 @@ class RentalContractFactory extends Factory
     {
         return $this->state([
             'contract_status' => ContractStatus::DRAFT->value,
-            'signed_at'       => null,
+            'signed_at' => null,
         ]);
     }
 
@@ -68,7 +68,7 @@ class RentalContractFactory extends Factory
     {
         return $this->state([
             'contract_status' => ContractStatus::SIGNED->value,
-            'signed_at'       => now()->subDays(fake()->numberBetween(0, 10)),
+            'signed_at' => now()->subDays(fake()->numberBetween(0, 10)),
         ]);
     }
 
@@ -77,7 +77,7 @@ class RentalContractFactory extends Factory
     {
         return $this->state([
             'contract_status' => ContractStatus::TERMINATED->value,
-            'signed_at'       => now()->subDays(fake()->numberBetween(15, 40)),
+            'signed_at' => now()->subDays(fake()->numberBetween(15, 40)),
         ]);
     }
 }

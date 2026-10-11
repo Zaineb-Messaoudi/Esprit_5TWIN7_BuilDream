@@ -31,13 +31,13 @@ class RentalFactory extends Factory
     public function definition(): array
     {
         $start = Carbon::instance(fake()->dateTimeBetween('-30 days', '+30 days'));
-        $end   = $start->copy()->addDays(fake()->numberBetween(1, 14));
+        $end = $start->copy()->addDays(fake()->numberBetween(1, 14));
 
         return $this->period($start, $end) + [
             // Temporary unique value: configure() below replaces it with RNT-2026-0001...
-            'reference'      => 'TMP-' . Str::uuid(),
-            'user_id'        => $this->randomUserId(),
-            'equipment_id'   => $this->randomEquipmentId(),
+            'reference' => 'TMP-'.Str::uuid(),
+            'user_id' => $this->randomUserId(),
+            'equipment_id' => $this->randomEquipmentId(),
             // Left empty on purpose: reservations belong to Student 4's module.
             // After the integration, the seeder can link a real reservation here.
             'reservation_id' => null,
@@ -63,6 +63,7 @@ class RentalFactory extends Factory
     {
         return $this->state(function () {
             $start = today()->addDays(fake()->numberBetween(2, 20));
+
             return $this->period($start, $start->copy()->addDays(fake()->numberBetween(1, 10)));
         });
     }
@@ -72,6 +73,7 @@ class RentalFactory extends Factory
     {
         return $this->state(function () {
             $start = today()->subDays(fake()->numberBetween(1, 5));
+
             return $this->period($start, today()->addDays(fake()->numberBetween(2, 10)));
         });
     }
@@ -81,6 +83,7 @@ class RentalFactory extends Factory
     {
         return $this->state(function () {
             $end = today()->subDays(fake()->numberBetween(2, 20));
+
             return $this->period($end->copy()->subDays(fake()->numberBetween(1, 10)), $end);
         });
     }
@@ -102,7 +105,7 @@ class RentalFactory extends Factory
      */
     private function period(Carbon $start, Carbon $end): array
     {
-        $days  = max(1, (int) $start->diffInDays($end));
+        $days = max(1, (int) $start->diffInDays($end));
         $today = today();
 
         if ($end->lt($today)) {
@@ -114,10 +117,10 @@ class RentalFactory extends Factory
         }
 
         return [
-            'start_date'   => $start->toDateString(),
-            'end_date'     => $end->toDateString(),
+            'start_date' => $start->toDateString(),
+            'end_date' => $end->toDateString(),
             'total_amount' => round($days * fake()->randomElement([10, 15, 20, 25, 30, 45, 60]), 2),
-            'status'       => $status->value,
+            'status' => $status->value,
         ];
     }
 
