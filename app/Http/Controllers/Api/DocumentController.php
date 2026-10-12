@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Api\StoreDocumentRequest;
 use App\Http\Requests\Api\SignDocumentRequest;
+use App\Http\Requests\Api\StoreDocumentRequest;
 use App\Models\Document;
+use App\Models\DocumentShare;
 use App\Models\DocumentSignature;
 use App\Models\DocumentTemplate;
-use App\Models\DocumentShare;
 use App\Services\DocumentService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -103,10 +103,10 @@ class DocumentController
         abort_unless($document->isDraft(), 400, 'Only draft documents can be edited.');
 
         $validated = $request->validate([
-            'content' => ['required', 'string'],
-            'title' => ['nullable', 'string', 'max:255'],
-            'variables' => ['nullable', 'array'],
-        );
+            'content' => 'required|string',
+            'title' => 'nullable|string|max:255',
+            'variables' => 'nullable|array',
+        ]);
 
         $changeSummary = $request->input('change_summary', 'Content updated via API');
 
@@ -140,7 +140,7 @@ class DocumentController
     {
         $signed = $this->service->signDocument($signature, $request->validated('signature_data'), $request->validated('metadata') ?? []);
 
-        if (!$signed) {
+        if (! $signed) {
             return response()->json(['message' => 'Signature cannot be completed.'], 400);
         }
 

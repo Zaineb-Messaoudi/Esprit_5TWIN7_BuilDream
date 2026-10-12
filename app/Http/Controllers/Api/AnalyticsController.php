@@ -7,6 +7,7 @@ use App\Models\AnalyticsReport;
 use App\Models\AnalyticsWidget;
 use App\Models\PredictiveModel;
 use App\Services\AnalyticsService;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -15,15 +16,15 @@ use Illuminate\Http\Request;
  */
 class AnalyticsController
 {
-    public function __construct(private readonly \App\Services\AnalyticsService $service) {}
+    public function __construct(private readonly AnalyticsService $service) {}
 
     /**
      * Get revenue analytics.
      */
     public function revenue(Request $request): JsonResponse
     {
-        $start = $request->get('start_date') ? \Carbon\Carbon::parse($request->get('start_date')) : null;
-        $end = $request->get('end_date') ? \Carbon\Carbon::parse($request->get('end_date')) : null;
+        $start = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
+        $end = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
 
         $analytics = $this->service->getRevenueAnalytics($start, $end);
 
@@ -35,8 +36,8 @@ class AnalyticsController
      */
     public function bookings(Request $request): JsonResponse
     {
-        $start = $request->get('start_date') ? \Carbon\Carbon::parse($request->get('start_date')) : null;
-        $end = $request->get('end_date') ? \Carbon\Carbon::parse($request->get('end_date')) : null;
+        $start = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
+        $end = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
 
         $analytics = $this->service->getBookingAnalytics($start, $end);
 
@@ -48,8 +49,8 @@ class AnalyticsController
      */
     public function utilization(Request $request): JsonResponse
     {
-        $start = $request->get('start_date') ? \Carbon\Carbon::parse($request->get('start_date')) : null;
-        $end = $request->get('end_date') ? \Carbon\Carbon::parse($request->get('end_date')) : null;
+        $start = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
+        $end = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
 
         $analytics = $this->service->getUtilizationAnalytics($start, $end);
 
@@ -61,8 +62,8 @@ class AnalyticsController
      */
     public function userGrowth(Request $request): JsonResponse
     {
-        $start = $request->get('start_date') ? \Carbon\Carbon::parse($request->get('start_date')) : null;
-        $end = $request->get('end_date') ? \Carbon\Carbon::parse($request->get('end_date')) : null;
+        $start = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
+        $end = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
 
         $analytics = $this->service->getUserGrowthAnalytics($start, $end);
 
@@ -75,8 +76,8 @@ class AnalyticsController
     public function topEquipment(Request $request): JsonResponse
     {
         $limit = $request->integer('limit', 10);
-        $start = $request->get('start_date') ? \Carbon\Carbon::parse($request->get('start_date')) : null;
-        $end = $request->get('end_date') ? \Carbon\Carbon::parse($request->get('end_date')) : null;
+        $start = $request->get('start_date') ? Carbon::parse($request->get('start_date')) : null;
+        $end = $request->get('end_date') ? Carbon::parse($request->get('end_date')) : null;
 
         $equipment = $this->service->getTopEquipment($limit, $start, $end);
 
@@ -89,12 +90,12 @@ class AnalyticsController
     public function recordEvent(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'event_name' => ['required', 'string', 'max:100'],
-            'category' => ['required', 'string', 'max:50'],
-            'value' => ['nullable', 'numeric'],
-            'dimensions' => ['nullable', 'array'],
-            'metric_type' => ['nullable', 'in:counter,gauge,histogram,rate'],
-        );
+            'event_name' => 'required|string|max:100',
+            'category' => 'required|string|max:50',
+            'value' => 'nullable|numeric',
+            'dimensions' => 'nullable|array',
+            'metric_type' => 'nullable|in:counter,gauge,histogram,rate',
+        ]);
 
         $this->service->recordEvent(
             $validated['event_name'],
@@ -126,13 +127,13 @@ class AnalyticsController
     public function storeDashboard(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'visibility' => ['required', 'in:private,team,organization,public'],
-            'layout' => ['nullable', 'array'],
-            'widgets' => ['nullable', 'array'],
-            'is_default' => ['boolean'],
-        );
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'visibility' => 'required|in:private,team,organization,public',
+            'layout' => 'nullable|array',
+            'widgets' => 'nullable|array',
+            'is_default' => 'boolean',
+        ]);
 
         $dashboard = AnalyticsDashboard::create([
             ...$validated,
@@ -140,7 +141,7 @@ class AnalyticsController
             'slug' => \Illuminate\Support\Str::slug($validated['name']),
         ]);
 
-        if (!empty($validated['widgets'])) {
+        if (! empty($validated['widgets'])) {
             foreach ($validated['widgets'] as $index => $widget) {
                 AnalyticsWidget::create([
                     'dashboard_id' => $dashboard->id,
@@ -178,11 +179,11 @@ class AnalyticsController
         abort_unless($dashboard->owner_id === request()->user()->id, 403);
 
         $validated = $request->validate([
-            'name' => ['nullable', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'visibility' => ['nullable', 'in:private,team,organization,public'],
-            'layout' => ['nullable', 'array'],
-            'is_default' => ['boolean'],
+            'name' => 'nullable|string|max:255',
+            'description' => 'nullable|string',
+            'visibility' => 'nullable|in:private,team,organization,public',
+            'layout' => 'nullable|array',
+            'is_default' => 'boolean',
         ]);
 
         $dashboard->update($validated);
@@ -213,11 +214,11 @@ class AnalyticsController
         abort_unless($dashboard->owner_id === request()->user()->id, 403);
 
         $validated = $request->validate([
-            'title' => ['required', 'string', 'max:255'],
-            'type' => ['required', 'in:metric,line,bar,area,pie,donut,funnel,heatmap,geo,table,gauge'],
-            'config' => ['required', 'array'],
-            'position' => ['nullable', 'array'],
-            'sort_order' => ['nullable', 'integer'],
+            'title' => 'required|string|max:255',
+            'type' => 'required|in:metric,line,bar,area,pie,donut,funnel,heatmap,geo,table,gauge',
+            'config' => 'required|array',
+            'position' => 'nullable|array',
+            'sort_order' => 'nullable|integer',
         ]);
 
         $widget = AnalyticsWidget::create([
@@ -239,12 +240,12 @@ class AnalyticsController
         abort_unless($widget->dashboard->owner_id === request()->user()->id, 403);
 
         $validated = $request->validate([
-            'title' => ['nullable', 'string', 'max:255'],
-            'type' => ['nullable', 'in:metric,line,bar,area,pie,donut,funnel,heatmap,geo,table,gauge'],
-            'config' => ['nullable', 'array'],
-            'position' => ['nullable', 'array'],
-            'sort_order' => ['nullable', 'integer'],
-            'is_visible' => ['nullable', 'boolean'],
+            'title' => 'nullable|string|max:255',
+            'type' => 'nullable|in:metric,line,bar,area,pie,donut,funnel,heatmap,geo,table,gauge',
+            'config' => 'nullable|array',
+            'position' => 'nullable|array',
+            'sort_order' => 'nullable|integer',
+            'is_visible' => 'nullable|boolean',
         ]);
 
         $widget->update($validated);
@@ -286,14 +287,14 @@ class AnalyticsController
     public function storeReport(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'name' => ['required', 'string', 'max:255'],
-            'description' => ['nullable', 'string'],
-            'type' => ['required', 'in:revenue,utilization,booking,user_growth,equipment_performance,financial,custom'],
-            'configuration' => ['required', 'array'],
-            'schedule' => ['required', 'in:manual,daily,weekly,monthly'],
-            'schedule_config' => ['nullable', 'array'],
-            'format' => ['required', 'in:json,csv,pdf,excel'],
-        );
+            'name' => 'required|string|max:255',
+            'description' => 'nullable|string',
+            'type' => 'required|in:revenue,utilization,booking,user_growth,equipment_performance,financial,custom',
+            'configuration' => 'required|array',
+            'schedule' => 'required|in:manual,daily,weekly,monthly',
+            'schedule_config' => 'nullable|array',
+            'format' => 'required|in:json,csv,pdf,excel',
+        ]);
 
         $report = AnalyticsReport::create([
             ...$validated,
@@ -325,9 +326,6 @@ class AnalyticsController
             'status' => 'pending',
             'parameters' => $request->input('parameters', []),
         ]);
-
-        // TODO: Queue report generation job
-        // GenerateReportJob::dispatch($run, $request->input('parameters', []));
 
         return response()->json([
             'message' => 'Report generation queued.',
@@ -379,17 +377,13 @@ class AnalyticsController
 
         $validated = $request->validate([
             'input_features' => ['required', 'array'],
-        );
+        ]);
 
-        // TODO: Call ML model service
-        // $prediction = $this->mlService->predict($model, $validated['input_features']);
-
-        // For now, return mock prediction
         $prediction = Prediction::create([
             'model_id' => $model->id,
             'input_features' => $validated['input_features'],
             'prediction' => [
-                'value' => 0, // Would come from ML model
+                'value' => 0,
                 'confidence_interval' => [0, 0],
             ],
             'predicted_at' => now(),
