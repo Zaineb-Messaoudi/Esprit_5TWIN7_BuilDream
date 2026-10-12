@@ -68,52 +68,19 @@ class Equipment extends Model
     }
 
     /**
-     * Configure index settings for Meilisearch.
+     * Configure index settings for database driver (no-op).
      */
     public static function getIndexSettings(): array
     {
-        return [
-            'searchableAttributes' => [
-                'name',
-                'description',
-                'brand',
-                'model',
-                'category_name',
-                'owner_name',
-                'location',
-                'brand',
-                'model',
-            ],
-            'filterableAttributes' => [
-                'category_id',
-                'owner_id',
-                'status',
-                'approval_status',
-                'condition',
-                'price_per_day',
-                'power_watts',
-                'capacity_wh',
-            ],
-            'sortableAttributes' => [
-                'price_per_day',
-                'created_at',
-                'updated_at',
-                'name',
-            ],
-            'rankingRules' => [
-                'words',
-                'typo',
-                'proximity',
-                'attribute',
-                'sort',
-                'exactness',
-            ],
-            'synonyms' => [
-                'solar' => ['panel', 'panel', 'photovoltaic', 'pv'],
-                'battery' => ['storage', 'accumulator', 'power bank'],
-                'wind' => ['turbine', 'generator'],
-            ],
-        ];
+        return [];
+    }
+
+    /**
+     * Only index published and available equipment.
+     */
+    public function shouldBeSearchable(): bool
+    {
+        return $this->approval_status === 'published' && $this->status === 'available';
     }
 
     /** The catalogue category for this listing. */

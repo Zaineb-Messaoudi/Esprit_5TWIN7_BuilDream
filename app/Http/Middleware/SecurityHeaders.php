@@ -58,12 +58,12 @@ class SecurityHeaders
 
         $base = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com https://maps.googleapis.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com",
             "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com",
-            "img-src 'self' data: blob: https: https://maps.googleapis.com https://maps.gstatic.com https://*.tile.openstreetmap.org",
-            "connect-src 'self' https://api.mapbox.com https://*.mapbox.com wss://*.pusher.com https://*.meilisearch.io https://*.algolia.net",
-            "frame-src 'self' https://www.google.com https://maps.googleapis.com",
+            "img-src 'self' data: blob: https: https://*.tile.openstreetmap.org",
+            "connect-src 'self' wss://*.pusher.com",
+            "frame-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",
