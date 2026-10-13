@@ -73,6 +73,8 @@ class UserService
             'email' => $data->email,
             'phone_number' => $data->phone_number,
             'address' => $data->address,
+            'address_latitude' => $data->address_latitude,
+            'address_longitude' => $data->address_longitude,
         ]);
 
         $user->save();

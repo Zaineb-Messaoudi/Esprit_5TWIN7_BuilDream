@@ -28,6 +28,8 @@ class ProfileUpdateRequest extends FormRequest
             ],
             'phone_number' => ['nullable', 'string', 'max:20'],
             'address' => ['nullable', 'string', 'max:500'],
+            'address_latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'address_longitude' => ['nullable', 'numeric', 'between:-180,180'],
         ];
     }
 }

@@ -68,6 +68,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'phone_number',
         'address',
+        'address_latitude',
+        'address_longitude',
         'role',
         'role_setup_completed',
         'profile_photo_path',
@@ -115,6 +117,8 @@ class User extends Authenticatable implements MustVerifyEmail
             'current_organization_id' => 'integer',
             'current_team_id' => 'integer',
             'organization_preferences' => 'array',
+            'address_latitude' => 'decimal:8',
+            'address_longitude' => 'decimal:8',
         ];
     }
 
