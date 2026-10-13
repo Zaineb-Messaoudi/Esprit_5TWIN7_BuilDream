@@ -2,6 +2,7 @@
     $publicLinks = [
         ['label' => __('Home'), 'href' => route('home'), 'active' => request()->routeIs('home'), 'icon' => 'home'],
         ['label' => __('Catalog'), 'href' => route('front.catalog'), 'active' => request()->routeIs('front.catalog'), 'icon' => 'catalog'],
+        ['label' => __('Map'), 'href' => route('front.equipment.map'), 'active' => request()->routeIs('front.equipment.map'), 'icon' => 'map'],
         ['label' => __('Energy tools'), 'href' => route('front.energy-calculator'), 'active' => request()->routeIs('front.energy-calculator', 'front.equipment.compare'), 'icon' => 'energy'],
         ['label' => __('How it works'), 'href' => route('front.how-it-works'), 'active' => request()->routeIs('front.how-it-works'), 'icon' => 'overview'],
         ['label' => __('Plans'), 'href' => route('front.plans'), 'active' => request()->routeIs('front.plans'), 'icon' => 'contract'],
@@ -31,6 +32,7 @@
     $sidebarGlobalLinks = [
         ['label' => __('Home'), 'href' => route('home'), 'active' => request()->routeIs('home'), 'icon' => 'home'],
         ['label' => __('Catalog'), 'href' => route('front.catalog'), 'active' => request()->routeIs('front.catalog'), 'icon' => 'catalog'],
+        ['label' => __('Map'), 'href' => route('front.equipment.map'), 'active' => request()->routeIs('front.equipment.map'), 'icon' => 'map'],
         ['label' => __('Energy calculator'), 'href' => route('front.energy-calculator'), 'active' => request()->routeIs('front.energy-calculator'), 'icon' => 'energy'],
         ['label' => __('Compare equipment'), 'href' => route('front.equipment.compare'), 'active' => request()->routeIs('front.equipment.compare'), 'icon' => 'compare'],
     ];

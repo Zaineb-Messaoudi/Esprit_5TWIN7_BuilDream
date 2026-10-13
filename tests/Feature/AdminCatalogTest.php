@@ -4,6 +4,7 @@ use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 
 function catalogAdmin(): User
 {
@@ -235,4 +236,28 @@ test('equipment factory can create its energy profile relationship', function ()
 
     expect($equipment->energyProfile)->not->toBeNull()
         ->and($equipment->energyProfile->equipment_id)->toBe($equipment->id);
+});
+
+test('admin can export and import equipment CSV data with validation', function () {
+    $admin = catalogAdmin();
+    $owner = catalogOwner();
+    $category = Category::factory()->create(['name' => 'CSV batteries']);
+    Equipment::factory()->create(['owner_id' => $owner->id, 'category_id' => $category->id, 'name' => 'Export battery']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.equipment.export'))
+        ->assertOk()
+        ->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+    $csv = implode("\n", [
+        'name,category,owner_email,brand,model,price_per_day,condition,location,latitude,longitude,status,approval_status,power_watts,capacity_wh',
+        "\"Imported battery\",\"CSV batteries\",{$owner->email},Voltix,CSV-1,20,good,Tunis,36.8065,10.1815,available,published,500,1000",
+    ]);
+
+    $this->actingAs($admin)
+        ->post(route('admin.equipment.import'), ['csv' => UploadedFile::fake()->createWithContent('equipment.csv', $csv)])
+        ->assertRedirect()
+        ->assertSessionHas('status', 'Equipment CSV imported successfully.');
+
+    $this->assertDatabaseHas('equipment', ['name' => 'Imported battery', 'latitude' => 36.8065, 'longitude' => 10.1815]);
 });

@@ -44,6 +44,8 @@ class EquipmentStoreRequest extends FormRequest
             'price_per_day' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
             'condition' => ['required', 'in:new,good,fair,damaged'],
             'location' => ['required', 'string', 'max:150'],
+            'latitude' => ['nullable', 'numeric', 'between:-90,90'],
+            'longitude' => ['nullable', 'numeric', 'between:-180,180'],
             'status' => ['required', 'in:available,unavailable,maintenance,inactive'],
             'approval_status' => ['required', 'in:pending_review,published,rejected'],
             'energy.power_watts' => ['nullable', 'integer', 'min:0', 'max:100000'],

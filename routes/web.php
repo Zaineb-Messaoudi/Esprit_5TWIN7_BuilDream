@@ -46,6 +46,7 @@ Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
     ->name('locale.switch');
 Route::get('/', [FrontController::class, 'home'])->name('home');
 Route::get('/catalog', [FrontController::class, 'catalog'])->name('front.catalog');
+Route::get('/equipment/map', [FrontController::class, 'equipmentMap'])->name('front.equipment.map');
 Route::get('/energy-calculator', [CatalogueToolsController::class, 'energyCalculator'])->name('front.energy-calculator');
 Route::get('/equipment/compare', [CatalogueToolsController::class, 'compare'])->name('front.equipment.compare');
 Route::get('/equipment/{id}', [FrontController::class, 'show'])
@@ -222,6 +223,8 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         Route::resource('users', AdminUserController::class);
         Route::resource('categories', AdminCategoryController::class);
         Route::resource('equipment', AdminEquipmentController::class);
+        Route::get('equipment-export.csv', [AdminEquipmentController::class, 'exportCsv'])->name('equipment.export');
+        Route::post('equipment-import.csv', [AdminEquipmentController::class, 'importCsv'])->name('equipment.import');
         Route::resource('equipment.energy-profile', AdminEnergyProfileController::class)
             ->only(['index', 'create', 'store'])
             ->parameters(['equipment.energy-profile' => 'equipment'])

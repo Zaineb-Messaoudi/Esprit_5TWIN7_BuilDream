@@ -109,6 +109,43 @@ class FrontController extends Controller
         ]);
     }
 
+    public function equipmentMap(): View
+    {
+        $cityCoordinates = [
+            'tunis' => [36.8065, 10.1815],
+            'sousse' => [35.8256, 10.6084],
+            'sfax' => [34.7406, 10.7603],
+            'gabes' => [33.8815, 10.0982],
+            'bizerte' => [37.2744, 9.8739],
+            'nabeul' => [36.4513, 10.7357],
+        ];
+
+        $equipment = FrontDemo::publishedEquipmentQuery()
+            ->with(['category', 'energyProfile'])
+            ->where('status', 'available')
+            ->latest()
+            ->get()
+            ->map(function (Equipment $item) use ($cityCoordinates): array {
+                $fallback = $cityCoordinates[mb_strtolower(trim((string) $item->location))] ?? null;
+
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'brand' => $item->brand,
+                    'location' => $item->location,
+                    'latitude' => (float) ($item->latitude ?? $fallback[0] ?? 36.8065),
+                    'longitude' => (float) ($item->longitude ?? $fallback[1] ?? 10.1815),
+                    'price' => number_format((float) $item->price_per_day, 2).' TND / day',
+                    'url' => route('front.equipment.show', $item->id),
+                ];
+            });
+
+        return view('pages.front.equipment-map', [
+            'title' => __('Equipment map'),
+            'equipment' => $equipment,
+        ]);
+    }
+
     public function show(int $id): View
     {
         $item = FrontDemo::findEquipment($id);

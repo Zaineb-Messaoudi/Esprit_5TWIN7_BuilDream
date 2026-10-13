@@ -11,7 +11,10 @@ use App\Models\User;
 use App\Services\EquipmentCatalogService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
+use Illuminate\Support\Str;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /** Back Office CRUD for all equipment listings and their energy profiles. */
 class EquipmentController extends Controller
@@ -78,6 +81,78 @@ class EquipmentController extends Controller
         $this->catalog->deleteEquipment($equipment);
 
         return redirect()->route('admin.equipment.index')->with('status', 'equipment-deleted');
+    }
+
+    public function exportCsv(): StreamedResponse
+    {
+        $equipment = Equipment::with(['category', 'owner', 'energyProfile'])->orderBy('id')->get();
+        $headers = ['id', 'name', 'category', 'owner_email', 'brand', 'model', 'description', 'price_per_day', 'condition', 'location', 'latitude', 'longitude', 'status', 'approval_status', 'power_watts', 'voltage', 'capacity_wh', 'efficiency', 'technology', 'max_output', 'operating_duration'];
+
+        return response()->streamDownload(function () use ($equipment, $headers): void {
+            $output = fopen('php://output', 'wb');
+            fputcsv($output, $headers);
+            foreach ($equipment as $item) {
+                $profile = $item->energyProfile;
+                fputcsv($output, [
+                    $item->id, $item->name, $item->category?->name, $item->owner?->email, $item->brand, $item->model,
+                    $item->description, $item->price_per_day, $item->condition, $item->location, $item->latitude, $item->longitude,
+                    $item->status, $item->approval_status, $profile?->power_watts, $profile?->voltage, $profile?->capacity_wh,
+                    $profile?->efficiency, $profile?->technology, $profile?->max_output, $profile?->operating_duration,
+                ]);
+            }
+            fclose($output);
+        }, 'solarshare-equipment-'.now()->format('Y-m-d').'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    public function importCsv(Request $request): RedirectResponse
+    {
+        $request->validate(['csv' => ['required', 'file', 'mimes:csv,txt', 'max:10240']]);
+        $handle = fopen($request->file('csv')->getRealPath(), 'rb');
+        $headers = array_map(fn ($header) => Str::snake(trim((string) $header)), fgetcsv($handle) ?: []);
+        $errors = [];
+        $line = 1;
+        $requiredHeaders = ['name', 'category', 'owner_email', 'price_per_day', 'condition', 'location'];
+        foreach (array_diff($requiredHeaders, $headers) as $requiredHeader) {
+            $errors['csv header'][] = __('Missing required column: :column', ['column' => $requiredHeader]);
+        }
+
+        while (($values = fgetcsv($handle)) !== false) {
+            $line++;
+            if (count(array_filter($values, fn ($value) => trim((string) $value) !== '')) === 0) continue;
+            if (count($values) !== count($headers)) {
+                $errors["csv row {$line}"][] = __('The number of values does not match the CSV header.');
+                continue;
+            }
+            $row = array_combine($headers, array_pad($values, count($headers), null));
+            $owner = User::where('email', trim((string) ($row['owner_email'] ?? '')))->where('role', 'owner')->first();
+            $category = Category::where('name', trim((string) ($row['category'] ?? '')))->first();
+            $payload = [
+                'category_id' => $category?->id, 'owner_id' => $owner?->id,
+                'name' => trim((string) ($row['name'] ?? '')), 'description' => $row['description'] ?? null,
+                'brand' => $row['brand'] ?? null, 'model' => $row['model'] ?? null,
+                'price_per_day' => $row['price_per_day'] ?? null, 'condition' => strtolower((string) ($row['condition'] ?? '')),
+                'location' => trim((string) ($row['location'] ?? '')), 'latitude' => $row['latitude'] ?? null,
+                'longitude' => $row['longitude'] ?? null, 'status' => $row['status'] ?? 'available',
+                'approval_status' => $row['approval_status'] ?? 'published',
+                'energy' => [
+                    'power_watts' => $row['power_watts'] ?? null, 'voltage' => $row['voltage'] ?? null,
+                    'capacity_wh' => $row['capacity_wh'] ?? null, 'efficiency' => $row['efficiency'] ?? null,
+                    'technology' => $row['technology'] ?? null, 'max_output' => $row['max_output'] ?? null,
+                    'operating_duration' => $row['operating_duration'] ?? null,
+                ],
+            ];
+            $validator = Validator::make($payload, EquipmentStoreRequest::equipmentRules());
+            if ($validator->fails()) {
+                foreach ($validator->errors()->all() as $message) $errors["csv row {$line}"][] = $message;
+                continue;
+            }
+            $this->catalog->createEquipment($validator->validated());
+        }
+        fclose($handle);
+
+        if ($errors) return back()->withErrors($errors)->with('status', __('Some CSV rows were skipped.'));
+
+        return back()->with('status', __('Equipment CSV imported successfully.'));
     }
 
     public function approve(Equipment $equipment): RedirectResponse

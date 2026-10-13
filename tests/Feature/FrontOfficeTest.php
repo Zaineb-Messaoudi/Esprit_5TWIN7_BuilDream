@@ -402,4 +402,22 @@ class FrontOfficeTest extends TestCase
             ->assertSee('Solar kit 2 × 100 W')
             ->assertDontSee('Portable battery 1000 Wh');
     }
+
+    public function test_equipment_map_renders_available_locations(): void
+    {
+        $equipment = Equipment::factory()->create([
+            'name' => 'Mapped battery',
+            'approval_status' => 'published',
+            'status' => 'available',
+            'latitude' => 36.8065,
+            'longitude' => 10.1815,
+        ]);
+
+        $this->get(route('front.equipment.map'))
+            ->assertOk()
+            ->assertSee('Find useful energy equipment near you.')
+            ->assertSee($equipment->name)
+            ->assertSee('equipment-map', false)
+            ->assertSee('OpenStreetMap', false);
+    }
 }
