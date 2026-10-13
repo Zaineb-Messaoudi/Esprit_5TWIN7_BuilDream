@@ -27,6 +27,8 @@ Category 1 ──── N Equipment N ──── 1 User (owner)
 - `/` — SolarShare landing page.
 - `/catalog` — searchable and filterable equipment catalogue.
 - `/equipment/{id}` — equipment details page.
+- `/energy-calculator` — estimates daily watt-hours from a renter's appliances and recommends compatible published equipment.
+- `/equipment/compare` — compares up to three published listings using their `EnergyProfile` values.
 
 The public catalogue reads Eloquent records through `App\Support\FrontDemo`. If the database has not been migrated or seeded yet, it uses the documented demo fallback so the template remains viewable.
 
@@ -72,6 +74,8 @@ Category detail pages show the related equipment. Energy profiles have a dedicat
 12. Equipment deletion is soft deletion so future rentals, reservations, inspections, and maintenance records keep their references.
 13. Category-aware validation requires the minimum useful energy values for batteries, solar panels, wind/hydro equipment, and charge controllers.
 14. The public catalogue filters and paginates published equipment through Eloquent queries; the demo fallback remains available only when the database is empty.
+15. The energy calculator computes `quantity × watts × hours` and recommends available equipment whose `capacity_wh` and `power_watts` or `max_output` meet the estimate.
+16. The comparison screen reads power, maximum output, capacity, voltage, efficiency, operating duration, and technology directly from `EnergyProfile`.
 
 ## Publication lifecycle
 

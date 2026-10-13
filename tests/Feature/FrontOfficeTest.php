@@ -54,6 +54,44 @@ class FrontOfficeTest extends TestCase
             ->assertSee(route('front.equipment.show', 1), false);
     }
 
+    public function test_energy_calculator_recommends_equipment_from_energy_profiles(): void
+    {
+        $equipment = Equipment::factory()->create([
+            'name' => 'Calculator-ready battery',
+            'approval_status' => 'published',
+            'status' => 'available',
+        ]);
+        $equipment->energyProfile()->create([
+            'power_watts' => 500,
+            'capacity_wh' => 2000,
+            'efficiency' => 92,
+            'technology' => 'Lithium-ion',
+            'max_output' => 500,
+        ]);
+
+        $this->get(route('front.energy-calculator', ['calculate' => 1]))
+            ->assertOk()
+            ->assertSee('Energy calculator')
+            ->assertSee('1,640')
+            ->assertSee($equipment->name);
+    }
+
+    public function test_equipment_comparison_reuses_energy_profile_values(): void
+    {
+        $first = Equipment::factory()->create(['name' => 'Comparison battery A']);
+        $first->energyProfile()->create(['power_watts' => 500, 'capacity_wh' => 1000, 'voltage' => 24, 'efficiency' => 92, 'technology' => 'Lithium-ion']);
+        $second = Equipment::factory()->create(['name' => 'Comparison panel B']);
+        $second->energyProfile()->create(['power_watts' => 200, 'capacity_wh' => 800, 'voltage' => 12, 'efficiency' => 88, 'technology' => 'Monocrystalline']);
+
+        $this->get(route('front.equipment.compare', ['ids' => [$first->id, $second->id]]))
+            ->assertOk()
+            ->assertSee('Specification comparison')
+            ->assertSee($first->name)
+            ->assertSee($second->name)
+            ->assertSee('1000')
+            ->assertSee('Monocrystalline');
+    }
+
     public function test_solarshare_branding_is_shared_by_front_office_back_office_and_auth_screens(): void
     {
         $this->get(route('home'))

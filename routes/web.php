@@ -11,6 +11,7 @@ use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\Auth\RoleSetupController;
 use App\Http\Controllers\AuthDemoController;
 use App\Http\Controllers\ChartShowcaseController;
+use App\Http\Controllers\CatalogueToolsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EcommerceController;
 use App\Http\Controllers\FaqController;
@@ -45,6 +46,8 @@ Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
     ->name('locale.switch');
 Route::get('/', [FrontController::class, 'home'])->name('home');
 Route::get('/catalog', [FrontController::class, 'catalog'])->name('front.catalog');
+Route::get('/energy-calculator', [CatalogueToolsController::class, 'energyCalculator'])->name('front.energy-calculator');
+Route::get('/equipment/compare', [CatalogueToolsController::class, 'compare'])->name('front.equipment.compare');
 Route::get('/equipment/{id}', [FrontController::class, 'show'])
     ->whereNumber('id')
     ->name('front.equipment.show');
