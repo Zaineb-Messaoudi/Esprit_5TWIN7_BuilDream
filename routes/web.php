@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
+use App\Http\Controllers\Admin\EnergyProfileController as AdminEnergyProfileController;
 use App\Http\Controllers\Admin\RentalContractController;
 use App\Http\Controllers\Admin\RentalController;
 use App\Http\Controllers\Admin\RentalExtensionController;
@@ -216,8 +217,20 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     // Admin User Management
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', AdminUserController::class);
-        Route::resource('categories', AdminCategoryController::class)->except(['show']);
+        Route::resource('categories', AdminCategoryController::class);
         Route::resource('equipment', AdminEquipmentController::class);
+        Route::resource('equipment.energy-profile', AdminEnergyProfileController::class)
+            ->only(['index', 'create', 'store'])
+            ->parameters(['equipment.energy-profile' => 'equipment'])
+            ->names('equipment.energy-profile');
+        Route::get('equipment/{equipment}/energy-profile/show', [AdminEnergyProfileController::class, 'show'])
+            ->name('equipment.energy-profile.show');
+        Route::get('equipment/{equipment}/energy-profile/edit', [AdminEnergyProfileController::class, 'edit'])
+            ->name('equipment.energy-profile.edit');
+        Route::put('equipment/{equipment}/energy-profile', [AdminEnergyProfileController::class, 'update'])
+            ->name('equipment.energy-profile.update');
+        Route::delete('equipment/{equipment}/energy-profile', [AdminEnergyProfileController::class, 'destroy'])
+            ->name('equipment.energy-profile.destroy');
         Route::put('equipment/{equipment}/approve', [AdminEquipmentController::class, 'approve'])->name('equipment.approve');
         Route::put('equipment/{equipment}/reject', [AdminEquipmentController::class, 'reject'])->name('equipment.reject');
         Route::resource('rentals', RentalController::class);

@@ -208,8 +208,8 @@ class AdminPagesTest extends TestCase
             ->assertSee('id="ticket-status"', false)
             ->assertSee('Database Connection Timeout')
             ->assertSee(route('app.support.reply'), false)
-            ->assertSee('selectDirection(option.id)', false)
-            ->assertSee("localStorage.setItem('dir', this.direction)", false)
+            ->assertSee('subDropdownOpen', false)
+            ->assertSee('languages', false)
             ->assertSee('href="'.route('locale.switch', ['locale' => 'en']).'"', false)
             ->assertSee('href="'.route('locale.switch', ['locale' => 'fr']).'"', false);
         $this->actingAs($user)
@@ -368,7 +368,6 @@ class AdminPagesTest extends TestCase
         $this->get(route('login'))
             ->assertOk()
             ->assertSee('Sign in | SolarShare Admin')
-            ->assertSee('const savedDir = localStorage.getItem(\'dir\')', false)
             ->assertSee('id="signin-form"', false)
             ->assertSee('action="'.route('login').'"', false)
             ->assertSee('name="email"', false)

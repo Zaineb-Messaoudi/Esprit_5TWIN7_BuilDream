@@ -4,6 +4,7 @@ namespace Database\Factories;
 
 use App\Models\Category;
 use App\Models\Equipment;
+use App\Models\EnergyProfile;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -26,5 +27,15 @@ class EquipmentFactory extends Factory
             'location' => fake()->city(),
             'status' => 'available',
         ];
+    }
+
+    /** Create the optional one-to-one technical profile with the equipment. */
+    public function withEnergyProfile(): static
+    {
+        return $this->afterCreating(function (Equipment $equipment): void {
+            $attributes = EnergyProfileFactory::new()->make()->toArray();
+            unset($attributes['equipment_id']);
+            $equipment->energyProfile()->create($attributes);
+        });
     }
 }

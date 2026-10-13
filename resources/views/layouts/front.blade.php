@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="h-full scroll-smooth">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr" class="h-full scroll-smooth">
 
 <head>
     <meta charset="utf-8">
@@ -18,8 +18,6 @@
 
     <script>
         (function () {
-            const savedDir = localStorage.getItem('dir');
-            if (savedDir) document.documentElement.setAttribute('dir', savedDir);
             if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
             if (localStorage.getItem('navigation-layout') === 'sidebar') document.documentElement.classList.add('nav-sidebar');
         })();

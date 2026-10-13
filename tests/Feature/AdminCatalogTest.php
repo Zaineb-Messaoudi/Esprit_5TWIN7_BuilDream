@@ -111,3 +111,59 @@ test('category with equipment cannot be deleted', function () {
 
     $this->assertDatabaseHas('categories', ['id' => $category->id]);
 });
+
+test('admin can view a category with its related equipment', function () {
+    $category = Category::factory()->create(['name' => 'Solar panels']);
+    $equipment = Equipment::factory()->create([
+        'category_id' => $category->id,
+        'owner_id' => catalogOwner()->id,
+    ]);
+
+    $this->actingAs(catalogAdmin())
+        ->get(route('admin.categories.show', $category))
+        ->assertOk()
+        ->assertSee($category->name)
+        ->assertSee($equipment->name);
+});
+
+test('admin can create update view and delete an energy profile', function () {
+    $equipment = Equipment::factory()->create(['owner_id' => catalogOwner()->id]);
+    $admin = catalogAdmin();
+
+    $this->actingAs($admin)
+        ->post(route('admin.equipment.energy-profile.store', $equipment), [
+            'power_watts' => 500,
+            'voltage' => 24,
+            'capacity_wh' => 1000,
+            'efficiency' => 92,
+            'technology' => 'Lithium-ion',
+            'max_output' => 1000,
+            'operating_duration' => 8,
+        ])
+        ->assertRedirect(route('admin.equipment.energy-profile.index', $equipment));
+
+    $profile = $equipment->energyProfile()->firstOrFail();
+
+    $this->get(route('admin.equipment.energy-profile.show', $equipment))
+        ->assertOk()
+        ->assertSee('Lithium-ion');
+
+    $this->put(route('admin.equipment.energy-profile.update', $equipment), [
+        'power_watts' => 600,
+        'technology' => 'Updated technology',
+    ])->assertRedirect(route('admin.equipment.energy-profile.index', $equipment));
+
+    expect($profile->refresh()->power_watts)->toBe(600);
+
+    $this->delete(route('admin.equipment.energy-profile.destroy', $equipment))
+        ->assertRedirect(route('admin.equipment.energy-profile.index', $equipment));
+
+    $this->assertDatabaseMissing('energy_profiles', ['id' => $profile->id]);
+});
+
+test('equipment factory can create its energy profile relationship', function () {
+    $equipment = Equipment::factory()->withEnergyProfile()->create();
+
+    expect($equipment->energyProfile)->not->toBeNull()
+        ->and($equipment->energyProfile->equipment_id)->toBe($equipment->id);
+});
