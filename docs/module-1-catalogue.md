@@ -44,6 +44,17 @@ These routes require authentication, email verification, the selected owner role
 ### Admin Back Office
 
 Administrators can manage all categories and equipment through resource routes under `/admin/categories` and `/admin/equipment`.
+Category detail pages show the related equipment. Energy profiles have a dedicated nested CRUD under `/admin/equipment/{equipment}/energy-profile`; the equipment form also supports the common create/update workflow for convenience.
+
+### Energy profile Back Office routes
+
+- `GET /admin/equipment/{equipment}/energy-profile` — view the profile or its empty state.
+- `GET /admin/equipment/{equipment}/energy-profile/create` — create a profile.
+- `POST /admin/equipment/{equipment}/energy-profile` — save a profile.
+- `GET /admin/equipment/{equipment}/energy-profile/show` — view the profile detail.
+- `GET /admin/equipment/{equipment}/energy-profile/edit` — edit a profile.
+- `PUT /admin/equipment/{equipment}/energy-profile` — save changes.
+- `DELETE /admin/equipment/{equipment}/energy-profile` — remove the profile.
 
 ## Validation and business rules
 
@@ -83,6 +94,8 @@ both values when the other module is connected.
 - Views: `resources/views/pages/front/owner-equipment` and `resources/views/pages/admin`
 - Database: `database/migrations`, `database/factories`, and `database/seeders/DatabaseSeeder.php`
 
+The factories support relation-aware fixtures. Use `Equipment::factory()->withEnergyProfile()->create()` when a test needs a complete catalogue listing, or create a profile through `EnergyProfile::factory()->for($equipment)`.
+
 ## Local setup
 
 ```bash
@@ -94,6 +107,20 @@ php artisan serve
 The seeded demo accounts are documented in `DatabaseSeeder.php`. The demo owner can publish and manage equipment; the demo admin can manage the complete catalogue.
 
 ## Testing
+
+The catalogue feature tests cover:
+
+- Category create, update, detail, and delete.
+- Equipment create, detail, update, soft delete, and validation.
+- EnergyProfile create, detail, update, delete, and factory relations.
+- Owner access restrictions and category deletion protection.
+- Public catalogue filtering, pagination, and seeded relations.
+
+Run the focused module tests with:
+
+```bash
+php artisan test --filter=AdminCatalogTest
+```
 
 ## Rental module integration
 

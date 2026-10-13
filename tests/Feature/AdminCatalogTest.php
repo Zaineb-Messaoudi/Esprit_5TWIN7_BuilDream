@@ -35,6 +35,27 @@ test('admin can create a category', function () {
     $this->assertDatabaseHas('categories', ['name' => 'Portable solar panels', 'status' => 'active']);
 });
 
+test('admin can update and delete an unused category', function () {
+    $admin = catalogAdmin();
+    $category = Category::factory()->create();
+
+    $this->actingAs($admin)
+        ->put(route('admin.categories.update', $category), [
+            'name' => 'Updated category',
+            'description' => 'Updated description.',
+            'status' => 'inactive',
+        ])
+        ->assertRedirect(route('admin.categories.index'));
+
+    expect($category->refresh()->name)->toBe('Updated category')
+        ->and($category->status)->toBe('inactive');
+
+    $this->delete(route('admin.categories.destroy', $category))
+        ->assertRedirect(route('admin.categories.index'));
+
+    $this->assertDatabaseMissing('categories', ['id' => $category->id]);
+});
+
 test('catalog admin pages render for administrators', function () {
     $admin = catalogAdmin();
     Category::factory()->create();
@@ -81,6 +102,54 @@ test('admin can create equipment with its energy profile', function () {
     expect($equipment->owner_id)->toBe($owner->id)
         ->and($equipment->energyProfile->power_watts)->toBe(500)
         ->and((int) $equipment->energyProfile->capacity_wh)->toBe(1000);
+});
+
+test('admin can view update and soft delete equipment', function () {
+    $admin = catalogAdmin();
+    $equipment = Equipment::factory()->create(['owner_id' => catalogOwner()->id]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.equipment.show', $equipment))
+        ->assertOk()
+        ->assertSee($equipment->name);
+
+    $this->put(route('admin.equipment.update', $equipment), [
+        'category_id' => $equipment->category_id,
+        'owner_id' => $equipment->owner_id,
+        'name' => 'Updated equipment',
+        'description' => 'Updated equipment description.',
+        'price_per_day' => 42,
+        'condition' => 'new',
+        'location' => 'Sousse',
+        'status' => 'available',
+        'approval_status' => 'published',
+    ])->assertRedirect(route('admin.equipment.index'));
+
+    expect($equipment->refresh()->name)->toBe('Updated equipment')
+        ->and((float) $equipment->price_per_day)->toBe(42.0);
+
+    $this->delete(route('admin.equipment.destroy', $equipment))
+        ->assertRedirect(route('admin.equipment.index'));
+
+    $this->assertSoftDeleted('equipment', ['id' => $equipment->id]);
+});
+
+test('equipment validation rejects incomplete catalogue data', function () {
+    $category = Category::factory()->create();
+    $owner = catalogOwner();
+
+    $this->actingAs(catalogAdmin())
+        ->from(route('admin.equipment.create'))
+        ->post(route('admin.equipment.store'), [
+            'category_id' => $category->id,
+            'owner_id' => $owner->id,
+            'name' => '',
+            'price_per_day' => -1,
+            'condition' => 'invalid',
+            'location' => '',
+            'status' => 'available',
+        ])
+        ->assertSessionHasErrors(['name', 'price_per_day', 'condition', 'location']);
 });
 
 test('non owner users cannot be assigned equipment', function () {
