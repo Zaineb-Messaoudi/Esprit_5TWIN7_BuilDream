@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Auth;
 
+use App\DTOs\UserRegistrationData;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\RegisterRequest;
-use App\DTOs\UserRegistrationData;
 use App\Services\UserService;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;

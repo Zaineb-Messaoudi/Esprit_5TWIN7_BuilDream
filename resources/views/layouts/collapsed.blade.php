@@ -22,13 +22,19 @@
                 init() {
                     const savedTheme = localStorage.getItem('theme');
                     this.theme = savedTheme === 'dark' ? 'dark' : 'light';
+                    this.resolvedTheme = this.theme;
                     this.updateTheme();
                 },
                 theme: 'light',
+                resolvedTheme: 'light',
                 set(value) {
                     this.theme = value === 'dark' ? 'dark' : 'light';
+                    this.resolvedTheme = this.theme;
                     localStorage.setItem('theme', this.theme);
                     this.updateTheme();
+                },
+                toggle() {
+                    this.set(this.resolvedTheme === 'dark' ? 'light' : 'dark');
                 },
                 updateTheme() {
                     const html = document.documentElement;

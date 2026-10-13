@@ -40,44 +40,6 @@ class MenuHelper
                     ['name' => 'Connected Accounts', 'path' => route('settings.connections'), 'pro' => false],
                 ],
             ],
-            [
-                'name' => 'Forms',
-                'icon' => 'forms',
-                'subItems' => [
-                    ['name' => 'Form Elements', 'path' => route('form.elements'), 'pro' => false],
-                    ['name' => 'Advanced Forms', 'path' => route('form.advanced'), 'pro' => false],
-                ],
-            ],
-            [
-                'name' => 'Tables',
-                'icon' => 'tables',
-                'subItems' => [
-                    ['name' => 'Basic Tables', 'path' => route('tables.basic'), 'pro' => false],
-                    ['name' => 'Advanced Tables', 'path' => route('tables.advanced'), 'pro' => false],
-                ],
-            ],
-            [
-                'name' => 'Pages',
-                'icon' => 'pages',
-                'subItems' => [
-                    ['name' => 'Blank Page', 'path' => route('pages.blank'), 'pro' => false],
-                    ['name' => '404 Error', 'path' => route('pages.error-404'), 'pro' => false],
-                    ['name' => '505 Error', 'path' => route('special.error-505'), 'pro' => false],
-                    ['name' => 'Account settings', 'path' => route('settings'), 'pro' => false],
-                    ['name' => 'Integrations', 'path' => route('integrations'), 'pro' => false],
-                    ['name' => 'API Keys', 'path' => route('api-keys'), 'pro' => false],
-                    ['name' => 'FAQ', 'path' => route('faq.index'), 'pro' => false],
-                    ['name' => 'Access Denied', 'path' => route('special.access-denied'), 'pro' => false],
-                    ['name' => '403 Error', 'path' => route('special.error-403'), 'pro' => false],
-                    ['name' => '500 Error', 'path' => route('special.error-500'), 'pro' => false],
-                    ['name' => '503 Error', 'path' => route('special.error-503'), 'pro' => false],
-                    ['name' => 'Maintenance', 'path' => route('special.maintenance'), 'pro' => false],
-                    ['name' => 'Coming Soon', 'path' => route('special.coming-soon'), 'pro' => false],
-                    ['name' => 'Success', 'path' => route('special.success'), 'pro' => false],
-                    ['name' => 'Under Construction', 'path' => route('special.under-construction'), 'pro' => false],
-                    ['name' => 'Full-width Layout', 'path' => route('layouts.full-width'), 'pro' => false],
-                ],
-            ],
         ];
 
         if (auth()->user()?->isAdmin()) {
@@ -85,7 +47,39 @@ class MenuHelper
                 'icon' => 'user-profile',
                 'name' => 'User Management',
                 'path' => route('admin.users.index'),
+            ], [
+                'icon' => 'ecommerce',
+                'name' => 'Catalog',
+                'subItems' => [
+                    ['name' => 'Categories', 'path' => route('admin.categories.index'), 'pro' => false],
+                    ['name' => 'Equipment', 'path' => route('admin.equipment.index'), 'pro' => false],
+                ],
             ]]);
+
+            // Rentals module (Student 3), visible to admins only
+            $items[] = [
+                'icon' => 'logistics',
+                'name' => 'Rentals',
+                'subItems' => [
+                    ['name' => 'Reservations', 'path' => route('rental.reservations.index'), 'activePrefix' => '/rental/reservations', 'pro' => false],
+                    ['name' => 'Rentals', 'path' => route('admin.rentals.index'), 'activePrefix' => '/admin/rentals', 'pro' => false],
+                    ['name' => 'Payments', 'path' => route('rental.payments.index'), 'activePrefix' => '/rental/payments', 'pro' => false],
+                    ['name' => 'Invoices', 'path' => route('rental.invoices.index'), 'activePrefix' => '/rental/invoices', 'pro' => false],
+                    ['name' => 'Contracts', 'path' => route('admin.rental-contracts.index'), 'activePrefix' => '/admin/rental-contracts', 'pro' => false],
+                    ['name' => 'Extensions', 'path' => route('admin.rental-extensions.index'), 'activePrefix' => '/admin/rental-extensions', 'pro' => false],
+                ],
+            ];
+
+            // Technical module (Student 2), visible to admins only
+            $items[] = [
+                'icon' => 'logistics',
+                'name' => 'Technical',
+                'subItems' => [
+                    ['name' => 'Maintenances', 'path' => route('admin.technical.maintenances.index'), 'activePrefix' => '/admin/technical/maintenances', 'pro' => false],
+                    ['name' => 'Reports', 'path' => route('admin.technical.reports.index'), 'activePrefix' => '/admin/technical/reports', 'pro' => false],
+                    ['name' => 'Inspections', 'path' => route('admin.technical.inspections.index'), 'activePrefix' => '/admin/technical/inspections', 'pro' => false],
+                ],
+            ];
         }
 
         return $items;
@@ -185,6 +179,44 @@ class MenuHelper
                     ['name' => 'AI Usage', 'path' => route('ai.usage'), 'pro' => false],
                     ['name' => 'Map View', 'path' => route('ai.map'), 'pro' => false],
                     ['name' => 'Map Examples', 'path' => route('maps.index'), 'pro' => false],
+                ],
+            ],
+            [
+                'icon' => 'forms',
+                'name' => 'Forms',
+                'subItems' => [
+                    ['name' => 'Form Elements', 'path' => route('form.elements'), 'pro' => false],
+                    ['name' => 'Advanced Forms', 'path' => route('form.advanced'), 'pro' => false],
+                ],
+            ],
+            [
+                'icon' => 'tables',
+                'name' => 'Tables',
+                'subItems' => [
+                    ['name' => 'Basic Tables', 'path' => route('tables.basic'), 'pro' => false],
+                    ['name' => 'Advanced Tables', 'path' => route('tables.advanced'), 'pro' => false],
+                ],
+            ],
+            [
+                'icon' => 'pages',
+                'name' => 'Pages',
+                'subItems' => [
+                    ['name' => 'Blank Page', 'path' => route('pages.blank'), 'pro' => false],
+                    ['name' => '404 Error', 'path' => route('pages.error-404'), 'pro' => false],
+                    ['name' => '505 Error', 'path' => route('special.error-505'), 'pro' => false],
+                    ['name' => 'Account settings', 'path' => route('settings'), 'pro' => false],
+                    ['name' => 'Integrations', 'path' => route('integrations'), 'pro' => false],
+                    ['name' => 'API Keys', 'path' => route('api-keys'), 'pro' => false],
+                    ['name' => 'FAQ', 'path' => route('faq.index'), 'pro' => false],
+                    ['name' => 'Access Denied', 'path' => route('special.access-denied'), 'pro' => false],
+                    ['name' => '403 Error', 'path' => route('special.error-403'), 'pro' => false],
+                    ['name' => '500 Error', 'path' => route('special.error-500'), 'pro' => false],
+                    ['name' => '503 Error', 'path' => route('special.error-503'), 'pro' => false],
+                    ['name' => 'Maintenance', 'path' => route('special.maintenance'), 'pro' => false],
+                    ['name' => 'Coming Soon', 'path' => route('special.coming-soon'), 'pro' => false],
+                    ['name' => 'Success', 'path' => route('special.success'), 'pro' => false],
+                    ['name' => 'Under Construction', 'path' => route('special.under-construction'), 'pro' => false],
+                    ['name' => 'Full-width Layout', 'path' => route('layouts.full-width'), 'pro' => false],
                 ],
             ],
         ];
