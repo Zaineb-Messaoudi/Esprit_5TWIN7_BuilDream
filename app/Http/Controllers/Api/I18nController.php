@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Models\Currency;
-use App\Models\LanguagePreference;
 use App\Services\I18nService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -30,7 +29,7 @@ class I18nController
     {
         $info = $this->service->getCurrentLocaleInfo();
         $rtl = $this->service->getRtlClasses();
-        
+
         return response()->json([
             'locale' => App::getLocale(),
             ...$info,
@@ -44,12 +43,12 @@ class I18nController
     public function switch(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'locale' => ['required', 'in:en,fr,ar,de,es,it,pt,tr'],
+            'locale' => 'required|in:en,fr,ar,de,es,it,pt,tr',
         ]);
 
         $success = $this->service->setLocale($validated['locale']);
 
-        if (!$success) {
+        if (! $success) {
             return response()->json(['message' => 'Invalid locale.'], 400);
         }
 
@@ -78,7 +77,7 @@ class I18nController
     public function currentCurrency(Request $request): JsonResponse
     {
         $currency = $this->service->getUserCurrency($request->user());
-        
+
         return response()->json([
             'currency' => $currency ? [
                 'code' => $currency->code,
@@ -96,12 +95,12 @@ class I18nController
     public function switchCurrency(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'currency_code' => ['required', 'string', 'size:3', 'exists:currencies,code'],
+            'currency_code' => 'required|string|size:3|exists:currencies,code',
         ]);
 
         $success = $this->service->setUserCurrency($request->user(), $validated['currency_code']);
 
-        if (!$success) {
+        if (! $success) {
             return response()->json(['message' => 'Invalid currency.'], 400);
         }
 
@@ -125,12 +124,12 @@ class I18nController
     public function convert(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'amount' => ['required', 'numeric', 'min:0'],
-            'from_currency' => ['nullable', 'string', 'size:3', 'exists:currencies,code'],
-        );
+            'amount' => 'required|numeric|min:0',
+            'from_currency' => 'nullable|string|size:3|exists:currencies,code',
+        ]);
 
         $user = $request->user();
-        $fromCurrency = $validated['from_currency'] 
+        $fromCurrency = $validated['from_currency']
             ? Currency::where('code', $validated['from_currency'])->first()
             : $this->service->getUserCurrency($request->user());
 
@@ -157,8 +156,8 @@ class I18nController
     public function exchangeRate(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'from' => ['required', 'string', 'size:3', 'exists:currencies,code'],
-            'to' => ['required', 'string', 'size:3', 'exists:currencies,code'],
+            'from' => 'required|string|size:3|exists:currencies,code',
+            'to' => 'required|string|size:3|exists:currencies,code',
         ]);
 
         $from = Currency::where('code', $validated['from'])->firstOrFail();
@@ -195,12 +194,12 @@ class I18nController
     public function updateUserLocale(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'locale' => ['required', 'in:en,fr,ar,de,es,it,pt,tr'],
+            'locale' => 'required|in:en,fr,ar,de,es,it,pt,tr',
         ]);
 
         $success = $this->service->setUserLocale($request->user(), $validated['locale']);
 
-        if (!$success) {
+        if (! $success) {
             return response()->json(['message' => 'Invalid locale.'], 400);
         }
 
@@ -216,12 +215,12 @@ class I18nController
     public function updateUserCurrency(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'currency_code' => ['required', 'string', 'size:3', 'exists:currencies,code'],
+            'currency_code' => 'required|string|size:3|exists:currencies,code',
         ]);
 
         $success = $this->service->setUserCurrency($request->user(), $validated['currency_code']);
 
-        if (!$success) {
+        if (! $success) {
             return response()->json(['message' => 'Invalid currency.'], 400);
         }
 

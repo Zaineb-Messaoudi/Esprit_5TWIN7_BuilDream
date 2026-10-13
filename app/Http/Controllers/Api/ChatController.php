@@ -2,10 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Api\StoreChatMessageRequest;
-use App\Models\Rental;
 use App\Models\ChatMessage;
-use App\Services\ChatService;
+use App\Models\Rental;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -32,13 +30,13 @@ class ChatController
     public function store(Request $request, Rental $rental): JsonResponse
     {
         $validated = $request->validate([
-            'message' => ['required', 'string', 'max:5000'],
-            'type' => ['nullable', 'in:text,image,file,location,system'],
-            'attachments' => ['nullable', 'array', 'max:5'],
-            'attachments.*.type' => ['required', 'in:image,file'],
-            'attachments.*.url' => ['required', 'url', 'max:500'],
-            'attachments.*.name' => ['nullable', 'string', 'max:255'],
-            'attachments.*.size' => ['nullable', 'integer', 'min:0'],
+            'message' => 'required|string|max:5000',
+            'type' => 'nullable|in:text,image,file,location,system',
+            'attachments' => 'nullable|array|max:5',
+            'attachments.*.type' => 'required|in:image,file',
+            'attachments.*.url' => 'required|url|max:500',
+            'attachments.*.name' => 'nullable|string|max:255',
+            'attachments.*.size' => 'nullable|integer|min:0',
         ]);
 
         $message = $this->service->sendMessage(
@@ -81,7 +79,7 @@ class ChatController
     public function typing(Request $request, Rental $rental): JsonResponse
     {
         $validated = $request->validate([
-            'is_typing' => ['required', 'boolean'],
+            'is_typing' => 'required|boolean',
         ]);
 
         app(\App\Services\ChatService::class)->sendTypingIndicator($rental, request()->user(), $validated['is_typing']);
@@ -95,8 +93,8 @@ class ChatController
     public function update(Request $request, ChatMessage $message): JsonResponse
     {
         $validated = $request->validate([
-            'message' => ['required', 'string', 'max:5000'],
-        );
+            'message' => 'required|string|max:5000',
+        ]);
 
         $message = app(\App\Services\ChatService::class)->editMessage($message, request()->user(), $validated['message']);
 
@@ -122,8 +120,8 @@ class ChatController
     public function mute(Request $request, Rental $rental): JsonResponse
     {
         $validated = $request->validate([
-            'muted' => ['required', 'boolean'],
-            'muted_until' => ['nullable', 'date', 'after:now'],
+            'muted' => 'required|boolean',
+            'muted_until' => 'nullable|date|after:now',
         ]);
 
         app(\App\Services\ChatService::class)->toggleMute($rental, request()->user(), $validated['muted'], $validated['muted_until'] ?? null);

@@ -56,24 +56,41 @@ class SecurityHeaders
             return "default-src 'none'; frame-ancestors 'none';";
         }
 
+        $devOrigin = 'http://localhost:5173';
+        $devWs = 'ws://localhost:5173';
+
         $base = [
             "default-src 'self'",
-            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com https://maps.googleapis.com",
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com",
             "style-src 'self' 'unsafe-inline' https://fonts.googleapis.com https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com",
             "font-src 'self' data: https://fonts.gstatic.com https://cdn.jsdelivr.net https://unpkg.com",
-            "img-src 'self' data: blob: https: https://maps.googleapis.com https://maps.gstatic.com https://*.tile.openstreetmap.org",
-            "connect-src 'self' https://api.mapbox.com https://*.mapbox.com wss://*.pusher.com https://*.meilisearch.io https://*.algolia.net",
-            "frame-src 'self' https://www.google.com https://maps.googleapis.com",
+            "img-src 'self' data: blob: https: https://*.tile.openstreetmap.org",
+            "connect-src 'self' wss://*.pusher.com",
+            "frame-src 'self'",
             "object-src 'none'",
             "base-uri 'self'",
             "form-action 'self'",
             "frame-ancestors 'self'",
-            "form-action 'self'",
         ];
 
-        if ($isDev) {
-            $base[] = "script-src-elem 'self' 'unsafe-inline' 'unsafe-eval' https://cdn.jsdelivr.net https://unpkg.com https://cdn.tailwindcss.com";
-            $base[] = "connect-src 'self' ws: wss:";
+        if (config('app.debug')) {
+            // Merge dev origins into existing directives instead of duplicating
+            $base = array_map(function ($directive) use ($devOrigin) {
+                if (str_starts_with($directive, 'script-src')) {
+                    return $directive.' '.$devOrigin;
+                }
+                if (str_starts_with($directive, 'style-src')) {
+                    return $directive.' '.$devOrigin;
+                }
+                if (str_starts_with($directive, 'font-src')) {
+                    return $directive.' '.$devOrigin;
+                }
+                if (str_starts_with($directive, 'connect-src')) {
+                    return $directive.' '.$devOrigin.' ws: wss:';
+                }
+
+                return $directive;
+            }, $base);
         }
 
         return implode('; ', $base);
