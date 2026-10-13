@@ -36,6 +36,8 @@ class UserService
                     'password' => Hash::make($data->password),
                     'phone_number' => $data->phone_number,
                     'address' => $data->address,
+                    'address_latitude' => $data->address_latitude,
+                    'address_longitude' => $data->address_longitude,
                     'role' => UserRole::BUYER,
                     'role_setup_completed' => false,
                     'profile_photo_path' => $photoPath,
