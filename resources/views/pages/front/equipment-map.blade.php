@@ -49,7 +49,7 @@
             const bounds = [];
             items.forEach((item) => {
                 const point = [item.latitude, item.longitude]; bounds.push(point);
-                L.marker(point).addTo(map).bindPopup(`<strong>${item.name}</strong><br>${item.location}<br>${item.price}<br><a href="${item.url}">View listing →</a>`);
+                L.marker(point).addTo(map).bindPopup(`<strong>${item.name}</strong><br>${item.location}<br>${item.price}<br><a href="${item.url}">{{ __('View listing') }} →</a>`);
             });
             if (bounds.length) map.fitBounds(bounds, { padding: [28, 28], maxZoom: 12 });
             document.querySelectorAll('[data-equipment-card]').forEach((card) => card.addEventListener('mouseenter', () => {

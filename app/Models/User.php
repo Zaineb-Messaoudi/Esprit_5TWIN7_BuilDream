@@ -7,6 +7,7 @@ use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Notification;
@@ -152,6 +153,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function equipment(): HasMany
     {
         return $this->hasMany(\App\Models\Equipment::class, 'owner_id');
+    }
+
+    public function favoriteEquipment(): BelongsToMany
+    {
+        return $this->belongsToMany(Equipment::class, 'equipment_favorites')->withTimestamps();
     }
 
     public function rentals(): HasMany

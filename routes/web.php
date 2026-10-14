@@ -47,6 +47,8 @@ Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
 Route::get('/', [FrontController::class, 'home'])->name('home');
 Route::get('/catalog', [FrontController::class, 'catalog'])->name('front.catalog');
 Route::get('/equipment/map', [FrontController::class, 'equipmentMap'])->name('front.equipment.map');
+Route::get('/equipment/{id}/solar-production', [FrontController::class, 'solarProduction'])->name('front.equipment.solar-production');
+Route::get('/equipment/{id}/technical-sheet.pdf', [FrontController::class, 'exportPdf'])->name('front.equipment.pdf');
 Route::get('/energy-calculator', [CatalogueToolsController::class, 'energyCalculator'])->name('front.energy-calculator');
 Route::get('/equipment/compare', [CatalogueToolsController::class, 'compare'])->name('front.equipment.compare');
 Route::get('/equipment/{id}', [FrontController::class, 'show'])
@@ -152,6 +154,7 @@ Route::get('/two-factor', [AuthDemoController::class, 'show'])
     ->name('auth.two-factor');
 
 Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    Route::post('/equipment/{id}/favorite', [FrontController::class, 'toggleFavorite'])->name('front.equipment.favorite');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

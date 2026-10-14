@@ -39,6 +39,8 @@ class EquipmentStoreRequest extends FormRequest
             'description' => ['nullable', 'string', 'max:3000'],
             'image_url' => ['nullable', 'url:http,https', 'max:2048'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
+            'images' => ['nullable', 'array', 'max:8'],
+            'images.*' => ['image', 'mimes:jpg,jpeg,png,webp', 'max:5120'],
             'brand' => ['nullable', 'string', 'max:100'],
             'model' => ['nullable', 'string', 'max:100'],
             'price_per_day' => ['required', 'numeric', 'min:0', 'max:99999999.99'],

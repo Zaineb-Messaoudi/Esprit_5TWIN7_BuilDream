@@ -2,11 +2,13 @@
 
 namespace App\Models;
 
+use App\Traits\Translatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Searchable;
 
@@ -19,7 +21,9 @@ use Laravel\Scout\Searchable;
  */
 class Equipment extends Model
 {
-    use HasFactory, Searchable, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes, Translatable;
+
+    protected $translatable = ['name', 'description'];
 
     protected $table = 'equipment';
 
@@ -99,6 +103,16 @@ class Equipment extends Model
     public function energyProfile(): HasOne
     {
         return $this->hasOne(EnergyProfile::class);
+    }
+
+    public function images(): HasMany
+    {
+        return $this->hasMany(EquipmentImage::class)->orderBy('sort_order');
+    }
+
+    public function favoritedBy(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'equipment_favorites')->withTimestamps();
     }
 
     /** Rentals created from this catalogue listing. */
