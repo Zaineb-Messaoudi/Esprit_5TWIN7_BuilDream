@@ -31,9 +31,15 @@
                 <p>{{ $equipment->description ?: __('No description.') }}</p>
             </div>
         </div>
+        <div class="mt-8 border-t border-gray-200 pt-6 dark:border-gray-800">
+            <div class="flex flex-wrap items-center justify-between gap-3">
+                <h2 class="font-semibold">{{ __('Energy profile') }}</h2>
+                <a href="{{ route('admin.equipment.energy-profile.index', $equipment) }}" class="text-sm text-brand-600 hover:underline dark:text-brand-400">{{ $equipment->energyProfile ? __('Manage profile') : __('Add profile') }}</a>
+            </div>
+        </div>
         @if($equipment->energyProfile)
         <div class="mt-8 border-t border-gray-200 pt-6 dark:border-gray-800">
-            <h2 class="mb-4 font-semibold">{{ __('Energy profile') }}</h2>
+            <h2 class="mb-4 font-semibold">{{ __('Technical values') }}</h2>
             <div class="grid gap-4 sm:grid-cols-3">
                 @foreach(['power_watts' => 'Power (W)','voltage' => 'Voltage (V)','capacity_wh' => 'Capacity (Wh)','efficiency' => 'Efficiency (%)','technology' => 'Technology','max_output' => 'Max output (W)','operating_duration' => 'Operating duration (h)'] as $key => $label)
                 <div>

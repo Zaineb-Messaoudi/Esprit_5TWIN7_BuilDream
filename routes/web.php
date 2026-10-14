@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
+use App\Http\Controllers\Admin\EnergyProfileController as AdminEnergyProfileController;
 use App\Http\Controllers\Admin\RentalContractController;
 use App\Http\Controllers\Admin\RentalController;
 use App\Http\Controllers\Admin\RentalExtensionController;
@@ -10,6 +11,7 @@ use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\Auth\RoleSetupController;
 use App\Http\Controllers\AuthDemoController;
 use App\Http\Controllers\ChartShowcaseController;
+use App\Http\Controllers\CatalogueToolsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EcommerceController;
 use App\Http\Controllers\FaqController;
@@ -44,6 +46,11 @@ Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
     ->name('locale.switch');
 Route::get('/', [FrontController::class, 'home'])->name('home');
 Route::get('/catalog', [FrontController::class, 'catalog'])->name('front.catalog');
+Route::get('/equipment/map', [FrontController::class, 'equipmentMap'])->name('front.equipment.map');
+Route::get('/equipment/{id}/solar-production', [FrontController::class, 'solarProduction'])->name('front.equipment.solar-production');
+Route::get('/equipment/{id}/technical-sheet.pdf', [FrontController::class, 'exportPdf'])->name('front.equipment.pdf');
+Route::get('/energy-calculator', [CatalogueToolsController::class, 'energyCalculator'])->name('front.energy-calculator');
+Route::get('/equipment/compare', [CatalogueToolsController::class, 'compare'])->name('front.equipment.compare');
 Route::get('/equipment/{id}', [FrontController::class, 'show'])
     ->whereNumber('id')
     ->name('front.equipment.show');
@@ -147,6 +154,7 @@ Route::get('/two-factor', [AuthDemoController::class, 'show'])
     ->name('auth.two-factor');
 
 Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    Route::post('/equipment/{id}/favorite', [FrontController::class, 'toggleFavorite'])->name('front.equipment.favorite');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -216,8 +224,22 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     // Admin User Management
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', AdminUserController::class);
-        Route::resource('categories', AdminCategoryController::class)->except(['show']);
+        Route::resource('categories', AdminCategoryController::class);
         Route::resource('equipment', AdminEquipmentController::class);
+        Route::get('equipment-export.csv', [AdminEquipmentController::class, 'exportCsv'])->name('equipment.export');
+        Route::post('equipment-import.csv', [AdminEquipmentController::class, 'importCsv'])->name('equipment.import');
+        Route::resource('equipment.energy-profile', AdminEnergyProfileController::class)
+            ->only(['index', 'create', 'store'])
+            ->parameters(['equipment.energy-profile' => 'equipment'])
+            ->names('equipment.energy-profile');
+        Route::get('equipment/{equipment}/energy-profile/show', [AdminEnergyProfileController::class, 'show'])
+            ->name('equipment.energy-profile.show');
+        Route::get('equipment/{equipment}/energy-profile/edit', [AdminEnergyProfileController::class, 'edit'])
+            ->name('equipment.energy-profile.edit');
+        Route::put('equipment/{equipment}/energy-profile', [AdminEnergyProfileController::class, 'update'])
+            ->name('equipment.energy-profile.update');
+        Route::delete('equipment/{equipment}/energy-profile', [AdminEnergyProfileController::class, 'destroy'])
+            ->name('equipment.energy-profile.destroy');
         Route::put('equipment/{equipment}/approve', [AdminEquipmentController::class, 'approve'])->name('equipment.approve');
         Route::put('equipment/{equipment}/reject', [AdminEquipmentController::class, 'reject'])->name('equipment.reject');
         Route::resource('rentals', RentalController::class);

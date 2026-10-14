@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Models\EnergyProfile;
+use App\Models\Equipment;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /** @extends Factory<EnergyProfile> */
@@ -13,6 +14,7 @@ class EnergyProfileFactory extends Factory
     public function definition(): array
     {
         return [
+            'equipment_id' => Equipment::factory(),
             'power_watts' => fake()->numberBetween(100, 2500),
             'voltage' => fake()->randomFloat(2, 12, 48),
             'capacity_wh' => fake()->numberBetween(500, 5000),

@@ -27,6 +27,8 @@ Category 1 ──── N Equipment N ──── 1 User (owner)
 - `/` — SolarShare landing page.
 - `/catalog` — searchable and filterable equipment catalogue.
 - `/equipment/{id}` — equipment details page.
+- `/energy-calculator` — estimates daily watt-hours from a renter's appliances and recommends compatible published equipment.
+- `/equipment/compare` — compares up to three published listings using their `EnergyProfile` values.
 
 The public catalogue reads Eloquent records through `App\Support\FrontDemo`. If the database has not been migrated or seeded yet, it uses the documented demo fallback so the template remains viewable.
 
@@ -44,6 +46,17 @@ These routes require authentication, email verification, the selected owner role
 ### Admin Back Office
 
 Administrators can manage all categories and equipment through resource routes under `/admin/categories` and `/admin/equipment`.
+Category detail pages show the related equipment. Energy profiles have a dedicated nested CRUD under `/admin/equipment/{equipment}/energy-profile`; the equipment form also supports the common create/update workflow for convenience.
+
+### Energy profile Back Office routes
+
+- `GET /admin/equipment/{equipment}/energy-profile` — view the profile or its empty state.
+- `GET /admin/equipment/{equipment}/energy-profile/create` — create a profile.
+- `POST /admin/equipment/{equipment}/energy-profile` — save a profile.
+- `GET /admin/equipment/{equipment}/energy-profile/show` — view the profile detail.
+- `GET /admin/equipment/{equipment}/energy-profile/edit` — edit a profile.
+- `PUT /admin/equipment/{equipment}/energy-profile` — save changes.
+- `DELETE /admin/equipment/{equipment}/energy-profile` — remove the profile.
 
 ## Validation and business rules
 
@@ -61,6 +74,8 @@ Administrators can manage all categories and equipment through resource routes u
 12. Equipment deletion is soft deletion so future rentals, reservations, inspections, and maintenance records keep their references.
 13. Category-aware validation requires the minimum useful energy values for batteries, solar panels, wind/hydro equipment, and charge controllers.
 14. The public catalogue filters and paginates published equipment through Eloquent queries; the demo fallback remains available only when the database is empty.
+15. The energy calculator computes `quantity × watts × hours` and recommends available equipment whose `capacity_wh` and `power_watts` or `max_output` meet the estimate.
+16. The comparison screen reads power, maximum output, capacity, voltage, efficiency, operating duration, and technology directly from `EnergyProfile`.
 
 ## Publication lifecycle
 
@@ -83,6 +98,8 @@ both values when the other module is connected.
 - Views: `resources/views/pages/front/owner-equipment` and `resources/views/pages/admin`
 - Database: `database/migrations`, `database/factories`, and `database/seeders/DatabaseSeeder.php`
 
+The factories support relation-aware fixtures. Use `Equipment::factory()->withEnergyProfile()->create()` when a test needs a complete catalogue listing, or create a profile through `EnergyProfile::factory()->for($equipment)`.
+
 ## Local setup
 
 ```bash
@@ -94,6 +111,20 @@ php artisan serve
 The seeded demo accounts are documented in `DatabaseSeeder.php`. The demo owner can publish and manage equipment; the demo admin can manage the complete catalogue.
 
 ## Testing
+
+The catalogue feature tests cover:
+
+- Category create, update, detail, and delete.
+- Equipment create, detail, update, soft delete, and validation.
+- EnergyProfile create, detail, update, delete, and factory relations.
+- Owner access restrictions and category deletion protection.
+- Public catalogue filtering, pagination, and seeded relations.
+
+Run the focused module tests with:
+
+```bash
+php artisan test --filter=AdminCatalogTest
+```
 
 ## Rental module integration
 

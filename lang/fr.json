@@ -1,1045 +1,1534 @@
 {
-    "Language": "Langue",
-    "Switch language to English": "Passer en anglais",
-    "Switch language to French": "Passer en français",
-    "Home": "Accueil",
-    "Catalog": "Catalogue",
-    "Dashboard": "Tableau de bord",
-    "Owner dashboard": "Tableau de bord propriétaire",
-    "Owner workspace": "Espace propriétaire",
-    "Owner workspace navigation": "Navigation de l’espace propriétaire",
+    "Energy calculator": "Calculateur énergétique",
+    "Energy tools": "Outils énergétiques",
+    "Compare equipment": "Comparer les équipements",
+    "Fridge": "Réfrigérateur",
+    "LED lights": "Éclairage LED",
+    "Phone charging": "Recharge du téléphone",
+    "Laptop": "Ordinateur portable",
+    "Fan": "Ventilateur",
+    "typical draw": "consommation typique",
+    "Quantity": "Quantité",
+    "No guesswork": "Dimensionnement précis",
+    "Step 1": "Étape 1",
+    "Step 2": "Étape 2",
+    "Open energy calculator": "Ouvrir le calculateur énergétique",
+    "Max output": "Sortie maximale",
+    "Operating duration": "Durée de fonctionnement",
+    "View listing": "Voir l'annonce",
+    "We estimate watt-hours from quantity × watts × hours.": "Nous estimons les watt-heures avec quantité × watts × heures.",
+    "We filter published equipment by capacity and output power.": "Nous filtrons les équipements publiés selon leur capacité et leur puissance de sortie.",
+    "You choose what fits your real plan.": "Vous choisissez ce qui correspond à votre besoin réel.",
+    "No published equipment with technical profiles is available yet.": "Aucun équipement publié avec un profil technique n'est encore disponible.",
+    "Choose two or three for the clearest comparison.": "Choisissez deux ou trois équipements pour une comparaison claire.",
+    "Pick equipment above to compare capacity, output power, efficiency and technology.": "Sélectionnez un équipement ci-dessus pour comparer sa capacité, sa puissance de sortie, son rendement et sa technologie.",
+    "Find the right amount of power before you book.": "Trouvez la puissance adaptée avant de réserver.",
+    "Estimate your daily energy need, then match it with real catalogue specifications.": "Estimez votre besoin énergétique quotidien, puis comparez-le aux caractéristiques réelles du catalogue.",
+    "Uses EnergyProfile data": "Utilise les données EnergyProfile",
+    "What will you power?": "Que voulez-vous alimenter ?",
+    "Set a quantity and daily usage for each appliance.": "Indiquez la quantité et l'utilisation quotidienne de chaque appareil.",
+    "Hours / day": "Heures / jour",
+    "Calculate my need": "Calculer mon besoin",
+    "Your estimate": "Votre estimation",
+    "Ready when you are": "Prêt quand vous l'êtes",
+    "simultaneous power": "puissance simultanée",
+    "Enter your appliances to unlock equipment recommendations.": "Saisissez vos appareils pour obtenir des recommandations.",
+    "Equipment that can carry the load": "Les équipements adaptés à votre besoin",
+    "Specification comparison": "Comparaison des caractéristiques",
+    "Select up to three published listings and read their EnergyProfile data side by side.": "Sélectionnez jusqu'à trois annonces publiées et comparez leurs données EnergyProfile.",
+    "Choose equipment": "Choisir les équipements",
+    "Compare selected": "Comparer la sélection",
+    "Power output": "Puissance de sortie",
+    "Your comparison is waiting": "Votre comparaison vous attend",
+    "0 live": "0 live",
+    "0 of 10,000 demo requests": "0 of 10,000 demo requests",
+    "1 item found": "1 élément trouvé",
+    "12 example rentals · 1 currently active.": "12 locations d’exemple · 1 actuellement en cours.",
+    "2 minutes ago": "2 minutes ago",
+    "2 requests this month · 1 pending decision.": "2 demandes ce mois-ci · 1 décision en attente.",
+    "27 Sep · 09:15": "27 sept. · 09:15",
+    "28 Sep · 11:30": "28 sept. · 11:30",
+    "3 days × 18 TND": "3 jours × 18 TND",
+    "3 example items · sorted by latest activity": "3 équipements d’exemple · triés par activité récente",
+    "403 Error": "Erreur 403",
+    "404 Error": "Erreur 404",
+    "5 items": "5 actions",
+    "500 Error": "Erreur 500",
+    "503 Error": "Erreur 503",
+    "505 Error": "Erreur 505",
+    "54.00 TND received for reservation RES-1038.": "54,00 TND reçus pour la réservation RES-1038.",
+    "9–11 Oct 2026 · La Marsa, Tunis · 18 TND / day": "9–11 oct. 2026 · La Marsa, Tunis · 18 TND / jour",
+    "A brighter way to share": "Une meilleure façon de partager",
+    "A clear view of your listings, rental requests and equipment activity.": "Retrouvez vos annonces, demandes de location et l’activité de vos équipements.",
+    "A clearer view of your solar business.": "A clearer view of your solar business.",
+    "A community-powered energy future.": "Un avenir énergétique porté par la communauté.",
+    "A compact, quiet power station for camping, mobile work and small appliances. Includes charging cable and protective case.": "Une station électrique compacte et silencieuse pour le camping, le travail mobile et les petits appareils. Câble de recharge et étui de protection inclus.",
+    "A complete visual preview of your equipment operations, from listing to return inspection.": "Un aperçu complet de la gestion de vos équipements, de la publication à l’inspection de retour.",
+    "A dialog with Escape/backdrop dismissal, a focus trap, and focus restoration.": "A dialog with Escape/backdrop dismissal, a focus trap, and focus restoration.",
+    "A few days of access can beat another device gathering dust.": "Quelques jours de location valent mieux qu’un appareil qui prend la poussière.",
+    "A focused map with one sample location.": "A focused map with one sample location.",
+    "A guided reservation journey for :equipment.": "Un parcours de réservation guidé pour :equipment.",
+    "A keyboard-focusable tab pattern for switching related panels.": "A keyboard-focusable tab pattern for switching related panels.",
+    "A little shared energy goes a long way.": "L’énergie partagée ouvre de nouvelles possibilités.",
+    "A metric trend with a compact summary value and change.": "A metric trend with a compact summary value and change.",
+    "A new verification link has been sent to your email address.": "Un nouveau lien de vérification a été envoyé à votre adresse e-mail.",
+    "A new verification link has been sent.": "Un nouveau lien de vérification a été envoyé.",
+    "A quick view of pending, confirmed and cancelled requests.": "Aperçu des demandes en attente, confirmées et annulées.",
+    "A renter is asking for one more day.": "Un locataire demande un jour supplémentaire.",
+    "A responsive off-canvas panel with Escape and backdrop dismissal.": "A responsive off-canvas panel with Escape and backdrop dismissal.",
+    "A reusable tab panel with keyboard arrow navigation.": "A reusable tab panel with keyboard arrow navigation.",
+    "A sample of what matters right now": "Un aperçu des informations importantes",
+    "A sample order has been added to the demo activity feed.": "A sample order has been added to the demo activity feed.",
+    "A service record was added for Solar kit 2 × 100 W.": "Une intervention a été ajoutée pour le kit solaire 2 × 100 W.",
+    "A shared-energy marketplace for everyone": "Une plateforme d’énergie partagée pour tous",
+    "A smarter way to power your plans": "Une énergie plus maligne pour vos projets",
+    "A vertical sequence for activity and audit history.": "A vertical sequence for activity and audit history.",
+    "AI Chat": "Discussion avec l’IA",
+    "AI Dashboard": "Tableau de bord IA",
+    "AI Settings": "Paramètres de l’IA",
+    "AI Studio & Maps": "Studio IA et cartes",
+    "AI Usage": "Utilisation de l’IA",
+    "API Keys": "Clés API",
+    "About": "À propos",
+    "Access Denied": "Accès refusé",
+    "Accessible modal example": "Accessible modal example",
+    "Accessible progress indicators and inline activity feedback.": "Accessible progress indicators and inline activity feedback.",
+    "Accessible wrappers for icons, images, links, and structured lists.": "Accessible wrappers for icons, images, links, and structured lists.",
+    "Accordion": "Accordion",
+    "Account": "Compte",
+    "Account created": "Account created",
+    "Account details": "Account details",
+    "Account for :name": "Compte de :name",
+    "Account information": "Informations du compte",
+    "Account role": "Rôle du compte",
+    "Account settings": "Paramètres du compte",
+    "Account shortcuts": "Account shortcuts",
+    "Across all listings": "Sur toutes les annonces",
+    "Across all projects": "Across all projects",
+    "Across this demo queue": "Across this demo queue",
+    "Actions": "Actions",
+    "Actions taken": "Actions effectuées",
+    "Active": "En cours",
+    "Active coverage": "Active coverage",
+    "Active rentals": "Locations en cours",
+    "Active trips and completed equipment hand-offs.": "Locations en cours et remises d’équipement terminées.",
+    "Active, completed and cancelled hand-offs.": "Remises en cours, terminées ou annulées.",
+    "Activity": "Activity",
+    "Add a reply": "Add a reply",
+    "Add equipment": "Ajouter un équipement",
+    "Add task": "Add task",
+    "Additional": "Supplément",
+    "Additional information": "Additional information",
+    "Address": "Adresse",
+    "Admin": "Administrateur",
+    "Administrator": "Administrateur",
+    "Advanced Forms": "Formulaires avancés",
+    "Advanced Tables": "Tableaux avancés",
+    "After": "Après",
+    "Alerts": "Alertes",
+    "All": "Tout",
+    "All Users": "Tous les utilisateurs",
+    "All activity and totals shown here are sample data, not connected to live bookings.": "Toutes les activités et tous les totaux affichés sont des exemples, pas des réservations réelles.",
+    "All categories": "Toutes les catégories",
+    "All earnings": "Tous les revenus",
+    "All equipment": "Tous les équipements",
+    "All equipment types": "Tous les types d’équipement",
+    "All equipment · month view": "Tous les équipements · vue mensuelle",
+    "All publication statuses": "Tous les statuts de publication",
+    "All rights reserved.": "Tous droits réservés.",
+    "All roles": "Tous les rôles",
+    "All statuses": "Tous les statuts",
+    "All types": "All types",
+    "Already have an account?": "Vous avez déjà un compte ?",
+    "Already registered?": "Déjà inscrit ?",
+    "Amount": "Montant",
+    "Anaerobic digestion": "Digestion anaérobie",
+    "Analytics": "Analyses",
+    "Answer an extension request": "Répondre à une demande de prolongation",
+    "Answers about demo content, existing account features, and page-library behavior.": "Answers about demo content, existing account features, and page-library behavior.",
+    "Any condition": "Tous les états",
+    "Any status": "Tous les statuts",
+    "Any technology": "Toutes les technologies",
+    "Applications": "Applications",
+    "Applications / Tasks": "Applications / Tasks",
+    "Apply filters": "Appliquer les filtres",
+    "Approve": "Approuver",
+    "Approved": "Approuvée",
+    "Apr": "Avr.",
+    "Archived": "Archived",
+    "Archives": "Archives",
+    "Are checkout and payment actions live?": "Are checkout and payment actions live?",
+    "Are the dashboard numbers connected to SolarShare data?": "Are the dashboard numbers connected to SolarShare data?",
+    "Are you sure you want to delete your account?": "Voulez-vous vraiment supprimer votre compte ?",
+    "Are you sure?": "Voulez-vous continuer ?",
+    "Area Chart": "Graphique en aires",
+    "Area chart": "Area chart",
+    "Ask the owner to extend an active rental.": "Demandez au propriétaire de prolonger une location en cours.",
+    "Assignee": "Assignee",
+    "Attach file": "Attach file",
+    "Attachment": "Attachment",
+    "Aug": "Août",
+    "Authentication": "Authentification",
+    "Availability": "Disponibilités",
+    "Availability calendar": "Calendrier des disponibilités",
+    "Availability checks, reservations and payments are handled after buyer access.": "La disponibilité, les réservations et les paiements sont gérés après l’accès acheteur.",
+    "Availability preview": "Aperçu des disponibilités",
+    "Availability, reservations, invoices and payments are not connected to a backend.": "Les disponibilités, réservations, factures et paiements ne sont pas reliés à un serveur.",
+    "Available": "Disponible",
+    "Available now": "Disponibles maintenant",
+    "Avatar": "Avatar",
+    "Awaiting owner response": "En attente de la réponse du propriétaire",
+    "Awaiting payment": "En attente de paiement",
+    "Awaiting response": "Awaiting response",
+    "Away": "Away",
+    "Back Office": "Administration",
+    "Back to conversations": "Back to conversations",
+    "Back to dashboard": "Back to dashboard",
+    "Back to equipment": "Retour à l’équipement",
+    "Back to list": "Retour à la liste",
+    "Back to messages": "Back to messages",
+    "Back to owner workspace": "Retour à l’espace propriétaire",
+    "Back to sign in": "Retour à la connexion",
+    "Badge": "Badge",
+    "Bank transfer": "Virement bancaire",
+    "Bar Chart": "Graphique à barres",
+    "Bar chart": "Bar chart",
+    "Basic Tables": "Tableaux simples",
+    "Basic vector map": "Basic vector map",
+    "Batteries": "Batteries",
+    "Battery 1000 Wh": "Batterie 1 000 Wh",
+    "Battery reservation": "Réservation de batterie",
+    "Before": "Avant",
+    "Billing": "Facturation",
+    "Biomass and bioenergy": "Biomasse et bioénergie",
+    "Biomass pellets": "Granulés de biomasse",
+    "Blank Page": "Page vierge",
+    "Booked": "Réservé",
+    "Booking": "Réservation",
+    "Booking flow preview only. No reservation is created and no payment is processed.": "Aperçu du parcours de réservation uniquement. Aucune réservation n’est créée et aucun paiement n’est traité.",
+    "Booking journey": "Parcours de réservation",
+    "Booking progress": "Étapes de réservation",
+    "Bookings, payments, invoices and actions shown here are illustrative; nothing is saved, charged or sent.": "Les réservations, paiements, factures et actions affichés sont fictifs. Rien n’est enregistré, débité ou envoyé.",
+    "Borrow. Use. Return.": "Emprunter. Utiliser. Rendre.",
+    "Brand": "Marque",
+    "Breadcrumb": "Fil d’Ariane",
+    "Browse": "Parcourir",
+    "Browse by energy source": "Parcourir par source d’énergie",
+    "Browse the catalog": "Parcourir le catalogue",
+    "Browse-only catalogue. Buyer access is required to continue.": "Catalogue en consultation. L’accès acheteur est requis pour continuer.",
+    "Browse-only catalogue. Sign in as a buyer to continue.": "Catalogue en consultation. Connectez-vous comme acheteur pour continuer.",
+    "Button group": "Button group",
+    "Buttons": "Boutons",
+    "Buttons and button groups": "Buttons and button groups",
+    "Buyer": "Acheteur",
+    "Buyer (legacy)": "Acheteur (ancien compte)",
     "Buyer account navigation": "Navigation de l’espace locataire",
-    "Main navigation": "Navigation principale",
-    "Mobile navigation": "Navigation mobile",
-    "Sidebar navigation": "Navigation latérale",
-    "Toggle menu": "Ouvrir ou fermer le menu",
-    "Toggle theme": "Changer de thème",
-    "Use sidebar navigation": "Utiliser la navigation latérale",
-    "Use top navigation": "Utiliser la navigation supérieure",
-    "Top nav": "Menu supérieur",
-    "Sidebar": "Menu latéral",
-    "Open navigation": "Ouvrir la navigation",
+    "Buyer dashboard": "Tableau de bord locataire",
+    "Buyer dashboard statistics": "Statistiques du tableau de bord locataire",
+    "CRM": "CRM",
+    "Cables": "Cables",
+    "Calculated at 18 TND per extra day; owner approval required.": "Calculé sur la base de 18 TND par jour supplémentaire ; accord du propriétaire requis.",
+    "Calendar": "Calendrier",
+    "Calendar & service dates": "Calendrier et dates de maintenance",
+    "Calendar dates are illustrative. Live availability and overlap checks are not connected.": "Ces dates sont indicatives. Les disponibilités et conflits ne sont pas vérifiés en temps réel.",
+    "Can I switch between light and dark themes?": "Can I switch between light and dark themes?",
+    "Can these patterns be customized?": "Can these patterns be customized?",
+    "Cancel": "Annuler",
+    "Cancel this pending reservation?": "Annuler cette réservation en attente ?",
+    "Cancellation is a visual preview only; no reservation was changed.": "Aperçu visuel uniquement : aucune réservation n’a été modifiée.",
+    "Cancellation is available only while a reservation is pending.": "L’annulation est possible uniquement lorsque la réservation est en attente.",
+    "Cancelled": "Annulée",
+    "Capacity": "Capacité",
+    "Capacity: high to low": "Capacité décroissante",
+    "Card": "Carte bancaire",
+    "Card number": "Numéro de carte",
+    "Cardholder name": "Nom du titulaire",
+    "Carousel": "Carrousel",
+    "Cart": "Panier",
+    "Cash": "Espèces",
+    "Cash on pickup": "Espèces au retrait",
+    "Catalog": "Catalogue",
+    "Categories": "Catégories",
+    "Category": "Catégorie",
+    "Central coast": "Central coast",
+    "Change dates": "Modifier les dates",
+    "Changes apply only in this page session.": "Changes apply only in this page session.",
+    "Changes saved": "Changes saved",
+    "Chart": "Chart",
+    "Chart Library": "Bibliothèque de graphiques",
+    "Charts": "Graphiques",
+    "Charts, KPI values and activity below are examples only. They are not live account or payment records.": "Les graphiques, indicateurs et activités ci-dessous sont des exemples, pas des données de compte ou de paiement réelles.",
+    "Chat": "Discussion",
+    "Check requested dates and equipment availability.": "Vérifiez les dates demandées et la disponibilité de l’équipement.",
+    "Check the new period for conflicts before responding.": "Vérifiez l’absence de conflit sur la nouvelle période avant de répondre.",
+    "Check the owner response to your pending reservation.": "Consultez la réponse du propriétaire à votre réservation en attente.",
+    "Check your inbox for a verification link. If you did not receive it, request another below.": "Consultez votre boîte de réception pour trouver le lien de vérification. Si vous ne l’avez pas reçu, demandez-en un autre ci-dessous.",
+    "Checkout": "Paiement",
+    "Choose a category": "Choisir une catégorie",
+    "Choose a date": "Choose a date",
+    "Choose a new password": "Choisissez un nouveau mot de passe",
+    "Choose a payment method": "Choisissez un moyen de paiement",
+    "Choose a profile photo": "Choisir une photo de profil",
+    "Choose your dates": "Choisissez vos dates",
+    "City": "Ville",
+    "City / pickup location": "Ville / lieu de retrait",
+    "City or neighbourhood": "Ville ou quartier",
+    "Clean energy": "L’énergie propre",
+    "Clear filters": "Effacer les filtres",
+    "Clear the filters or add a task to this list.": "Clear the filters or add a task to this list.",
+    "Click here to re-send the verification email.": "Cliquez ici pour renvoyer l’e-mail de vérification.",
+    "Close": "Fermer",
+    "Close compose window": "Close compose window",
+    "Close dialog": "Close dialog",
+    "Close drawer": "Close drawer",
+    "Close form": "Close form",
     "Close navigation": "Fermer la navigation",
-    "Reservations": "Réservations",
-    "Rentals": "Locations",
+    "Close task details": "Close task details",
+    "Coast": "Coast",
+    "Code": "Code",
+    "Code Generator": "Générateur de code",
+    "Combine column and line series to compare values and rates.": "Combine column and line series to compare values and rates.",
+    "Coming Soon": "Bientôt disponible",
+    "Comments": "Commentaires",
+    "Commercial": "Commercial",
+    "Compact battery 500 Wh": "Batterie compacte 500 Wh",
+    "Compact battery 500 Wh returned without damage.": "La batterie compacte 500 Wh a été rendue sans dommage.",
+    "Compact battery 500 Wh · no damage": "Batterie compacte 500 Wh · aucun dommage",
+    "Compact header": "Compact header",
+    "Compact navigation for tables and multi-step workflows.": "Compact navigation for tables and multi-step workflows.",
+    "Compact progress visualization for goal tracking.": "Compact progress visualization for goal tracking.",
+    "Company": "Entreprise",
+    "Compare multiple illustrative service locations.": "Compare multiple illustrative service locations.",
+    "Compare multiple performance dimensions at a glance.": "Compare multiple performance dimensions at a glance.",
+    "Compare two periods with synchronized category labels.": "Compare two periods with synchronized category labels.",
+    "Comparison chart": "Comparison chart",
+    "Complete": "Complete",
+    "Completed": "Terminée",
+    "Component Library": "Bibliothèque de composants",
+    "Component examples": "Component examples",
+    "Components": "Components",
+    "Compose email": "Compose email",
+    "Condition": "État",
+    "Condition after": "État après",
+    "Condition before": "État avant",
+    "Condition before and after each rental.": "État avant et après chaque location.",
+    "Confirm": "Confirmer",
+    "Confirm Password": "Confirm Password",
+    "Confirm and continue to payment": "Confirmer et passer au paiement",
+    "Confirm cancellation": "Confirmer l’annulation",
+    "Confirm delete": "Confirmer la suppression",
+    "Confirm new password": "Confirmer le nouveau mot de passe",
+    "Confirm password": "Confirmer le mot de passe",
+    "Confirm request": "Confirmer la demande",
+    "Confirm the details and read the sample rental terms.": "Vérifiez les informations et consultez les conditions de location proposées.",
+    "Confirm this pending reservation?": "Confirmer cette réservation en attente ?",
+    "Confirm two reservation requests": "Confirmer deux demandes de réservation",
+    "Confirm with your current password": "Confirmer avec votre mot de passe actuel",
+    "Confirm your password": "Confirmez votre mot de passe",
+    "Confirmation": "Confirmation",
+    "Confirmation is a visual preview only; no reservation was changed.": "Aperçu visuel uniquement : aucune réservation n’a été modifiée.",
+    "Confirmed": "Confirmée",
+    "Connected Accounts": "Comptes connectés",
+    "Connected accounts": "Connected accounts",
+    "Connections are not configured in this demonstration.": "Connections are not configured in this demonstration.",
+    "Contact": "Contact",
+    "Content area": "Content area",
+    "Content primitives": "Content primitives",
     "Contract": "Contrat",
-    "Extensions": "Prolongations",
-    "Notifications": "Notifications",
-    "Profile": "Profil",
-    "My profile": "Mon profil",
-    "Sign in": "Se connecter",
-    "Sign out": "Se déconnecter",
+    "Contract CTR-2031-01": "Contrat CTR-2031-01",
+    "Contracts": "Contrats",
+    "Conversation": "Conversation",
+    "Conversation history": "Conversation history",
+    "Conversations": "Conversations",
+    "Conversion rate": "Conversion rate",
+    "Cost (TND)": "Coût (TND)",
     "Create account": "Créer un compte",
-    "How it works": "Comment ça marche",
-    "Plans": "Offres",
+    "Create an account": "Créer un compte",
+    "Create an account and assign its workspace role.": "Créez un compte et attribuez-lui un rôle d’espace de travail.",
+    "Create an account to find trusted equipment nearby or share the clean-energy gear you already own.": "Créez un compte pour louer du matériel près de chez vous ou partager vos équipements d’énergie propre.",
+    "Create record": "Créer un enregistrement",
+    "Create support ticket": "Create support ticket",
+    "Create task": "Create task",
+    "Create ticket": "Create ticket",
+    "Create user": "Créer un utilisateur",
+    "Create your SolarShare account": "Créer votre compte SolarShare",
+    "Create your free account": "Créer votre compte gratuitement",
+    "Crossflow": "Flux croisé",
+    "Current end": "Fin actuelle",
+    "Current password": "Mot de passe actuel",
+    "Current period": "Current period",
+    "Current quarter": "Current quarter",
+    "Current return date": "Date de retour actuelle",
+    "Currently being worked on": "Currently being worked on",
+    "Currently with renters": "Actuellement chez les locataires",
+    "Custom markers": "Custom markers",
+    "Customer success": "Customer success",
+    "Customers": "Clients",
+    "Daily rental": "Location à la journée",
+    "Damage detected": "Dommage détecté",
+    "Damage detected · linked maintenance": "Dommage détecté · maintenance associée",
+    "Dashboard": "Tableau de bord",
+    "Dashboard statistics": "Statistiques du tableau de bord",
+    "Data will appear here when it is available.": "Data will appear here when it is available.",
+    "Date": "Date",
+    "Date from": "Du",
+    "Date selector": "Date selector",
+    "Date totals are a preview. Availability checks and reservations are not live yet.": "Les montants sont indicatifs. Les disponibilités et réservations ne sont pas encore actives.",
+    "Date totals are a preview. Availability checks, ownership checks and reservations are not live yet.": "Les prix sont indicatifs. La disponibilité, la propriété et les réservations ne sont pas encore vérifiées en temps réel.",
+    "Dates": "Dates",
+    "Dates not selected": "Dates non sélectionnées",
+    "Dec": "Déc.",
+    "Decide": "Décider",
+    "Decision": "Décision",
+    "Decline": "Refuser",
+    "Delete": "Supprimer",
+    "Delete account": "Supprimer le compte",
+    "Delete my account": "Supprimer mon compte",
+    "Delete task": "Delete task",
+    "Delete this listing?": "Supprimer cette annonce ?",
+    "Delete this record?": "Supprimer cet enregistrement ?",
+    "Deleting your account permanently removes your account and cannot be undone.": "La suppression de votre compte est définitive et ne peut pas être annulée.",
+    "Delivery": "Delivery",
+    "Demo": "Demo",
+    "Demo data only": "Demo data only",
+    "Demo only: no email is transmitted.": "Demo only: no email is transmitted.",
+    "Demo only: the ticket is not saved to the server.": "Demo only: the ticket is not saved to the server.",
+    "Demo order SS-2084 was created.": "Demo order SS-2084 was created.",
+    "Demo preferences saved in this browser only.": "Demo preferences saved in this browser only.",
+    "Demo storage used": "Demo storage used",
+    "Deposit": "Caution",
+    "Deposit · information only": "Caution · à titre indicatif",
+    "Description": "Description",
+    "Details": "Détails",
+    "Diagnosis": "Diagnostic",
+    "Diagnosis: minor wear detected. Action: connector replaced and output tested. Parts: MC4 connector.": "Diagnostic : usure légère détectée. Intervention : connecteur remplacé et puissance testée. Pièce : connecteur MC4.",
+    "Different marker sizes and colors help distinguish location groups.": "Different marker sizes and colors help distinguish location groups.",
+    "Disabled": "Disabled",
+    "Discover": "Découvrir",
+    "Dismiss notification": "Ignorer la notification",
+    "Dismiss with Escape or by clicking outside.": "Dismiss with Escape or by clicking outside.",
+    "Distribution chart with a clear center label.": "Distribution chart with a clear center label.",
+    "Do demo forms save changes?": "Do demo forms save changes?",
+    "Documents": "Documents",
+    "Does the AI Studio generate content?": "Does the AI Studio generate content?",
+    "Don't have an account?": "Vous n’avez pas de compte ?",
+    "Done": "Done",
+    "Donut Chart": "Diagramme en anneau",
+    "Donut chart": "Donut chart",
+    "Drag and drop a file or browse": "Drag and drop a file or browse",
+    "Drawer": "Drawer",
+    "Drawer panel": "Drawer panel",
+    "Due after return": "À effectuer après le retour",
+    "Due date": "Due date",
+    "Each tab panel is labelled and associated with its trigger.": "Each tab panel is labelled and associated with its trigger.",
+    "Earnings": "Revenus",
+    "Earnings & invoices": "Revenus et factures",
+    "EcoFlow River 2 Pro · La Marsa, Tunis": "EcoFlow River 2 Pro · La Marsa, Tunis",
+    "Ecommerce": "Commerce en ligne",
+    "Edit": "Modifier",
+    "Edit User": "Modifier l’utilisateur",
+    "Edit User Profile": "Modifier le profil utilisateur",
+    "Edit listing": "Modifier l’annonce",
+    "Edit product": "Edit product",
+    "Edit profile": "Modifier le profil",
+    "Edit record": "Modifier l’enregistrement",
+    "Edit task": "Edit task",
+    "Efficiency": "Rendement",
+    "Email": "E-mail",
+    "Email address": "Adresse e-mail",
+    "Email and push controls will be available when notifications are connected.": "Les réglages des notifications par e-mail et push seront disponibles lorsque cette fonctionnalité sera activée.",
+    "Email message": "Email message",
+    "Email verification": "Email verification",
+    "Email verified": "E-mail vérifié",
+    "Empty State": "État vide",
+    "End date": "Date de fin",
+    "Energy details first": "Les détails énergétiques d’abord",
+    "Energy gear": "Matériel énergétique",
+    "Energy monitoring": "Suivi énergétique",
+    "Energy parameters": "Paramètres énergétiques",
+    "Energy profile": "Profil énergétique",
+    "Energy saved": "Énergie économisée",
+    "Ensure your account is using a long, random password to stay secure.": "Utilisez un mot de passe long et aléatoire pour protéger votre compte.",
+    "Enter 6-digit code": "Enter 6-digit code",
+    "Enter fullscreen": "Passer en plein écran",
+    "Enter your details to create your account.": "Saisissez vos informations pour créer votre compte.",
+    "Enter your email and we will send you a password reset link.": "Saisissez votre adresse e-mail pour recevoir un lien de réinitialisation.",
+    "Equipment": "Équipement",
+    "Equipment / maintenance": "Équipement / maintenance",
+    "Equipment Owner": "Propriétaire d’équipement",
+    "Equipment catalog": "Catalogue des équipements",
+    "Equipment category": "Catégorie d’équipement",
+    "Equipment details": "Détails de l’équipement",
+    "Equipment information": "Informations sur l’équipement",
+    "Equipment name": "Nom de l’équipement",
+    "Equipment photo": "Photo de l’équipement",
+    "Equipment rental": "Location d’équipement",
+    "Equipment status": "État des équipements",
+    "Equipment submitted for administrator review.": "Équipement envoyé pour validation par l’administrateur.",
+    "Error 404": "Error 404",
+    "Esprit 5TWIN7 – BuilDream project": "Projet BuilDream – Esprit 5TWIN7",
+    "Estimated saved vs buying": "Économies estimées par rapport à l’achat",
+    "Estimated spend": "Estimated spend",
+    "Estimated total": "Total estimé",
+    "Evacuated tube": "Tube sous vide",
+    "Everything": "Tout",
+    "Example condition reports recorded at equipment return.": "Exemples de rapports d’état établis au retour de l’équipement.",
+    "Example cumulative service spend · TND.": "Dépenses cumulées d’entretien à titre d’exemple · TND.",
+    "Example events from the reservation-to-return journey.": "Exemples d’événements du parcours, de la réservation au retour.",
+    "Example extension requests by status and month.": "Exemples de demandes de prolongation par statut et par mois.",
+    "Example listing": "Exemple d’annonce",
+    "Example paid totals for the past 12 months.": "Exemples de dépenses payées au cours des 12 derniers mois.",
+    "Example steps": "Example steps",
+    "Example transaction history for your listings.": "Historique d’exemple des transactions de vos annonces.",
+    "Examples": "Examples",
+    "Excellent": "Excellent",
+    "Excellent condition": "Excellent état",
+    "Excellent · 2 Oct 2026": "Excellent · 2 oct. 2026",
+    "Exit fullscreen": "Quitter le plein écran",
+    "Expandable content with state announced to assistive technology.": "Expandable content with state announced to assistive technology.",
+    "Expandable sections": "Expandable sections",
+    "Expiry": "Date d’expiration",
+    "Explore country boundaries and zoom controls.": "Explore country boundaries and zoom controls.",
+    "Explore equipment": "Explorer les équipements",
+    "Explore the catalog": "Explorer le catalogue",
+    "Explore:": "Explorer :",
+    "Extension decisions": "Décisions de prolongation",
+    "Extension history": "Historique des prolongations",
+    "Extension requested": "Prolongation demandée",
+    "Extension requests": "Demandes de prolongation",
+    "Extension requests over time": "Demandes de prolongation dans le temps",
+    "Extension update": "Mise à jour de prolongation",
+    "Extensions": "Prolongations",
+    "Extensions awaiting owner": "Prolongations en attente du propriétaire",
+    "Extensions by status": "Prolongations par statut",
+    "External link example": "External link example",
+    "Extra": "Supplément",
+    "FAQ": "FAQ",
+    "Fair": "Correct",
+    "Feb": "Févr.",
+    "File Manager": "Gestionnaire de fichiers",
+    "Filled time series with a responsive tooltip.": "Filled time series with a responsive tooltip.",
+    "Filter": "Filtrer",
+    "Filter by category": "Filtrer par catégorie",
+    "Filter by equipment": "Filtrer par équipement",
+    "Filter by file type": "Filter by file type",
+    "Filter by period and print a sample invoice.": "Filtrez par période et imprimez une facture d’exemple.",
+    "Filter by priority": "Filter by priority",
+    "Filter by reservation status": "Filtrer par statut de réservation",
+    "Filter by role": "Filtrer par rôle",
+    "Filter by status": "Filtrer par statut",
+    "Filter tasks, review priorities, and advance statuses": "Filter tasks, review priorities, and advance statuses",
+    "Filters": "Filtres",
+    "Finance": "Finance",
+    "Find equipment": "Trouver un équipement",
+    "Find power near you": "Trouvez de l’énergie près de chez vous",
+    "Find something useful": "Trouvez l’équipement idéal",
+    "Find the power you need, or let someone else put your equipment to work.": "Trouvez l’énergie qu’il vous faut ou permettez à quelqu’un d’utiliser votre équipement.",
+    "Find the right power": "Trouvez la puissance adaptée",
+    "Find your kind of power.": "Trouvez l’énergie qu’il vous faut.",
+    "First name": "Prénom",
+    "Flat-plate solar collector": "Capteur solaire plan",
+    "Foldable panel · return due 4 Oct": "Panneau pliable · retour prévu le 4 oct.",
+    "Foldable solar panel 200 W": "Panneau solaire pliable 200 W",
+    "Foldable solar panel · +1 day": "Panneau solaire pliable · +1 jour",
     "For owners": "Pour les propriétaires",
+    "Forgot Password": "Mot de passe oublié",
+    "Forgot password?": "Mot de passe oublié ?",
+    "Forgot your password?": "Mot de passe oublié ?",
+    "Form Elements": "Éléments de formulaire",
+    "Forms": "Formulaires",
+    "Forward": "Forward",
+    "Forward email": "Forward email",
+    "Four signals to help you plan the next equipment hand-off.": "Quatre indicateurs pour préparer les prochaines remises d’équipement.",
+    "Free": "Disponible",
+    "Frequently Asked Questions": "Frequently Asked Questions",
+    "Fri": "Ven",
+    "From completed payments": "Paiements effectués",
+    "Frontend preview with sample data.": "Aperçu avec des données fictives.",
+    "Full inspection list": "Liste complète des inspections",
+    "Full name": "Nom complet",
+    "Full width": "Full width",
+    "Full-width Layout": "Mise en page pleine largeur",
+    "Full-width content region": "Full-width content region",
+    "Full-width layout": "Full-width layout",
+    "Full-width layout example": "Full-width layout example",
+    "Fullscreen could not be changed.": "Impossible de modifier le mode plein écran.",
+    "Gear nearby": "Du matériel près de chez vous",
+    "Generation History": "Historique des générations",
+    "Geographic statistics": "Geographic statistics",
+    "Geothermal heat pumps": "Pompes à chaleur géothermiques",
+    "Give good energy a second life.": "Offrez une seconde vie à l’énergie.",
+    "Good": "Bon",
+    "Good energy is better shared.": "La bonne énergie se partage.",
+    "Good energy is better when it moves.": "La bonne énergie circule et se partage.",
+    "Good gear, shared locally. Filter by what your plans need, not what a salesperson wants to sell.": "Du matériel de qualité, partagé près de chez vous. Filtrez selon vos besoins.",
+    "Grid": "Grid",
+    "Ground-source": "Géothermique",
+    "Ground-source heat pump": "Pompe à chaleur géothermique",
+    "Grouped bar": "Grouped bar",
+    "Growth": "Growth",
     "Help": "Aide",
     "Help center": "Centre d’aide",
-    "Overview": "Vue d’ensemble",
-    "Equipment": "Équipement",
-    "Availability": "Disponibilités",
-    "Maintenance": "Maintenance",
-    "Inspections": "Inspections",
-    "Earnings": "Revenus",
-    "My SolarShare": "Mon SolarShare",
-    "Back Office": "Administration",
-    "Skip to main content": "Aller au contenu principal",
-    "Rent and share portable solar panels, batteries and small wind turbines between neighbours. Use clean energy without buying gear you will only need twice a year.": "Louez et partagez des panneaux solaires portables, des batteries et de petites éoliennes entre voisins. Profitez d’une énergie propre sans acheter du matériel utilisé seulement quelques jours par an.",
-    "Good energy is better when it moves.": "La bonne énergie circule et se partage.",
-    "Explore the catalog": "Explorer le catalogue",
-    "Rent and share renewable energy": "Louez et partagez l’énergie renouvelable",
-    "A shared-energy marketplace for everyone": "Une plateforme d’énergie partagée pour tous",
-    "Clean energy": "L’énergie propre",
-    "goes further when we share it.": "va plus loin quand on la partage.",
-    "SolarShare brings renters, equipment owners and local communities together to make renewable energy easier to access, share and keep in use.": "SolarShare rassemble locataires, propriétaires d’équipements et communautés locales pour rendre les énergies renouvelables plus accessibles et mieux partagées.",
-    "What kind of power do you need?": "De quelle énergie avez-vous besoin ?",
-    "All equipment types": "Tous les types d’équipement",
-    "Search": "Rechercher",
-    "Search equipment": "Rechercher un équipement",
-    "Explore:": "Explorer :",
-    "Portable solar panels": "Panneaux solaires portables",
-    "Batteries": "Batteries",
-    "Small wind turbines": "Petites éoliennes",
-    "Power for real-life plans.": "De l’énergie pour vos projets.",
-    "A few days of access can beat another device gathering dust.": "Quelques jours de location valent mieux qu’un appareil qui prend la poussière.",
-    "See how it works": "Découvrir le fonctionnement",
-    "One battery": "Une batterie",
-    "Many new adventures": "De nouvelles aventures",
-    "THE SHARED-POWER LOOP": "LE CYCLE DE L’ÉNERGIE PARTAGÉE",
-    "Borrow. Use. Return.": "Emprunter. Utiliser. Rendre.",
-    "Power in good company": "L’énergie se partage",
+    "Helpful context for this control.": "Helpful context for this control.",
+    "Hide filters": "Masquer les filtres",
+    "Hide password": "Masquer le mot de passe",
+    "High": "High",
+    "Home": "Accueil",
+    "Horizontal axis": "Axe horizontal",
+    "Horizontal bar": "Horizontal bar",
+    "Horizontal ranking for category labels.": "Horizontal ranking for category labels.",
+    "Hover or focus": "Hover or focus",
+    "How do I update my account password?": "How do I update my account password?",
+    "How it works": "Comment ça marche",
+    "Hydrogen and fuel cells": "Hydrogène et piles à combustible",
+    "I have read the sample terms.": "J’ai lu les conditions indicatives.",
+    "Icon wrapper with accessible label": "Icon wrapper with accessible label",
+    "Illustration of a portable clean-energy battery station": "Illustration d’une batterie portable d’énergie propre",
+    "Illustration of shared solar power": "Illustration du partage de l’énergie solaire",
     "Illustration · SolarShare concept": "Illustration · concept SolarShare",
-    "Find power near you": "Trouvez de l’énergie près de chez vous",
-    "Rent only for the days you need": "Louez uniquement les jours nécessaires",
-    "Keep useful gear in motion": "Faisons circuler les équipements utiles",
-    "A smarter way to power your plans": "Une énergie plus maligne pour vos projets",
-    "Rent the energy. Skip the extra stuff.": "Louez l’énergie, évitez les achats inutiles.",
-    "See how much you save by renting for a few days instead of buying.": "Découvrez les économies réalisées en louant quelques jours au lieu d’acheter.",
-    "Rental length": "Durée de location",
-    "days": "jours",
-    "Your rental total": "Total de votre location",
-    "Estimated saved vs buying": "Économies estimées par rapport à l’achat",
-    "TND stays in your pocket": "TND économisés",
-    "Illustrative estimate based on typical purchase prices.": "Estimation indicative basée sur les prix d’achat habituels.",
-    "Find your kind of power.": "Trouvez l’énergie qu’il vous faut.",
-    "Good gear, shared locally. Filter by what your plans need, not what a salesperson wants to sell.": "Du matériel de qualité, partagé près de chez vous. Filtrez selon vos besoins.",
-    "Portable solar, batteries and small wind power.": "Solaire portable, batteries et petite éolienne.",
-    "The SolarShare collection": "La sélection SolarShare",
-    "Refine your search": "Affiner la recherche",
-    "Name, brand or city…": "Nom, marque ou ville…",
-    "Category": "Catégorie",
-    "All categories": "Toutes les catégories",
-    "Max price/day": "Prix maximum par jour",
-    "Min power (W)": "Puissance minimale (W)",
-    "Min capacity (Wh)": "Capacité minimale (Wh)",
-    "Condition": "État",
-    "Any condition": "Tous les états",
-    "New": "Neuf",
-    "Good": "Bon",
-    "Fair": "Correct",
-    "Location": "Lieu",
-    "City or neighbourhood": "Ville ou quartier",
-    "Sort by": "Trier par",
-    "Newest": "Plus récents",
-    "Price: low to high": "Prix croissant",
-    "Price: high to low": "Prix décroissant",
-    "Power: high to low": "Puissance décroissante",
-    "Apply filters": "Appliquer les filtres",
-    "Reset filters": "Réinitialiser les filtres",
-    "Find something useful": "Trouvez l’équipement idéal",
-    "Shared nearby · rented by the day": "Partagé près de chez vous · location à la journée",
-    "Nothing matches your search": "Aucun résultat ne correspond à votre recherche",
-    "Try removing a filter or searching for something broader.": "Essayez de retirer un filtre ou d’élargir votre recherche.",
-    "Clear filters": "Effacer les filtres",
-    "Equipment catalog": "Catalogue des équipements",
-    "Energy profile": "Profil énergétique",
-    "Power": "Puissance",
-    "Capacity": "Capacité",
-    "Voltage": "Tension",
-    "Technology": "Technologie",
-    "City": "Ville",
-    "Date from": "Du",
-    "To": "Au",
-    "day": "jour",
-    "day(s)": "jour(s)",
-    "shared by": "proposé par",
-    "The useful details": "Les caractéristiques utiles",
-    "Know your power before you go": "Choisissez la puissance adaptée à vos besoins",
-    "Booking": "Réservation",
-    "Make a weekend of it": "Partez l’esprit léger",
-    "October 2026 · sample dates": "Octobre 2026 · dates indicatives",
-    "Availability preview": "Aperçu des disponibilités",
-    "Plan ahead": "Planifiez votre séjour",
-    "Booked": "Réservé",
-    "Free": "Disponible",
-    "Calendar dates are illustrative. Live availability and overlap checks are not connected.": "Ces dates sont indicatives. Les disponibilités et conflits ne sont pas vérifiés en temps réel.",
-    "Preview booking flow": "Aperçu du parcours de réservation",
-    "Sign in to reserve": "Connectez-vous pour réserver",
-    "Date totals are a preview. Availability checks, ownership checks and reservations are not live yet.": "Les prix sont indicatifs. La disponibilité, la propriété et les réservations ne sont pas encore vérifiées en temps réel.",
-    "Example listing": "Exemple d’annonce",
-    "Maintenance example": "Exemple en maintenance",
-    "SolarShare · illustrative listing": "SolarShare · annonce illustrative",
-    "Starting at": "À partir de",
-    "Similar equipment": "Équipements similaires",
-    "Keep exploring": "Continuez à explorer",
-    "Search dashboard pages": "Rechercher dans le tableau de bord",
-    "Search or type command...": "Rechercher ou saisir une commande…",
-    "Your SolarShare": "Votre SolarShare",
-    "Your next adventure starts here, :name.": "Votre prochaine aventure commence ici, :name.",
-    "Make your equipment work harder, :name.": "Faites travailler votre équipement, :name.",
-    "A clear view of your listings, rental requests and equipment activity.": "Retrouvez vos annonces, demandes de location et l’activité de vos équipements.",
-    "Keep your borrowed gear, upcoming plans and clean-energy impact in one place.": "Retrouvez vos locations, vos prochains projets et votre impact énergétique au même endroit.",
-    "Find equipment": "Trouver un équipement",
-    "List equipment": "Publier un équipement",
-    "Buyer dashboard": "Tableau de bord locataire",
-    "Dashboard statistics": "Statistiques du tableau de bord",
-    "Buyer dashboard statistics": "Statistiques du tableau de bord locataire",
-    "Owner dashboard statistics": "Statistiques du tableau de bord propriétaire",
-    "Total equipment": "Équipements au total",
-    "Available now": "Disponibles maintenant",
-    "Active rentals": "Locations en cours",
-    "Upcoming reservations": "Réservations à venir",
-    "Pending reservations": "Réservations en attente",
-    "Total spent": "Dépenses totales",
-    "Total rental days": "Jours de location au total",
-    "Extensions awaiting owner": "Prolongations en attente du propriétaire",
-    "Extension requests": "Demandes de prolongation",
-    "Revenue this month": "Revenus ce mois-ci",
-    "Returns due this week": "Retours prévus cette semaine",
-    "In maintenance": "En maintenance",
-    "To do now": "À faire maintenant",
-    "Your rental snapshot": "Votre activité de location",
-    "YOUR ACTIVITY · ANALYTICS": "VOTRE ACTIVITÉ · ANALYSES",
-    "Spending per month": "Dépenses par mois",
-    "Rentals by category": "Locations par catégorie",
-    "Reservations by status": "Réservations par statut",
-    "Payments by method": "Paiements par moyen de paiement",
-    "Rental days per month": "Jours de location par mois",
-    "Extensions by status": "Prolongations par statut",
-    "Spend (TND)": "Dépenses (TND)",
-    "Rental days": "Jours de location",
-    "Card": "Carte bancaire",
-    "Bank transfer": "Virement bancaire",
-    "Cash on pickup": "Espèces au retrait",
-    "Cash": "Espèces",
-    "Wind equipment": "Équipement éolien",
-    "Up next · RES-1042": "À venir · RES-1042",
-    "Confirmed": "Confirmée",
-    "Pending": "En attente",
-    "Cancelled": "Annulée",
-    "Requested": "Demandée",
-    "Approved": "Approuvée",
-    "Rejected": "Refusée",
-    "Completed": "Terminée",
-    "Paid": "Payé",
-    "Payment received": "Paiement reçu",
-    "Reservation confirmed": "Réservation confirmée",
-    "Extension update": "Mise à jour de prolongation",
-    "Rental ending soon": "Fin de location imminente",
-    "Review": "Consulter",
-    "View": "Voir",
-    "Open": "Ouvrir",
-    "Details": "Détails",
-    "Actions": "Actions",
-    "Status": "Statut",
-    "Reference": "Référence",
-    "Dates": "Dates",
-    "Total": "Total",
-    "Amount": "Montant",
-    "Total paid": "Total payé",
-    "Successful payments": "Paiements réussis",
-    "Payments & invoices": "Paiements et factures",
-    "Payment & invoice": "Paiement et facture",
-    "My payments & invoices": "Mes paiements et factures",
-    "Print": "Imprimer",
-    "Print invoice": "Imprimer la facture",
-    "Print contract": "Imprimer le contrat",
-    "Print / save as PDF": "Imprimer / enregistrer en PDF",
-    "Your updates": "Vos notifications",
-    "Your reservations": "Vos réservations",
-    "Your rental history": "Historique de vos locations",
-    "Rental history": "Historique des locations",
-    "Request more time": "Demander une prolongation",
-    "Request an extension": "Demander une prolongation",
-    "Send extension request": "Envoyer la demande de prolongation",
-    "Extension history": "Historique des prolongations",
-    "Reason": "Motif",
-    "Current return date": "Date de retour actuelle",
-    "New end date": "Nouvelle date de fin",
-    "Illustrative additional amount": "Montant supplémentaire indicatif",
-    "Owner approval required.": "L’accord du propriétaire est nécessaire.",
-    "Frontend preview with sample data.": "Aperçu avec des données fictives.",
-    "Bookings, payments, invoices and actions shown here are illustrative; nothing is saved, charged or sent.": "Les réservations, paiements, factures et actions affichés sont fictifs. Rien n’est enregistré, débité ou envoyé.",
-    "Interactive frontend preview.": "Aperçu interactif du site.",
-    "These records and actions are sample content only. Nothing is saved, charged, approved or sent to a renter.": "Ces données et actions sont des exemples. Rien n’est enregistré, débité, approuvé ou envoyé à un locataire.",
-    "Illustrative dashboard data.": "Données indicatives du tableau de bord.",
-    "Charts, KPI values and activity below are examples only. They are not live account or payment records.": "Les graphiques, indicateurs et activités ci-dessous sont des exemples, pas des données de compte ou de paiement réelles.",
-    "Renter space": "Espace locataire",
-    "Up next": "À venir",
-    "Explore equipment": "Explorer les équipements",
-    "My account": "Mon compte",
-    "Profile & settings": "Profil et paramètres",
-    "Create your free account": "Créer votre compte gratuitement",
-    "Page not found": "Page introuvable",
-    "Fullscreen could not be changed.": "Impossible de modifier le mode plein écran.",
-    "Enter fullscreen": "Passer en plein écran",
-    "Exit fullscreen": "Quitter le plein écran",
-    "Switch to light theme": "Passer au thème clair",
-    "Switch to dark theme": "Passer au thème sombre",
-    "Account for :name": "Compte de :name",
-    "SolarShare home": "Accueil SolarShare",
-    "Your bookings, rentals and clean-energy journeys, all in one place.": "Retrouvez vos réservations, locations et parcours d’énergie propre au même endroit.",
-    "Your listings, rental requests and equipment activity, all in one place.": "Retrouvez vos annonces, demandes de location et l’activité de vos équipements au même endroit.",
-    "Reservation details": "Détails de la réservation",
-    "Rental details": "Détails de la location",
-    "Reservation summary": "Récapitulatif de réservation",
-    "Secure booking preview": "Aperçu de réservation sécurisé",
-    "A guided reservation journey for :equipment.": "Un parcours de réservation guidé pour :equipment.",
-    "Booking progress": "Étapes de réservation",
-    "Reservation": "Réservation",
-    "Summary": "Récapitulatif",
-    "Payment": "Paiement",
-    "Confirmation": "Confirmation",
-    "Simulation only.": "Simulation uniquement.",
-    "Availability, reservations, invoices and payments are not connected to a backend.": "Les disponibilités, réservations, factures et paiements ne sont pas reliés à un serveur.",
-    "Choose your dates": "Choisissez vos dates",
-    "Select a pickup and return date to see your estimated total.": "Choisissez les dates de retrait et de retour pour estimer le total.",
-    "Start date": "Date de début",
-    "End date": "Date de fin",
-    "Sample date conflict.": "Conflit de dates illustratif.",
-    "This example listing is marked unavailable from 9–11 Oct. Choose other dates. The real overlap check must be enforced on the server.": "Cette annonce d’exemple est indisponible du 9 au 11 octobre. Choisissez d’autres dates. La vérification réelle des chevauchements doit être faite côté serveur.",
-    "day(s) × :price TND": "jour(s) × :price TND",
-    "Tax · 19%": "Taxes · 19 %",
-    "Estimated total": "Total estimé",
-    "Review reservation": "Vérifier la réservation",
-    "Shared by :owner · :location": "Proposé par :owner · :location",
-    "Back to equipment": "Retour à l’équipement",
-    "Review before you continue": "Vérifiez avant de continuer",
-    "Confirm and continue to payment": "Confirmer et passer au paiement",
-    "Change dates": "Modifier les dates",
-    "Sample rental terms": "Conditions de location indicatives",
-    "Choose a payment method": "Choisissez un moyen de paiement",
-    "No real payment details are collected in this demo.": "Aucune donnée de paiement réelle n’est collectée dans cette démonstration.",
-    "Simulate successful payment": "Simuler un paiement réussi",
-    "Simulate failure": "Simuler un échec",
-    "Sample payment failed. No charge was made; try again or choose another method.": "Échec du paiement simulé. Aucun débit n’a été effectué. Réessayez ou choisissez un autre moyen de paiement.",
-    "Payment simulation successful": "Simulation de paiement réussie",
-    "Your reservation is confirmed!": "Votre réservation est confirmée !",
-    "This confirmation is an example and was not saved to an account.": "Cette confirmation est un exemple et n’a pas été enregistrée dans un compte.",
-    "View invoice": "Voir la facture",
-    "SolarShare invoice": "Facture SolarShare",
-    "Issued 3 Oct 2026": "Émise le 3 octobre 2026",
-    "Description": "Description",
-    "Equipment rental": "Location d’équipement",
-    "Sample invoice only. This is not a tax document or payment record.": "Facture indicative uniquement. Ce document n’est ni une pièce fiscale ni une preuve de paiement.",
-    "Confirm this pending reservation?": "Confirmer cette réservation en attente ?",
-    "Cancel this pending reservation?": "Annuler cette réservation en attente ?",
-    "Confirm cancellation": "Confirmer l’annulation",
-    "Keep reservation": "Conserver la réservation",
-    "Only pending reservations can be cancelled. This is a preview; no booking will change.": "Seules les réservations en attente peuvent être annulées. Cet aperçu ne modifie aucune réservation.",
-    "Preview only: the reservation was not cancelled.": "Aperçu uniquement : la réservation n’a pas été annulée.",
-    "Find the right power": "Trouvez la puissance adaptée",
-    "Pick your dates. We check nobody else booked them.": "Choisissez vos dates. Nous vérifions les autres réservations.",
-    "Payment method": "Moyen de paiement",
-    "Cardholder name": "Nom du titulaire",
-    "Card number": "Numéro de carte",
-    "Expiry": "Date d’expiration",
-    "Date totals are a preview. Availability checks and reservations are not live yet.": "Les montants sont indicatifs. Les disponibilités et réservations ne sont pas encore actives.",
-    "Newsletter": "Infolettre",
-    "Platform": "Plateforme",
-    "Owners": "Propriétaires",
-    "Company": "Entreprise",
-    "Legal": "Informations légales",
-    "About": "À propos",
-    "Contact": "Contact",
-    "Terms of use": "Conditions d’utilisation",
-    "Privacy policy": "Politique de confidentialité",
-    "Ready to power your next adventure?": "Prêt à alimenter votre prochaine aventure ?",
-    "Turn idle equipment into income.": "Transformez votre équipement inutilisé en revenus.",
-    "Save": "Enregistrer",
-    "Cancel": "Annuler",
-    "Close": "Fermer",
-    "Next": "Suivant",
-    "Previous": "Précédent",
-    "Filter by status": "Filtrer par statut",
-    "Search equipment…": "Rechercher un équipement…",
-    "Select a category": "Choisir une catégorie",
-    "Owner": "Propriétaire",
-    "Pickup location": "Lieu de retrait",
-    "Price per day": "Prix par jour",
-    "Rental period": "Période de location",
-    "Requested on": "Demandée le",
-    "Booking journey": "Parcours de réservation",
-    "Payment status": "Statut du paiement",
-    "Invoice": "Facture",
-    "Owner response": "Réponse du propriétaire",
-    "Ready after owner hand-off": "Disponible après la remise par le propriétaire",
-    "Inspection": "Inspection",
-    "Pickup condition": "État au retrait",
-    "Return inspection": "Inspection au retour",
-    "Due after return": "À effectuer après le retour",
-    "Deposit · information only": "Caution · à titre indicatif",
-    "Deposit": "Caution",
-    "Signed": "Signé",
-    "Signed 1 Oct 2026": "Signé le 1er octobre 2026",
-    "Contracts": "Contrats",
-    "Latest activity": "Activité récente",
-    "Your rental activity": "Votre activité de location",
-    "View reservations": "Voir les réservations",
-    "Illustrative data": "Données indicatives",
-    "Across all listings": "Sur toutes les annonces",
-    "Ready to be reserved": "Prêt à être réservé",
-    "Currently with renters": "Actuellement chez les locataires",
-    "Need your decision": "Votre réponse est attendue",
-    "Waiting for a response": "En attente d’une réponse",
-    "From completed payments": "Paiements effectués",
-    "Prepare for inspection": "À préparer pour l’inspection",
-    "Temporarily unavailable": "Temporairement indisponible",
+    "Illustrative account summary": "Récapitulatif de compte indicatif",
     "Illustrative actions that need an owner response.": "Exemples d’actions nécessitant une réponse du propriétaire.",
-    "Quick access": "Accès rapide",
+    "Illustrative additional amount": "Montant supplémentaire indicatif",
+    "Illustrative availability across your listings.": "Disponibilités indicatives de vos annonces.",
+    "Illustrative dashboard data.": "Données indicatives du tableau de bord.",
+    "Illustrative data": "Données indicatives",
+    "Illustrative days used across the last 12 months.": "Jours de location indicatifs au cours des 12 derniers mois.",
+    "Illustrative distribution of recent requests.": "Répartition indicative des demandes récentes.",
+    "Illustrative estimate based on typical purchase prices.": "Estimation indicative basée sur les prix d’achat habituels.",
+    "Illustrative income split across equipment categories.": "Répartition indicative des revenus par catégorie d’équipement.",
+    "Illustrative lifetime revenue: 684 TND · estimated occupancy: 42%.": "Revenus cumulés indicatifs : 684 TND · taux d’occupation estimé : 42 %.",
+    "Illustrative paid revenue across the last six months.": "Revenus payés indicatifs des six derniers mois.",
+    "Illustrative paid revenue by month · TND": "Revenus mensuels indicatifs encaissés · TND",
+    "Illustrative paid totals for the last 12 months.": "Totaux payés indicatifs des 12 derniers mois.",
+    "Illustrative payment method mix.": "Répartition indicative des moyens de paiement.",
+    "Illustrative plan quota; actual usage remains zero.": "Illustrative plan quota; actual usage remains zero.",
+    "Illustrative regional service locations.": "Illustrative regional service locations.",
+    "Illustrative rental volume for your top listings.": "Nombre indicatif de locations pour vos principales annonces.",
+    "Illustrative rented days as a share of available days, by month.": "Part des jours loués par rapport aux jours disponibles, par mois (données indicatives).",
+    "Illustrative requested, approved and rejected requests by month.": "Demandes mensuelles indicatives : en attente, approuvées et refusées.",
+    "Illustrative requests over the last four months.": "Demandes indicatives des quatre derniers mois.",
+    "Illustrative share of recorded payment methods.": "Répartition indicative des moyens de paiement enregistrés.",
+    "Image Generator": "Générateur d’images",
+    "Images": "Images",
+    "Images generated": "Images generated",
+    "In maintenance": "En maintenance",
+    "In progress": "En cours",
+    "Inspection": "Inspection",
+    "Inspection completed": "Inspection terminée",
+    "Inspection date": "Date d’inspection",
+    "Inspection log": "Journal des inspections",
+    "Inspections": "Inspections",
+    "Inspections this month": "Inspections ce mois-ci",
+    "Integrations": "Intégrations",
+    "Interactive ApexCharts examples with responsive sizing, tooltips, legends, and theme-aware colors. All figures are illustrative.": "Interactive ApexCharts examples with responsive sizing, tooltips, legends, and theme-aware colors. All figures are illustrative.",
+    "Interactive frontend preview.": "Aperçu interactif du site.",
+    "Interactive preview.": "Aperçu interactif.",
+    "Inventory": "Inventory",
+    "Inventory status": "Inventory status",
+    "Inverters": "Inverters",
+    "Invoice": "Facture",
+    "Invoices": "Factures",
+    "Irradiance sensor": "Capteur d’irradiance",
+    "Issued 3 Oct 2026": "Émise le 3 octobre 2026",
+    "JPG, PNG, or WebP. Maximum file size: 2 MB.": "JPG, PNG ou WebP. Taille maximale : 2 Mo.",
+    "Jan": "Janv.",
+    "Join the SolarShare community": "Rejoignez la communauté SolarShare",
+    "Join the community": "Rejoindre la communauté",
+    "Joined date": "Date d’inscription",
+    "Jul": "Juil.",
+    "Jump straight into the work that keeps your listings moving.": "Accédez directement aux tâches qui font avancer vos annonces.",
+    "Jun": "Juin",
+    "KPI chart": "KPI chart",
+    "Kanban board": "Kanban board",
+    "Keep exploring": "Continuez à explorer",
+    "Keep listing": "Conserver l’annonce",
+    "Keep me signed in": "Rester connecté",
+    "Keep reservation": "Conserver la réservation",
+    "Keep useful gear in motion": "Faisons circuler les équipements utiles",
+    "Keep your borrowed gear, upcoming plans and clean-energy impact in one place.": "Retrouvez vos locations, vos prochains projets et votre impact énergétique au même endroit.",
+    "Keep your name and contact details up to date.": "Gardez votre nom et vos coordonnées à jour.",
+    "Know your power before you go": "Choisissez la puissance adaptée à vos besoins",
+    "Language": "Langue",
+    "Largest first": "Largest first",
+    "Last name": "Nom",
+    "Last year": "Last year",
+    "Latest activity": "Activité récente",
+    "Layouts": "Layouts",
+    "Legacy buyer": "Ancien rôle acheteur",
+    "Legal": "Informations légales",
+    "Leila Ben Salem requested Portable battery 1000 Wh for 9–11 Oct.": "Leila Ben Salem a demandé la batterie portable 1 000 Wh du 9 au 11 oct.",
+    "Leila Ben Salem · 9–11 Oct 2026": "Leila Ben Salem · 9–11 oct. 2026",
+    "Lifetime earnings": "Revenus cumulés",
+    "Line Chart": "Graphique linéaire",
+    "Line chart": "Line chart",
+    "List": "List",
+    "List dividers adapt to light and dark themes.": "List dividers adapt to light and dark themes.",
+    "List equipment": "Publier un équipement",
     "Listings & energy profiles": "Annonces et profils énergétiques",
-    "Calendar & service dates": "Calendrier et dates de maintenance",
-    "Requests from renters": "Demandes des locataires",
-    "Your performance at a glance": "Vos performances en un coup d’œil",
-    "Four signals to help you plan the next equipment hand-off.": "Quatre indicateurs pour préparer les prochaines remises d’équipement.",
-    "Revenue per month": "Revenus par mois",
-    "Revenue (TND)": "Revenus (TND)",
-    "Equipment status": "État des équipements",
-    "Rentals by equipment": "Locations par équipement",
-    "Revenue by category": "Revenus par catégorie",
-    "Occupancy rate": "Taux d’occupation",
+    "Lithium-ion": "Lithium-ion",
+    "Live equipment readout": "Lecture technique en direct",
+    "Loading": "Loading",
+    "Loading chart": "Loading chart",
+    "Loading records": "Loading records",
+    "Local conversation demo. Messages and attachments stay in this browser session.": "Local conversation demo. Messages and attachments stay in this browser session.",
+    "Local mailbox demo. Messages and attachments are not sent to an email service.": "Local mailbox demo. Messages and attachments are not sent to an email service.",
+    "Local owners": "Propriétaires locaux",
+    "Local popover": "Local popover",
+    "Location": "Lieu",
+    "Location information": "Location information",
+    "Lock Screen Demo": "Démo d’écran verrouillé",
+    "Log out": "Se déconnecter",
+    "Logistics": "Logistique",
+    "Low": "Low",
+    "MPPT": "MPPT",
+    "MPPT charge controller 40 A": "Régulateur de charge MPPT 40 A",
+    "Mail folders": "Mail folders",
+    "Main navigation": "Navigation principale",
+    "Maintenance": "Maintenance",
+    "Maintenance cost (TND)": "Coût de maintenance (TND)",
     "Maintenance cost by equipment": "Coût de maintenance par équipement",
-    "Extension requests over time": "Demandes de prolongation dans le temps",
-    "Revenue vs maintenance cost": "Revenus et frais de maintenance",
-    "Today": "Aujourd’hui",
-    "Yesterday": "Hier",
-    "My reservations": "Mes réservations",
-    "My rentals": "Mes locations",
+    "Maintenance example": "Exemple en maintenance",
+    "Maintenance history": "Historique de maintenance",
+    "Maintenance reports": "Rapports de maintenance",
+    "Maintenance spend": "Dépenses de maintenance",
+    "Maintenance update": "Mise à jour de maintenance",
+    "Maintenances": "Maintenances",
+    "Make a weekend of it": "Partez l’esprit léger",
+    "Make your equipment work harder, :name.": "Faites travailler votre équipement, :name.",
+    "Manage your workspace with the tools and account features available to your team.": "Manage your workspace with the tools and account features available to your team.",
+    "Many new adventures": "De nouvelles aventures",
+    "Map Examples": "Exemples de cartes",
+    "Map View": "Vue cartographique",
+    "Map examples": "Map examples",
+    "Map legend": "Map legend",
+    "Maps": "Maps",
+    "Mar": "Mars",
+    "Marine energy": "Énergie marine",
+    "Mark all as read": "Tout marquer comme lu",
+    "Marked as done": "Marked as done",
+    "Marketing": "Marketing",
+    "Max capacity (Wh)": "Capacité maximale (Wh)",
+    "Max power (W)": "Puissance maximale (W)",
+    "Max price/day": "Prix maximum par jour",
+    "May": "Mai",
+    "Medium": "Medium",
+    "Menu": "Menu",
+    "Message": "Message",
+    "Messages": "Messages",
+    "Messages remain local to this demonstration.": "Messages remain local to this demonstration.",
+    "Method": "Moyen de paiement",
+    "Micro-hydro stream turbine": "Turbine hydroélectrique de ruisseau",
+    "Micro-hydropower": "Micro-hydroélectricité",
+    "Min capacity (Wh)": "Capacité minimale (Wh)",
+    "Min power (W)": "Puissance minimale (W)",
+    "Min price/day": "Prix minimum/jour",
+    "Mixed chart": "Mixed chart",
+    "Mobile navigation": "Navigation mobile",
+    "Modal": "Modal",
+    "Modals": "Fenêtres modales",
+    "Model": "Modèle",
+    "Mon": "Lun",
+    "Monocrystalline": "Monocristallin",
+    "Monthly goal": "Monthly goal",
+    "Monthly recurring revenue": "Monthly recurring revenue",
+    "Monthly spending": "Dépenses mensuelles",
+    "Monthly usage limit": "Monthly usage limit",
+    "More information": "More information",
+    "More, together": "Ensemble, plus loin",
+    "Most new page-library forms are local interaction demos and do not write to the database. Existing profile and authentication forms retain their real Laravel behavior.": "Most new page-library forms are local interaction demos and do not write to the database. Existing profile and authentication forms retain their real Laravel behavior.",
+    "Mounts": "Mounts",
+    "Move to next status": "Move to next status",
+    "Move to trash": "Move to trash",
+    "Multiple markers": "Multiple markers",
+    "My Profile": "My Profile",
+    "My SolarShare": "Mon SolarShare",
+    "My account": "Mon compte",
+    "My dashboard": "Mon tableau de bord",
     "My equipment": "Mes équipements",
-    "Availability calendar": "Calendrier des disponibilités",
-    "Earnings & invoices": "Revenus et factures",
-    "Return inspections": "Inspections de retour",
+    "My payments & invoices": "Mes paiements et factures",
+    "My profile": "Mon profil",
+    "My rentals": "Mes locations",
+    "My reservations": "Mes réservations",
+    "Name": "Nom",
+    "Name, brand or city…": "Nom, marque ou ville…",
+    "Name, brand, technology or city…": "Nom, marque, technologie ou ville…",
+    "Name: A to Z": "Nom : A à Z",
+    "Need your decision": "Votre réponse est attendue",
+    "Needs attention": "Needs attention",
+    "New": "Neuf",
+    "New badge": "Nouveau",
+    "New end date": "Nouvelle date de fin",
+    "New order received": "New order received",
+    "New password": "Nouveau mot de passe",
+    "New reservation": "Nouvelle réservation",
+    "New reservation request": "Nouvelle demande de réservation",
+    "Newest": "Plus récents",
+    "Newest first": "Newest first",
+    "Newsletter": "Infolettre",
+    "Next": "Suivant",
+    "Next page": "Next page",
+    "Next reservation and reminders": "Prochaine réservation et rappels",
+    "Nice work": "Bravo",
+    "No": "Non",
+    "No AI provider connected": "No AI provider connected",
+    "No AI provider is connected. Prompts remain in the browser demo and no generated text, images, video, or code is returned.": "No AI provider is connected. Prompts remain in the browser demo and no generated text, images, video, or code is returned.",
+    "No billable activity": "No billable activity",
+    "No chart data": "No chart data",
+    "No connected provider": "No connected provider",
+    "No conversations match your search.": "No conversations match your search.",
+    "No damage": "Aucun dommage",
+    "No damage detected": "Aucun dommage détecté",
+    "No emails match this folder or search.": "No emails match this folder or search.",
+    "No equipment found": "Aucun équipement trouvé",
     "No equipment matches": "Aucun équipement correspondant",
-    "Showing 3 sample reservations": "Affichage de 3 réservations d’exemple",
+    "No extension has been approved for this rental yet.": "Aucune prolongation n’a encore été approuvée pour cette location.",
+    "No generation service": "No generation service",
+    "No live usage": "No live usage",
+    "No matching tasks": "No matching tasks",
+    "No messages yet. Start the conversation below.": "No messages yet. Start the conversation below.",
+    "No open maintenance items for this equipment.": "Aucune intervention de maintenance en cours pour cet équipement.",
+    "No prompts sent": "No prompts sent",
+    "No prompts, generated content, or provider requests are recorded in this demo.": "No prompts, generated content, or provider requests are recorded in this demo.",
+    "No questions match that search.": "No questions match that search.",
+    "No real payment details are collected in this demo.": "Aucune donnée de paiement réelle n’est collectée dans cette démonstration.",
+    "No records yet.": "Aucun enregistrement.",
+    "No rentals yet": "Aucune location pour le moment",
+    "No replies yet. Send the first update.": "No replies yet. Send the first update.",
+    "No reservations yet": "Aucune réservation pour le moment",
+    "No sender address": "No sender address",
+    "No sidebar": "No sidebar",
+    "No tasks in this status.": "No tasks in this status.",
+    "No tickets match your filters.": "No tickets match your filters.",
+    "No tool usage is recorded in this UI-only build.": "No tool usage is recorded in this UI-only build.",
+    "No usage to report": "No usage to report",
+    "No users found.": "Aucun utilisateur trouvé.",
+    "No. New dashboard and chart values are illustrative UI examples unless a page explicitly identifies an existing application data source.": "No. New dashboard and chart values are illustrative UI examples unless a page explicitly identifies an existing application data source.",
+    "No. The ecommerce checkout and transaction screens are non-operational examples and do not charge a payment method.": "No. The ecommerce checkout and transaction screens are non-operational examples and do not charge a payment method.",
+    "North": "North",
+    "Not available": "Not available",
+    "Not provided": "Non renseigné",
+    "Not selected": "Non sélectionné",
+    "Notes": "Notes",
+    "Nothing matches your search": "Aucun résultat ne correspond à votre recherche",
+    "Notification preferences": "Préférences de notification",
+    "Notifications": "Notifications",
+    "Notifications and toast": "Notifications and toast",
+    "Nov": "Nov.",
+    "OWNER STUDIO": "ESPACE PROPRIÉTAIRE",
+    "OWNER STUDIO · ANALYTICS": "ESPACE PROPRIÉTAIRE · ANALYSES",
+    "Occupancy rate": "Taux d’occupation",
+    "Occupancy rate (%)": "Taux d’occupation (%)",
+    "Oct": "Oct.",
+    "October 2026": "Octobre 2026",
+    "October 2026 · sample dates": "Octobre 2026 · dates indicatives",
+    "Off-grid solar regulator 20 A": "Régulateur solaire autonome 20 A",
+    "Offer short hints or lightweight supplemental content.": "Offer short hints or lightweight supplemental content.",
+    "Oldest first": "Oldest first",
+    "Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.": "La suppression de votre compte entraînera la suppression définitive de toutes vos ressources et données. Téléchargez au préalable les informations que vous souhaitez conserver.",
+    "Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.": "La suppression de votre compte et de toutes ses données est définitive. Saisissez votre mot de passe pour confirmer.",
+    "One battery": "Une batterie",
+    "One-time verification code": "One-time verification code",
+    "Online": "Online",
+    "Only pending reservations can be cancelled. This is a preview; no booking will change.": "Seules les réservations en attente peuvent être annulées. Cet aperçu ne modifie aucune réservation.",
+    "Open": "Ouvrir",
+    "Open Profile, then use the existing password form. The new UI examples do not replace Laravel authentication or account security.": "Open Profile, then use the existing password form. The new UI examples do not replace Laravel authentication or account security.",
+    "Open drawer": "Open drawer",
+    "Open help center": "Open help center",
+    "Open maintenance": "Maintenance en cours",
+    "Open modal": "Open modal",
+    "Open navigation": "Ouvrir la navigation",
+    "Open rental history": "Ouvrir l’historique des locations",
+    "Open reusable drawer": "Open reusable drawer",
+    "Open support tickets": "Open support tickets",
+    "Open work orders": "Interventions en cours",
+    "Operations": "Operations",
+    "Or upload a category image": "Ou téléverser une image de catégorie",
+    "Or upload an equipment image": "Ou téléverser une image d’équipement",
+    "Order placed": "Order placed",
+    "Order summary": "Récapitulatif de la commande",
+    "Orders": "Commandes",
+    "Other": "Other",
+    "Others": "Autres",
+    "Outline": "Outline",
+    "Overview": "Vue d’ensemble",
+    "Owner": "Propriétaire",
+    "Owner approval required.": "L’accord du propriétaire est nécessaire.",
+    "Owner dashboard": "Tableau de bord propriétaire",
+    "Owner dashboard statistics": "Statistiques du tableau de bord propriétaire",
+    "Owner decision": "Décision du propriétaire",
+    "Owner response": "Réponse du propriétaire",
+    "Owner workspace": "Espace propriétaire",
+    "Owner workspace navigation": "Navigation de l’espace propriétaire",
+    "Owner: Sami Ben Salem · 2–4 Oct 2026": "Propriétaire : Sami Ben Salem · 2–4 oct. 2026",
+    "Owners": "Propriétaires",
+    "PEM fuel cell": "Pile à combustible PEM",
+    "PEM fuel-cell backup kit": "Kit de secours à pile à combustible PEM",
+    "POWERING SHARED MOMENTS": "DE L’ÉNERGIE POUR LES MOMENTS PARTAGÉS",
+    "PWM": "PWM",
+    "Page": "Page",
+    "Page not found": "Page introuvable",
+    "Pages": "Pages",
+    "Pagination": "Pagination",
+    "Pagination and stepper": "Pagination and stepper",
+    "Paid": "Payé",
+    "Paid revenue (TND)": "Revenus encaissés (TND)",
+    "Paid this month": "Revenus encaissés ce mois-ci",
+    "Paid · Card": "Payé · Carte bancaire",
+    "Panels": "Panels",
+    "Part-to-whole comparison for a small set of categories.": "Part-to-whole comparison for a small set of categories.",
+    "Partner location": "Partner location",
+    "Parts replaced": "Pièces remplacées",
+    "Pass labels, content, and component attributes to match the page context.": "Pass labels, content, and component attributes to match the page context.",
+    "Password": "Mot de passe",
+    "Password updated successfully.": "Le mot de passe a été modifié.",
+    "Password visibility": "Password visibility",
+    "Payment": "Paiement",
+    "Payment & invoice": "Paiement et facture",
+    "Payment completed and invoice INV-2026-0142 is ready.": "Le paiement est terminé et la facture INV-2026-0142 est disponible.",
+    "Payment confirmed": "Payment confirmed",
+    "Payment method": "Moyen de paiement",
+    "Payment received": "Paiement reçu",
+    "Payment simulation successful": "Simulation de paiement réussie",
+    "Payment state shown for demonstration only.": "Payment state shown for demonstration only.",
+    "Payment status": "Statut du paiement",
+    "Payments": "Paiements",
+    "Payments & invoices": "Paiements et factures",
+    "Payments by method": "Paiements par moyen de paiement",
+    "Pellet heater 8 kW": "Poêle à granulés 8 kW",
+    "Pelton": "Pelton",
+    "Pending": "En attente",
+    "Pending reservations": "Réservations en attente",
+    "Pending review": "En attente de validation",
+    "Pending tickets": "Pending tickets",
+    "Pending verification": "Pending verification",
+    "Period": "Période",
+    "Phone": "Téléphone",
+    "Phone Number": "Phone Number",
+    "Phone number": "Numéro de téléphone",
+    "Pick a current": "Choisissez votre énergie",
+    "Pick your dates. We check nobody else booked them.": "Choisissez vos dates. Nous vérifions les autres réservations.",
+    "Pickup condition": "État au retrait",
+    "Pickup inspection: excellent condition. Return inspection: planned for 11 Oct.": "Inspection au retrait : excellent état. Inspection de retour prévue le 11 oct.",
+    "Pickup location": "Lieu de retrait",
+    "Pie Chart": "Diagramme circulaire",
+    "Pie chart": "Pie chart",
+    "Plan ahead": "Planifiez votre séjour",
+    "Plan work and follow progress · changes stay in this browser session": "Plan work and follow progress · changes stay in this browser session",
+    "Planned": "Planifiée",
+    "Planned expansion": "Planned expansion",
+    "Plans": "Offres",
+    "Platform": "Plateforme",
+    "Point absorber": "Absorbeur ponctuel",
+    "Popover content stays local and closes on Escape or outside click.": "Popover content stays local and closes on Escape or outside click.",
+    "Popular questions": "Popular questions",
+    "Portable battery 1000 Wh": "Batterie portable 1 000 Wh",
+    "Portable battery 1000 Wh · 9–11 Oct": "Batterie portable 1 000 Wh · 9–11 oct.",
+    "Portable battery · 9–11 Oct · 54 TND": "Batterie portable · 9–11 oct. · 54 TND",
+    "Portable power stations": "Stations électriques portables",
+    "Portable solar irradiance meter": "Irradiancemètre solaire portable",
+    "Portable solar panels": "Panneaux solaires portables",
+    "Portable solar, batteries and small wind power.": "Solaire portable, batteries et petite éolienne.",
+    "Portable wind turbine 400 W": "Éolienne portable 400 W",
+    "Power": "Puissance",
+    "Power for real-life plans.": "De l’énergie pour vos projets.",
+    "Power for the plan you already have.": "L’énergie pour vos projets déjà prévus.",
+    "Power in good company": "L’énergie se partage",
+    "Power station 2000 Wh": "Station électrique 2 000 Wh",
+    "Power station 2000 Wh · 90 TND": "Station électrique 2 000 Wh · 90 TND",
+    "Power: high to low": "Puissance décroissante",
+    "Preferences": "Préférences",
+    "Prepare for inspection": "À préparer pour l’inspection",
+    "Prepare two equipment returns": "Préparer deux retours d’équipement",
+    "Preparing shipment": "Preparing shipment",
+    "Preview booking flow": "Aperçu du parcours de réservation",
+    "Preview only: notifications are not actually marked as read.": "Aperçu uniquement : les notifications ne sont pas réellement marquées comme lues.",
+    "Preview only: request not approved or saved.": "Aperçu uniquement : la demande n’a pas été approuvée ni enregistrée.",
+    "Preview only: request not rejected or saved.": "Aperçu uniquement : la demande n’a pas été refusée ni enregistrée.",
+    "Preview only: the equipment listing was not deleted.": "Aperçu uniquement : l’annonce n’a pas été supprimée.",
+    "Preview only: the reservation was not cancelled.": "Aperçu uniquement : la réservation n’a pas été annulée.",
+    "Preview only: this listing was not saved because the owner workspace is not connected to the backend yet.": "Aperçu uniquement : cette annonce n’a pas été enregistrée, car l’espace propriétaire n’est pas encore relié au serveur.",
+    "Preview only: your extension request was not sent or saved.": "Aperçu uniquement : votre demande de prolongation n’a pas été envoyée ni enregistrée.",
+    "Previous": "Précédent",
+    "Previous page": "Previous page",
+    "Previous period": "Previous period",
+    "Previous quarter": "Previous quarter",
+    "Price / day": "Prix / jour",
+    "Price input group": "Price input group",
+    "Price per day": "Prix par jour",
+    "Price per day (TND)": "Prix par jour (TND)",
+    "Price summary": "Récapitulatif du prix",
+    "Price: high to low": "Prix décroissant",
+    "Price: low to high": "Prix croissant",
+    "Pricing": "Tarifs",
+    "Primary": "Primary",
+    "Primary navigation": "Navigation principale",
+    "Primary service hub": "Primary service hub",
+    "Print": "Imprimer",
+    "Print / save as PDF": "Imprimer / enregistrer en PDF",
+    "Print contract": "Imprimer le contrat",
+    "Print invoice": "Imprimer la facture",
+    "Print report": "Imprimer le rapport",
+    "Priority": "Priority",
+    "Privacy": "Privacy",
+    "Privacy policy": "Politique de confidentialité",
+    "Product List": "Liste des produits",
+    "Product summary": "Product summary",
+    "Profile": "Profil",
+    "Profile & settings": "Profil et paramètres",
+    "Profile Overview": "Aperçu du profil",
+    "Profile details": "Profile details",
+    "Profile information": "Informations du profil",
+    "Profile overview": "Profile overview",
+    "Profile photo": "Photo de profil",
+    "Profile settings": "Paramètres du profil",
+    "Profile updated successfully.": "Le profil a été mis à jour.",
+    "Progress and loading": "Progress and loading",
+    "Project": "Project",
+    "Provider status": "Provider status",
+    "Publication": "Publication",
+    "Publication status": "Statut de publication",
+    "Publish listing": "Publier l’annonce",
+    "Published": "Publié",
+    "Quarterly target": "Quarterly target",
+    "Quick access": "Accès rapide",
+    "Quick information": "Quick information",
+    "Quiet": "Quiet",
+    "RES-1042 is confirmed for 9–11 Oct.": "La réservation RES-1042 est confirmée du 9 au 11 octobre.",
+    "RNT-2031 is due back tomorrow. Remember the hand-off.": "La location RNT-2031 doit être rendue demain. Pensez à organiser la remise.",
+    "RNT-2031 return is coming up. Review your contract and return date.": "Le retour de RNT-2031 approche. Vérifiez votre contrat et la date de retour.",
+    "RNT-2031 · Signed 1 Oct 2026": "RNT-2031 · Signé le 1er oct. 2026",
+    "RNT-2031: Leila asked to extend the return date by one day.": "RNT-2031 : Leila demande de décaler le retour d’un jour.",
+    "Radar Charts": "Graphiques radar",
+    "Radar chart": "Radar chart",
+    "Radial Chart": "Graphique radial",
+    "Radial Progress Charts": "Graphiques radiaux de progression",
+    "Radial chart": "Radial chart",
+    "Ready": "Prêt",
+    "Ready after owner hand-off": "Disponible après la remise par le propriétaire",
+    "Ready to be reserved": "Prêt à être réservé",
+    "Ready to power your next adventure?": "Prêt à alimenter votre prochaine aventure ?",
+    "Reason": "Motif",
+    "Recent activity appears here when your workspace has events.": "Recent activity appears here when your workspace has events.",
+    "Recent usage": "Recent usage",
+    "Record created.": "Enregistrement créé.",
+    "Record deleted.": "Enregistrement supprimé.",
+    "Record updated.": "Enregistrement modifié.",
+    "Reference": "Référence",
+    "Refine your search": "Affiner la recherche",
+    "Refreshing": "Refreshing",
+    "Refreshing dashboard": "Refreshing dashboard",
+    "Register": "S’inscrire",
+    "Reject": "Rejeter",
+    "Rejected": "Refusée",
+    "Remember me": "Se souvenir de moi",
+    "Remove star": "Remove star",
+    "Remove tag": "Remove tag",
+    "Rent and share portable solar panels, batteries and small wind turbines between neighbours.": "Louez et partagez des panneaux solaires portables, des batteries et de petites éoliennes entre voisins.",
+    "Rent and share portable solar panels, batteries and small wind turbines between neighbours. Use clean energy without buying gear you will only need twice a year.": "Louez et partagez des panneaux solaires portables, des batteries et de petites éoliennes entre voisins. Profitez d’une énergie propre sans acheter du matériel utilisé seulement quelques jours par an.",
+    "Rent and share renewable energy": "Louez et partagez l’énergie renouvelable",
+    "Rent only for the days you need": "Louez uniquement les jours nécessaires",
+    "Rent the energy. Skip the extra stuff.": "Louez l’énergie, évitez les achats inutiles.",
+    "Rent the gear you need for a few days, then pass it on for someone else to use.": "Louez l’équipement dont vous avez besoin quelques jours, puis partagez-le avec quelqu’un d’autre.",
+    "Rental": "Location",
+    "Rental (optional)": "Location (facultative)",
+    "Rental RNT-2031": "Location RNT-2031",
+    "Rental amount": "Montant de la location",
+    "Rental contract": "Contrat de location",
+    "Rental dates": "Dates de location",
+    "Rental days": "Jours de location",
+    "Rental days per month": "Jours de location par mois",
+    "Rental details": "Détails de la location",
+    "Rental ending soon": "Fin de location imminente",
+    "Rental history": "Historique des locations",
+    "Rental length": "Durée de location",
+    "Rental period": "Période de location",
+    "Rentals": "Locations",
+    "Rentals by category": "Locations par catégorie",
+    "Rentals by equipment": "Locations par équipement",
+    "Rented": "Loué",
+    "Renter": "Locataire",
+    "Renter space": "Espace locataire",
+    "Reply to email": "Reply to email",
+    "Report date": "Date du rapport",
+    "Request an extension": "Demander une prolongation",
+    "Request created": "Demande créée",
+    "Request more time": "Demander une prolongation",
+    "Requested": "Demandée",
+    "Requested end": "Fin demandée",
+    "Requested end date": "Date de fin demandée",
+    "Requested on": "Demandée le",
+    "Requests": "Demandes",
+    "Requests from renters": "Demandes des locataires",
+    "Requests this month": "Requests this month",
+    "Requests used": "Requests used",
+    "Research": "Research",
+    "Resend verification email": "Renvoyer l’e-mail de vérification",
+    "Reservation": "Réservation",
+    "Reservation RES-1042": "Réservation RES-1042",
+    "Reservation RES-1042 · Issued 3 Oct 2026": "Réservation RES-1042 · émise le 3 oct. 2026",
+    "Reservation confirmed": "Réservation confirmée",
+    "Reservation details": "Détails de la réservation",
+    "Reservation summary": "Récapitulatif de réservation",
+    "Reservations": "Réservations",
+    "Reservations by status": "Réservations par statut",
+    "Reservations on your equipment": "Réservations de vos équipements",
+    "Reservations, payments and equipment events in one place.": "Retrouvez les réservations, paiements et événements liés aux équipements au même endroit.",
+    "Reserved": "Réservé",
+    "Reset": "Réinitialiser",
+    "Reset Password": "Réinitialiser le mot de passe",
+    "Reset filters": "Réinitialiser les filtres",
+    "Reset your password": "Réinitialiser votre mot de passe",
+    "Residential": "Residential",
+    "Resolved": "Resolved",
+    "Resolved tickets": "Resolved tickets",
+    "Responsive drawer content can be supplied through the component slot.": "Responsive drawer content can be supplied through the component slot.",
+    "Responsive image with descriptive alternative text": "Responsive image with descriptive alternative text",
+    "Responsive width": "Responsive width",
+    "Retention": "Retention",
+    "Return date": "Date de retour",
+    "Return inspection": "Inspection au retour",
+    "Return inspections": "Inspections de retour",
+    "Returns due this week": "Retours prévus cette semaine",
+    "Returns due this week need an inspection.": "Les retours prévus cette semaine nécessitent une inspection.",
+    "Reusable TailAdmin-style controls with keyboard-friendly states and dark-mode styling.": "Reusable TailAdmin-style controls with keyboard-friendly states and dark-mode styling.",
+    "Reusable drawer": "Reusable drawer",
+    "Reusable filters and labelled search inputs.": "Reusable filters and labelled search inputs.",
+    "Reusable interactive patterns": "Reusable interactive patterns",
+    "Reuse": "Réutiliser",
+    "Revenue": "Revenus",
+    "Revenue (TND)": "Revenus (TND)",
+    "Revenue by category": "Revenus par catégorie",
+    "Revenue per month": "Revenus par mois",
+    "Revenue this month": "Revenus ce mois-ci",
+    "Revenue trend": "Évolution des revenus",
+    "Revenue vs maintenance": "Revenus et maintenance",
+    "Revenue vs maintenance cost": "Revenus et frais de maintenance",
+    "Review": "Consulter",
+    "Review before you continue": "Vérifiez avant de continuer",
+    "Review dates and renter details before responding.": "Vérifiez les dates et les informations du locataire avant de répondre.",
+    "Review dates, booking status and payment progress.": "Consultez les dates, le statut de réservation et l’état du paiement.",
+    "Review requests": "Examiner les demandes",
+    "Review reservation": "Vérifier la réservation",
+    "Review reservations": "Consulter les réservations",
+    "Review the current overview and key workspace indicators.": "Review the current overview and key workspace indicators.",
+    "Review your account details and manage profile settings.": "Review your account details and manage profile settings.",
+    "Ribbons": "Rubans",
+    "Role": "Rôle",
+    "Run-of-river generator": "Générateur au fil de l’eau",
+    "SaaS": "SaaS",
+    "Sales": "Ventes",
+    "Sample alerts for owner actions and equipment changes.": "Exemples d’alertes concernant les actions du propriétaire et les changements d’équipement.",
+    "Sample date conflict.": "Conflit de dates illustratif.",
+    "Sample distribution by service region.": "Sample distribution by service region.",
+    "Sample information is not connected to an account or saved.": "Les informations d’exemple ne sont associées à aucun compte et ne sont pas enregistrées.",
+    "Sample invoice only. This is not a tax document or payment record.": "Facture indicative uniquement. Ce document n’est ni une pièce fiscale ni une preuve de paiement.",
+    "Sample marker groups used in this map library.": "Sample marker groups used in this map library.",
+    "Sample monthly income compared with service costs · TND.": "Comparaison indicative des revenus mensuels et des frais d’entretien · TND.",
+    "Sample notifications from your rental journey.": "Exemples de notifications liées à vos locations.",
+    "Sample payment failed. No charge was made; try again or choose another method.": "Échec du paiement simulé. Aucun débit n’a été effectué. Réessayez ou choisissez un autre moyen de paiement.",
+    "Sample rental terms": "Conditions de location indicatives",
+    "Sample requests and owner decisions.": "Exemples de demandes et de décisions des propriétaires.",
+    "Sample spending, category and booking trends.": "Exemples de dépenses, catégories et tendances de réservation.",
+    "Sat": "Sam",
+    "Satisfaction": "Satisfaction",
+    "Save": "Enregistrer",
+    "Save changes": "Enregistrer les modifications",
+    "Save draft": "Save draft",
+    "Save profile": "Enregistrer le profil",
+    "Save reply to Sent": "Save reply to Sent",
+    "Save to Sent": "Save to Sent",
+    "Saved.": "Enregistré.",
+    "Schedule and manage events in the local calendar demonstration.": "Schedule and manage events in the local calendar demonstration.",
+    "Scroll categories backward": "Faire défiler les catégories vers l’arrière",
+    "Scroll categories forward": "Faire défiler les catégories vers l’avant",
+    "Search": "Rechercher",
+    "Search contacts and messages": "Search contacts and messages",
+    "Search contacts and messages...": "Search contacts and messages...",
+    "Search dashboard pages": "Rechercher dans le tableau de bord",
+    "Search emails": "Search emails",
+    "Search emails...": "Search emails...",
+    "Search equipment": "Rechercher un équipement",
+    "Search equipment…": "Rechercher un équipement…",
+    "Search help topics": "Search help topics",
+    "Search or type command...": "Rechercher ou saisir une commande…",
+    "Search questions": "Search questions",
+    "Search records": "Search records",
+    "Search records...": "Search records...",
+    "Search tasks": "Search tasks",
+    "Search tasks or projects...": "Search tasks or projects...",
+    "Search the network": "Rechercher dans le réseau",
+    "Search tickets": "Search tickets",
+    "Search tickets...": "Search tickets...",
+    "Search users": "Rechercher des utilisateurs",
+    "Search users...": "Rechercher des utilisateurs…",
+    "Secure access to your SolarShare account.": "Secure access to your SolarShare account.",
+    "Secure booking preview": "Aperçu de réservation sécurisé",
+    "Security settings": "Security settings",
+    "See how it works": "Découvrir le fonctionnement",
+    "See how much you save by renting for a few days instead of buying.": "Découvrez les économies réalisées en louant quelques jours au lieu d’acheter.",
+    "Select a category": "Choisir une catégorie",
+    "Select a message to read it.": "Select a message to read it.",
+    "Select a pickup and return date to see your estimated total.": "Choisissez les dates de retrait et de retour pour estimer le total.",
+    "Select a ticket to review its details.": "Select a ticket to review its details.",
+    "Select an option": "Sélectionnez une option",
+    "Selected equipment preview": "Aperçu de l’équipement sélectionné",
+    "Selected ticket summary and routing information.": "Selected ticket summary and routing information.",
+    "Send extension request": "Envoyer la demande de prolongation",
+    "Send message": "Send message",
+    "Send password reset link": "Envoyer le lien de réinitialisation",
+    "Sep": "Sept.",
+    "Service records by equipment": "Interventions par équipement",
+    "Sessions & Security": "Sessions et sécurité",
+    "Sessions and security": "Sessions and security",
+    "Set a new password to secure your account.": "Définissez un nouveau mot de passe pour sécuriser votre compte.",
+    "Settings": "Settings",
+    "Share": "Partager",
+    "Share your equipment": "Partager votre équipement",
+    "Shared by :owner · :location": "Proposé par :owner · :location",
+    "Shared nearby · rented by the day": "Partagé près de chez vous · location à la journée",
+    "Shared renewable energy, made easier for everyone.": "L’énergie renouvelable partagée, plus accessible à tous.",
+    "Show filters": "Afficher les filtres",
+    "Show password": "Afficher le mot de passe",
     "Showing 3 example listings": "Affichage de 3 annonces d’exemple",
     "Showing 3 sample rentals": "Affichage de 3 locations d’exemple",
-    "No reservations yet": "Aucune réservation pour le moment",
-    "No rentals yet": "Aucune location pour le moment",
-    "Browse the catalog": "Parcourir le catalogue",
-    "Monthly spending": "Dépenses mensuelles",
-    "Create an account": "Créer un compte",
-    "Welcome back": "Bon retour",
-    "Email address": "Adresse e-mail",
-    "Password": "Mot de passe",
-    "Remember me": "Se souvenir de moi",
-    "Forgot your password?": "Mot de passe oublié ?",
-    "Name": "Nom",
-    "Phone": "Téléphone",
-    "Confirm password": "Confirmer le mot de passe",
-    "Already registered?": "Déjà inscrit ?",
-    "Register": "S’inscrire",
-    "Profile photo": "Photo de profil",
-    "Update profile": "Mettre à jour le profil",
+    "Showing 3 sample reservations": "Affichage de 3 réservations d’exemple",
+    "Side-by-side comparison across two periods.": "Side-by-side comparison across two periods.",
+    "Sidebar": "Menu latéral",
+    "Sidebar Variants": "Variantes de barre latérale",
+    "Sidebar navigation": "Navigation latérale",
+    "Sign Up": "Inscription",
+    "Sign in": "Se connecter",
+    "Sign in to SolarShare": "Se connecter à SolarShare",
+    "Sign in to continue to your account.": "Connectez-vous pour accéder à votre compte.",
+    "Sign in to reserve": "Connectez-vous pour réserver",
+    "Sign out": "Se déconnecter",
+    "Signed": "Signé",
+    "Signed 1 Oct 2026": "Signé le 1er octobre 2026",
+    "Similar equipment": "Équipements similaires",
+    "Simulate failure": "Simuler un échec",
+    "Simulate successful payment": "Simuler un paiement réussi",
+    "Simulation only.": "Simulation uniquement.",
+    "Single marker": "Single marker",
+    "Skeletons": "Squelettes de chargement",
+    "Skip to main content": "Aller au contenu principal",
+    "Small biogas digester": "Petit digesteur de biogaz",
+    "Small choices add up.": "Les petits gestes font la différence.",
+    "Small trend chart suited to KPI cards and compact summaries.": "Small trend chart suited to KPI cards and compact summaries.",
+    "Small wind turbines": "Petites éoliennes",
+    "Smart energy meter": "Compteur énergétique intelligent",
+    "Smooth trend series with interactive points.": "Smooth trend series with interactive points.",
+    "Solar charge controllers": "Régulateurs de charge solaire",
+    "Solar energy": "Solar energy",
+    "Solar kit 2 × 100 W": "Kit solaire 2 × 100 W",
+    "Solar panel 200 W": "Panneau solaire 200 W",
+    "Solar panel product example": "Solar panel product example",
+    "Solar panel rental": "Location de panneau solaire",
+    "Solar panels": "Panneaux solaires",
+    "Solar thermal": "Solaire thermique",
+    "Solar thermal equipment": "Équipement solaire thermique",
+    "Solar water heater kit": "Kit de chauffe-eau solaire",
+    "SolarShare": "SolarShare",
+    "SolarShare / open catalogue": "SolarShare / catalogue ouvert",
+    "SolarShare Admin": "SolarShare Admin",
+    "SolarShare Studio": "Espace SolarShare",
+    "SolarShare brings renters, equipment owners and local communities together to make renewable energy easier to access, share and keep in use.": "SolarShare rassemble locataires, propriétaires d’équipements et communautés locales pour rendre les énergies renouvelables plus accessibles et mieux partagées.",
+    "SolarShare home": "Accueil SolarShare",
+    "SolarShare invoice": "Facture SolarShare",
+    "SolarShare website": "SolarShare website",
+    "SolarShare workspace": "SolarShare workspace",
+    "SolarShare · illustrative listing": "SolarShare · annonce illustrative",
+    "Sort by": "Trier par",
+    "Sort: ": "Trier : ",
+    "South coast": "South coast",
+    "Sparkline": "Sparkline",
+    "Spend (TND)": "Dépenses (TND)",
+    "Spending per month": "Dépenses par mois",
+    "Spreadsheets": "Spreadsheets",
+    "Stacked bar": "Stacked bar",
+    "Stacked series reveal totals and composition.": "Stacked series reveal totals and composition.",
+    "Standalone components for common navigation and disclosure controls.": "Standalone components for common navigation and disclosure controls.",
+    "Star email": "Star email",
+    "Start date": "Date de début",
+    "Starting at": "À partir de",
+    "Status": "Statut",
+    "Status / damage": "Statut / dommage",
+    "Status filter": "Status filter",
+    "Status messages with accessible announcement and dismiss controls.": "Status messages with accessible announcement and dismiss controls.",
+    "Steps": "Steps",
+    "Still need help?": "Still need help?",
+    "Stocks": "Stocks",
+    "Storage": "Storage",
+    "Storage used": "Storage used",
+    "Structured item with supporting text.": "Structured item with supporting text.",
+    "Subject": "Subject",
+    "Subtotal · tax": "Sous-total · taxes",
+    "Success": "Réussite",
+    "Successful payments": "Paiements réussis",
+    "Summary": "Récapitulatif",
+    "Sun": "Dim",
+    "Support Ticket": "Ticket d’assistance",
+    "Support tickets": "Support tickets",
+    "Switch language to :name": "Passer à la langue :name",
+    "Switch to dark theme": "Passer au thème sombre",
+    "Switch to light theme": "Passer au thème clair",
+    "THE SHARED-POWER LOOP": "LE CYCLE DE L’ÉNERGIE PARTAGÉE",
+    "TND": "TND",
+    "TND stays in your pocket": "TND économisés",
+    "Tables": "Tableaux",
+    "Tabs": "Tabs",
+    "Tags and search": "Tags and search",
+    "Task list": "Task list",
+    "Task name": "Task name",
+    "Task view": "Task view",
+    "Tasks": "Tâches",
+    "Tax": "Taxes",
+    "Tax · 19%": "Taxes · 19 %",
+    "Team chat": "Team chat",
+    "Team members": "Team members",
+    "Technical issue": "Technical issue",
+    "Technical records": "Dossiers techniques",
+    "Technical records will appear here after equipment ownership is connected to the database.": "Les dossiers techniques apparaîtront ici quand les équipements et leurs propriétaires seront enregistrés en base.",
+    "Technical records will appear here after the equipment and rental modules are connected to the database.": "Les dossiers techniques apparaîtront ici après la connexion des modules équipement et location à la base de données.",
+    "Technical report": "Rapport technique",
+    "Technical specifications help renters choose safely.": "Les caractéristiques techniques aident les locataires à choisir en toute sécurité.",
+    "Technician notes": "Notes du technicien",
+    "Technology": "Technologie",
+    "Tell renters what makes this item right for their needs.": "Expliquez aux locataires en quoi cet équipement répond à leurs besoins.",
+    "Tell the owner why you need more time…": "Expliquez au propriétaire pourquoi vous avez besoin de plus de temps…",
+    "Temporarily unavailable": "Temporairement indisponible",
+    "Temporary password": "Mot de passe temporaire",
+    "Terms of use": "Conditions d’utilisation",
+    "Text": "Text",
+    "Text Generator": "Générateur de texte",
+    "The SolarShare collection": "La sélection SolarShare",
+    "The deposit shown is informational in this frontend preview. No payment or deposit is being collected.": "La caution affichée est fournie à titre indicatif dans cet aperçu. Aucun paiement ni dépôt n’est collecté.",
+    "The equipment types in your sample rental history.": "Types d’équipements de votre historique de location fictif.",
+    "The layout retains responsive page padding while allowing content to expand without a fixed dashboard sidebar.": "The layout retains responsive page padding while allowing content to expand without a fixed dashboard sidebar.",
+    "The new user will need to verify their email address before accessing verified workspace pages.": "Le nouvel utilisateur devra vérifier son adresse e-mail avant d’accéder aux pages sécurisées de son espace.",
+    "The owner approved your request for RNT-2024.": "Le propriétaire a approuvé votre demande pour RNT-2024.",
+    "The renter agrees to follow the manufacturer instructions, use the equipment safely, keep it secure and return it on the agreed date in the recorded condition. Any incident should be reported to the owner promptly.": "Le locataire s’engage à respecter les consignes du fabricant, à utiliser l’équipement en toute sécurité et à le rendre à la date prévue dans l’état constaté. Tout incident doit être rapidement signalé au propriétaire.",
+    "The renter agrees to use the equipment according to its operating instructions, keep it secure and return it in the recorded condition. Any damage must be reported promptly. The owner and renter confirm the hand-off and return inspection.": "Le locataire s’engage à utiliser l’équipement conformément à son mode d’emploi, à le garder en sécurité et à le rendre dans l’état constaté. Tout dommage doit être signalé rapidement. Le propriétaire et le locataire confirment la remise et l’inspection de retour.",
+    "The sample order is ready for dispatch.": "The sample order is ready for dispatch.",
+    "The table remains empty until an approved AI provider is integrated.": "The table remains empty until an approved AI provider is integrated.",
+    "The useful details": "Les caractéristiques utiles",
+    "These records and actions are sample content only. Nothing is saved, charged, approved or sent to a renter.": "Ces données et actions sont des exemples. Rien n’est enregistré, débité, approuvé ou envoyé à un locataire.",
+    "This confirmation is an example and was not saved to an account.": "Cette confirmation est un exemple et n’a pas été enregistrée dans un compte.",
+    "This equipment is in maintenance and cannot be reserved right now.": "Cet équipement est en maintenance et ne peut pas être réservé pour le moment.",
+    "This example listing is marked unavailable from 9–11 Oct. Choose other dates. The real overlap check must be enforced on the server.": "Cette annonce d’exemple est indisponible du 9 au 11 octobre. Choisissez d’autres dates. La vérification réelle des chevauchements doit être faite côté serveur.",
+    "This is a secure area. Please confirm your password before continuing.": "Cette zone est sécurisée. Confirmez votre mot de passe pour continuer.",
+    "This is only a preview. No listing will be removed.": "Ceci est un aperçu. Aucune annonce ne sera supprimée.",
+    "This panel demonstrates the full-width content grid at the current viewport size.": "This panel demonstrates the full-width content grid at the current viewport size.",
+    "This panel is sample content for the reusable accordion interaction.": "This panel is sample content for the reusable accordion interaction.",
+    "This responsive shell removes the sidebar and lets wide content use the viewport. It shares the app theme tokens and includes a compact header and skip link.": "This responsive shell removes the sidebar and lets wide content use the viewport. It shares the app theme tokens and includes a compact header and skip link.",
+    "This technical value is required for the selected category.": "Cette donnée technique est requise pour la catégorie sélectionnée.",
+    "This year": "This year",
+    "Thu": "Jeu",
+    "Ticket Reply": "Réponse au ticket",
+    "Ticket details": "Ticket details",
+    "Ticket list": "Ticket list",
+    "Ticket status": "Ticket status",
+    "Ticket workflow demonstration. Updates are kept in this page only.": "Ticket workflow demonstration. Updates are kept in this page only.",
+    "Time": "Time",
+    "Timeline": "Timeline",
+    "To": "Au",
+    "To do": "To do",
+    "To do now": "À faire maintenant",
+    "Today": "Aujourd’hui",
+    "Today · 09:15": "Aujourd’hui · 09:15",
+    "Today · 10:42": "Aujourd’hui · 10:42",
+    "Today, 10:24 AM": "Today, 10:24 AM",
+    "Today, 10:26 AM": "Today, 10:26 AM",
+    "Today, 11:10 AM": "Today, 11:10 AM",
+    "Toggle Mobile Menu": "Afficher ou masquer le menu mobile",
+    "Toggle Sidebar": "Afficher ou masquer la barre latérale",
+    "Toggle application menu": "Afficher ou masquer le menu des applications",
+    "Toggle color theme": "Changer de thème",
+    "Toggle menu": "Ouvrir ou fermer le menu",
+    "Toggle popover": "Toggle popover",
+    "Toggle theme": "Changer de thème",
+    "Tokens processed": "Tokens processed",
+    "Tooltip and popover": "Tooltip and popover",
+    "Top nav": "Menu supérieur",
+    "Total": "Total",
+    "Total equipment": "Équipements au total",
+    "Total paid": "Total payé",
+    "Total rental days": "Jours de location au total",
+    "Total repair spend": "Dépenses totales de réparation",
+    "Total spent": "Dépenses totales",
+    "Total tasks": "Total tasks",
+    "Transactions": "Transactions",
+    "Try changing your search or filters, or add a new equipment listing.": "Modifiez votre recherche ou vos filtres, ou ajoutez une annonce.",
+    "Try removing a filter or searching for something broader.": "Essayez de retirer un filtre ou d’élargir votre recherche.",
+    "Tue": "Mar",
+    "Turn idle equipment into income.": "Transformez votre équipement inutilisé en revenus.",
+    "Two-Factor Demo": "Démo à deux facteurs",
+    "Type a keyword or question...": "Type a keyword or question...",
+    "UI Elements": "Éléments d’interface",
+    "UI preview — sample data": "Aperçu de l’interface — données d’exemple",
+    "USD": "USD",
+    "Under Construction": "En construction",
+    "Unread": "Non lu",
+    "Unread notifications": "Notifications non lues",
+    "Unverified": "Non vérifié",
+    "Up next": "À venir",
+    "Up next · RES-1042": "À venir · RES-1042",
+    "Upcoming": "À venir",
+    "Upcoming reservations": "Réservations à venir",
     "Update password": "Modifier le mot de passe",
-    "Current password": "Mot de passe actuel",
-    "New password": "Nouveau mot de passe",
-    "Confirm new password": "Confirmer le nouveau mot de passe",
-    "All rights reserved.": "Tous droits réservés.",
-    "1 item found": "1 élément trouvé",
-    "{0} No equipment found|{1} :count item found|[2,*] :count items found": "{0} Aucun équipement trouvé|{1} :count élément trouvé|[2,*] :count éléments trouvés"
-    ,"27 Sep · 09:15": "27 sept. · 09:15"
-    ,"28 Sep · 11:30": "28 sept. · 11:30"
-    ,"3 days × 18 TND": "3 jours × 18 TND"
-    ,"5 items": "5 actions"
-    ,"9–11 Oct 2026 · La Marsa, Tunis · 18 TND / day": "9–11 oct. 2026 · La Marsa, Tunis · 18 TND / jour"
-    ,"A little shared energy goes a long way.": "L’énergie partagée ouvre de nouvelles possibilités."
-    ,"A new verification link has been sent.": "Un nouveau lien de vérification a été envoyé."
-    ,"A quick view of pending, confirmed and cancelled requests.": "Aperçu des demandes en attente, confirmées et annulées."
-    ,"A renter is asking for one more day.": "Un locataire demande un jour supplémentaire."
-    ,"A sample of what matters right now": "Un aperçu des informations importantes"
-    ,"Account": "Compte"
-    ,"Active": "En cours"
-    ,"Active trips and completed equipment hand-offs.": "Locations en cours et remises d’équipement terminées."
-    ,"Address": "Adresse"
-    ,"All": "Tout"
-    ,"All activity and totals shown here are sample data, not connected to live bookings.": "Toutes les activités et tous les totaux affichés sont des exemples, pas des réservations réelles."
-    ,"All earnings": "Tous les revenus"
-    ,"Answer an extension request": "Répondre à une demande de prolongation"
-    ,"Apr": "Avr."
-    ,"Ask the owner to extend an active rental.": "Demandez au propriétaire de prolonger une location en cours."
-    ,"Aug": "Août"
-    ,"Available": "Disponible"
-    ,"Battery 1000 Wh": "Batterie 1 000 Wh"
-    ,"Battery reservation": "Réservation de batterie"
-    ,"Breadcrumb": "Fil d’Ariane"
-    ,"Browse": "Parcourir"
-    ,"Calculated at 18 TND per extra day; owner approval required.": "Calculé sur la base de 18 TND par jour supplémentaire ; accord du propriétaire requis."
-    ,"Cancellation is available only while a reservation is pending.": "L’annulation est possible uniquement lorsque la réservation est en attente."
-    ,"Check requested dates and equipment availability.": "Vérifiez les dates demandées et la disponibilité de l’équipement."
-    ,"Check the owner response to your pending reservation.": "Consultez la réponse du propriétaire à votre réservation en attente."
-    ,"Choose a profile photo": "Choisir une photo de profil"
-    ,"Compact battery 500 Wh · no damage": "Batterie compacte 500 Wh · aucun dommage"
-    ,"Confirm the details and read the sample rental terms.": "Vérifiez les informations et consultez les conditions de location proposées."
-    ,"Confirm two reservation requests": "Confirmer deux demandes de réservation"
-    ,"Confirm with your current password": "Confirmer avec votre mot de passe actuel"
-    ,"Contract CTR-2031-01": "Contrat CTR-2031-01"
-    ,"Create an account to find trusted equipment nearby or share the clean-energy gear you already own.": "Créez un compte pour louer du matériel près de chez vous ou partager vos équipements d’énergie propre."
-    ,"Create your SolarShare account": "Créer votre compte SolarShare"
-    ,"Date": "Date"
-    ,"Dates not selected": "Dates non sélectionnées"
-    ,"Dec": "Déc."
-    ,"Decide": "Décider"
-    ,"Delete account": "Supprimer le compte"
-    ,"Delete my account": "Supprimer mon compte"
-    ,"Deleting your account permanently removes your account and cannot be undone.": "La suppression de votre compte est définitive et ne peut pas être annulée."
-    ,"Energy saved": "Énergie économisée"
-    ,"Equipment category": "Catégorie d’équipement"
-    ,"Example events from the reservation-to-return journey.": "Exemples d’événements du parcours, de la réservation au retour."
-    ,"Example extension requests by status and month.": "Exemples de demandes de prolongation par statut et par mois."
-    ,"Example paid totals for the past 12 months.": "Exemples de dépenses payées au cours des 12 derniers mois."
-    ,"Excellent · 2 Oct 2026": "Excellent · 2 oct. 2026"
-    ,"Extension requested": "Prolongation demandée"
-    ,"Extra": "Supplément"
-    ,"Feb": "Févr."
-    ,"Filter by period and print a sample invoice.": "Filtrez par période et imprimez une facture d’exemple."
-    ,"Filters": "Filtres"
-    ,"First name": "Prénom"
-    ,"Foldable panel · return due 4 Oct": "Panneau pliable · retour prévu le 4 oct."
-    ,"Foldable solar panel · +1 day": "Panneau solaire pliable · +1 jour"
-    ,"Forgot password?": "Mot de passe oublié ?"
-    ,"Give good energy a second life.": "Offrez une seconde vie à l’énergie."
-    ,"Hide password": "Masquer le mot de passe"
-    ,"I have read the sample terms.": "J’ai lu les conditions indicatives."
-    ,"Illustration of a portable clean-energy battery station": "Illustration d’une batterie portable d’énergie propre"
-    ,"Illustrative account summary": "Récapitulatif de compte indicatif"
-    ,"Illustrative availability across your listings.": "Disponibilités indicatives de vos annonces."
-    ,"Illustrative days used across the last 12 months.": "Jours de location indicatifs au cours des 12 derniers mois."
-    ,"Illustrative distribution of recent requests.": "Répartition indicative des demandes récentes."
-    ,"Illustrative paid revenue across the last six months.": "Revenus payés indicatifs des six derniers mois."
-    ,"Illustrative paid totals for the last 12 months.": "Totaux payés indicatifs des 12 derniers mois."
-    ,"Illustrative payment method mix.": "Répartition indicative des moyens de paiement."
-    ,"Illustrative rental volume for your top listings.": "Nombre indicatif de locations pour vos principales annonces."
-    ,"Illustrative requests over the last four months.": "Demandes indicatives des quatre derniers mois."
-    ,"Inspection completed": "Inspection terminée"
-    ,"Interactive preview.": "Aperçu interactif."
-    ,"JPG, PNG, or WebP. Maximum file size: 2 MB.": "JPG, PNG ou WebP. Taille maximale : 2 Mo."
-    ,"Jan": "Janv."
-    ,"Join the SolarShare community": "Rejoignez la communauté SolarShare"
-    ,"Join the community": "Rejoindre la communauté"
-    ,"Jump straight into the work that keeps your listings moving.": "Accédez directement aux tâches qui font avancer vos annonces."
-    ,"Keep me signed in": "Rester connecté"
-    ,"Keep your name and contact details up to date.": "Gardez votre nom et vos coordonnées à jour."
-    ,"Last name": "Nom"
-    ,"Mar": "Mars"
-    ,"May": "Mai"
-    ,"Method": "Moyen de paiement"
-    ,"My dashboard": "Mon tableau de bord"
-    ,"New reservation": "Nouvelle réservation"
-    ,"New reservation request": "Nouvelle demande de réservation"
-    ,"Next reservation and reminders": "Prochaine réservation et rappels"
-    ,"Nice work": "Bravo"
-    ,"No extension has been approved for this rental yet.": "Aucune prolongation n’a encore été approuvée pour cette location."
-    ,"Not selected": "Non sélectionné"
-    ,"Nov": "Nov."
-    ,"OWNER STUDIO": "ESPACE PROPRIÉTAIRE"
-    ,"OWNER STUDIO · ANALYTICS": "ESPACE PROPRIÉTAIRE · ANALYSES"
-    ,"Oct": "Oct."
-    ,"Order summary": "Récapitulatif de la commande"
-    ,"Owner: Sami Ben Salem · 2–4 Oct 2026": "Propriétaire : Sami Ben Salem · 2–4 oct. 2026"
-    ,"Paid · Card": "Payé · Carte bancaire"
-    ,"Password updated successfully.": "Le mot de passe a été modifié."
-    ,"Payment completed and invoice INV-2026-0142 is ready.": "Le paiement est terminé et la facture INV-2026-0142 est disponible."
-    ,"Period": "Période"
-    ,"Phone number": "Numéro de téléphone"
-    ,"Portable battery 1000 Wh": "Batterie portable 1 000 Wh"
-    ,"Portable battery 1000 Wh · 9–11 Oct": "Batterie portable 1 000 Wh · 9–11 oct."
-    ,"Portable battery · 9–11 Oct · 54 TND": "Batterie portable · 9–11 oct. · 54 TND"
-    ,"Power station 2000 Wh · 90 TND": "Station électrique 2 000 Wh · 90 TND"
-    ,"Prepare two equipment returns": "Préparer deux retours d’équipement"
-    ,"Preview only: your extension request was not sent or saved.": "Aperçu uniquement : votre demande de prolongation n’a pas été envoyée ni enregistrée."
-    ,"Price summary": "Récapitulatif du prix"
-    ,"Profile information": "Informations du profil"
-    ,"Profile settings": "Paramètres du profil"
-    ,"Profile updated successfully.": "Le profil a été mis à jour."
-    ,"RES-1042 is confirmed for 9–11 Oct.": "La réservation RES-1042 est confirmée du 9 au 11 octobre."
-    ,"RNT-2031 is due back tomorrow. Remember the hand-off.": "La location RNT-2031 doit être rendue demain. Pensez à organiser la remise."
-    ,"RNT-2031 return is coming up. Review your contract and return date.": "Le retour de RNT-2031 approche. Vérifiez votre contrat et la date de retour."
-    ,"RNT-2031 · Signed 1 Oct 2026": "RNT-2031 · Signé le 1er oct. 2026"
-    ,"Rental": "Location"
-    ,"Rental RNT-2031": "Location RNT-2031"
-    ,"Rental amount": "Montant de la location"
-    ,"Rental contract": "Contrat de location"
-    ,"Rental dates": "Dates de location"
-    ,"Rented": "Loué"
-    ,"Requested end": "Fin demandée"
-    ,"Requests": "Demandes"
-    ,"Return date": "Date de retour"
-    ,"Returns due this week need an inspection.": "Les retours prévus cette semaine nécessitent une inspection."
-    ,"Review dates, booking status and payment progress.": "Consultez les dates, le statut de réservation et l’état du paiement."
-    ,"Sample notifications from your rental journey.": "Exemples de notifications liées à vos locations."
-    ,"Sample requests and owner decisions.": "Exemples de demandes et de décisions des propriétaires."
-    ,"Sample spending, category and booking trends.": "Exemples de dépenses, catégories et tendances de réservation."
-    ,"Save profile": "Enregistrer le profil"
-    ,"Sep": "Sept."
-    ,"Share your equipment": "Partager votre équipement"
-    ,"Show password": "Afficher le mot de passe"
-    ,"Sign in to SolarShare": "Se connecter à SolarShare"
-    ,"Small choices add up.": "Les petits gestes font la différence."
-    ,"Solar panel 200 W": "Panneau solaire 200 W"
-    ,"Solar panel rental": "Location de panneau solaire"
-    ,"Solar panels": "Panneaux solaires"
-    ,"SolarShare": "SolarShare"
-    ,"Tax": "Taxes"
-    ,"Tell the owner why you need more time…": "Expliquez au propriétaire pourquoi vous avez besoin de plus de temps…"
-    ,"The deposit shown is informational in this frontend preview. No payment or deposit is being collected.": "La caution affichée est fournie à titre indicatif dans cet aperçu. Aucun paiement ni dépôt n’est collecté."
-    ,"The equipment types in your sample rental history.": "Types d’équipements de votre historique de location fictif."
-    ,"The owner approved your request for RNT-2024.": "Le propriétaire a approuvé votre demande pour RNT-2024."
-    ,"The renter agrees to follow the manufacturer instructions, use the equipment safely, keep it secure and return it on the agreed date in the recorded condition. Any incident should be reported to the owner promptly.": "Le locataire s’engage à respecter les consignes du fabricant, à utiliser l’équipement en toute sécurité et à le rendre à la date prévue dans l’état constaté. Tout incident doit être rapidement signalé au propriétaire."
-    ,"This equipment is in maintenance and cannot be reserved right now.": "Cet équipement est en maintenance et ne peut pas être réservé pour le moment."
-    ,"Today · 09:15": "Aujourd’hui · 09:15"
-    ,"Today · 10:42": "Aujourd’hui · 10:42"
-    ,"Toggle color theme": "Changer de thème"
-    ,"Upcoming": "À venir"
-    ,"Update your account details, change your password, or delete your account.": "Modifiez les informations de votre compte, votre mot de passe ou supprimez votre compte."
-    ,"Use a unique password and confirm your current password before changing it.": "Choisissez un mot de passe unique et confirmez votre mot de passe actuel avant de le modifier."
-    ,"Use the equipment according to its instructions, keep it secure and return it in the recorded condition. Report any damage promptly. Deposit is shown for information only in this preview.": "Utilisez l’équipement conformément à ses instructions, conservez-le en sécurité et rendez-le dans l’état constaté. Signalez rapidement tout dommage. La caution est affichée à titre indicatif."
-    ,"Use the equipment according to its instructions, take reasonable care and return it on the agreed date. The deposit and final contract are informational in this preview.": "Utilisez l’équipement conformément à ses instructions, prenez-en soin et rendez-le à la date convenue. La caution et le contrat final sont présentés à titre indicatif."
-    ,"View inspections": "Voir les inspections"
-    ,"View payment & invoice": "Voir le paiement et la facture"
-    ,"View reservation": "Voir la réservation"
-    ,"Wind turbine 400 W": "Éolienne 400 W"
-    ,"Yesterday · 11:30": "Hier · 11:30"
-    ,"Yesterday · 16:08": "Hier · 16:08"
-    ,"You borrowed instead of buying equipment": "Vous avez loué au lieu d’acheter un équipement"
-    ,"Your clean-energy snapshot": "Votre aperçu énergie propre"
-    ,"Your email address is not verified.": "Votre adresse e-mail n’est pas vérifiée."
-    ,"Your next shared-energy experience starts here.": "Votre prochaine expérience d’énergie partagée commence ici."
-    ,"Leila Ben Salem requested Portable battery 1000 Wh for 9–11 Oct.": "Leila Ben Salem a demandé la batterie portable 1 000 Wh du 9 au 11 oct."
-    ,"RNT-2031: Leila asked to extend the return date by one day.": "RNT-2031 : Leila demande de décaler le retour d’un jour."
-    ,"54.00 TND received for reservation RES-1038.": "54,00 TND reçus pour la réservation RES-1038."
-    ,"Compact battery 500 Wh returned without damage.": "La batterie compacte 500 Wh a été rendue sans dommage."
-    ,"Maintenance update": "Mise à jour de maintenance"
-    ,"A service record was added for Solar kit 2 × 100 W.": "Une intervention a été ajoutée pour le kit solaire 2 × 100 W."
-    ,"SolarShare Studio": "Espace SolarShare"
-    ,"A complete visual preview of your equipment operations, from listing to return inspection.": "Un aperçu complet de la gestion de vos équipements, de la publication à l’inspection de retour."
-    ,"Add equipment": "Ajouter un équipement"
-    ,"Your listings": "Vos annonces"
-    ,"3 example items · sorted by latest activity": "3 équipements d’exemple · triés par activité récente"
-    ,"Filter by category": "Filtrer par catégorie"
-    ,"All statuses": "Tous les statuts"
-    ,"Reserved": "Réservé"
-    ,"Price / day": "Prix / jour"
-    ,"Edit": "Modifier"
-    ,"Delete": "Supprimer"
-    ,"Try changing your search or filters, or add a new equipment listing.": "Modifiez votre recherche ou vos filtres, ou ajoutez une annonce."
-    ,"Delete this listing?": "Supprimer cette annonce ?"
-    ,"This is only a preview. No listing will be removed.": "Ceci est un aperçu. Aucune annonce ne sera supprimée."
-    ,"Keep listing": "Conserver l’annonce"
-    ,"Preview only: the equipment listing was not deleted.": "Aperçu uniquement : l’annonce n’a pas été supprimée."
-    ,"Confirm delete": "Confirmer la suppression"
-    ,"Equipment details": "Détails de l’équipement"
-    ,"Tell renters what makes this item right for their needs.": "Expliquez aux locataires en quoi cet équipement répond à leurs besoins."
-    ,"Equipment name": "Nom de l’équipement"
-    ,"e.g. Portable power station": "ex. : station électrique portable"
-    ,"Choose a category": "Choisir une catégorie"
-    ,"Brand": "Marque"
-    ,"Model": "Modèle"
-    ,"Price per day (TND)": "Prix par jour (TND)"
-    ,"Excellent": "Excellent"
-    ,"City / pickup location": "Ville / lieu de retrait"
-    ,"Equipment photo": "Photo de l’équipement"
-    ,"Selected equipment preview": "Aperçu de l’équipement sélectionné"
-    ,"Technical specifications help renters choose safely.": "Les caractéristiques techniques aident les locataires à choisir en toute sécurité."
-    ,"Save changes": "Enregistrer les modifications"
-    ,"Publish listing": "Publier l’annonce"
-    ,"Preview only: this listing was not saved because the owner workspace is not connected to the backend yet.": "Aperçu uniquement : cette annonce n’a pas été enregistrée, car l’espace propriétaire n’est pas encore relié au serveur."
-    ,"Occupancy rate (%)": "Taux d’occupation (%)"
-    ,"Jul": "Juil."
-    ,"Excellent condition": "Excellent état"
-    ,"EcoFlow River 2 Pro · La Marsa, Tunis": "EcoFlow River 2 Pro · La Marsa, Tunis"
-    ,"A compact, quiet power station for camping, mobile work and small appliances. Includes charging cable and protective case.": "Une station électrique compacte et silencieuse pour le camping, le travail mobile et les petits appareils. Câble de recharge et étui de protection inclus."
-    ,"Edit listing": "Modifier l’annonce"
-    ,"Equipment information": "Informations sur l’équipement"
-    ,"Revenue": "Revenus"
-    ,"2 requests this month · 1 pending decision.": "2 demandes ce mois-ci · 1 décision en attente."
-    ,"Review reservations": "Consulter les réservations"
-    ,"12 example rentals · 1 currently active.": "12 locations d’exemple · 1 actuellement en cours."
-    ,"Open rental history": "Ouvrir l’historique des locations"
-    ,"No open maintenance items for this equipment.": "Aucune intervention de maintenance en cours pour cet équipement."
-    ,"View technical history": "Voir l’historique technique"
-    ,"Illustrative lifetime revenue: 684 TND · estimated occupancy: 42%.": "Revenus cumulés indicatifs : 684 TND · taux d’occupation estimé : 42 %."
-    ,"View earnings": "Voir les revenus"
-    ,"Illustrative rented days as a share of available days, by month.": "Part des jours loués par rapport aux jours disponibles, par mois (données indicatives)."
-    ,"October 2026": "Octobre 2026"
-    ,"All equipment · month view": "Tous les équipements · vue mensuelle"
-    ,"All equipment": "Tous les équipements"
-    ,"Mon": "Lun"
-    ,"Tue": "Mar"
-    ,"Wed": "Mer"
-    ,"Thu": "Jeu"
-    ,"Fri": "Ven"
-    ,"Sat": "Sam"
-    ,"Sun": "Dim"
-    ,"Reservations on your equipment": "Réservations de vos équipements"
-    ,"Review dates and renter details before responding.": "Vérifiez les dates et les informations du locataire avant de répondre."
-    ,"Filter by reservation status": "Filtrer par statut de réservation"
-    ,"Filter by equipment": "Filtrer par équipement"
-    ,"Renter": "Locataire"
-    ,"Reservation RES-1042": "Réservation RES-1042"
-    ,"Confirmation is a visual preview only; no reservation was changed.": "Aperçu visuel uniquement : aucune réservation n’a été modifiée."
-    ,"Confirm request": "Confirmer la demande"
-    ,"Cancellation is a visual preview only; no reservation was changed.": "Aperçu visuel uniquement : aucune réservation n’a été modifiée."
-    ,"Decline": "Refuser"
-    ,"Awaiting owner response": "En attente de la réponse du propriétaire"
-    ,"Subtotal · tax": "Sous-total · taxes"
-    ,"Request created": "Demande créée"
-    ,"Owner decision": "Décision du propriétaire"
-    ,"Waiting": "En attente"
-    ,"Active, completed and cancelled hand-offs.": "Remises en cours, terminées ou annulées."
-    ,"records": "enregistrements"
-    ,"Leila Ben Salem · 9–11 Oct 2026": "Leila Ben Salem · 9–11 oct. 2026"
-    ,"The renter agrees to use the equipment according to its operating instructions, keep it secure and return it in the recorded condition. Any damage must be reported promptly. The owner and renter confirm the hand-off and return inspection.": "Le locataire s’engage à utiliser l’équipement conformément à son mode d’emploi, à le garder en sécurité et à le rendre dans l’état constaté. Tout dommage doit être signalé rapidement. Le propriétaire et le locataire confirment la remise et l’inspection de retour."
-    ,"extension request": "demande de prolongation"
-    ,"Requested end date": "Date de fin demandée"
-    ,"Review requests": "Examiner les demandes"
-    ,"Pickup inspection: excellent condition. Return inspection: planned for 11 Oct.": "Inspection au retrait : excellent état. Inspection de retour prévue le 11 oct."
-    ,"Extension decisions": "Décisions de prolongation"
-    ,"Check the new period for conflicts before responding.": "Vérifiez l’absence de conflit sur la nouvelle période avant de répondre."
-    ,"Current end": "Fin actuelle"
-    ,"Additional": "Supplément"
-    ,"Decision": "Décision"
-    ,"Preview only: request not approved or saved.": "Aperçu uniquement : la demande n’a pas été approuvée ni enregistrée."
-    ,"Approve": "Approuver"
-    ,"Preview only: request not rejected or saved.": "Aperçu uniquement : la demande n’a pas été refusée ni enregistrée."
-    ,"Reject": "Rejeter"
-    ,"Illustrative requested, approved and rejected requests by month.": "Demandes mensuelles indicatives : en attente, approuvées et refusées."
-    ,"Paid revenue (TND)": "Revenus encaissés (TND)"
-    ,"Jun": "Juin"
-    ,"Paid this month": "Revenus encaissés ce mois-ci"
-    ,"Awaiting payment": "En attente de paiement"
-    ,"Lifetime earnings": "Revenus cumulés"
-    ,"Maintenance spend": "Dépenses de maintenance"
-    ,"Revenue trend": "Évolution des revenus"
-    ,"Illustrative paid revenue by month · TND": "Revenus mensuels indicatifs encaissés · TND"
-    ,"Illustrative income split across equipment categories.": "Répartition indicative des revenus par catégorie d’équipement."
-    ,"Illustrative share of recorded payment methods.": "Répartition indicative des moyens de paiement enregistrés."
-    ,"Revenue vs maintenance": "Revenus et maintenance"
-    ,"Sample monthly income compared with service costs · TND.": "Comparaison indicative des revenus mensuels et des frais d’entretien · TND."
-    ,"Example transaction history for your listings.": "Historique d’exemple des transactions de vos annonces."
-    ,"Print report": "Imprimer le rapport"
-    ,"Maintenance cost (TND)": "Coût de maintenance (TND)"
-    ,"Open work orders": "Interventions en cours"
-    ,"Total repair spend": "Dépenses totales de réparation"
-    ,"Inspections this month": "Inspections ce mois-ci"
-    ,"Example cumulative service spend · TND.": "Dépenses cumulées d’entretien à titre d’exemple · TND."
-    ,"Maintenance history": "Historique de maintenance"
-    ,"Service records by equipment": "Interventions par équipement"
-    ,"Technical report": "Rapport technique"
-    ,"Diagnosis: minor wear detected. Action: connector replaced and output tested. Parts: MC4 connector.": "Diagnostic : usure légère détectée. Intervention : connecteur remplacé et puissance testée. Pièce : connecteur MC4."
-    ,"Condition before and after each rental.": "État avant et après chaque location."
-    ,"Before": "Avant"
-    ,"After": "Après"
-    ,"Damage detected · linked maintenance": "Dommage détecté · maintenance associée"
-    ,"No damage detected": "Aucun dommage détecté"
-    ,"Full inspection list": "Liste complète des inspections"
-    ,"Inspection log": "Journal des inspections"
-    ,"Example condition reports recorded at equipment return.": "Exemples de rapports d’état établis au retour de l’équipement."
-    ,"Open maintenance": "Maintenance en cours"
-    ,"No damage": "Aucun dommage"
-    ,"Reservations, payments and equipment events in one place.": "Retrouvez les réservations, paiements et événements liés aux équipements au même endroit."
-    ,"Preview only: notifications are not actually marked as read.": "Aperçu uniquement : les notifications ne sont pas réellement marquées comme lues."
-    ,"Mark all as read": "Tout marquer comme lu"
-    ,"Unread": "Non lu"
-    ,"Payments": "Paiements"
-    ,"Unread notifications": "Notifications non lues"
-    ,"Sample alerts for owner actions and equipment changes.": "Exemples d’alertes concernant les actions du propriétaire et les changements d’équipement."
-    ,"Notification preferences": "Préférences de notification"
-    ,"Email and push controls will be available when notifications are connected.": "Les réglages des notifications par e-mail et push seront disponibles lorsque cette fonctionnalité sera activée."
-    ,"Account settings": "Paramètres du compte"
-    ,"Dismiss notification": "Ignorer la notification"
-    ,"Your SolarShare space": "Votre espace SolarShare"
-    ,"UI preview — sample data": "Aperçu de l’interface — données d’exemple"
-    ,"Visual prototype.": "Prototype visuel."
-    ,"Sample information is not connected to an account or saved.": "Les informations d’exemple ne sont associées à aucun compte et ne sont pas enregistrées."
-    ,"Booking flow preview only. No reservation is created and no payment is processed.": "Aperçu du parcours de réservation uniquement. Aucune réservation n’est créée et aucun paiement n’est traité."
-    ,"Rent the gear you need for a few days, then pass it on for someone else to use.": "Louez l’équipement dont vous avez besoin quelques jours, puis partagez-le avec quelqu’un d’autre."
-    ,"Reservation RES-1042 · Issued 3 Oct 2026": "Réservation RES-1042 · émise le 3 oct. 2026"
-    ,"Esprit 5TWIN7 – BuilDream project": "Projet BuilDream – Esprit 5TWIN7"
-    ,"Confirm your password": "Confirmez votre mot de passe"
-    ,"This is a secure area. Please confirm your password before continuing.": "Cette zone est sécurisée. Confirmez votre mot de passe pour continuer."
-    ,"Confirm": "Confirmer"
-    ,"Reset your password": "Réinitialiser votre mot de passe"
-    ,"Enter your email and we will send you a password reset link.": "Saisissez votre adresse e-mail pour recevoir un lien de réinitialisation."
-    ,"Send password reset link": "Envoyer le lien de réinitialisation"
-    ,"Back to sign in": "Retour à la connexion"
-    ,"Sign in to continue to your account.": "Connectez-vous pour accéder à votre compte."
-    ,"Don't have an account?": "Vous n’avez pas de compte ?"
-    ,"Enter your details to create your account.": "Saisissez vos informations pour créer votre compte."
-    ,"Already have an account?": "Vous avez déjà un compte ?"
-    ,"Choose a new password": "Choisissez un nouveau mot de passe"
-    ,"Set a new password to secure your account.": "Définissez un nouveau mot de passe pour sécuriser votre compte."
-    ,"Reset Password": "Réinitialiser le mot de passe"
-    ,"Verify your email address": "Vérifiez votre adresse e-mail"
-    ,"Check your inbox for a verification link. If you did not receive it, request another below.": "Consultez votre boîte de réception pour trouver le lien de vérification. Si vous ne l’avez pas reçu, demandez-en un autre ci-dessous."
-    ,"A new verification link has been sent to your email address.": "Un nouveau lien de vérification a été envoyé à votre adresse e-mail."
-    ,"Resend verification email": "Renvoyer l’e-mail de vérification"
-    ,"Log out": "Se déconnecter"
-    ,"Once your account is deleted, all of its resources and data will be permanently deleted. Before deleting your account, please download any data or information that you wish to retain.": "La suppression de votre compte entraînera la suppression définitive de toutes vos ressources et données. Téléchargez au préalable les informations que vous souhaitez conserver."
-    ,"Are you sure you want to delete your account?": "Voulez-vous vraiment supprimer votre compte ?"
-    ,"Once your account is deleted, all of its resources and data will be permanently deleted. Please enter your password to confirm you would like to permanently delete your account.": "La suppression de votre compte et de toutes ses données est définitive. Saisissez votre mot de passe pour confirmer."
-    ,"Ensure your account is using a long, random password to stay secure.": "Utilisez un mot de passe long et aléatoire pour protéger votre compte."
-    ,"Saved.": "Enregistré."
-    ,"Update your account's profile information and email address.": "Mettez à jour les informations de votre profil et votre adresse e-mail."
-    ,"Email": "E-mail"
-    ,"Your email address is unverified.": "Votre adresse e-mail n’est pas vérifiée."
-    ,"Click here to re-send the verification email.": "Cliquez ici pour renvoyer l’e-mail de vérification."
-    ,"User Management": "Gestion des utilisateurs"
-    ,"User details": "Détails de l’utilisateur"
-    ,"Edit profile": "Modifier le profil"
-    ,"Back to list": "Retour à la liste"
-    ,"Account information": "Informations du compte"
-    ,"Not provided": "Non renseigné"
-    ,"Account role": "Rôle du compte"
-    ,"Email verified": "E-mail vérifié"
-    ,"Yes": "Oui"
-    ,"No": "Non"
-    ,"Joined date": "Date d’inscription"
-    ,"All Users": "Tous les utilisateurs"
-    ,"Blank Page": "Page vierge"
-    ,"Page": "Page"
-    ,"Search users": "Rechercher des utilisateurs"
-    ,"Search users...": "Rechercher des utilisateurs…"
-    ,"Filter by role": "Filtrer par rôle"
-    ,"All roles": "Tous les rôles"
-    ,"Admin": "Administrateur"
-    ,"User": "Utilisateur"
-    ,"Role": "Rôle"
-    ,"Verified": "Vérifié"
-    ,"Unverified": "Non vérifié"
-    ,"Filter": "Filtrer"
-    ,"Reset": "Réinitialiser"
-    ,"Are you sure?": "Voulez-vous continuer ?"
-    ,"No users found.": "Aucun utilisateur trouvé."
-    ,"Edit User": "Modifier l’utilisateur"
-    ,"Edit User Profile": "Modifier le profil utilisateur"
-    ,"Update user information and account privileges.": "Mettez à jour les informations et les autorisations du compte."
-    ,"Equipment Owner": "Propriétaire d’équipement"
-    ,"Buyer (legacy)": "Acheteur (ancien compte)"
-    ,"User Role": "Rôle de l’utilisateur"
-    ,"Toggle Sidebar": "Afficher ou masquer la barre latérale"
-    ,"Toggle Mobile Menu": "Afficher ou masquer le menu mobile"
-    ,"Toggle application menu": "Afficher ou masquer le menu des applications"
-    ,"Rent and share portable solar panels, batteries and small wind turbines between neighbours.": "Louez et partagez des panneaux solaires portables, des batteries et de petites éoliennes entre voisins."
-    ,"Primary navigation": "Navigation principale"
-    ,"pro": "Pro"
-    ,"Menu": "Menu"
-    ,"Others": "Autres"
-    ,"Ecommerce": "Commerce en ligne"
-    ,"Analytics": "Analyses"
-    ,"Marketing": "Marketing"
-    ,"CRM": "CRM"
-    ,"SaaS": "SaaS"
-    ,"AI Dashboard": "Tableau de bord IA"
-    ,"Stocks": "Stocks"
-    ,"Finance": "Finance"
-    ,"Sales": "Ventes"
-    ,"Logistics": "Logistique"
-    ,"Calendar": "Calendrier"
-    ,"User Profile": "Profil utilisateur"
-    ,"Profile Overview": "Aperçu du profil"
-    ,"Preferences": "Préférences"
-    ,"Sessions & Security": "Sessions et sécurité"
-    ,"Connected Accounts": "Comptes connectés"
-    ,"Forms": "Formulaires"
-    ,"Form Elements": "Éléments de formulaire"
-    ,"Advanced Forms": "Formulaires avancés"
-    ,"Tables": "Tableaux"
-    ,"Basic Tables": "Tableaux simples"
-    ,"Advanced Tables": "Tableaux avancés"
-    ,"Pages": "Pages"
-    ,"Blank Page": "Page vierge"
-    ,"404 Error": "Erreur 404"
-    ,"505 Error": "Erreur 505"
-    ,"Integrations": "Intégrations"
-    ,"API Keys": "Clés API"
-    ,"FAQ": "FAQ"
-    ,"Access Denied": "Accès refusé"
-    ,"403 Error": "Erreur 403"
-    ,"500 Error": "Erreur 500"
-    ,"503 Error": "Erreur 503"
-    ,"Coming Soon": "Bientôt disponible"
-    ,"Success": "Réussite"
-    ,"Under Construction": "En construction"
-    ,"Full-width Layout": "Mise en page pleine largeur"
-    ,"Charts": "Graphiques"
-    ,"Line Chart": "Graphique linéaire"
-    ,"Bar Chart": "Graphique à barres"
-    ,"Area Chart": "Graphique en aires"
-    ,"Pie Chart": "Diagramme circulaire"
-    ,"Donut Chart": "Diagramme en anneau"
-    ,"Radial Chart": "Graphique radial"
-    ,"Radar Charts": "Graphiques radar"
-    ,"Radial Progress Charts": "Graphiques radiaux de progression"
-    ,"Chart Library": "Bibliothèque de graphiques"
-    ,"UI Elements": "Éléments d’interface"
-    ,"Component Library": "Bibliothèque de composants"
-    ,"Alerts": "Alertes"
-    ,"Avatar": "Avatar"
-    ,"Badge": "Badge"
-    ,"Buttons": "Boutons"
-    ,"Images": "Images"
-    ,"Videos": "Vidéos"
-    ,"Modals": "Fenêtres modales"
-    ,"Skeletons": "Squelettes de chargement"
-    ,"Empty State": "État vide"
-    ,"Carousel": "Carrousel"
-    ,"Ribbons": "Rubans"
-    ,"Sidebar Variants": "Variantes de barre latérale"
-    ,"Authentication": "Authentification"
-    ,"New badge": "Nouveau"
-    ,"Sign Up": "Inscription"
-    ,"Forgot Password": "Mot de passe oublié"
-    ,"Two-Factor Demo": "Démo à deux facteurs"
-    ,"Lock Screen Demo": "Démo d’écran verrouillé"
-    ,"Applications": "Applications"
-    ,"Chat": "Discussion"
-    ,"Support Ticket": "Ticket d’assistance"
-    ,"Ticket Reply": "Réponse au ticket"
-    ,"Tasks": "Tâches"
-    ,"File Manager": "Gestionnaire de fichiers"
-    ,"Map Examples": "Exemples de cartes"
-    ,"Vector Maps": "Cartes vectorielles"
-    ,"Product List": "Liste des produits"
-    ,"Categories": "Catégories"
-    ,"Orders": "Commandes"
-    ,"Customers": "Clients"
-    ,"Invoices": "Factures"
-    ,"Transactions": "Transactions"
-    ,"Billing": "Facturation"
-    ,"Cart": "Panier"
-    ,"Checkout": "Paiement"
-    ,"Pricing": "Tarifs"
-    ,"AI Studio & Maps": "Studio IA et cartes"
-    ,"Text Generator": "Générateur de texte"
-    ,"Image Generator": "Générateur d’images"
-    ,"Video Generator": "Générateur de vidéos"
-    ,"Code Generator": "Générateur de code"
-    ,"AI Chat": "Discussion avec l’IA"
-    ,"Generation History": "Historique des générations"
-    ,"AI Settings": "Paramètres de l’IA"
-    ,"AI Usage": "Utilisation de l’IA"
-    ,"Map View": "Vue cartographique"
-    ,"Create user": "Créer un utilisateur"
-    ,"Create an account and assign its workspace role.": "Créez un compte et attribuez-lui un rôle d’espace de travail."
-    ,"Full name": "Nom complet"
-    ,"Account role": "Rôle du compte"
-    ,"Buyer": "Acheteur"
-    ,"Legacy buyer": "Ancien rôle acheteur"
-    ,"Administrator": "Administrateur"
-    ,"Temporary password": "Mot de passe temporaire"
-    ,"The new user will need to verify their email address before accessing verified workspace pages.": "Le nouvel utilisateur devra vérifier son adresse e-mail avant d’accéder aux pages sécurisées de son espace."
-    ,"User Role": "Rôle de l’utilisateur"
-    ,"User created successfully.": "L’utilisateur a été créé."
-    ,"User updated successfully.": "L’utilisateur a été mis à jour."
-    ,"User deleted successfully.": "L’utilisateur a été supprimé."
-    ,"A brighter way to share": "Une meilleure façon de partager"
-    ,"Good energy is better shared.": "La bonne énergie se partage."
-    ,"Find the power you need, or let someone else put your equipment to work.": "Trouvez l’énergie qu’il vous faut ou permettez à quelqu’un d’utiliser votre équipement."
-    ,"POWERING SHARED MOMENTS": "DE L’ÉNERGIE POUR LES MOMENTS PARTAGÉS"
-    ,"Illustration of shared solar power": "Illustration du partage de l’énergie solaire"
-    ,"Discover": "Découvrir"
-    ,"Gear nearby": "Du matériel près de chez vous"
-    ,"Share": "Partager"
-    ,"What you own": "Vos équipements"
-    ,"Reuse": "Réutiliser"
-    ,"More, together": "Ensemble, plus loin"
-    ,"A community-powered energy future.": "Un avenir énergétique porté par la communauté."
-    ,"Shared renewable energy, made easier for everyone.": "L’énergie renouvelable partagée, plus accessible à tous."
-    ,"optional": "facultatif"
-    ,"or continue with email": "ou continuer avec votre adresse e-mail"
-    ,"sample rentals": "locations d’exemple"
-      ,"Technical records": "Dossiers techniques"
-    ,"Maintenances": "Maintenances"
-    ,"Maintenance reports": "Rapports de maintenance"
-    ,"Equipment / maintenance": "Équipement / maintenance"
-    ,"Cost (TND)": "Coût (TND)"
-    ,"Notes": "Notes"
-    ,"Planned": "Planifiée"
-    ,"In progress": "En cours"
-    ,"Diagnosis": "Diagnostic"
-    ,"Actions taken": "Actions effectuées"
-    ,"Parts replaced": "Pièces remplacées"
-    ,"Technician notes": "Notes du technicien"
-    ,"Report date": "Date du rapport"
-    ,"Rental (optional)": "Location (facultative)"
-    ,"Inspection date": "Date d’inspection"
-    ,"Condition before": "État avant"
-    ,"Condition after": "État après"
-    ,"Damage detected": "Dommage détecté"
-    ,"Comments": "Commentaires"
-    ,"Select an option": "Sélectionnez une option"
-    ,"Create record": "Créer un enregistrement"
-    ,"Edit record": "Modifier l’enregistrement"
-    ,"No records yet.": "Aucun enregistrement."
-    ,"Status / damage": "Statut / dommage"
-    ,"Delete this record?": "Supprimer cet enregistrement ?"
-    ,"View maintenance report": "Voir le rapport de maintenance"
-    ,"Record created.": "Enregistrement créé."
-    ,"Record updated.": "Enregistrement modifié."
-    ,"Record deleted.": "Enregistrement supprimé."
-    ,"Technical records will appear here after the equipment and rental modules are connected to the database.": "Les dossiers techniques apparaîtront ici après la connexion des modules équipement et location à la base de données."
-    ,"Back to owner workspace": "Retour à l’espace propriétaire"
-    ,"Technical records will appear here after equipment ownership is connected to the database.": "Les dossiers techniques apparaîtront ici quand les équipements et leurs propriétaires seront enregistrés en base."
-    ,"Search the network": "Rechercher dans le réseau"
-    ,"Energy parameters": "Paramètres énergétiques"
-    ,"Live equipment readout": "Lecture technique en direct"
-    ,"Efficiency": "Rendement"
-    ,"Ready": "Prêt"
-    ,"Publication status": "Statut de publication"
-    ,"Published": "Publié"
-    ,"Pending review": "En attente de validation"
-    ,"Publication": "Publication"
-    ,"All publication statuses": "Tous les statuts de publication"
-    ,"Or upload a category image": "Ou téléverser une image de catégorie"
-    ,"Or upload an equipment image": "Ou téléverser une image d’équipement"
-    ,"Equipment submitted for administrator review.": "Équipement envoyé pour validation par l’administrateur."
-    ,"This technical value is required for the selected category.": "Cette donnée technique est requise pour la catégorie sélectionnée."
-    ,"Name: A to Z": "Nom : A à Z"
-    ,"Capacity: high to low": "Capacité décroissante"
-    ,"SolarShare / open catalogue": "SolarShare / catalogue ouvert"
-    ,"Power for the plan you already have.": "L’énergie pour vos projets déjà prévus."
-    ,"Local owners": "Propriétaires locaux"
-    ,"Daily rental": "Location à la journée"
-    ,"Energy details first": "Les détails énergétiques d’abord"
-    ,"ways to borrow useful clean-energy equipment today.": "façons d’emprunter du matériel énergétique utile aujourd’hui."
-    ,"Name, brand, technology or city…": "Nom, marque, technologie ou ville…"
-    ,"e.g. Voltix": "ex. Voltix"
-    ,"Any technology": "Toutes les technologies"
-    ,"Min price/day": "Prix minimum/jour"
-    ,"Max power (W)": "Puissance maximale (W)"
-    ,"Max capacity (Wh)": "Capacité maximale (Wh)"
-    ,"Any status": "Tous les statuts"
-    ,"Hide filters": "Masquer les filtres"
-    ,"Show filters": "Afficher les filtres"
-    ,"Sort: ": "Trier : "
-    ,"Energy gear": "Matériel énergétique"
-    ,"TND": "TND"
-    ,"View details": "Voir les détails"
-    ,"Browse by energy source": "Parcourir par source d’énergie"
-    ,"Pick a current": "Choisissez votre énergie"
-    ,"Scroll categories backward": "Faire défiler les catégories vers l’arrière"
-    ,"Scroll categories forward": "Faire défiler les catégories vers l’avant"
-    ,"Everything": "Tout"
-    ,"No equipment found": "Aucun équipement trouvé"
-    ,"item found": "équipement trouvé"
-    ,"items found": "équipements trouvés"
-    ,"Browse-only catalogue. Buyer access is required to continue.": "Catalogue en consultation. L’accès acheteur est requis pour continuer."
-    ,"Browse-only catalogue. Sign in as a buyer to continue.": "Catalogue en consultation. Connectez-vous comme acheteur pour continuer."
-    ,"Availability checks, reservations and payments are handled after buyer access.": "La disponibilité, les réservations et les paiements sont gérés après l’accès acheteur."
-    ,"Portable power stations": "Stations électriques portables"
-    ,"Solar charge controllers": "Régulateurs de charge solaire"
-    ,"Solar thermal equipment": "Équipement solaire thermique"
-    ,"Micro-hydropower": "Micro-hydroélectricité"
-    ,"Biomass and bioenergy": "Biomasse et bioénergie"
-    ,"Geothermal heat pumps": "Pompes à chaleur géothermiques"
-    ,"Marine energy": "Énergie marine"
-    ,"Hydrogen and fuel cells": "Hydrogène et piles à combustible"
-    ,"Energy monitoring": "Suivi énergétique"
-    ,"Lithium-ion": "Lithium-ion"
-    ,"Monocrystalline": "Monocristallin"
-    ,"Horizontal axis": "Axe horizontal"
-    ,"Vertical axis": "Axe vertical"
-    ,"MPPT": "MPPT"
-    ,"Solar thermal": "Solaire thermique"
-    ,"Pelton": "Pelton"
-    ,"Biomass pellets": "Granulés de biomasse"
-    ,"Ground-source": "Géothermique"
-    ,"Point absorber": "Absorbeur ponctuel"
-    ,"PEM fuel cell": "Pile à combustible PEM"
-    ,"Wi-Fi monitoring": "Suivi Wi-Fi"
-    ,"Foldable solar panel 200 W": "Panneau solaire pliable 200 W"
-    ,"Portable wind turbine 400 W": "Éolienne portable 400 W"
-    ,"Power station 2000 Wh": "Station électrique 2 000 Wh"
-    ,"Solar kit 2 × 100 W": "Kit solaire 2 × 100 W"
-    ,"Compact battery 500 Wh": "Batterie compacte 500 Wh"
-    ,"{0} No equipment found|{1} :count item found|[2,*] :count items found": "{0} Aucun équipement trouvé|{1} :count équipement trouvé|[2,*] :count équipements trouvés"
-    ,"Anaerobic digestion": "Digestion anaérobie"
-    ,"Crossflow": "Flux croisé"
-    ,"Evacuated tube": "Tube sous vide"
-    ,"Irradiance sensor": "Capteur d’irradiance"
-    ,"PWM": "PWM"
-    ,"Flat-plate solar collector": "Capteur solaire plan"
-    ,"Solar water heater kit": "Kit de chauffe-eau solaire"
-    ,"Vertical-axis wind turbine": "Éolienne à axe vertical"
-    ,"Micro-hydro stream turbine": "Turbine hydroélectrique de ruisseau"
-    ,"Run-of-river generator": "Générateur au fil de l’eau"
-    ,"Pellet heater 8 kW": "Poêle à granulés 8 kW"
-    ,"Small biogas digester": "Petit digesteur de biogaz"
-    ,"Ground-source heat pump": "Pompe à chaleur géothermique"
-    ,"Wave-energy buoy demonstrator": "Démonstrateur de bouée houlomotrice"
-    ,"PEM fuel-cell backup kit": "Kit de secours à pile à combustible PEM"
-    ,"Smart energy meter": "Compteur énergétique intelligent"
-    ,"Portable solar irradiance meter": "Irradiancemètre solaire portable"
-    ,"MPPT charge controller 40 A": "Régulateur de charge MPPT 40 A"
-    ,"Off-grid solar regulator 20 A": "Régulateur solaire autonome 20 A"
+    "Update profile": "Mettre à jour le profil",
+    "Update user information and account privileges.": "Mettez à jour les informations et les autorisations du compte.",
+    "Update your account details, change your password, or delete your account.": "Modifiez les informations de votre compte, votre mot de passe ou supprimez votre compte.",
+    "Update your account's profile information and email address.": "Mettez à jour les informations de votre profil et votre adresse e-mail.",
+    "Usage": "Usage",
+    "Usage analytics page example · no provider is connected and no tokens have been consumed.": "Usage analytics page example · no provider is connected and no tokens have been consumed.",
+    "Usage by tool": "Usage by tool",
+    "Use a drawer for contextual actions or details that should not navigate away.": "Use a drawer for contextual actions or details that should not navigate away.",
+    "Use a unique password and confirm your current password before changing it.": "Choisissez un mot de passe unique et confirmez votre mot de passe actuel avant de le modifier.",
+    "Use consistent variants for primary, secondary, outline, and quiet actions.": "Use consistent variants for primary, secondary, outline, and quiet actions.",
+    "Use drawers for contextual details, filters, or quick actions on narrow screens.": "Use drawers for contextual details, filters, or quick actions on narrow screens.",
+    "Use sidebar navigation": "Utiliser la navigation latérale",
+    "Use the equipment according to its instructions, keep it secure and return it in the recorded condition. Report any damage promptly. Deposit is shown for information only in this preview.": "Utilisez l’équipement conformément à ses instructions, conservez-le en sécurité et rendez-le dans l’état constaté. Signalez rapidement tout dommage. La caution est affichée à titre indicatif.",
+    "Use the equipment according to its instructions, take reasonable care and return it on the agreed date. The deposit and final contract are informational in this preview.": "Utilisez l’équipement conformément à ses instructions, prenez-en soin et rendez-le à la date convenue. La caution et le contrat final sont présentés à titre indicatif.",
+    "Use the keyboard to move through the dialog controls. Focus stays in the modal until it is closed.": "Use the keyboard to move through the dialog controls. Focus stays in the modal until it is closed.",
+    "Use the theme control in the header. The selected appearance is stored in this browser and applies to the dashboard interface.": "Use the theme control in the header. The selected appearance is stored in this browser and applies to the dashboard interface.",
+    "Use this shell for maps, reports, or wide data workspaces.": "Use this shell for maps, reports, or wide data workspaces.",
+    "Use top navigation": "Utiliser la navigation supérieure",
+    "User": "Utilisateur",
+    "User Management": "Gestion des utilisateurs",
+    "User Profile": "Profil utilisateur",
+    "User Role": "Rôle de l’utilisateur",
+    "User created successfully.": "L’utilisateur a été créé.",
+    "User deleted successfully.": "L’utilisateur a été supprimé.",
+    "User details": "Détails de l’utilisateur",
+    "User updated successfully.": "L’utilisateur a été mis à jour.",
+    "Vector Maps": "Cartes vectorielles",
+    "Vector map examples use illustrative public locations and do not identify customer addresses.": "Vector map examples use illustrative public locations and do not identify customer addresses.",
+    "Verified": "Vérifié",
+    "Verify your email address": "Vérifiez votre adresse e-mail",
+    "Vertical axis": "Axe vertical",
+    "Vertical category comparison.": "Vertical category comparison.",
+    "Vertical-axis wind turbine": "Éolienne à axe vertical",
+    "Video": "Video",
+    "Video Generator": "Générateur de vidéos",
+    "Videos": "Vidéos",
+    "View": "Voir",
+    "View AI settings": "View AI settings",
+    "View details": "Voir les détails",
+    "View earnings": "Voir les revenus",
+    "View inspections": "Voir les inspections",
+    "View invoice": "Voir la facture",
+    "View maintenance report": "Voir le rapport de maintenance",
+    "View options": "View options",
+    "View payment & invoice": "Voir le paiement et la facture",
+    "View reservation": "Voir la réservation",
+    "View reservations": "Voir les réservations",
+    "View technical history": "Voir l’historique technique",
+    "Viewport-aware workspace": "Viewport-aware workspace",
+    "Visit the help center": "Visit the help center",
+    "Visitors": "Visitors",
+    "Visual prototype.": "Prototype visuel.",
+    "Voltage": "Tension",
+    "Waiting": "En attente",
+    "Waiting for a response": "En attente d’une réponse",
+    "Wave-energy buoy demonstrator": "Démonstrateur de bouée houlomotrice",
+    "We can't seem to find the page you are looking for.": "We can't seem to find the page you are looking for.",
+    "Wed": "Mer",
+    "Weekly orders": "Weekly orders",
+    "Welcome back": "Bon retour",
+    "What kind of power do you need?": "De quelle énergie avez-vous besoin ?",
+    "What needs to be done?": "What needs to be done?",
+    "What you own": "Vos équipements",
+    "When should I use a drawer?": "When should I use a drawer?",
+    "Wi-Fi monitoring": "Suivi Wi-Fi",
+    "Wind equipment": "Équipement éolien",
+    "Wind turbine 400 W": "Éolienne 400 W",
+    "Workspace overview": "Workspace overview",
+    "Workspace preferences can be organized in this panel.": "Workspace preferences can be organized in this panel.",
+    "World map with custom location markers": "World map with custom location markers",
+    "World map with multiple Tunisia markers": "World map with multiple Tunisia markers",
+    "World map with one marker in Tunis": "World map with one marker in Tunis",
+    "World map without markers": "World map without markers",
+    "Write a message": "Write a message",
+    "Write a message...": "Write a message...",
+    "Write a reply...": "Write a reply...",
+    "Write a response...": "Write a response...",
+    "YOUR ACTIVITY · ANALYTICS": "VOTRE ACTIVITÉ · ANALYSES",
+    "Yes": "Oui",
+    "Yesterday": "Hier",
+    "Yesterday · 11:30": "Hier · 11:30",
+    "Yesterday · 16:08": "Hier · 16:08",
+    "You borrowed instead of buying equipment": "Vous avez loué au lieu d’acheter un équipement",
+    "Your SolarShare": "Votre SolarShare",
+    "Your SolarShare space": "Votre espace SolarShare",
+    "Your account, in one place": "Your account, in one place",
+    "Your bookings, rentals and clean-energy journeys, all in one place.": "Retrouvez vos réservations, locations et parcours d’énergie propre au même endroit.",
+    "Your clean-energy snapshot": "Votre aperçu énergie propre",
+    "Your demo preferences were updated locally.": "Your demo preferences were updated locally.",
+    "Your email address is not verified.": "Votre adresse e-mail n’est pas vérifiée.",
+    "Your email address is unverified.": "Votre adresse e-mail n’est pas vérifiée.",
+    "Your listings": "Vos annonces",
+    "Your listings, rental requests and equipment activity, all in one place.": "Retrouvez vos annonces, demandes de location et l’activité de vos équipements au même endroit.",
+    "Your next adventure starts here, :name.": "Votre prochaine aventure commence ici, :name.",
+    "Your next shared-energy experience starts here.": "Votre prochaine expérience d’énergie partagée commence ici.",
+    "Your performance at a glance": "Vos performances en un coup d’œil",
+    "Your rental activity": "Votre activité de location",
+    "Your rental history": "Historique de vos locations",
+    "Your rental snapshot": "Votre activité de location",
+    "Your rental total": "Total de votre location",
+    "Your reservation is confirmed!": "Votre réservation est confirmée !",
+    "Your reservations": "Vos réservations",
+    "Your updates": "Vos notifications",
+    "additional team members": "additional team members",
+    "available in this demo": "available in this demo",
+    "day": "jour",
+    "day(s)": "jour(s)",
+    "day(s) × :price TND": "jour(s) × :price TND",
+    "days": "jours",
+    "e.g. Portable power station": "ex. : station électrique portable",
+    "e.g. Voltix": "ex. Voltix",
+    "extension request": "demande de prolongation",
+    "goes further when we share it.": "va plus loin quand on la partage.",
+    "installations": "installations",
+    "item found": "équipement trouvé",
+    "items found": "équipements trouvés",
+    "of": "of",
+    "of 5": "of 5",
+    "optional": "facultatif",
+    "or continue with email": "ou continuer avec votre adresse e-mail",
+    "pro": "Pro",
+    "records": "enregistrements",
+    "sample rentals": "locations d’exemple",
+    "shared by": "proposé par",
+    "ways to borrow useful clean-energy equipment today.": "façons d’emprunter du matériel énergétique utile aujourd’hui.",
+    "{0} No equipment found|{1} :count item found|[2,*] :count items found": "{0} Aucun équipement trouvé|{1} :count équipement trouvé|[2,*] :count équipements trouvés",
+    "Add gallery images": "Ajouter des images à la galerie",
+    "Up to 8 photos. The first one becomes the gallery cover.": "Jusqu’à 8 photos. La première devient la couverture de la galerie.",
+    "Download technical PDF": "Télécharger la fiche technique PDF",
+    "Save to favorites": "Ajouter aux favoris",
+    "Remove from favorites": "Retirer des favoris",
+    "Favorite list updated.": "La liste des favoris a été mise à jour.",
+    "Solar insight": "Analyse solaire",
+    "Estimated daily production": "Production quotidienne estimée",
+    "Based on the next available Open-Meteo radiation forecast and this panel’s efficiency.": "Selon les prévisions de rayonnement Open-Meteo disponibles et le rendement de ce panneau.",
+    "Production": "Production",
+    "CO₂ avoided": "CO₂ évité",
+    "Equipment technical sheet": "Fiche technique de l’équipement",
+    "Scan to view this listing on SolarShare": "Scannez pour consulter cette annonce sur SolarShare",
+    "Brand / model": "Marque / modèle",
+    "Power (W)": "Puissance (W)",
+    "Capacity (Wh)": "Capacité (Wh)",
+    "Voltage (V)": "Tension (V)",
+    "Efficiency (%)": "Rendement (%)",
+    "Max output (W)": "Puissance maximale (W)",
+    "Foldable panels for camping, vans and off-grid weekends.": "Panneaux pliables pour le camping, les vans et les week-ends autonomes.",
+    "Rechargeable power stations for fridges, lights, tools and weekend trips.": "Stations électriques rechargeables pour les réfrigérateurs, les lampes, les outils et les escapades du week-end."
+    ,"Controllers that safely regulate energy from panels into batteries.": "Régulateurs qui dirigent en toute sécurité l’énergie des panneaux vers les batteries.",
+    "Solar collectors and hot-water equipment for low-energy homes.": "Capteurs solaires et équipements d’eau chaude pour les logements économes en énergie.",
+    "Compact biomass equipment for useful heat and local energy recovery.": "Équipements compacts de biomasse pour produire de la chaleur utile et récupérer l’énergie localement.",
+    "Efficient ground-source systems for heating and cooling spaces.": "Systèmes géothermiques efficaces pour chauffer et rafraîchir les espaces.",
+    "Small tidal and wave-energy prototypes for coastal experiments.": "Petits prototypes d’énergie marémotrice et houlomotrice pour les expérimentations côtières.",
+    "Educational electrolyzers and fuel-cell backup power systems.": "Électrolyseurs pédagogiques et systèmes de secours à pile à combustible.",
+    "Meters and sensors that make renewable-energy usage visible.": "Compteurs et capteurs qui rendent visible l’utilisation des énergies renouvelables.",
+    "Small water turbines for streams, farms and off-grid installations.": "Petites turbines hydrauliques pour les cours d’eau, les fermes et les installations autonomes.",
+    "Compact turbines to generate clean power where the wind blows.": "Turbines compactes pour produire une énergie propre là où le vent souffle."
 }

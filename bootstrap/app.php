@@ -16,6 +16,7 @@ return Application::configure(basePath: dirname(__DIR__))
     )
     ->withProviders([
         \App\Providers\EventServiceProvider::class,
+        \App\Providers\TranslationServiceProvider::class,
         \Laravel\Sanctum\SanctumServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
@@ -51,5 +52,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withCommands([
         \App\Console\Commands\ScoutSetupMeilisearch::class,
+        \App\Console\Commands\SyncBladeTranslations::class,
+        \App\Console\Commands\SyncDatabaseTranslations::class,
     ])
     ->create();
