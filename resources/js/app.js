@@ -223,6 +223,44 @@ async function startAlpine() {
     }
 
     Alpine.start();
+
+    // Initialize Laravel Echo for real-time notifications
+    if (window.Echo) {
+        const userId = document.querySelector('meta[name="user-id"]')?.getAttribute('content');
+        if (userId) {
+            // Owner channel
+            window.Echo.private(`owner.${userId}`)
+                .listen('.reservation.created', (e) => showToast(e.message))
+                .listen('.payment.received', (e) => showToast(e.message))
+                .listen('.rental.started', (e) => showToast(e.message))
+                .listen('.equipment.returned', (e) => showToast(e.message))
+                .listen('.extension.requested', (e) => showToast(e.message))
+                .listen('.maintenance.created', (e) => showToast(e.message))
+                .listen('.maintenance.completed', (e) => showToast(e.message));
+
+            // User channel (buyer)
+            window.Echo.private(`user.${userId}`)
+                .listen('.reservation.approved', (e) => showToast(e.message))
+                .listen('.reservation.rejected', (e) => showToast(e.message))
+                .listen('.rental.started', (e) => showToast(e.message))
+                .listen('.equipment.returned', (e) => showToast(e.message))
+                .listen('.extension.approved', (e) => showToast(e.message))
+                .listen('.extension.rejected', (e) => showToast(e.message));
+        }
+    }
+
+    function showToast(message) {
+        if (window.Alpine && Alpine.store('notifications')) {
+            Alpine.store('notifications').add(message);
+        } else {
+            // Fallback: create a simple toast
+            const toast = document.createElement('div');
+            toast.className = 'fixed bottom-4 right-4 bg-gray-900 text-white px-4 py-2 rounded-lg shadow-lg z-50';
+            toast.textContent = message;
+            document.body.appendChild(toast);
+            setTimeout(() => toast.remove(), 5000);
+        }
+    }
 }
 
 startAlpine();

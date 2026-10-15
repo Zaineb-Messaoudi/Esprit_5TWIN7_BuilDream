@@ -1,0 +1,2 @@
+@extends('layouts.app')
+@section('content')<div class="mx-auto max-w-2xl p-6"><div class="rounded-xl bg-white p-6 shadow-theme-xs dark:bg-gray-900"><h1 class="text-title-lg font-semibold">{{ $payment->transaction_reference }}</h1><p class="mt-3">{{ $payment->amount }} · {{ $payment->status }} · {{ $payment->payment_method }}</p><a class="mt-5 inline-block text-brand-600" href="{{ route('rental.payments.edit',$payment) }}">{{ __('Edit') }}</a></div></div>@endsection

@@ -17,6 +17,12 @@
         <div class="flex flex-wrap items-center justify-between gap-4">
             <h1 class="text-title-md font-semibold text-gray-800 dark:text-white/90">Rental {{ $rental->reference }}</h1>
             <div class="flex items-center gap-3">
+                @if (in_array($rental->status->value, ['active', 'completed']) && ! $rental->inspections->first())
+                    <a href="{{ route('rental.return.form', $rental) }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-warning-500 px-4 py-2 text-sm font-medium text-white hover:bg-warning-600">
+                        <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+                        {{ __('Return equipment') }}
+                    </a>
+                @endif
                 <a href="{{ route('admin.rentals.edit', $rental) }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">Edit</a>
                 <a href="{{ route('admin.rentals.index') }}" class="inline-flex min-h-10 items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">Back to list</a>
             </div>

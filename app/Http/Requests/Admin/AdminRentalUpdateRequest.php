@@ -4,7 +4,6 @@ namespace App\Http\Requests\Admin;
 
 use App\Enums\RentalStatus;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
 /**
@@ -25,18 +24,14 @@ class AdminRentalUpdateRequest extends FormRequest
         return [
             'user_id' => ['required', 'integer', 'exists:users,id'],
 
-            'equipment_id' => [
-                'required',
-                'integer',
-                Schema::hasTable('equipment') ? Rule::exists('equipment', 'id') : 'min:1',
-            ],
+            'equipment_id' => ['required', 'integer', 'exists:equipment,id'],
 
             // $this->route('rental') is the Rental being edited (route model binding).
             // ignore(...) lets the rental keep its own reservation_id without an error.
             'reservation_id' => [
                 'nullable',
                 'integer',
-                'min:1',
+                'exists:reservations,id',
                 Rule::unique('rentals', 'reservation_id')->ignore($this->route('rental')),
             ],
 
@@ -52,12 +47,12 @@ class AdminRentalUpdateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'user_id'        => 'renter',
-            'equipment_id'   => 'equipment',
+            'user_id' => 'renter',
+            'equipment_id' => 'equipment',
             'reservation_id' => 'reservation',
-            'start_date'     => 'start date',
-            'end_date'       => 'end date',
-            'total_amount'   => 'total amount',
+            'start_date' => 'start date',
+            'end_date' => 'end date',
+            'total_amount' => 'total amount',
         ];
     }
 }

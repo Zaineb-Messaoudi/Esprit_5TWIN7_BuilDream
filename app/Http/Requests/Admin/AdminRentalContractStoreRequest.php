@@ -53,10 +53,10 @@ class AdminRentalContractStoreRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'rental_id'       => 'rental',
-            'deposit_amount'  => 'deposit amount',
+            'rental_id' => 'rental',
+            'deposit_amount' => 'deposit amount',
             'contract_status' => 'contract status',
-            'signed_at'       => 'signature date',
+            'signed_at' => 'signature date',
         ];
     }
 }

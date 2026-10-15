@@ -2,18 +2,18 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\UserRole;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\AdminUserStoreRequest;
 use App\Http\Requests\Admin\AdminUserUpdateRequest;
 use App\Models\User;
 use App\Services\UserService;
-use App\Enums\UserRole;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Auth\Events\Registered;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Validation\ValidationException;
-use Illuminate\Auth\Events\Registered;
+use Illuminate\View\View;
 
 class UserController extends Controller
 {
@@ -30,9 +30,9 @@ class UserController extends Controller
         }
 
         if ($request->has('search') && $request->search) {
-            $query->where(function($q) use ($request) {
-                $q->where('name', 'like', '%' . $request->search . '%')
-                  ->orWhere('email', 'like', '%' . $request->search . '%');
+            $query->where(function ($q) use ($request) {
+                $q->where('name', 'like', '%'.$request->search.'%')
+                    ->orWhere('email', 'like', '%'.$request->search.'%');
             });
         }
 

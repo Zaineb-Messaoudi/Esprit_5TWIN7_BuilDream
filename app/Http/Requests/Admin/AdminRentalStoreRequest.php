@@ -4,7 +4,6 @@ namespace App\Http\Requests\Admin;
 
 use App\Enums\RentalStatus;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\Rule;
 
 /**
@@ -27,17 +26,11 @@ class AdminRentalStoreRequest extends FormRequest
             // The renter must be an existing user
             'user_id' => ['required', 'integer', 'exists:users,id'],
 
-            // The "equipment" table belongs to Student 1. Until it is merged we only
-            // check that it is a number; afterwards we also check that it exists.
-            'equipment_id' => [
-                'required',
-                'integer',
-                Schema::hasTable('equipment') ? Rule::exists('equipment', 'id') : 'min:1',
-            ],
+            'equipment_id' => ['required', 'integer', 'exists:equipment,id'],
 
             // Optional. A reservation can become only ONE rental, hence "unique".
             // (We do not check "exists" yet: Student 4's table is not merged.)
-            'reservation_id' => ['nullable', 'integer', 'min:1', 'unique:rentals,reservation_id'],
+            'reservation_id' => ['nullable', 'integer', 'exists:reservations,id', 'unique:rentals,reservation_id'],
 
             'start_date' => ['required', 'date'],
             // The rental cannot end before it starts
@@ -54,12 +47,12 @@ class AdminRentalStoreRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'user_id'        => 'renter',
-            'equipment_id'   => 'equipment',
+            'user_id' => 'renter',
+            'equipment_id' => 'equipment',
             'reservation_id' => 'reservation',
-            'start_date'     => 'start date',
-            'end_date'       => 'end date',
-            'total_amount'   => 'total amount',
+            'start_date' => 'start date',
+            'end_date' => 'end date',
+            'total_amount' => 'total amount',
         ];
     }
 }

@@ -31,9 +31,9 @@ class AdminRentalContractUpdateRequest extends FormRequest
     public function attributes(): array
     {
         return [
-            'deposit_amount'  => 'deposit amount',
+            'deposit_amount' => 'deposit amount',
             'contract_status' => 'contract status',
-            'signed_at'       => 'signature date',
+            'signed_at' => 'signature date',
         ];
     }
 }

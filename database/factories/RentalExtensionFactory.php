@@ -32,14 +32,14 @@ class RentalExtensionFactory extends Factory
 
         return [
             // A new rental is created automatically unless rental_id is given
-            'rental_id'      => Rental::factory(),
+            'rental_id' => Rental::factory(),
 
             'requested_date' => now()->subDays(fake()->numberBetween(0, 5))->toDateString(),
 
             // The closures receive the attributes already computed (rental_id is ready here)
-            'old_end_date'   => fn (array $attributes) => Rental::find($attributes['rental_id'])->end_date,
+            'old_end_date' => fn (array $attributes) => Rental::find($attributes['rental_id'])->end_date,
 
-            'new_end_date'   => fn (array $attributes) => Rental::find($attributes['rental_id'])
+            'new_end_date' => fn (array $attributes) => Rental::find($attributes['rental_id'])
                 ->end_date->copy()->addDays($extraDays),
 
             // Amount = rental daily rate x extra days

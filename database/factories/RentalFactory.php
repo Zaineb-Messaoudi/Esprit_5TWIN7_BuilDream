@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\RentalStatus;
+use App\Models\Equipment;
 use App\Models\Rental;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -30,13 +31,13 @@ class RentalFactory extends Factory
     public function definition(): array
     {
         $start = Carbon::instance(fake()->dateTimeBetween('-30 days', '+30 days'));
-        $end   = $start->copy()->addDays(fake()->numberBetween(1, 14));
+        $end = $start->copy()->addDays(fake()->numberBetween(1, 14));
 
         return $this->period($start, $end) + [
             // Temporary unique value: configure() below replaces it with RNT-2026-0001...
-            'reference'      => 'TMP-' . Str::uuid(),
-            'user_id'        => $this->randomUserId(),
-            'equipment_id'   => $this->randomEquipmentId(),
+            'reference' => 'TMP-'.Str::uuid(),
+            'user_id' => $this->randomUserId(),
+            'equipment_id' => $this->randomEquipmentId(),
             // Left empty on purpose: reservations belong to Student 4's module.
             // After the integration, the seeder can link a real reservation here.
             'reservation_id' => null,
@@ -62,6 +63,7 @@ class RentalFactory extends Factory
     {
         return $this->state(function () {
             $start = today()->addDays(fake()->numberBetween(2, 20));
+
             return $this->period($start, $start->copy()->addDays(fake()->numberBetween(1, 10)));
         });
     }
@@ -71,6 +73,7 @@ class RentalFactory extends Factory
     {
         return $this->state(function () {
             $start = today()->subDays(fake()->numberBetween(1, 5));
+
             return $this->period($start, today()->addDays(fake()->numberBetween(2, 10)));
         });
     }
@@ -80,6 +83,7 @@ class RentalFactory extends Factory
     {
         return $this->state(function () {
             $end = today()->subDays(fake()->numberBetween(2, 20));
+
             return $this->period($end->copy()->subDays(fake()->numberBetween(1, 10)), $end);
         });
     }
@@ -101,7 +105,7 @@ class RentalFactory extends Factory
      */
     private function period(Carbon $start, Carbon $end): array
     {
-        $days  = max(1, (int) $start->diffInDays($end));
+        $days = max(1, (int) $start->diffInDays($end));
         $today = today();
 
         if ($end->lt($today)) {
@@ -113,10 +117,10 @@ class RentalFactory extends Factory
         }
 
         return [
-            'start_date'   => $start->toDateString(),
-            'end_date'     => $end->toDateString(),
+            'start_date' => $start->toDateString(),
+            'end_date' => $end->toDateString(),
             'total_amount' => round($days * fake()->randomElement([10, 15, 20, 25, 30, 45, 60]), 2),
-            'status'       => $status->value,
+            'status' => $status->value,
         ];
     }
 
@@ -130,19 +134,22 @@ class RentalFactory extends Factory
      * An existing equipment id when Student 1's Equipment model and table exist,
      * otherwise a made-up id (there is no foreign key yet, so it is accepted).
      */
-    private function randomEquipmentId(): int
+    private function randomEquipmentId(): int|Factory
     {
-        if (class_exists(\App\Models\Equipment::class)) {
-            $table = (new \App\Models\Equipment())->getTable();
+        if (Schema::hasTable('equipment')) {
+            $id = Equipment::query()
+                ->where('status', 'available')
+                ->where('approval_status', 'published')
+                ->inRandomOrder()
+                ->value('id');
 
-            if (Schema::hasTable($table)) {
-                $id = \App\Models\Equipment::query()->inRandomOrder()->value('id');
-                if ($id) {
-                    return (int) $id;
-                }
+            if ($id) {
+                return (int) $id;
             }
+
+            return Equipment::factory();
         }
 
-        return fake()->numberBetween(1, 10);
+        return Equipment::factory();
     }
 }
