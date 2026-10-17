@@ -5,6 +5,7 @@ use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
 use App\Http\Controllers\Admin\RentalContractController;
 use App\Http\Controllers\Admin\RentalController;
 use App\Http\Controllers\Admin\RentalExtensionController;
+use App\Http\Controllers\Front\ContractController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\Auth\RoleSetupController;
@@ -78,7 +79,7 @@ Route::middleware(['auth', 'verified', 'role.selected'])->get(
 )->name('front.rental-contract.export-pdf');
 Route::middleware(['auth', 'verified', 'role.selected'])->get(
     '/owner/rentals/{rental:reference}/contract/pdf', [PageController::class, 'exportContractPdf']
-)->name('front.owner-rental-contract.export-pdf');
+)->name('front.owner-rental-contract.export-pdf'); 
 
 foreach (config('front.pages') as $slug => $page) {
     if (in_array($slug, [
@@ -445,6 +446,10 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     Route::post('/booking/reservations', [MarketplaceController::class, 'storeReservation'])->name('booking.reservations.store');
     Route::post('/booking/reservations/{reservation}/payment', [MarketplaceController::class, 'pay'])->name('booking.reservations.pay');
     Route::post('/rental-contracts/{contract}/sign', [MarketplaceController::class, 'signContract'])->name('buyer.contracts.sign');
+    // Contract: read first, then accept (sign) or decline
+    Route::get('/rental-contracts/{contract}', [ContractController::class, 'show'])->name('contracts.show');
+    Route::post('/rental-contracts/{contract}/accept', [ContractController::class, 'accept'])->name('contracts.accept');
+    Route::post('/rental-contracts/{contract}/decline', [ContractController::class, 'decline'])->name('contracts.decline');
     Route::post('/owner/reservations/{reservation}/decision', [MarketplaceController::class, 'decideReservation'])
         ->middleware('can:owner-only')->name('owner.reservations.decision');
 
