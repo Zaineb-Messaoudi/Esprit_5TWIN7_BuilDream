@@ -6,6 +6,7 @@ use App\Http\Controllers\Admin\RentalContractController;
 use App\Http\Controllers\Admin\RentalController;
 use App\Http\Controllers\Admin\RentalExtensionController;
 use App\Http\Controllers\Front\ContractController;
+use App\Http\Controllers\Admin\RentalInsightsController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\Auth\RoleSetupController;
@@ -236,6 +237,10 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
             ->name('rental-extensions.approve');
         Route::post('rental-extensions/{rental_extension}/reject', [RentalExtensionController::class, 'reject'])
             ->name('rental-extensions.reject');
+        // Advanced features: analytics and overdue rentals with late fees
+        Route::get('rental-insights', [RentalInsightsController::class, 'dashboard'])->name('rental-insights.dashboard');
+        Route::get('rental-insights/overdue', [RentalInsightsController::class, 'overdue'])->name('rental-insights.overdue');    
+
     });
 
     // Dashboard Routes
