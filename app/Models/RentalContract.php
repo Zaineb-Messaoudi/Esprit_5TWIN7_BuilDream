@@ -3,7 +3,9 @@
 namespace App\Models;
 
 use App\Enums\ContractStatus;
-use App\Enums\DepositStatus; 
+// FIX: the deposit methods below use DepositStatus. The enum lives in App\Enums, so without
+// this line PHP looks for App\Models\DepositStatus and crashes with "Class not found".
+use App\Enums\DepositStatus;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;

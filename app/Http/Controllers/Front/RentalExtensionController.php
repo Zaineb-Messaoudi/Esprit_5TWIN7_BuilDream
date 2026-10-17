@@ -12,14 +12,19 @@ use App\Models\RentalExtension;
 use Carbon\Carbon;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class RentalExtensionController extends Controller
 {
     /**
      * Front-office: Show extension request form for the renter (buyer).
+     *
+     * FIX 1: the return type was "View" but the method can also return a redirect
+     * (when a request is already pending). PHP would throw a TypeError in that case,
+     * so the type now accepts both.
      */
-    public function create(Request $request, Rental $rental): View
+    public function create(Request $request, Rental $rental): View|RedirectResponse
     {
         abort_unless($rental->user_id === $request->user()->id, 403);
         abort_unless(in_array($rental->status->value, ['active']), 409, 'Only active rentals can be extended.');
@@ -47,6 +52,15 @@ class RentalExtensionController extends Controller
     {
         abort_unless($rental->user_id === $request->user()->id, 403);
         abort_unless(in_array($rental->status->value, ['active']), 409);
+
+        // FIX 2: a rental can have only ONE pending request at a time.
+        // create() already checked it, but a form can be sent directly without
+        // opening that page, so the rule must also be enforced here.
+        if ($rental->extensions()->where('status', ExtensionStatus::PENDING->value)->exists()) {
+            return back()
+                ->withInput()
+                ->withErrors(['new_end_date' => __('This rental already has a pending extension request.')]);
+        }
 
         $data = $request->validate([
             'new_end_date' => ['required', 'date', 'after:'.$rental->end_date->toDateString()],
@@ -78,22 +92,51 @@ class RentalExtensionController extends Controller
 
     /**
      * Front-office: Approve extension request (owner only).
+     *
+     * FIX 3: the rental update and the status change now run in ONE transaction with
+     * locked rows (same as the admin version). Two clicks at the same time, or a rental
+     * edited in between, can no longer produce a double approval or inconsistent data.
      */
     public function approve(Request $request, RentalExtension $rentalExtension): RedirectResponse
     {
-        abort_unless($rentalExtension->rental->equipment->owner_id === $request->user()->id, 403);
+        abort_unless((int) $rentalExtension->rental->equipment->owner_id === (int) $request->user()->id, 403);
         abort_unless($rentalExtension->status === ExtensionStatus::PENDING, 409);
 
-        $rental = $rentalExtension->rental;
-        $rental->update([
-            'end_date' => $rentalExtension->new_end_date,
-            'total_amount' => round((float) $rental->total_amount + (float) $rentalExtension->additional_amount, 2),
-        ]);
+        $error = null;
 
-        $rentalExtension->update(['status' => ExtensionStatus::APPROVED]);
+        DB::transaction(function () use ($rentalExtension, &$error) {
+            // lockForUpdate(): other transactions must wait until we finish
+            $extension = RentalExtension::whereKey($rentalExtension->id)->lockForUpdate()->first();
+            $rental = Rental::whereKey($extension->rental_id)->lockForUpdate()->first();
 
-        // Fire real-time notification for extension approved
-        $rentalExtension->load('rental.equipment', 'rental.user');
+            // Re-check with the locked data: someone may have processed it a moment ago
+            if ($extension->status !== ExtensionStatus::PENDING) {
+                $error = 'This request has already been processed.';
+
+                return;
+            }
+
+            if ($extension->new_end_date->lte($rental->end_date)) {
+                $error = 'The requested end date is no longer after the rental end date.';
+
+                return;
+            }
+
+            $rental->update([
+                'end_date' => $extension->new_end_date,
+                'total_amount' => round((float) $rental->total_amount + (float) $extension->additional_amount, 2),
+            ]);
+
+            $extension->update(['status' => ExtensionStatus::APPROVED]);
+        });
+
+        if ($error) {
+            return redirect()->route('front.my-rental-detail', $rentalExtension->rental->reference)
+                ->withErrors(['extension' => $error]);
+        }
+
+        // Fire real-time notification for extension approved (after the transaction succeeded)
+        $rentalExtension->refresh()->load('rental.equipment', 'rental.user');
         ExtensionApproved::dispatch($rentalExtension, $rentalExtension->rental->user);
 
         return redirect()->route('front.my-rental-detail', $rentalExtension->rental->reference)
@@ -105,7 +148,7 @@ class RentalExtensionController extends Controller
      */
     public function reject(Request $request, RentalExtension $rentalExtension): RedirectResponse
     {
-        abort_unless($rentalExtension->rental->equipment->owner_id === $request->user()->id, 403);
+        abort_unless((int) $rentalExtension->rental->equipment->owner_id === (int) $request->user()->id, 403);
         abort_unless($rentalExtension->status === ExtensionStatus::PENDING, 409);
 
         $rentalExtension->update(['status' => ExtensionStatus::REJECTED]);
