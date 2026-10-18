@@ -2,7 +2,7 @@
 
 @section('content')
 <div class="space-y-6">
-    {{-- Breadcrumb: Dashboard / Rentals (same pattern as the users page) --}}
+    {{-- Breadcrumb: Dashboard / Rentals --}}
     <x-common.page-breadcrumb>
         <div class="flex items-center gap-2">
             <a href="{{ route('dashboard') }}" class="text-gray-500 transition-colors hover:text-brand-600 dark:text-gray-400">Dashboard</a>
@@ -11,20 +11,24 @@
         </div>
     </x-common.page-breadcrumb>
 
-    {{-- Page title + "Create" button --}}
+    {{-- Page title + shortcuts to the advanced pages (there is no "Create" button on purpose) --}}
     <div class="flex flex-wrap items-center justify-between gap-4">
-        <h1 class="text-title-md font-semibold text-gray-800 dark:text-white/90">All Rentals</h1>
-        <a href="{{ route('admin.rentals.create') }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-theme-xs transition-colors hover:bg-brand-600">
-            + Create Rental
-        </a>
+        <div>
+            <h1 class="text-title-md font-semibold text-gray-800 dark:text-white/90">All Rentals</h1>
+            <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+                Rentals are created automatically when a renter's payment is verified. This page is for supervision.
+            </p>
+        </div>
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="{{ route('admin.rental-insights.overdue') }}" class="inline-flex min-h-10 items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">Overdue rentals</a>
+            <a href="{{ route('admin.rental-insights.dashboard') }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-theme-xs transition-colors hover:bg-brand-600">Analytics</a>
+        </div>
     </div>
 
-    {{-- Flash message: the controller sends 'rental-created', 'rental-updated' or 'rental-deleted' --}}
+    {{-- Flash message sent by the controller: 'rental-deleted' --}}
     @if (session('status'))
         <p role="status" aria-live="polite" class="rounded-lg border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-300">
             {{ match (session('status')) {
-                'rental-created' => __('Rental created successfully.'),
-                'rental-updated' => __('Rental updated successfully.'),
                 'rental-deleted' => __('Rental deleted successfully.'),
                 default => session('status'),
             } }}
@@ -71,20 +75,17 @@
                     @forelse ($rentals as $rental)
                         <tr class="border-b transition-colors hover:bg-gray-50 dark:border-gray-700 dark:hover:bg-gray-800/50">
                             <td class="p-3 font-medium">{{ $rental->reference }}</td>
-                            {{-- $rental->user is the relation defined in the Rental model --}}
                             <td class="p-3">{{ $rental->user?->name ?? '—' }}</td>
                             {{-- equipment_label is the accessor defined in the Rental model --}}
                             <td class="p-3">{{ $rental->equipment_label }}</td>
                             <td class="p-3 text-sm">{{ $rental->start_date->format('d/m/Y') }} → {{ $rental->end_date->format('d/m/Y') }}</td>
                             <td class="p-3">{{ number_format($rental->total_amount, 2) }}</td>
                             <td class="p-3">
-                                {{-- The enum gives both the label and the colour of the badge --}}
                                 <x-ui.badge :color="$rental->status->color()">{{ $rental->status->label() }}</x-ui.badge>
                             </td>
                             <td class="space-x-2 p-3 text-end">
                                 <a href="{{ route('admin.rentals.show', $rental) }}" class="text-sm text-gray-600 underline-offset-4 hover:underline dark:text-gray-300">View</a>
-                                <a href="{{ route('admin.rentals.edit', $rental) }}" class="text-sm text-brand-600 underline-offset-4 hover:underline dark:text-brand-400">Edit</a>
-                                {{-- A form is needed because browsers can only send GET/POST: @method('DELETE') fakes the DELETE verb --}}
+                                {{-- @method('DELETE') fakes the DELETE verb (browsers only send GET/POST) --}}
                                 <form action="{{ route('admin.rentals.destroy', $rental) }}" method="POST" class="inline">
                                     @csrf
                                     @method('DELETE')

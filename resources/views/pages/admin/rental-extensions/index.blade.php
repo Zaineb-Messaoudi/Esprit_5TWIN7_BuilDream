@@ -11,20 +11,18 @@
         </div>
     </x-common.page-breadcrumb>
 
-    {{-- Page title + "Create" button --}}
-    <div class="flex flex-wrap items-center justify-between gap-4">
+    {{-- Page title (there is no "New request" button on purpose) --}}
+    <div>
         <h1 class="text-title-md font-semibold text-gray-800 dark:text-white/90">All Extension Requests</h1>
-        <a href="{{ route('admin.rental-extensions.create') }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white shadow-theme-xs transition-colors hover:bg-brand-600">
-            + New Request
-        </a>
+        <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">
+            Requests are sent by renters from their account. The equipment owner decides, and an administrator can approve or reject a pending request too.
+        </p>
     </div>
 
     {{-- Success message sent by the controller with ->with('status', ...) --}}
     @if (session('status'))
         <p role="status" aria-live="polite" class="rounded-lg border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-300">
             {{ match (session('status')) {
-                'extension-created'  => __('Extension request created successfully.'),
-                'extension-updated'  => __('Extension request updated successfully.'),
                 'extension-deleted'  => __('Extension request deleted successfully.'),
                 'extension-approved' => __('Extension approved: the rental end date and amount were updated.'),
                 'extension-rejected' => __('Extension rejected: the rental was not changed.'),
@@ -94,10 +92,8 @@
                             <td class="space-x-2 p-3 text-end whitespace-nowrap">
                                 <a href="{{ route('admin.rental-extensions.show', $extension) }}" class="text-sm text-gray-600 underline-offset-4 hover:underline dark:text-gray-300">View</a>
 
-                                {{-- Edit / Approve / Reject only make sense while the request is pending --}}
+                                {{-- Approve / Reject only make sense while the request is pending --}}
                                 @if ($extension->status === \App\Enums\ExtensionStatus::PENDING)
-                                    <a href="{{ route('admin.rental-extensions.edit', $extension) }}" class="text-sm text-brand-600 underline-offset-4 hover:underline dark:text-brand-400">Edit</a>
-
                                     <form action="{{ route('admin.rental-extensions.approve', $extension) }}" method="POST" class="inline">
                                         @csrf
                                         <button type="submit" onclick="return confirm('Approve this extension? The rental end date and amount will be updated.')" class="text-sm text-success-600 underline-offset-4 hover:underline dark:text-success-400">Approve</button>
