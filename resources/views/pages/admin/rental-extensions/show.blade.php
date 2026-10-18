@@ -41,7 +41,6 @@
                         @csrf
                         <button type="submit" onclick="return confirm('Reject this extension request?')" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-error-500 px-4 py-2 text-sm font-medium text-white hover:bg-error-600">Reject</button>
                     </form>
-                    <a href="{{ route('admin.rental-extensions.edit', $extension) }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">Edit</a>
                 @endif
                 <a href="{{ route('admin.rental-extensions.index') }}" class="inline-flex min-h-10 items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">Back to list</a>
             </div>

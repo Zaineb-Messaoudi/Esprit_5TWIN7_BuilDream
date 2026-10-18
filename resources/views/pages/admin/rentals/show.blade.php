@@ -23,7 +23,6 @@
                         {{ __('Return equipment') }}
                     </a>
                 @endif
-                <a href="{{ route('admin.rentals.edit', $rental) }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">Edit</a>
                 <a href="{{ route('admin.rentals.index') }}" class="inline-flex min-h-10 items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">Back to list</a>
             </div>
         </div>
@@ -91,17 +90,12 @@
                 <a href="{{ route('admin.rental-contracts.show', $rental->contract) }}" class="mt-4 inline-block text-sm font-medium text-brand-600 underline-offset-4 hover:underline dark:text-brand-400">View contract</a>
             @else
                 <p class="text-sm text-gray-500 dark:text-gray-400">No contract for this rental yet.</p>
-                {{-- Opens the contract form with this rental already selected (?rental_id=...) --}}
-                <a href="{{ route('admin.rental-contracts.create', ['rental_id' => $rental->id]) }}" class="mt-4 inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">Create contract</a>
             @endif
         </x-common.component-card>
 
-        {{-- Extension requests (relation 1-N: $rental->extensions, a list that can be empty) --}}
+        {{-- Extension requests (relation 1-N: $rental->extensions, a list that can be empty).
+             Renters make these requests in the front office, the admin only supervises them. --}}
         <x-common.component-card :title="__('Extension requests')">
-            {{-- Opens the request form with this rental already selected (?rental_id=...) --}}
-            <div class="mb-4">
-                <a href="{{ route('admin.rental-extensions.create', ['rental_id' => $rental->id]) }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">Request extension</a>
-            </div>
             <div class="overflow-x-auto">
                 <table class="w-full min-w-[500px] border-collapse text-start text-sm">
                     <thead>

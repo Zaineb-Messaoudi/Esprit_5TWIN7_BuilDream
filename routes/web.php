@@ -222,8 +222,8 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         Route::resource('equipment', AdminEquipmentController::class);
         Route::put('equipment/{equipment}/approve', [AdminEquipmentController::class, 'approve'])->name('equipment.approve');
         Route::put('equipment/{equipment}/reject', [AdminEquipmentController::class, 'reject'])->name('equipment.reject');
-        Route::resource('rentals', RentalController::class);
-        Route::resource('rental-contracts', RentalContractController::class);
+        Route::resource('rentals', RentalController::class)->only(['index', 'show', 'destroy']);
+        Route::resource('rental-contracts', RentalContractController::class)->only(['index', 'show', 'destroy']);
         Route::get('rental-contracts/{rental_contract}/export-pdf', [RentalContractController::class, 'exportPdf'])
             ->name('rental-contracts.export-pdf');
         // Deposit management (admin)
@@ -232,8 +232,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
             Route::post('release', [RentalContractController::class, 'releaseDeposit'])->name('release');
             Route::post('forfeit', [RentalContractController::class, 'forfeitDeposit'])->name('forfeit');
         });
-        Route::resource('rental-extensions', RentalExtensionController::class);
-        Route::post('rental-extensions/{rental_extension}/approve', [RentalExtensionController::class, 'approve'])
+        Route::resource('rental-extensions', RentalExtensionController::class)->only(['index', 'show', 'destroy']);        Route::post('rental-extensions/{rental_extension}/approve', [RentalExtensionController::class, 'approve'])
             ->name('rental-extensions.approve');
         Route::post('rental-extensions/{rental_extension}/reject', [RentalExtensionController::class, 'reject'])
             ->name('rental-extensions.reject');
