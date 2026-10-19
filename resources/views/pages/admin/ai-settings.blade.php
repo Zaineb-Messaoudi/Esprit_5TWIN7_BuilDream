@@ -69,6 +69,18 @@
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-show="provider === 'ollama'">For semantic search. Pull first: <code>ollama pull nomic-embed-text</code></p>
                 </div>
 
+                <!-- Vision Model -->
+                <div>
+                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Vision Model (Image Validation)') }}</label>
+                    <select name="vision_model" x-model="config.vision_model" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                        <template x-for="model in visionModels" :key="model.value">
+                            <option :value="model.value" :selected="config.vision_model === model.value" x-text="model.label"></option>
+                        </template>
+                    </select>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-show="provider === 'ollama'">For image validation. Pull first: <code>ollama pull llava</code></p>
+                    <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-show="provider === 'openai'">gpt-4o-mini, gpt-4o support vision</p>
+                </div>
+
                 <!-- API Key (only for cloud providers) -->
                 <div x-show="provider !== 'ollama'">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('API Key') }}</label>
@@ -210,6 +222,14 @@ function aiSettingsForm() {
             { value: 'mxbai-embed-large', label: 'MXBAI Embed Large (1024 dims)' },
             { value: 'all-minilm', label: 'All-MiniLM (384 dims, fast)' },
             { value: 'text-embedding-3-small', label: 'OpenAI text-embedding-3-small (1536 dims)' },
+        ],
+        visionModels: [
+            { value: 'llava', label: 'LLaVA (general purpose, recommended)' },
+            { value: 'llava-llama3', label: 'LLaVA-Llama3 (LLaVA with Llama 3)' },
+            { value: 'llava-mistral', label: 'LLaVA-Mistral (LLaVA with Mistral)' },
+            { value: 'bakllava', label: 'BakLLaVA' },
+            { value: 'gpt-4o-mini', label: 'GPT-4o Mini (OpenAI vision)' },
+            { value: 'gpt-4o', label: 'GPT-4o (OpenAI vision)' },
         ],
         showApiKey: false,
         testing: false,

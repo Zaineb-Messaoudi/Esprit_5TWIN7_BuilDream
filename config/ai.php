@@ -40,11 +40,26 @@ return [
     | - phi3 (Microsoft, small)
     | - qwen2.5 (multilingual)
     | - gemma2 (Google)
+    | - llava (vision model for image validation)
     |
     | OpenAI: gpt-4o-mini, gpt-4o, gpt-3.5-turbo
     | Anthropic: claude-3-haiku, claude-3-sonnet
     */
     'model' => env('AI_MODEL', 'llama3.2'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Vision Model (for image validation)
+    |--------------------------------------------------------------------------
+    | Ollama vision models (pull first):
+    | - llava (recommended, general purpose)
+    | - llava-llama3 (LLaVA with Llama 3)
+    | - llava-mistral (LLaVA with Mistral)
+    | - bakllava (BakLLaVA)
+    |
+    | OpenAI: gpt-4o-mini, gpt-4o (vision capable)
+    */
+    'vision_model' => env('AI_VISION_MODEL', 'llava'),
 
     /*
     |--------------------------------------------------------------------------

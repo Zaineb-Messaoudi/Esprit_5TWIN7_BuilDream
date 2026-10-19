@@ -30,12 +30,19 @@ class AdminAiSettingsController extends Controller
         }
 
         $availableModels = $this->getAvailableModels($config['provider']);
+        $visionModels = $this->getAvailableVisionModels($config['provider']);
         
         // Format models for JavaScript
         $availableModelsFormatted = array_map(
             fn ($label, $value) => ['value' => $value, 'label' => $label],
             array_keys($availableModels),
             $availableModels
+        );
+        
+        $visionModelsFormatted = array_map(
+            fn ($label, $value) => ['value' => $value, 'label' => $label],
+            array_keys($visionModels),
+            $visionModels
         );
 
         return view('pages.admin.ai-settings', [
@@ -44,6 +51,8 @@ class AdminAiSettingsController extends Controller
             'ollamaHealth' => $ollamaHealth,
             'availableModels' => $availableModels,
             'availableModelsFormatted' => $availableModelsFormatted,
+            'visionModels' => $visionModels,
+            'visionModelsFormatted' => $visionModelsFormatted,
             'providers' => [
                 'ollama' => 'Ollama (Local, FREE)',
                 'openai' => 'OpenAI (Cloud, Paid)',
@@ -148,18 +157,47 @@ class AdminAiSettingsController extends Controller
                 'phi3' => 'Phi-3 Mini (3.8B, Microsoft)',
                 'qwen2.5' => 'Qwen 2.5 (multilingual)',
                 'gemma2' => 'Gemma 2 (Google, 9B)',
+                'llava' => 'LLaVA (vision, general purpose)',
+                'llava-llama3' => 'LLaVA-Llama3 (vision)',
+                'llava-mistral' => 'LLaVA-Mistral (vision)',
+                'bakllava' => 'BakLLaVA (vision)',
                 'nomic-embed-text' => 'Nomic Embed Text (embeddings)',
                 'mxbai-embed-large' => 'MXBAI Embed Large (embeddings)',
             ],
             'openai' => [
-                'gpt-4o-mini' => 'GPT-4o Mini (fast, cheap)',
-                'gpt-4o' => 'GPT-4o (best quality)',
+                'gpt-4o-mini' => 'GPT-4o Mini (fast, cheap, vision)',
+                'gpt-4o' => 'GPT-4o (best quality, vision)',
                 'gpt-3.5-turbo' => 'GPT-3.5 Turbo (legacy)',
             ],
             'anthropic' => [
                 'claude-3-haiku' => 'Claude 3 Haiku (fast)',
                 'claude-3-sonnet' => 'Claude 3 Sonnet (balanced)',
                 'claude-3-opus' => 'Claude 3 Opus (best)',
+            ],
+            default => [],
+        };
+    }
+
+    /**
+     * Get available vision models for the provider.
+     */
+    private function getAvailableVisionModels(string $provider): array
+    {
+        return match ($provider) {
+            'ollama' => [
+                'llava' => 'LLaVA (general purpose, recommended)',
+                'llava-llama3' => 'LLaVA-Llama3',
+                'llava-mistral' => 'LLaVA-Mistral',
+                'bakllava' => 'BakLLaVA',
+            ],
+            'openai' => [
+                'gpt-4o-mini' => 'GPT-4o Mini (vision)',
+                'gpt-4o' => 'GPT-4o (vision)',
+            ],
+            'anthropic' => [
+                'claude-3-haiku' => 'Claude 3 Haiku (vision)',
+                'claude-3-sonnet' => 'Claude 3 Sonnet (vision)',
+                'claude-3-opus' => 'Claude 3 Opus (vision)',
             ],
             default => [],
         };
@@ -177,6 +215,7 @@ class AdminAiSettingsController extends Controller
             'provider' => 'AI_PROVIDER',
             'base_url' => 'AI_BASE_URL',
             'model' => 'AI_MODEL',
+            'vision_model' => 'AI_VISION_MODEL',
             'embedding_model' => 'AI_EMBEDDING_MODEL',
             'api_key' => 'AI_API_KEY',
         ];

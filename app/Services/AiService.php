@@ -23,6 +23,7 @@ class AiService
     private ?string $apiKey;
     private string $baseUrl;
     private string $model;
+    private string $visionModel;
 
     public function __construct()
     {
@@ -30,6 +31,7 @@ class AiService
         $this->apiKey = config('ai.api_key');
         $this->baseUrl = config('ai.base_url', '');
         $this->model = config('ai.model', 'llama3.2');
+        $this->visionModel = config('ai.vision_model', 'llava');
     }
 
     public function getProvider(): string
@@ -75,14 +77,33 @@ class AiService
             return null;
         }
 
+        $hasImages = $this->hasImages($messages);
+
         $response = match ($this->provider) {
             'openai' => $this->callOpenAI($messages, $options),
             'anthropic' => $this->callAnthropic($messages, $options),
-            'ollama' => $this->callOllama($messages, $options),
-            default => $this->callOllama($messages, $options),
+            'ollama' => $hasImages ? $this->callOllamaVision($messages, $options) : $this->callOllama($messages, $options),
+            default => $hasImages ? $this->callOllamaVision($messages, $options) : $this->callOllama($messages, $options),
         };
 
         return $response;
+    }
+
+    /**
+     * Check if messages contain image content.
+     */
+    private function hasImages(array $messages): bool
+    {
+        foreach ($messages as $message) {
+            if (is_array($message['content'] ?? null)) {
+                foreach ($message['content'] as $part) {
+                    if (isset($part['type']) && $part['type'] === 'image_url') {
+                        return true;
+                    }
+                }
+            }
+        }
+        return false;
     }
 
     /**
@@ -342,6 +363,82 @@ class AiService
     }
 
     /**
+     * Call Ollama vision model (LLaVA) for image validation.
+     * 
+     * Requires a vision model like llava, llava-llama3, llava-mistral, etc.
+     * Pull first: ollama pull llava
+     */
+    private function callOllamaVision(array $messages, array $options): ?string
+    {
+        $url = rtrim($this->baseUrl, '/') . '/api/chat';
+        
+        $ollamaMessages = [];
+        foreach ($messages as $message) {
+            if (is_array($message['content'])) {
+                // Handle vision content (text + image)
+                $content = '';
+                $images = [];
+                foreach ($message['content'] as $part) {
+                    if ($part['type'] === 'text') {
+                        $content = $part['text'];
+                    } elseif ($part['type'] === 'image_url') {
+                        // Extract base64 from data URL
+                        if (preg_match('/^data:image\/[^;]+;base64,(.+)$/', $part['image_url']['url'], $matches)) {
+                            $images[] = $matches[1];
+                        }
+                    }
+                }
+                $ollamaMessages[] = [
+                    'role' => $message['role'],
+                    'content' => $content,
+                    'images' => $images,
+                ];
+            } else {
+                $ollamaMessages[] = [
+                    'role' => $message['role'],
+                    'content' => $message['content'],
+                ];
+            }
+        }
+
+        // Use vision model for Ollama, fallback to chat model
+        $visionModel = $this->visionModel ?: $this->model;
+
+        $payload = array_merge([
+            'model' => $visionModel,
+            'messages' => $ollamaMessages,
+            'stream' => false,
+            'options' => [
+                'temperature' => $options['temperature'] ?? 0.3,
+                'num_predict' => $options['max_tokens'] ?? 2048,
+            ],
+        ], array_diff_key($options, ['temperature' => '', 'max_tokens' => '', 'response_format' => '']));
+
+        try {
+            $response = Http::timeout(120)->post($url, $payload);
+
+            if ($response->failed()) {
+                Log::warning('Ollama vision API error', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'url' => $url,
+                    'model' => $visionModel,
+                ]);
+                return null;
+            }
+
+            return $response->json('message.content');
+        } catch (\Throwable $e) {
+            Log::warning('Ollama vision request failed', [
+                'error' => $e->getMessage(),
+                'url' => $url,
+                'model' => $visionModel,
+            ]);
+            return null;
+        }
+    }
+
+    /**
      * Check if Ollama is running and list available models.
      * Useful for health checks in admin UI.
      */
@@ -366,6 +463,7 @@ class AiService
                 'models' => $models,
                 'current_model' => $this->model,
                 'model_exists' => in_array($this->model, $models),
+                'vision_models' => array_filter($models, fn ($m) => stripos($m, 'llava') !== false || stripos($m, 'vision') !== false || stripos($m, 'bakllava') !== false),
             ];
         } catch (\Throwable $e) {
             return ['available' => false, 'reason' => $e->getMessage()];
