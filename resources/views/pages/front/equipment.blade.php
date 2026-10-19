@@ -87,15 +87,23 @@
                     </div>
                     <p class="mt-3 text-[11px] text-gray-500 dark:text-gray-400">{{ __('Calendar dates are illustrative. Live availability and overlap checks are not connected.') }}</p>
                 </section>
-                @if (str_contains(strtolower((string) $item->category->name), 'solar') && $p?->power_watts)
+@if (str_contains(strtolower((string) $item->category->name), 'solar') && $p?->power_watts)
                     <section class="mt-6 rounded-2xl border border-warning-200 bg-warning-50/70 p-5 dark:border-warning-500/20 dark:bg-warning-500/10" x-data="{ loaded: false, result: null, async load() { const response = await fetch('{{ route('front.equipment.solar-production', $item->id) }}'); this.result = await response.json(); this.loaded = true; } }" x-init="load()">
                         <p class="text-theme-xs font-semibold uppercase tracking-[0.16em] text-warning-700 dark:text-warning-300">{{ __('Solar insight') }}</p>
                         <h2 class="mt-1 font-semibold text-gray-900 dark:text-white">{{ __('Estimated daily production') }}</h2>
-                        <p class="mt-2 text-theme-xs text-gray-600 dark:text-gray-300">{{ __('Based on the next available Open-Meteo radiation forecast and this panel’s efficiency.') }}</p>
+                        <p class="mt-2 text-theme-xs text-gray-600 dark:text-gray-300">{{ __('Based on the next available Open-Meteo radiation forecast and this panel\'s efficiency.') }}</p>
                         <div class="mt-4 grid grid-cols-2 gap-3" x-show="loaded" x-cloak>
                             <div class="rounded-xl bg-white/80 p-3 dark:bg-gray-900/50"><span class="block text-[10px] uppercase text-gray-500">{{ __('Production') }}</span><strong class="mt-1 block text-lg text-warning-800 dark:text-warning-200" x-text="result.production_wh_day + ' Wh/day'"></strong></div>
                             <div class="rounded-xl bg-white/80 p-3 dark:bg-gray-900/50"><span class="block text-[10px] uppercase text-gray-500">{{ __('CO₂ avoided') }}</span><strong class="mt-1 block text-lg text-success-700 dark:text-success-300" x-text="result.co2_avoided_kg_day + ' kg/day'"></strong></div>
                         </div>
+                        <details class="mt-4">
+                            <summary class="text-xs font-medium text-gray-500 cursor-pointer hover:text-gray-700 dark:hover:text-gray-300">{{ __('Formula & assumptions') }}</summary>
+                            <div class="mt-2 p-3 rounded-lg bg-white/80 dark:bg-gray-900/50 text-[11px] text-gray-600 dark:text-gray-300 space-y-1">
+                                <div>{{ __('Production (Wh/day) = Radiation (kWh/m²/day) × Power (W) × Efficiency') }}</div>
+                                <div>{{ __('CO₂ avoided (kg/day) = Production (Wh) × 0.42 / 1000') }}</div>
+                                <div class="text-gray-400 dark:text-gray-500">{{ __('Assumptions: Grid emission factor 0.42 kg CO₂/kWh (Tunisia/France mix). Radiation from Open-Meteo shortwave_radiation_sum forecast.') }}</div>
+                            </div>
+                        </details>
                     </section>
                 @endif
             </div>

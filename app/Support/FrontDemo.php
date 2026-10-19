@@ -107,6 +107,15 @@ class FrontDemo
             'technology' => $item->energyProfile?->technology ?: self::categoryTechnology($categoryName),
         ];
 
+        // Calculate estimated CO2 avoided for solar equipment (rough estimate using avg 4.5 kWh/m2/day radiation)
+        $co2Avoided = null;
+        if ($item->energyProfile && str_contains(strtolower($categoryName), 'solar')) {
+            $efficiency = ((float) ($item->energyProfile->efficiency ?: 20)) / 100;
+            $radiation = 4.5; // kWh/m2/day average
+            $productionWh = round($radiation * (float) ($item->energyProfile->power_watts ?: 0) * $efficiency, 1);
+            $co2Avoided = round($productionWh * 0.42 / 1000, 3); // 0.42 kg CO2/kWh grid emission factor
+        }
+
         return (object) [
             'id' => $item->id, 'name' => $item->name, 'brand' => $item->brand, 'model' => $item->model,
             'description' => $item->description, 'price_per_day' => $item->price_per_day, 'location' => $item->location,
@@ -120,6 +129,7 @@ class FrontDemo
                 'technology' => $category->technology,
                 'max_output' => $item->energyProfile?->max_output,
                 'operating_duration' => $item->energyProfile?->operating_duration,
+                'co2_avoided_kg_day' => $co2Avoided,
             ],
         ];
     }
