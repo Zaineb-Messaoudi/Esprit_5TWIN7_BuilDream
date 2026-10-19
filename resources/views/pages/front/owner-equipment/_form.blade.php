@@ -109,11 +109,36 @@
             @endforeach
         </div>
     </fieldset>
-    <div class="rounded-2xl border border-brand-100 bg-brand-50/60 p-4 dark:border-brand-500/20 dark:bg-brand-500/10 sm:col-span-2">
-        <label for="images" class="mb-1.5 block text-theme-sm font-semibold text-gray-800 dark:text-white">{{ __('Add gallery images') }}</label>
-        <input id="images" name="images[]" type="file" multiple accept="image/jpeg,image/png,image/webp" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+    <div class="rounded-2xl border border-brand-100 bg-brand-50/60 p-4 dark:border-brand-500/20 dark:bg-brand-500/10 sm:col-span-2" x-data="aiImageValidation()">
+        <label for="images" class="mb-1.5 block text-theme-sm font-semibold text-gray-800 dark:text-white flex items-center justify-between">
+            {{ __('Add gallery images') }}
+            <button type="button" @click="validateImages()" :disabled="validating" class="ml-3 px-3 py-1.5 text-xs font-medium text-brand-700 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 dark:text-brand-300 dark:bg-brand-500/10 dark:border-brand-500/30 disabled:opacity-50">
+                <span x-show="!validating">{{ __('Validate with AI') }}</span>
+                <span x-show="validating">{{ __('Validating...') }}</span>
+            </button>
+        </label>
+        <input id="images" name="images[]" type="file" multiple accept="image/jpeg,image/png,image/webp" @change="onImagesSelected($event)" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
         <p class="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">{{ __('Up to 8 photos. The first one becomes the gallery cover.') }}</p>
         @error('images.*')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+        
+        <div x-show="results.length" class="mt-3 space-y-2" x-cloak>
+            <template x-for="(result, index) in results" :key="index">
+                <div class="flex items-center justify-between p-2 rounded-lg" :class="result.valid ? 'bg-success-50 border border-success-200 dark:bg-success-500/10 dark:border-success-500/30' : 'bg-error-50 border border-error-200 dark:bg-error-500/10 dark:border-error-500/30'">
+                    <div class="flex items-center gap-2">
+                        <span :class="result.valid ? 'text-success-600 dark:text-success-400' : 'text-error-600 dark:text-error-400'">
+                            <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 20 20"><path x-show="result.valid" fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/><path x-show="!result.valid" fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z" clip-rule="evenodd"/></svg>
+                        </span>
+                        <span class="text-xs font-medium" x-text="result.filename"></span>
+                    </div>
+                    <div class="text-right">
+                        <span class="text-xs" x-text="result.confidence + '% confidence'"></span>
+                        <p class="text-[10px] text-gray-500 dark:text-gray-400 mt-0.5" x-text="result.reason"></p>
+                    </div>
+                </div>
+            </template>
+        </div>
+        
+        <div x-show="error" class="mt-2 p-2 rounded-lg bg-error-50 border border-error-200 text-xs text-error-600 dark:bg-error-500/10 dark:border-error-500/30 dark:text-error-400" x-cloak x-text="error"></div>
     </div>
     <x-form.location-picker :location="old('location', $equipment->location ?? '')" :latitude="old('latitude', $equipment->latitude ?? null)" :longitude="old('longitude', $equipment->longitude ?? null)" location-id="location" :show-input="false" />
 </div>
@@ -306,6 +331,77 @@ function aiAutoCategorize() {
                 }
                 this.suggestion = null;
             }
+        },
+    };
+}
+
+function aiImageValidation() {
+    return {
+        selectedFiles: [],
+        results: [],
+        validating: false,
+        error: null,
+
+        onImagesSelected(event) {
+            this.selectedFiles = Array.from(event.target.files);
+            this.results = [];
+            this.error = null;
+        },
+
+        async validateImages() {
+            if (!this.selectedFiles.length) {
+                this.error = '{{ __('Please select images first.') }}';
+                return;
+            }
+
+            const name = document.getElementById('name')?.value || '';
+            const categorySelect = document.getElementById('category_id');
+            const category = categorySelect ? categorySelect.options[categorySelect.selectedIndex]?.text || '' : '';
+
+            if (!name || !category) {
+                this.error = '{{ __('Please fill in name and category first.') }}';
+                return;
+            }
+
+            this.validating = true;
+            this.error = null;
+            this.results = [];
+
+            for (const file of this.selectedFiles) {
+                try {
+                    const formData = new FormData();
+                    formData.append('image', file);
+                    formData.append('equipment_name', name);
+                    formData.append('category', category);
+
+                    const response = await fetch('{{ route("ai.validate-image") }}', {
+                        method: 'POST',
+                        headers: {
+                            'Accept': 'application/json',
+                            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                        },
+                        body: formData,
+                    });
+
+                    const data = await response.json();
+
+                    this.results.push({
+                        filename: file.name,
+                        valid: data.valid ?? true,
+                        confidence: data.confidence ?? 50,
+                        reason: data.reason ?? '{{ __('Validation completed') }}',
+                    });
+                } catch (e) {
+                    this.results.push({
+                        filename: file.name,
+                        valid: false,
+                        confidence: 0,
+                        reason: '{{ __('Validation failed') }}',
+                    });
+                }
+            }
+
+            this.validating = false;
         },
     };
 }
