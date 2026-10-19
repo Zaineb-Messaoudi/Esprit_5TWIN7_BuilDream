@@ -7,14 +7,45 @@ use App\Services\AiService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class AiController extends Controller
 {
     public function __construct(private readonly AiService $ai) {}
 
+    /**
+     * Sanitize user input to prevent prompt injection.
+     * Removes/neutralizes common injection patterns.
+     */
+    private function sanitize(string $input, int $maxLength = 2000): string
+    {
+        $input = trim($input);
+        $input = Str::limit($input, $maxLength, '');
+        
+        // Remove potential injection patterns
+        $patterns = [
+            '/ignore\s+(previous|above|system)\s+(instructions?|prompts?)/i',
+            '/forget\s+(everything|all|previous)/i',
+            '/you\s+are\s+now\s+/i',
+            '/system\s*:\s*/i',
+            '/assistant\s*:\s*/i',
+            '/```/i',  // Code blocks
+            '/<\|.*?\|>/',  // Special tokens
+        ];
+        
+        foreach ($patterns as $pattern) {
+            $input = preg_replace($pattern, '[filtered]', $input);
+        }
+        
+        // Limit excessive whitespace
+        $input = preg_replace('/\s{3,}/', '  ', $input);
+        
+        return $input;
+    }
+
     public function naturalLanguageSearch(Request $request): JsonResponse
     {
-        $query = $request->string('q')->trim();
+        $query = $this->sanitize($request->string('q')->trim());
         
         if (!$query || !$this->ai->isConfigured()) {
             return response()->json(['error' => 'AI not configured or query empty'], 400);
@@ -115,6 +146,12 @@ PROMPT;
 
         $energy = $request->input('energy_profile', []);
         
+        // Sanitize all user inputs
+        $name = $this->sanitize($request->name);
+        $brand = $this->sanitize($request->brand);
+        $model = $this->sanitize($request->model);
+        $category = $this->sanitize($request->category);
+        
         $systemPrompt = <<<'PROMPT'
 You are an AI assistant for SolarShare, a renewable energy equipment rental marketplace.
 Generate a compelling, professional equipment description for a rental listing.
@@ -124,8 +161,8 @@ Keep it under 300 words. Use a professional but friendly tone.
 PROMPT;
 
         $userPrompt = "Generate a description for:\n";
-        $userPrompt .= "- Name: {$request->name}\n";
-        $userPrompt .= "- Brand: {$request->brand}\n";
+        $userPrompt .= "- Name: {$name}\n";
+        $userPrompt .= "- Brand: {$brand}\n";
         $userPrompt .= "- Model: {$request->model}\n";
         $userPrompt .= "- Category: {$request->category}\n";
         
@@ -163,11 +200,15 @@ PROMPT;
             return response()->json(['error' => 'AI not configured'], 400);
         }
 
+        // Sanitize inputs
+        $category = $this->sanitize($request->category);
+        $brand = $request->filled('brand') ? $this->sanitize($request->brand) : null;
+        
         // Get median price from similar equipment
         $similarQuery = Equipment::query()
             ->where('approval_status', 'published')
             ->where('status', 'available')
-            ->whereHas('category', fn ($q) => $q->where('name', 'like', "%{$request->category}%"));
+            ->whereHas('category', fn ($q) => $q->where('name', 'like', "%{$category}%"));
 
         if ($request->filled('brand')) {
             $similarQuery->where('brand', $request->brand);
@@ -227,12 +268,16 @@ PROMPT;
             return response()->json(['error' => 'AI not configured'], 400);
         }
 
+        // Sanitize inputs
+        $name = $this->sanitize($request->name);
+        $description = $request->filled('description') ? $this->sanitize($request->description) : '';
+        
         $categories = \App\Models\Category::where('status', 'active')->pluck('name')->toArray();
         $categoriesList = implode(', ', $categories);
 
         $systemPrompt = "You are an AI assistant for SolarShare. Given an equipment name and description, suggest the most appropriate category from this list: {$categoriesList}. Return JSON with 'category' (string) and 'confidence' (0-100).";
 
-        $userPrompt = "Name: {$request->name}\nDescription: {$request->description}";
+        $userPrompt = "Name: {$name}\nDescription: {$description}";
 
         $messages = [
             ['role' => 'system', 'content' => $systemPrompt],
@@ -257,6 +302,9 @@ PROMPT;
         if (!$this->ai->isConfigured()) {
             return response()->json(['error' => 'AI not configured'], 400);
         }
+
+        // Sanitize user message
+        $message = $this->sanitize($request->string('message')->trim());
 
         $equipmentIds = $request->input('context_equipment_ids', []);
         $equipment = Equipment::with(['category', 'energyProfile'])
@@ -291,7 +339,7 @@ Do NOT invent specifications, prices, or availability. If the information is not
 Be concise and helpful. Respond in French.
 PROMPT;
 
-        $userPrompt = "Available equipment:\n" . json_encode($context, JSON_PRETTY_PRINT) . "\n\nUser question: {$request->message}";
+        $userPrompt = "Available equipment:\n" . json_encode($context, JSON_PRETTY_PRINT) . "\n\nUser question: {$message}";
 
         $messages = [
             ['role' => 'system', 'content' => $systemPrompt],
@@ -307,7 +355,7 @@ PROMPT;
 
     public function semanticSearch(Request $request): JsonResponse
     {
-        $query = $request->string('q')->trim();
+        $query = $this->sanitize($request->string('q')->trim());
         
         if (!$query || !$this->ai->isConfigured()) {
             return response()->json(['error' => 'AI not configured or query empty'], 400);
