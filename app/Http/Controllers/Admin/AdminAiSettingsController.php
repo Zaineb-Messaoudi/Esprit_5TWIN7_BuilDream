@@ -30,12 +30,20 @@ class AdminAiSettingsController extends Controller
         }
 
         $availableModels = $this->getAvailableModels($config['provider']);
+        
+        // Format models for JavaScript
+        $availableModelsFormatted = array_map(
+            fn ($label, $value) => ['value' => $value, 'label' => $label],
+            array_keys($availableModels),
+            $availableModels
+        );
 
         return view('pages.admin.ai-settings', [
             'title' => __('AI Configuration'),
             'config' => $config,
             'ollamaHealth' => $ollamaHealth,
             'availableModels' => $availableModels,
+            'availableModelsFormatted' => $availableModelsFormatted,
             'providers' => [
                 'ollama' => 'Ollama (Local, FREE)',
                 'openai' => 'OpenAI (Cloud, Paid)',
@@ -73,7 +81,7 @@ class AdminAiSettingsController extends Controller
      */
     public function testConnection(): \Illuminate\Http\JsonResponse
     {
-        if ($this->ai->provider === 'ollama') {
+        if ($this->ai->getProvider() === 'ollama') {
             $health = $this->ai->checkOllamaHealth();
             return response()->json($health);
         }
@@ -87,8 +95,8 @@ class AdminAiSettingsController extends Controller
 
         return response()->json([
             'available' => $success,
-            'provider' => $this->ai->provider,
-            'model' => $this->ai->model,
+            'provider' => $this->ai->getProvider(),
+            'model' => $this->ai->getModel(),
             'response' => $testResponse ? substr($testResponse, 0, 100) : null,
         ]);
     }
@@ -98,14 +106,14 @@ class AdminAiSettingsController extends Controller
      */
     public function pullModel(Request $request): \Illuminate\Http\JsonResponse
     {
-        if ($this->ai->provider !== 'ollama') {
+        if ($this->ai->getProvider() !== 'ollama') {
             return response()->json(['success' => false, 'message' => 'Only available for Ollama'], 400);
         }
 
         $request->validate(['model' => ['required', 'string']]);
 
         try {
-            $url = rtrim($this->ai->baseUrl, '/') . '/api/pull';
+            $url = rtrim($this->ai->getBaseUrl(), '/') . '/api/pull';
             $response = Http::timeout(300)->post($url, [
                 'model' => $request->model,
                 'stream' => false,

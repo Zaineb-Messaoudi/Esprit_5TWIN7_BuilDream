@@ -4,7 +4,7 @@
 <div class="space-y-6">
     <x-common.page-breadcrumb>
         <a href="{{ route('dashboard') }}" class="text-gray-500 hover:text-brand-600">{{ __('Dashboard') }}</a>
-        / <a href="{{ route('admin.index') }}" class="text-gray-500 hover:text-brand-600">{{ __('Admin') }}</a>
+        / <a href="{{ route('admin.categories.index') }}" class="text-gray-500 hover:text-brand-600">{{ __('Admin') }}</a>
         / {{ __('AI Configuration') }}
     </x-common.page-breadcrumb>
 
@@ -204,7 +204,7 @@ function aiSettingsForm() {
     return {
         provider: '@js($config["provider"])',
         config: @json($config),
-        availableModels: @json(array_map(fn($l, $v) => ['value' => $v, 'label' => $l], array_keys($availableModels), $availableModels)),
+        availableModels: @json($availableModelsFormatted),
         embeddingModels: [
             { value: 'nomic-embed-text', label: 'Nomic Embed Text (768 dims, recommended)' },
             { value: 'mxbai-embed-large', label: 'MXBAI Embed Large (1024 dims)' },

@@ -20,16 +20,36 @@ use Illuminate\Support\Facades\Log;
 class AiService
 {
     private string $provider;
-    private string $apiKey;
+    private ?string $apiKey;
     private string $baseUrl;
     private string $model;
 
     public function __construct()
     {
         $this->provider = config('ai.provider', 'ollama');
-        $this->apiKey = config('ai.api_key', '');
+        $this->apiKey = config('ai.api_key');
         $this->baseUrl = config('ai.base_url', '');
         $this->model = config('ai.model', 'llama3.2');
+    }
+
+    public function getProvider(): string
+    {
+        return $this->provider;
+    }
+
+    public function getModel(): string
+    {
+        return $this->model;
+    }
+
+    public function getBaseUrl(): string
+    {
+        return $this->baseUrl;
+    }
+
+    public function getApiKey(): ?string
+    {
+        return $this->apiKey;
     }
 
     /**
