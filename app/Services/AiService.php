@@ -291,6 +291,7 @@ class AiService
      * - all-minilm
      * 
      * For OpenAI, uses text-embedding-3-small.
+     * Results are cached for 24 hours to avoid repeated API calls.
      */
     public function getEmbedding(string $text): ?array
     {
@@ -298,20 +299,24 @@ class AiService
             return null;
         }
 
-        try {
-            if ($this->provider === 'ollama') {
-                return $this->getOllamaEmbedding($text);
-            } elseif ($this->provider === 'openai') {
-                return $this->getOpenAIEmbedding($text);
+        $cacheKey = 'ai_embedding_' . md5($text . '|' . $this->provider . '|' . $this->model);
+        
+        return \Illuminate\Support\Facades\Cache::remember($cacheKey, 86400, function () use ($text) {
+            try {
+                if ($this->provider === 'ollama') {
+                    return $this->getOllamaEmbedding($text);
+                } elseif ($this->provider === 'openai') {
+                    return $this->getOpenAIEmbedding($text);
+                }
+                return null;
+            } catch (\Throwable $e) {
+                Log::warning('Embedding request failed', [
+                    'provider' => $this->provider,
+                    'error' => $e->getMessage(),
+                ]);
+                return null;
             }
-            return null;
-        } catch (\Throwable $e) {
-            Log::warning('Embedding request failed', [
-                'provider' => $this->provider,
-                'error' => $e->getMessage(),
-            ]);
-            return null;
-        }
+        });
     }
 
     /**
