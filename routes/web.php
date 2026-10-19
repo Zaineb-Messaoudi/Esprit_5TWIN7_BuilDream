@@ -7,6 +7,7 @@ use App\Http\Controllers\Admin\RentalContractController;
 use App\Http\Controllers\Admin\RentalController;
 use App\Http\Controllers\Admin\RentalExtensionController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\AdminAiSettingsController;
 use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\Auth\RoleSetupController;
 use App\Http\Controllers\AuthDemoController;
@@ -256,6 +257,12 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
             ->name('rental-extensions.approve');
         Route::post('rental-extensions/{rental_extension}/reject', [RentalExtensionController::class, 'reject'])
             ->name('rental-extensions.reject');
+
+        // AI Settings
+        Route::get('ai-settings', [AdminAiSettingsController::class, 'index'])->name('ai-settings.index');
+        Route::put('ai-settings', [AdminAiSettingsController::class, 'update'])->name('ai-settings.update');
+        Route::post('ai-settings/test', [AdminAiSettingsController::class, 'testConnection'])->name('ai-settings.test');
+        Route::post('ai-settings/pull-model', [AdminAiSettingsController::class, 'pullModel'])->name('ai-settings.pull-model');
     });
 
     // Dashboard Routes
