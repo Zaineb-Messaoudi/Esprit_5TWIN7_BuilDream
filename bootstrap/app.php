@@ -41,6 +41,7 @@ return Application::configure(basePath: dirname(__DIR__))
         $middleware->alias([
             'role.selected' => \App\Http\Middleware\EnsureRoleSelected::class,
             '2fa' => \App\Http\Middleware\TwoFactorAuth::class,
+            'rate_limit_ip_user' => \App\Http\Middleware\RateLimitByIpAndUser::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {

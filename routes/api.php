@@ -243,7 +243,7 @@ Route::prefix('i18n')->name('i18n.')->group(function () {
 });
 
 // AI Features
-Route::prefix('ai')->name('ai.')->middleware(['auth:sanctum', 'throttle:30,1'])->group(function () {
+Route::prefix('ai')->name('ai.')->middleware(['auth:sanctum', 'rate_limit_ip_user:30,1'])->group(function () {
     Route::post('/natural-language-search', [AiController::class, 'naturalLanguageSearch'])->name('natural-language-search');
     Route::post('/generate-description', [AiController::class, 'generateDescription'])->name('generate-description');
     Route::post('/suggest-price', [AiController::class, 'suggestPrice'])->name('suggest-price');
