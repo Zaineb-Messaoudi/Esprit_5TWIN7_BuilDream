@@ -156,5 +156,118 @@
             </div>
             </div>
         @endif
+
+        {{-- AI Chatbot (RAG) --}}
+        <div class="mt-16 border-t border-gray-200 pt-10 dark:border-gray-800" x-data="aiChatbot(@json($item->id))">
+            <div class="rounded-2xl border border-brand-200 bg-brand-50/70 p-6 dark:border-brand-500/20 dark:bg-brand-500/10">
+                <div class="flex items-center gap-3 mb-4">
+                    <div class="size-12 rounded-xl bg-brand-100 dark:bg-brand-900/30 grid place-items-center">
+                        <svg class="w-6 h-6 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z"/></svg>
+                    </div>
+                    <div>
+                        <h3 class="font-semibold text-gray-900 dark:text-white">{{ __('Ask about this equipment') }}</h3>
+                        <p class="text-sm text-gray-500 dark:text-gray-400">{{ __('Get instant answers powered by AI using the equipment specifications.') }}</p>
+                    </div>
+                </div>
+                
+                <div class="space-y-3 max-h-96 overflow-y-auto" x-show="messages.length > 0" x-cloak>
+                    <template x-for="(message, index) in messages" :key="index">
+                        <div class="flex" :class="message.role === 'user' ? 'justify-end' : 'justify-start'">
+                            <div class="max-w-[85%] rounded-2xl px-4 py-3 text-sm" :class="message.role === 'user' ? 'bg-brand-500 text-white' : 'bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300 shadow-sm'" x-html="message.content"></div>
+                        </div>
+                    </template>
+                    <div x-show="typing" class="flex justify-start">
+                        <div class="bg-white text-gray-700 dark:bg-gray-800 dark:text-gray-300 rounded-2xl px-4 py-3 text-sm shadow-sm animate-pulse">{{ __('Thinking...') }}</div>
+                    </div>
+                </div>
+
+                <div x-show="messages.length === 0" class="text-center py-8 text-gray-500 dark:text-gray-400">
+                    <p>{{ __('Start a conversation about this equipment. Try asking:') }}</p>
+                    <div class="mt-3 flex flex-wrap justify-center gap-2">
+                        <button @click="ask('{{ __('What is the capacity and power output?') }}')" class="px-3 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full hover:border-brand-400 hover:text-brand-700 dark:hover:text-brand-300">{{ __('What is the capacity and power output?') }}</button>
+                        <button @click="ask('{{ __('Is this suitable for camping?') }}')" class="px-3 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full hover:border-brand-400 hover:text-brand-700 dark:hover:text-brand-300">{{ __('Is this suitable for camping?') }}</button>
+                        <button @click="ask('{{ __('What technology does it use?') }}')" class="px-3 py-1.5 text-xs bg-white dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-full hover:border-brand-400 hover:text-brand-700 dark:hover:text-brand-300">{{ __('What technology does it use?') }}</button>
+                    </div>
+                </div>
+
+                <form @submit.prevent="sendMessage()" class="mt-4 flex gap-2" x-show="messages.length > 0 || input">
+                    <input type="text" x-model="input" @keydown.enter.prevent="sendMessage()" placeholder="{{ __('Ask a question about this equipment...') }}" class="flex-1 min-h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white" autocomplete="off">
+                    <button type="submit" :disabled="!input.trim() || sending" class="px-4 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                        <span x-show="!sending">{{ __('Send') }}</span>
+                        <span x-show="sending">{{ __('Sending...') }}</span>
+                    </button>
+                </form>
+
+                <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('AI only uses the equipment data shown on this page. It cannot access external information.') }}</p>
+            </div>
+        </div>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+function aiChatbot(equipmentId) {
+    return {
+        messages: [],
+        input: '',
+        sending: false,
+        typing: false,
+
+        async sendMessage() {
+            if (!this.input.trim() || this.sending) return;
+            
+            const userMessage = this.input.trim();
+            this.messages.push({ role: 'user', content: userMessage });
+            this.input = '';
+            this.sending = true;
+            this.typing = true;
+
+            try {
+                // Get context equipment IDs (current + related)
+                const contextIds = [equipmentId];
+                document.querySelectorAll('[data-equipment-id]').forEach(el => {
+                    contextIds.push(parseInt(el.dataset.equipmentId));
+                });
+
+                const response = await fetch('{{ route("ai.chatbot") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify({
+                        message: userMessage,
+                        context_equipment_ids: contextIds,
+                    }),
+                });
+
+                const data = await response.json();
+
+                this.typing = false;
+                
+                if (data.response) {
+                    this.messages.push({ role: 'assistant', content: data.response });
+                } else if (data.error) {
+                    this.messages.push({ role: 'assistant', content: '{{ __('Sorry, I encountered an error. Please try again.') }}' });
+                }
+            } catch (e) {
+                this.typing = false;
+                this.messages.push({ role: 'assistant', content: '{{ __('Failed to connect. Please check your connection and try again.') }}' });
+            } finally {
+                this.sending = false;
+                this.$nextTick(() => {
+                    const container = this.$el.querySelector('.space-y-3');
+                    if (container) container.scrollTop = container.scrollHeight;
+                });
+            }
+        },
+
+        ask(question) {
+            this.input = question;
+            this.sendMessage();
+        },
+    };
+}
+</script>
+@endpush
