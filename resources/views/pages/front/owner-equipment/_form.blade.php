@@ -6,7 +6,13 @@
         @error('name')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
     </div>
     <div>
-        <label for="category_id" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Category') }}</label>
+        <label for="category_id" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300 flex items-center justify-between">
+            {{ __('Category') }}
+            <button type="button" x-data="aiAutoCategorize()" @click="suggest()" :disabled="loading" class="ml-3 px-3 py-1.5 text-xs font-medium text-brand-700 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 dark:text-brand-300 dark:bg-brand-500/10 dark:border-brand-500/30 disabled:opacity-50">
+                <span x-show="!loading">{{ __('Suggest Category') }}</span>
+                <span x-show="loading">{{ __('Analyzing...') }}</span>
+            </button>
+        </label>
         <select id="category_id" name="category_id" required class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
             <option value="">{{ __('Select category') }}</option>
             @foreach($categories as $category)
@@ -14,6 +20,12 @@
             @endforeach
         </select>
         @error('category_id')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+        <div x-show="suggestion" class="mt-2 p-3 rounded-lg bg-brand-50 border border-brand-200 dark:bg-brand-500/10 dark:border-brand-500/30" x-cloak>
+            <p class="text-xs font-medium text-brand-700 dark:text-brand-300">{{ __('Suggested Category:') }} <strong x-text="suggestion.category"></strong></p>
+            <p class="mt-1 text-xs text-brand-600 dark:text-brand-400">{{ __('Confidence:') }} <span x-text="suggestion.confidence + '%'"></span></p>
+            <button @click="applySuggestion()" class="mt-2 text-xs font-medium text-brand-700 hover:underline dark:text-brand-300">{{ __('Apply this category') }}</button>
+        </div>
+        <div x-show="error" class="mt-2 p-2 rounded-lg bg-error-50 border border-error-200 text-xs text-error-600 dark:bg-error-500/10 dark:border-error-500/30 dark:text-error-400" x-cloak x-text="error"></div>
     </div>
     <div>
         <label for="brand" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Brand') }}</label>
@@ -226,6 +238,72 @@ function aiPriceSuggestion() {
             if (this.suggestion?.suggested_price) {
                 document.getElementById('price_per_day').value = this.suggestion.suggested_price;
                 document.getElementById('price_per_day').dispatchEvent(new Event('input', { bubbles: true }));
+                this.suggestion = null;
+            }
+        },
+    };
+}
+
+function aiAutoCategorize() {
+    return {
+        loading: false,
+        suggestion: null,
+        error: null,
+
+        async suggest() {
+            this.loading = true;
+            this.error = null;
+            this.suggestion = null;
+
+            const name = document.getElementById('name')?.value || '';
+            const description = document.getElementById('description')?.value || '';
+
+            if (!name && !description) {
+                this.error = '{{ __('Please fill in at least name or description first.') }}';
+                this.loading = false;
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ route("ai.auto-categorize") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify({
+                        name,
+                        description,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.category) {
+                    this.suggestion = data;
+                } else if (data.error) {
+                    this.error = data.error;
+                }
+            } catch (e) {
+                this.error = '{{ __('Failed to get category suggestion. Please try again.') }}';
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        applySuggestion() {
+            if (this.suggestion?.category) {
+                const select = document.getElementById('category_id');
+                const options = select.options;
+                for (let i = 0; i < options.length; i++) {
+                    if (options[i].text.toLowerCase().includes(this.suggestion.category.toLowerCase()) ||
+                        this.suggestion.category.toLowerCase().includes(options[i].text.toLowerCase())) {
+                        select.value = options[i].value;
+                        select.dispatchEvent(new Event('change', { bubbles: true }));
+                        break;
+                    }
+                }
                 this.suggestion = null;
             }
         },
