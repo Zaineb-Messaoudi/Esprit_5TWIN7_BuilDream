@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\OwnerController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\StripeConnectController;
 use App\Http\Controllers\Api\StripeWebhookController;
+use App\Http\Controllers\AiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -203,4 +204,15 @@ Route::prefix('i18n')->name('i18n.')->group(function () {
     Route::post('/currency', [I18nController::class, 'updateUserCurrency'])->name('user-currency.update');
     Route::get('/rtl', [I18nController::class, 'rtl'])->name('rtl');
     Route::get('/switcher', [I18nController::class, 'switcherData'])->name('switcher');
+});
+
+// AI Features
+Route::prefix('ai')->name('ai.')->middleware('auth:sanctum')->group(function () {
+    Route::post('/natural-language-search', [AiController::class, 'naturalLanguageSearch'])->name('natural-language-search');
+    Route::post('/generate-description', [AiController::class, 'generateDescription'])->name('generate-description');
+    Route::post('/suggest-price', [AiController::class, 'suggestPrice'])->name('suggest-price');
+    Route::post('/auto-categorize', [AiController::class, 'autoCategorize'])->name('auto-categorize');
+    Route::post('/chatbot', [AiController::class, 'chatbot'])->name('chatbot');
+    Route::post('/semantic-search', [AiController::class, 'semanticSearch'])->name('semantic-search');
+    Route::post('/validate-image', [AiController::class, 'validateImage'])->name('validate-image');
 });

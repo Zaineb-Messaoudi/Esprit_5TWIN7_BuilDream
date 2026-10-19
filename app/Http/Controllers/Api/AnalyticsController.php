@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api;
 
 use App\Models\AnalyticsDashboard;
 use App\Models\AnalyticsReport;
+use App\Models\AnalyticsReportRun;
 use App\Models\AnalyticsWidget;
+use App\Models\Prediction;
 use App\Models\PredictiveModel;
 use App\Services\AnalyticsService;
 use Carbon\Carbon;

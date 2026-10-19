@@ -25,11 +25,11 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 
 RateLimiter::for('global', function (Request $request) {
-    return \Illuminate\Cache\RateLimit::perMinute(60)->by($request->ip());
+    return \Illuminate\Cache\RateLimiter::perMinute(60)->by($request->ip());
 });
 
 RateLimiter::for('auth', function (Request $request) {
-    return \Illuminate\Cache\RateLimit::perMinute(5)->by($request->ip());
+    return \Illuminate\Cache\RateLimiter::perMinute(5)->by($request->ip());
 });
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
@@ -164,9 +164,8 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard.main');
+    Route::get('/dashboard', [\App\Http\Controllers\SolarShareDashboardController::class, 'index'])->name('dashboard.main');
+    Route::get('/ecommerce', [DashboardController::class, 'ecommerce'])->name('dashboard.ecommerce');
     Route::get('/stocks', [DashboardController::class, 'sector'])->defaults('dashboard', 'stocks')->name('dashboard.stocks');
     Route::get('/finance', [DashboardController::class, 'sector'])->defaults('dashboard', 'finance')->name('dashboard.finance');
     Route::get('/sales', [DashboardController::class, 'sector'])->defaults('dashboard', 'sales')->name('dashboard.sales');
@@ -260,7 +259,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     });
 
     // Dashboard Routes
-    Route::get('/ecommerce', [DashboardController::class, 'ecommerce'])->name('dashboard.ecommerce');
+    })->name('dashboard.main');
     Route::get('/analytics', function () {
         return view('pages.dashboard.analytics', ['title' => 'Analytics Dashboard']);
     })->name('dashboard.analytics');
@@ -446,7 +445,6 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/vector-maps', function () {
         return view('pages.applications.vector-maps', ['title' => __('Vector Maps')]);
     })->name('maps.vector');
-});
 // Isolated technical module. Owner access is scoped to equipment ownership in the controllers.
 Route::middleware(['auth', 'verified', 'role.selected'])->prefix('technical')->name('technical.')->group(function () {
     Route::resource('maintenances', MaintenanceController::class);
