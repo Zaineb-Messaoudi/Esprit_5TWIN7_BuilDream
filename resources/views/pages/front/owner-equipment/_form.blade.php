@@ -24,9 +24,21 @@
         <input id="model" name="model" value="{{ old('model', $equipment->model ?? '') }}" class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
     </div>
     <div>
-        <label for="price_per_day" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Price per day') }}</label>
+        <label for="price_per_day" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300 flex items-center justify-between">
+            {{ __('Price per day') }}
+            <button type="button" x-data="aiPriceSuggestion()" @click="suggest()" :disabled="loading" class="ml-3 px-3 py-1.5 text-xs font-medium text-brand-700 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 dark:text-brand-300 dark:bg-brand-500/10 dark:border-brand-500/30 disabled:opacity-50">
+                <span x-show="!loading">{{ __('Suggest Price') }}</span>
+                <span x-show="loading">{{ __('Analyzing...') }}</span>
+            </button>
+        </label>
         <input id="price_per_day" name="price_per_day" type="number" step="0.01" min="0" value="{{ old('price_per_day', $equipment->price_per_day ?? '') }}" required class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
         @error('price_per_day')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+        <div x-show="suggestion" class="mt-2 p-3 rounded-lg bg-success-50 border border-success-200 dark:bg-success-500/10 dark:border-success-500/30" x-cloak>
+            <p class="text-xs font-medium text-success-700 dark:text-success-300">{{ __('AI Suggestion:') }} <span x-text="suggestion.suggested_price + ' TND/day'"></span></p>
+            <p class="mt-1 text-xs text-success-600 dark:text-success-400" x-text="suggestion.explanation"></p>
+            <button @click="applySuggestion()" class="mt-2 text-xs font-medium text-brand-700 hover:underline dark:text-brand-300">{{ __('Apply this price') }}</button>
+        </div>
+        <div x-show="error" class="mt-2 p-2 rounded-lg bg-error-50 border border-error-200 text-xs text-error-600 dark:bg-error-500/10 dark:border-error-500/30 dark:text-error-400" x-cloak x-text="error"></div>
     </div>
     <div>
         <label for="condition" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Condition') }}</label>
@@ -143,7 +155,6 @@ function aiDescriptionGenerator() {
                 if (data.description) {
                     const textarea = document.getElementById('description');
                     textarea.value = data.description;
-                    // Trigger Alpine.js update if needed
                     textarea.dispatchEvent(new Event('input', { bubbles: true }));
                 } else if (data.error) {
                     alert(data.error);
@@ -152,6 +163,70 @@ function aiDescriptionGenerator() {
                 alert('{{ __('Failed to generate description. Please try again.') }}');
             } finally {
                 this.loading = false;
+            }
+        },
+    };
+}
+
+function aiPriceSuggestion() {
+    return {
+        loading: false,
+        suggestion: null,
+        error: null,
+
+        async suggest() {
+            this.loading = true;
+            this.error = null;
+            this.suggestion = null;
+
+            const name = document.getElementById('name')?.value || '';
+            const brand = document.getElementById('brand')?.value || '';
+            const categorySelect = document.getElementById('category_id');
+            const category = categorySelect ? categorySelect.options[categorySelect.selectedIndex]?.text || '' : '';
+            const powerWatts = document.getElementById('energy_power_watts')?.value || '';
+            const capacityWh = document.getElementById('energy_capacity_wh')?.value || '';
+
+            if (!name && !category) {
+                this.error = '{{ __('Please fill in at least name and category first.') }}';
+                this.loading = false;
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ route("ai.suggest-price") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify({
+                        category,
+                        brand: brand || null,
+                        power_watts: powerWatts ? parseInt(powerWatts) : null,
+                        capacity_wh: capacityWh ? parseInt(capacityWh) : null,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.suggestion) {
+                    this.suggestion = data.suggestion;
+                } else if (data.error) {
+                    this.error = data.error;
+                }
+            } catch (e) {
+                this.error = '{{ __('Failed to get price suggestion. Please try again.') }}';
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        applySuggestion() {
+            if (this.suggestion?.suggested_price) {
+                document.getElementById('price_per_day').value = this.suggestion.suggested_price;
+                document.getElementById('price_per_day').dispatchEvent(new Event('input', { bubbles: true }));
+                this.suggestion = null;
             }
         },
     };
