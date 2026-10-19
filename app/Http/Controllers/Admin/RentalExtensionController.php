@@ -12,6 +12,8 @@ use App\Http\Requests\Admin\AdminRentalExtensionStoreRequest;
 use App\Http\Requests\Admin\AdminRentalExtensionUpdateRequest;
 use App\Models\Rental;
 use App\Models\RentalExtension;
+use App\Services\ExtensionAdvisorService;
+use App\Services\ExtensionAvailabilityService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Carbon;
@@ -34,6 +36,12 @@ use Illuminate\View\View;
  */
 class RentalExtensionController extends Controller
 {
+    // The two services are injected by Laravel (same pattern as UserController with UserService)
+    public function __construct(
+        protected ExtensionAvailabilityService $availability,
+        protected ExtensionAdvisorService $advisor,
+    ) {}
+
     /** List of requests, with search + status filter + pagination. */
     public function index(Request $request): View
     {
@@ -107,7 +115,7 @@ class RentalExtensionController extends Controller
         return redirect()->route('admin.rental-extensions.index')->with('status', 'extension-created');
     }
 
-    /** Details of one request, with the approve / reject buttons. */
+    /** Details of one request, with the approve / reject buttons and the decision aid. */
     public function show(RentalExtension $rentalExtension): View
     {
         // Route model binding: {rental_extension} in the URL -> $rentalExtension
@@ -115,6 +123,10 @@ class RentalExtensionController extends Controller
 
         return view('pages.admin.rental-extensions.show', [
             'extension' => $rentalExtension,
+            // The decision aid is only useful while the request waits for a decision
+            'advice' => $rentalExtension->status === ExtensionStatus::PENDING
+                ? $this->advisor->advise($rentalExtension)
+                : null,
             'title' => __('Extension Details'),
         ]);
     }
@@ -206,8 +218,14 @@ class RentalExtensionController extends Controller
                 return;
             }
 
-            // TODO (after Student 4's merge): refuse the extension if another reservation
-            // of the same equipment overlaps the extra period (old end date -> new end date).
+            // Availability: a booking of the same equipment may have appeared since the request.
+            // If another booking overlaps the extra period, the extension is refused.
+            $conflicts = $this->availability->conflicts($rental, $extension->new_end_date);
+            if ($conflicts->isNotEmpty()) {
+                $error = $this->availability->refusalMessage($rental, $conflicts);
+
+                return;
+            }
 
             $rental->update([
                 'end_date' => $extension->new_end_date,
