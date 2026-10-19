@@ -469,4 +469,72 @@ class AiService
             return ['available' => false, 'reason' => $e->getMessage()];
         }
     }
+
+    /**
+     * Calculate cosine similarity between two vectors.
+     * Works with JSON-stored embeddings on MySQL/PostgreSQL.
+     */
+    public function cosineSimilarity(array $a, array $b): float
+    {
+        $dot = 0.0;
+        $normA = 0.0;
+        $normB = 0.0;
+        $count = min(count($a), count($b));
+
+        for ($i = 0; $i < $count; $i++) {
+            $dot += $a[$i] * $b[$i];
+            $normA += $a[$i] * $a[$i];
+            $normB += $b[$i] * $b[$i];
+        }
+
+        if ($normA === 0.0 || $normB === 0.0) {
+            return 0.0;
+        }
+
+        return $dot / (sqrt($normA) * sqrt($normB));
+    }
+
+    /**
+     * Semantic search using JSON embeddings (MySQL-compatible).
+     * Fetches all embeddings, computes similarity in PHP.
+     * For production with >10k rows, use pgvector or Qdrant.
+     */
+    public function semanticSearchJson(string $query, int $limit = 10): ?array
+    {
+        $queryEmbedding = $this->getEmbedding($query);
+        if (!$queryEmbedding) {
+            return null;
+        }
+
+        $equipment = Equipment::whereNotNull('embedding')
+            ->where('approval_status', 'published')
+            ->where('status', 'available')
+            ->with(['category', 'energyProfile'])
+            ->get(['id', 'name', 'brand', 'model', 'price_per_day', 'location', 'category_id', 'embedding']);
+
+        if ($equipment->isEmpty()) {
+            return ['results' => []];
+        }
+
+        $results = $equipment->map(function ($e) use ($queryEmbedding) {
+            $embedding = is_array($e->embedding) ? $e->embedding : json_decode($e->embedding, true);
+            if (!$embedding) {
+                return null;
+            }
+            $score = $this->cosineSimilarity($queryEmbedding, $embedding);
+            return [
+                'id' => $e->id,
+                'name' => $e->name,
+                'brand' => $e->brand,
+                'model' => $e->model,
+                'price_per_day' => $e->price_per_day,
+                'location' => $e->location,
+                'category' => $e->category?->name,
+                'energyProfile' => $e->energyProfile,
+                'similarity' => $score,
+            ];
+        })->filter()->sortByDesc('similarity')->take($limit)->values()->toArray();
+
+        return ['results' => $results];
+    }
 }

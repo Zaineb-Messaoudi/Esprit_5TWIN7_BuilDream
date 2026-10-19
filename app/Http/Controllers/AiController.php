@@ -313,43 +313,17 @@ PROMPT;
             return response()->json(['error' => 'AI not configured or query empty'], 400);
         }
 
-        // Get embeddings for the query
-        $queryEmbedding = $this->ai->getEmbedding($query);
+        // Use JSON-based semantic search (works on MySQL/PostgreSQL)
+        $result = $this->ai->semanticSearchJson($query, 10);
         
-        if (!$queryEmbedding) {
+        if (!$result) {
             return response()->json(['error' => 'Failed to generate embedding'], 500);
         }
 
-        // In a real implementation, you'd use a vector database or pgvector
-        // For now, we'll fall back to keyword search with a note
-        $equipment = Equipment::query()
-            ->where('approval_status', 'published')
-            ->where('status', 'available')
-            ->where(function ($q) use ($query) {
-                $q->where('name', 'like', "%{$query}%")
-                  ->orWhere('brand', 'like', "%{$query}%")
-                  ->orWhere('model', 'like', "%{$query}%")
-                  ->orWhere('description', 'like', "%{$query}%")
-                  ->orWhereHas('category', fn ($c) => $c->where('name', 'like', "%{$query}%"))
-                  ->orWhereHas('energyProfile', fn ($e) => $e->where('technology', 'like', "%{$query}%"));
-            })
-            ->with(['category', 'energyProfile'])
-            ->limit(10)
-            ->get();
-
         return response()->json([
             'query' => $query,
-            'note' => 'Using keyword search fallback. For true semantic search, configure pgvector or a vector database.',
-            'results' => $equipment->map(fn ($e) => [
-                'id' => $e->id,
-                'name' => $e->name,
-                'brand' => $e->brand,
-                'model' => $e->model,
-                'price_per_day' => $e->price_per_day,
-                'category' => $e->category?->name,
-                'location' => $e->location,
-                'energyProfile' => $e->energyProfile,
-            ]),
+            'note' => 'Using JSON embedding similarity (MySQL-compatible). For >10k rows, use pgvector or Qdrant.',
+            ...$result,
         ]);
     }
 
