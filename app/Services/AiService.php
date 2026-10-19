@@ -5,6 +5,18 @@ namespace App\Services;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Log;
 
+/**
+ * AI Service supporting multiple LLM providers:
+ * - OpenAI (cloud, paid)
+ * - Anthropic (cloud, paid)
+ * - Ollama (local, FREE - runs on your machine)
+ * 
+ * Configuration via config/ai.php and .env:
+ * - AI_PROVIDER=ollama|openai|anthropic
+ * - AI_BASE_URL (for Ollama: http://localhost:11434)
+ * - AI_MODEL (e.g., llama3.2, mistral, phi3 for Ollama)
+ * - AI_API_KEY (not needed for Ollama)
+ */
 class AiService
 {
     private string $provider;
@@ -14,35 +26,57 @@ class AiService
 
     public function __construct()
     {
-        $this->provider = config('ai.provider', 'openai');
+        $this->provider = config('ai.provider', 'ollama');
         $this->apiKey = config('ai.api_key', '');
         $this->baseUrl = config('ai.base_url', '');
-        $this->model = config('ai.model', 'gpt-4o-mini');
+        $this->model = config('ai.model', 'llama3.2');
     }
 
+    /**
+     * Check if the AI service is properly configured.
+     * For Ollama, no API key is required - just needs base URL.
+     */
     public function isConfigured(): bool
     {
+        if ($this->provider === 'ollama') {
+            return !empty($this->baseUrl);
+        }
         return !empty($this->apiKey);
     }
 
+    /**
+     * Send a chat completion request.
+     * Returns the assistant's response text or null on failure.
+     */
     public function chat(array $messages, array $options = []): ?string
     {
         if (!$this->isConfigured()) {
+            Log::warning('AI service not configured', ['provider' => $this->provider]);
             return null;
         }
 
         $response = match ($this->provider) {
             'openai' => $this->callOpenAI($messages, $options),
             'anthropic' => $this->callAnthropic($messages, $options),
-            default => $this->callOpenAI($messages, $options),
+            'ollama' => $this->callOllama($messages, $options),
+            default => $this->callOllama($messages, $options),
         };
 
         return $response;
     }
 
+    /**
+     * Send a chat completion request expecting JSON response.
+     * Adds response_format for providers that support it.
+     */
     public function chatJson(array $messages, array $options = []): ?array
     {
-        $response = $this->chat($messages, array_merge($options, ['response_format' => ['type' => 'json_object']]));
+        // Only OpenAI supports response_format natively
+        $formatOptions = ($this->provider === 'openai') 
+            ? ['response_format' => ['type' => 'json_object']] 
+            : [];
+
+        $response = $this->chat($messages, array_merge($options, $formatOptions));
         
         if (!$response) {
             return null;
@@ -50,11 +84,27 @@ class AiService
 
         try {
             return json_decode($response, true, 512, JSON_THROW_ON_ERROR);
-        } catch (\JsonException) {
+        } catch (\JsonException $e) {
+            Log::warning('Failed to parse AI JSON response', [
+                'provider' => $this->provider,
+                'response' => substr($response, 0, 500),
+                'error' => $e->getMessage(),
+            ]);
+            // Try to extract JSON from markdown code blocks
+            if (preg_match('/```json\s*(.*?)\s*```/s', $response, $matches)) {
+                try {
+                    return json_decode($matches[1], true, 512, JSON_THROW_ON_ERROR);
+                } catch (\JsonException) {
+                    // Fall through to null
+                }
+            }
             return null;
         }
     }
 
+    /**
+     * Call OpenAI-compatible API (OpenAI, OpenRouter, etc.)
+     */
     private function callOpenAI(array $messages, array $options): ?string
     {
         $url = $this->baseUrl ?: 'https://api.openai.com/v1/chat/completions';
@@ -70,7 +120,7 @@ class AiService
             $response = Http::withHeaders([
                 'Authorization' => 'Bearer ' . $this->apiKey,
                 'Content-Type' => 'application/json',
-            ])->timeout(30)->post($url, $payload);
+            ])->timeout(60)->post($url, $payload);
 
             if ($response->failed()) {
                 Log::warning('OpenAI API error', [
@@ -87,6 +137,9 @@ class AiService
         }
     }
 
+    /**
+     * Call Anthropic API (Claude)
+     */
     private function callAnthropic(array $messages, array $options): ?string
     {
         $url = $this->baseUrl ?: 'https://api.anthropic.com/v1/messages';
@@ -115,7 +168,7 @@ class AiService
                 'x-api-key' => $this->apiKey,
                 'anthropic-version' => '2023-06-01',
                 'Content-Type' => 'application/json',
-            ])->timeout(30)->post($url, $payload);
+            ])->timeout(60)->post($url, $payload);
 
             if ($response->failed()) {
                 Log::warning('Anthropic API error', [
@@ -132,28 +185,170 @@ class AiService
         }
     }
 
+    /**
+     * Call Ollama local API (FREE - runs on your machine)
+     * 
+     * Ollama API: http://localhost:11434/api/chat
+     * Models: llama3.2, mistral, phi3, qwen2.5, gemma2, etc.
+     * Install: curl -fsSL https://ollama.com/install.sh | sh
+     * Pull model: ollama pull llama3.2
+     */
+    private function callOllama(array $messages, array $options): ?string
+    {
+        $url = rtrim($this->baseUrl, '/') . '/api/chat';
+        
+        // Convert messages to Ollama format
+        $ollamaMessages = [];
+        foreach ($messages as $message) {
+            $ollamaMessages[] = [
+                'role' => $message['role'],
+                'content' => $message['content'],
+            ];
+        }
+
+        $payload = array_merge([
+            'model' => $this->model,
+            'messages' => $ollamaMessages,
+            'stream' => false,
+            'options' => [
+                'temperature' => $options['temperature'] ?? 0.3,
+                'num_predict' => $options['max_tokens'] ?? 2048,
+            ],
+        ], array_diff_key($options, ['temperature' => '', 'max_tokens' => '', 'response_format' => '']));
+
+        try {
+            $response = Http::timeout(120)->post($url, $payload);
+
+            if ($response->failed()) {
+                Log::warning('Ollama API error', [
+                    'status' => $response->status(),
+                    'body' => $response->body(),
+                    'url' => $url,
+                    'model' => $this->model,
+                ]);
+                return null;
+            }
+
+            // Ollama returns: { "message": { "role": "assistant", "content": "..." } }
+            return $response->json('message.content');
+        } catch (\Throwable $e) {
+            Log::warning('Ollama request failed', [
+                'error' => $e->getMessage(),
+                'url' => $url,
+                'model' => $this->model,
+            ]);
+            return null;
+        }
+    }
+
+    /**
+     * Get text embeddings for semantic search.
+     * 
+     * Note: Ollama supports embeddings via /api/embeddings with models like:
+     * - nomic-embed-text (recommended)
+     * - mxbai-embed-large
+     * - all-minilm
+     * 
+     * For OpenAI, uses text-embedding-3-small.
+     */
     public function getEmbedding(string $text): ?array
     {
-        if (!$this->isConfigured() || $this->provider !== 'openai') {
+        if (!$this->isConfigured()) {
             return null;
         }
 
         try {
-            $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
-                'Content-Type' => 'application/json',
-            ])->timeout(30)->post('https://api.openai.com/v1/embeddings', [
-                'model' => 'text-embedding-3-small',
-                'input' => $text,
+            if ($this->provider === 'ollama') {
+                return $this->getOllamaEmbedding($text);
+            } elseif ($this->provider === 'openai') {
+                return $this->getOpenAIEmbedding($text);
+            }
+            return null;
+        } catch (\Throwable $e) {
+            Log::warning('Embedding request failed', [
+                'provider' => $this->provider,
+                'error' => $e->getMessage(),
             ]);
+            return null;
+        }
+    }
+
+    /**
+     * Get embeddings from Ollama.
+     */
+    private function getOllamaEmbedding(string $text): ?array
+    {
+        $url = rtrim($this->baseUrl, '/') . '/api/embeddings';
+        
+        // Use a dedicated embedding model if configured, otherwise use the chat model
+        $embeddingModel = config('ai.embedding_model', 'nomic-embed-text');
+        
+        $response = Http::timeout(60)->post($url, [
+            'model' => $embeddingModel,
+            'prompt' => $text,
+        ]);
+
+        if ($response->failed()) {
+            Log::warning('Ollama embedding error', [
+                'status' => $response->status(),
+                'body' => $response->body(),
+                'model' => $embeddingModel,
+            ]);
+            return null;
+        }
+
+        // Ollama returns: { "embedding": [...] }
+        return $response->json('embedding');
+    }
+
+    /**
+     * Get embeddings from OpenAI.
+     */
+    private function getOpenAIEmbedding(string $text): ?array
+    {
+        $response = Http::withHeaders([
+            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Content-Type' => 'application/json',
+        ])->timeout(30)->post('https://api.openai.com/v1/embeddings', [
+            'model' => 'text-embedding-3-small',
+            'input' => $text,
+        ]);
+
+        if ($response->failed()) {
+            return null;
+        }
+
+        return $response->json('data.0.embedding');
+    }
+
+    /**
+     * Check if Ollama is running and list available models.
+     * Useful for health checks in admin UI.
+     */
+    public function checkOllamaHealth(): array
+    {
+        if ($this->provider !== 'ollama') {
+            return ['available' => false, 'reason' => 'Provider is not Ollama'];
+        }
+
+        try {
+            $url = rtrim($this->baseUrl, '/') . '/api/tags';
+            $response = Http::timeout(10)->get($url);
 
             if ($response->failed()) {
-                return null;
+                return ['available' => false, 'reason' => 'Ollama API unreachable'];
             }
 
-            return $response->json('data.0.embedding');
-        } catch (\Throwable) {
-            return null;
+            $models = collect($response->json('models', []))->pluck('name')->toArray();
+            
+            return [
+                'available' => true,
+                'models' => $models,
+                'current_model' => $this->model,
+                'model_exists' => in_array($this->model, $models),
+            ];
+        } catch (\Throwable $e) {
+            return ['available' => false, 'reason' => $e->getMessage()];
         }
     }
 }

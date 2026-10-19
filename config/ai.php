@@ -1,8 +1,71 @@
 <?php
 
 return [
-    'provider' => env('AI_PROVIDER', 'openai'),
+    /*
+    |--------------------------------------------------------------------------
+    | AI Provider
+    |--------------------------------------------------------------------------
+    | Supported: 'ollama' (local, FREE), 'openai', 'anthropic'
+    | Ollama runs locally on your machine - no API costs!
+    | Install: https://ollama.com/
+    */
+    'provider' => env('AI_PROVIDER', 'ollama'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | API Key
+    |--------------------------------------------------------------------------
+    | Required for OpenAI and Anthropic. NOT needed for Ollama.
+    */
     'api_key' => env('AI_API_KEY'),
-    'base_url' => env('AI_BASE_URL'),
-    'model' => env('AI_MODEL', 'gpt-4o-mini'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Base URL
+    |--------------------------------------------------------------------------
+    | - Ollama: http://localhost:11434 (default)
+    | - OpenAI: https://api.openai.com/v1 (default)
+    | - Anthropic: https://api.anthropic.com/v1 (default)
+    | - OpenRouter: https://openrouter.ai/api/v1
+    */
+    'base_url' => env('AI_BASE_URL', 'http://localhost:11434'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Chat Model
+    |--------------------------------------------------------------------------
+    | Ollama models (pull first: ollama pull <model>):
+    | - llama3.2 (recommended, fast, 3B params)
+    | - mistral (good quality)
+    | - phi3 (Microsoft, small)
+    | - qwen2.5 (multilingual)
+    | - gemma2 (Google)
+    |
+    | OpenAI: gpt-4o-mini, gpt-4o, gpt-3.5-turbo
+    | Anthropic: claude-3-haiku, claude-3-sonnet
+    */
+    'model' => env('AI_MODEL', 'llama3.2'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Embedding Model (for semantic search)
+    |--------------------------------------------------------------------------
+    | Ollama embedding models:
+    | - nomic-embed-text (recommended, 768 dims)
+    | - mxbai-embed-large (1024 dims)
+    | - all-minilm (384 dims, fast)
+    |
+    | OpenAI: text-embedding-3-small (1536 dims)
+    */
+    'embedding_model' => env('AI_EMBEDDING_MODEL', 'nomic-embed-text'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Default Generation Options
+    |--------------------------------------------------------------------------
+    */
+    'options' => [
+        'temperature' => 0.3,
+        'max_tokens' => 2048,
+    ],
 ];
