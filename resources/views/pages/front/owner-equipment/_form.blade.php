@@ -1,7 +1,160 @@
 @php($energy = old('energy', isset($equipment) && $equipment->energyProfile ? $equipment->energyProfile->toArray() : []))
-<div class="grid gap-5 sm:grid-cols-2"><div><label for="name" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Name') }}</label><input id="name" name="name" value="{{ old('name', $equipment->name ?? '') }}" required class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">@error('name')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror</div><div><label for="category_id" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Category') }}</label><select id="category_id" name="category_id" required class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"><option value="">{{ __('Select category') }}</option>@foreach($categories as $category)<option value="{{ $category->id }}" @selected((string) old('category_id', $equipment->category_id ?? '') === (string) $category->id)>{{ $category->name }}</option>@endforeach</select>@error('category_id')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror</div><div><label for="brand" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Brand') }}</label><input id="brand" name="brand" value="{{ old('brand', $equipment->brand ?? '') }}" class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"></div><div><label for="model" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Model') }}</label><input id="model" name="model" value="{{ old('model', $equipment->model ?? '') }}" class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"></div><div><label for="price_per_day" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Price per day (TND)') }}</label><input id="price_per_day" name="price_per_day" type="number" step="0.01" min="0" value="{{ old('price_per_day', $equipment->price_per_day ?? '') }}" required class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">@error('price_per_day')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror</div><div><label for="location" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Location') }}</label><input id="location" name="location" value="{{ old('location', $equipment->location ?? '') }}" required class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">@error('location')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror</div><div><label for="condition" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Condition') }}</label><select id="condition" name="condition" class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">@foreach(['new','good','fair','damaged'] as $value)<option value="{{ $value }}" @selected(old('condition', $equipment->condition ?? 'good') === $value)>{{ __(ucfirst($value)) }}</option>@endforeach</select></div><div><label for="status" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Status') }}</label><select id="status" name="status" class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">@foreach(['available','unavailable','maintenance','inactive'] as $value)<option value="{{ $value }}" @selected(old('status', $equipment->status ?? 'available') === $value)>{{ __(ucfirst($value)) }}</option>@endforeach</select></div></div>
-<div><label for="description" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Description') }}</label><textarea id="description" name="description" rows="4" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">{{ old('description', $equipment->description ?? '') }}</textarea></div>
-<div><label for="image_url" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Equipment image URL') }}</label><input id="image_url" name="image_url" type="url" value="{{ old('image_url', $equipment->image_url ?? '') }}" placeholder="https://images.unsplash.com/..." class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"><p class="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">{{ __('Optional. Use a public image URL that represents this equipment.') }}</p>@error('image_url')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror</div><div><label for="image" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Or upload an equipment image') }}</label><input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">@error('image')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror</div>
-<fieldset class="rounded-xl border border-gray-200 p-4 dark:border-gray-800"><legend class="px-2 text-theme-sm font-semibold text-gray-900 dark:text-white">{{ __('Energy profile') }}</legend><div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">@foreach([['power_watts','Power (W)','number'],['voltage','Voltage (V)','number'],['capacity_wh','Capacity (Wh)','number'],['efficiency','Efficiency (%)','number'],['technology','Technology','text'],['max_output','Max output (W)','number'],['operating_duration','Operating duration (h)','number']] as [$key,$label,$type])<div><label for="energy_{{ $key }}" class="mb-1 block text-theme-xs font-medium text-gray-700 dark:text-gray-300">{{ __($label) }}</label><input id="energy_{{ $key }}" name="energy[{{ $key }}]" type="{{ $type }}" step="0.01" value="{{ $energy[$key] ?? '' }}" class="min-h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white"></div>@endforeach</div></fieldset>
-<div class="rounded-2xl border border-brand-100 bg-brand-50/60 p-4 dark:border-brand-500/20 dark:bg-brand-500/10"><label for="images" class="mb-1.5 block text-theme-sm font-semibold text-gray-800 dark:text-white">{{ __('Add gallery images') }}</label><input id="images" name="images[]" type="file" multiple accept="image/jpeg,image/png,image/webp" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white"><p class="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">{{ __('Up to 8 photos. The first one becomes the gallery cover.') }}</p>@error('images.*')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror</div>
-<x-form.location-picker :location="old('location', $equipment->location ?? '')" :latitude="old('latitude', $equipment->latitude ?? null)" :longitude="old('longitude', $equipment->longitude ?? null)" location-id="location" :show-input="false" />
+<div class="grid gap-5 sm:grid-cols-2">
+    <div>
+        <label for="name" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Name') }}</label>
+        <input id="name" name="name" value="{{ old('name', $equipment->name ?? '') }}" required class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+        @error('name')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+    </div>
+    <div>
+        <label for="category_id" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Category') }}</label>
+        <select id="category_id" name="category_id" required class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+            <option value="">{{ __('Select category') }}</option>
+            @foreach($categories as $category)
+                <option value="{{ $category->id }}" @selected((string) old('category_id', $equipment->category_id ?? '') === (string) $category->id)>{{ $category->name }}</option>
+            @endforeach
+        </select>
+        @error('category_id')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+    </div>
+    <div>
+        <label for="brand" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Brand') }}</label>
+        <input id="brand" name="brand" value="{{ old('brand', $equipment->brand ?? '') }}" class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+    </div>
+    <div>
+        <label for="model" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Model') }}</label>
+        <input id="model" name="model" value="{{ old('model', $equipment->model ?? '') }}" class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+    </div>
+    <div>
+        <label for="price_per_day" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Price per day') }}</label>
+        <input id="price_per_day" name="price_per_day" type="number" step="0.01" min="0" value="{{ old('price_per_day', $equipment->price_per_day ?? '') }}" required class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+        @error('price_per_day')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+    </div>
+    <div>
+        <label for="condition" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Condition') }}</label>
+        <select id="condition" name="condition" required class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+            <option value="">{{ __('Select condition') }}</option>
+            @foreach(['new', 'good', 'fair', 'damaged'] as $condition)
+                <option value="{{ $condition }}" @selected((string) old('condition', $equipment->condition ?? '') === $condition)>{{ __(ucfirst($condition)) }}</option>
+            @endforeach
+        </select>
+        @error('condition')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+    </div>
+    <div>
+        <label for="location" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Location') }}</label>
+        <input id="location" name="location" value="{{ old('location', $equipment->location ?? '') }}" required class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+        @error('location')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+    </div>
+    <div>
+        <label for="status" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Status') }}</label>
+        <select id="status" name="status" class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+            <option value="available">{{ __('Available') }}</option>
+            <option value="unavailable">{{ __('Unavailable') }}</option>
+            <option value="maintenance">{{ __('Maintenance') }}</option>
+            <option value="inactive">{{ __('Inactive') }}</option>
+        </select>
+        @error('status')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+    </div>
+    <div class="sm:col-span-2">
+        <label for="description" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300 flex items-center justify-between">
+            {{ __('Description') }}
+            <button type="button" x-data="aiDescriptionGenerator()" @click="generate()" :disabled="loading" class="ml-3 px-3 py-1.5 text-xs font-medium text-brand-700 bg-brand-50 border border-brand-200 rounded-lg hover:bg-brand-100 dark:text-brand-300 dark:bg-brand-500/10 dark:border-brand-500/30 disabled:opacity-50">
+                <span x-show="!loading">{{ __('Generate with AI') }}</span>
+                <span x-show="loading">{{ __('Generating...') }}</span>
+            </button>
+        </label>
+        <textarea id="description" name="description" rows="4" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">{{ old('description', $equipment->description ?? '') }}</textarea>
+    </div>
+    <div class="sm:col-span-2">
+        <label for="image_url" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Equipment image URL') }}</label>
+        <input id="image_url" name="image_url" type="url" value="{{ old('image_url', $equipment->image_url ?? '') }}" placeholder="https://images.unsplash.com/..." class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+        <p class="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">{{ __('Optional. Use a public image URL that represents this equipment.') }}</p>
+        @error('image_url')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+    </div>
+    <div class="sm:col-span-2">
+        <label for="image" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Or upload an equipment image') }}</label>
+        <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+        @error('image')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+    </div>
+    <fieldset class="rounded-xl border border-gray-200 p-4 dark:border-gray-800 sm:col-span-2">
+        <legend class="px-2 text-theme-sm font-semibold text-gray-900 dark:text-white">{{ __('Energy profile') }}</legend>
+        <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+            @foreach([['power_watts','Power (W)','number'],['voltage','Voltage (V)','number'],['capacity_wh','Capacity (Wh)','number'],['efficiency','Efficiency (%)','number'],['technology','Technology','text'],['max_output','Max output (W)','number'],['operating_duration','Operating duration (h)','number']] as [$key,$label,$type])
+                <div>
+                    <label for="energy_{{ $key }}" class="mb-1 block text-theme-xs font-medium text-gray-700 dark:text-gray-300">{{ __($label) }}</label>
+                    <input id="energy_{{ $key }}" name="energy[{{ $key }}]" type="{{ $type }}" step="0.01" value="{{ $energy[$key] ?? '' }}" class="min-h-10 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-xs dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                </div>
+            @endforeach
+        </div>
+    </fieldset>
+    <div class="rounded-2xl border border-brand-100 bg-brand-50/60 p-4 dark:border-brand-500/20 dark:bg-brand-500/10 sm:col-span-2">
+        <label for="images" class="mb-1.5 block text-theme-sm font-semibold text-gray-800 dark:text-white">{{ __('Add gallery images') }}</label>
+        <input id="images" name="images[]" type="file" multiple accept="image/jpeg,image/png,image/webp" class="w-full rounded-lg border border-gray-300 bg-white px-3 py-2 text-theme-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+        <p class="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">{{ __('Up to 8 photos. The first one becomes the gallery cover.') }}</p>
+        @error('images.*')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+    </div>
+    <x-form.location-picker :location="old('location', $equipment->location ?? '')" :latitude="old('latitude', $equipment->latitude ?? null)" :longitude="old('longitude', $equipment->longitude ?? null)" location-id="location" :show-input="false" />
+</div>
+
+@push('scripts')
+<script>
+function aiDescriptionGenerator() {
+    return {
+        loading: false,
+
+        async generate() {
+            this.loading = true;
+            const name = document.getElementById('name')?.value || '';
+            const brand = document.getElementById('brand')?.value || '';
+            const model = document.getElementById('model')?.value || '';
+            const categorySelect = document.getElementById('category_id');
+            const category = categorySelect ? categorySelect.options[categorySelect.selectedIndex]?.text || '' : '';
+            const energy = {};
+            document.querySelectorAll('[name^="energy["]').forEach(input => {
+                const key = input.name.match(/energy\[(.+)\]/);
+                if (key && input.value) {
+                    energy[key[1]] = input.value;
+                }
+            });
+
+            if (!name && !brand && !model) {
+                alert('{{ __('Please fill in at least name, brand, or model first.') }}');
+                this.loading = false;
+                return;
+            }
+
+            try {
+                const response = await fetch('{{ route("ai.generate-description") }}', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify({
+                        name,
+                        brand,
+                        model,
+                        category,
+                        energy_profile: energy,
+                    }),
+                });
+
+                const data = await response.json();
+
+                if (data.description) {
+                    const textarea = document.getElementById('description');
+                    textarea.value = data.description;
+                    // Trigger Alpine.js update if needed
+                    textarea.dispatchEvent(new Event('input', { bubbles: true }));
+                } else if (data.error) {
+                    alert(data.error);
+                }
+            } catch (e) {
+                alert('{{ __('Failed to generate description. Please try again.') }}');
+            } finally {
+                this.loading = false;
+            }
+        },
+    };
+}
+</script>
+@endpush
