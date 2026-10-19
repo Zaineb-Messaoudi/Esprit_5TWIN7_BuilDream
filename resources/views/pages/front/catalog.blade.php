@@ -76,8 +76,17 @@
 
                 {{-- Regular Search --}}
                 <div>
-                    <label for="q" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Keyword Search') }}</label>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="q" class="mb-0 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Keyword Search') }}</label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" x-model="useSemanticSearch" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('Semantic Search (AI)') }}</span>
+                        </label>
+                    </div>
                     <input id="q" type="search" name="q" autocomplete="off" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Name, brand, technology or city…') }}" class="{{ $field }}" />
+                    <div x-show="useSemanticSearch" class="mt-2 p-3 rounded-lg bg-brand-50 border border-brand-100 dark:bg-brand-500/10 dark:border-brand-500/20" x-cloak>
+                        <p class="text-xs text-brand-700 dark:text-brand-300">{{ __('Semantic search finds conceptually similar equipment using AI embeddings. Falls back to keyword search if embeddings unavailable.') }}</p>
+                    </div>
                 </div>
                 <div class="mt-4">
                     <div>
@@ -225,6 +234,7 @@ function aiNaturalSearch() {
         loading: false,
         error: null,
         appliedFilters: [],
+        useSemanticSearch: false,
 
         async search() {
             if (!this.query.trim()) return;
@@ -232,7 +242,11 @@ function aiNaturalSearch() {
             this.error = null;
 
             try {
-                const response = await fetch('{{ route("ai.natural-language-search") }}', {
+                const endpoint = this.useSemanticSearch 
+                    ? '{{ route("ai.semantic-search") }}'
+                    : '{{ route("ai.natural-language-search") }}';
+                
+                const response = await fetch(endpoint, {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json',
