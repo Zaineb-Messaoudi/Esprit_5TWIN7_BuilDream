@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Jobs\ProcessAiRequest;
 use App\Models\Equipment;
 use App\Services\AiService;
 use Illuminate\Http\JsonResponse;
@@ -43,8 +44,33 @@ class AiController extends Controller
         return $input;
     }
 
+    /**
+     * Dispatch AI request to queue for async processing.
+     * Returns job ID immediately, result delivered via webhook/callback.
+     */
+    private function dispatchAsync(string $endpoint, array $payload, Request $request): JsonResponse
+    {
+        $callbackUrl = $request->input('callback_url');
+        $callbackSecret = $request->input('callback_secret', Str::random(32));
+        
+        $job = new ProcessAiRequest($endpoint, $payload, $callbackUrl, $callbackSecret);
+        $jobId = $job->dispatch()->getJobId();
+        
+        return response()->json([
+            'job_id' => $jobId,
+            'status' => 'queued',
+            'message' => 'Request queued for async processing. Provide callback_url for result.',
+            'callback_secret' => $callbackSecret,
+        ], 202);
+    }
+
     public function naturalLanguageSearch(Request $request): JsonResponse
     {
+        // Check if async mode requested
+        if ($request->boolean('async')) {
+            return $this->dispatchAsync('natural-language-search', ['q' => $request->string('q')->trim()], $request);
+        }
+        
         $query = $this->sanitize($request->string('q')->trim());
         
         if (!$query || !$this->ai->isConfigured()) {
@@ -132,6 +158,16 @@ PROMPT;
 
     public function generateDescription(Request $request): JsonResponse
     {
+        if ($request->boolean('async')) {
+            return $this->dispatchAsync('generate-description', [
+                'name' => $request->name,
+                'brand' => $request->brand,
+                'model' => $request->model,
+                'category' => $request->category,
+                'energy_profile' => $request->input('energy_profile', []),
+            ], $request);
+        }
+        
         $request->validate([
             'name' => 'required|string',
             'brand' => 'required|string',
@@ -189,6 +225,15 @@ PROMPT;
 
     public function suggestPrice(Request $request): JsonResponse
     {
+        if ($request->boolean('async')) {
+            return $this->dispatchAsync('suggest-price', [
+                'category' => $request->category,
+                'brand' => $request->brand,
+                'power_watts' => $request->power_watts,
+                'capacity_wh' => $request->capacity_wh,
+            ], $request);
+        }
+        
         $request->validate([
             'category' => 'required|string',
             'brand' => 'nullable|string',
@@ -259,6 +304,13 @@ PROMPT;
 
     public function autoCategorize(Request $request): JsonResponse
     {
+        if ($request->boolean('async')) {
+            return $this->dispatchAsync('auto-categorize', [
+                'name' => $request->name,
+                'description' => $request->description,
+            ], $request);
+        }
+        
         $request->validate([
             'name' => 'required|string',
             'description' => 'nullable|string',
@@ -294,6 +346,13 @@ PROMPT;
 
     public function chatbot(Request $request): JsonResponse
     {
+        if ($request->boolean('async')) {
+            return $this->dispatchAsync('chatbot', [
+                'message' => $request->string('message')->trim(),
+                'context_equipment_ids' => $request->input('context_equipment_ids', []),
+            ], $request);
+        }
+        
         $request->validate([
             'message' => 'required|string',
             'context_equipment_ids' => 'array',
@@ -355,6 +414,10 @@ PROMPT;
 
     public function semanticSearch(Request $request): JsonResponse
     {
+        if ($request->boolean('async')) {
+            return $this->dispatchAsync('semantic-search', ['q' => $request->string('q')->trim()], $request);
+        }
+        
         $query = $this->sanitize($request->string('q')->trim());
         
         if (!$query || !$this->ai->isConfigured()) {
