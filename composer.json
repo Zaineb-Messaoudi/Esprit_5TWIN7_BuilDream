@@ -19,6 +19,7 @@
         "meilisearch/meilisearch-php": "^1.17",
         "pragmarx/google2fa-laravel": "^3.0",
         "pusher/pusher-php-server": "^7.3",
+        "sentry/sentry-laravel": "*",
         "stripe/stripe-php": "^22.0"
     },
     "require-dev": {
