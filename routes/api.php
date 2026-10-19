@@ -30,6 +30,42 @@ use Illuminate\Support\Facades\Route;
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
     ->name('stripe.webhook');
 
+// Health check (no auth required)
+Route::get('/health', function () {
+    $checks = [
+        'database' => 'ok',
+        'cache' => 'ok',
+        'queue' => 'ok',
+    ];
+    
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+    } catch (\Throwable) {
+        $checks['database'] = 'failed';
+    }
+    
+    try {
+        \Illuminate\Support\Facades\Cache::get('health-check');
+    } catch (\Throwable) {
+        $checks['cache'] = 'failed';
+    }
+    
+    try {
+        \Illuminate\Support\Facades\Queue::size('default');
+    } catch (\Throwable) {
+        $checks['queue'] = 'failed';
+    }
+    
+    $status = in_array('failed', $checks) ? 503 : 200;
+    
+    return response()->json([
+        'status' => $status === 200 ? 'healthy' : 'unhealthy',
+        'checks' => $checks,
+        'timestamp' => now()->toISOString(),
+        'version' => config('app.version', '1.0.0'),
+    ], $status);
+})->name('health');
+
 Route::middleware('auth:sanctum')->group(function () {
     // ---- Authenticated user -------------------------------------------------
     Route::get('/me', AccountController::class)->name('api.me');

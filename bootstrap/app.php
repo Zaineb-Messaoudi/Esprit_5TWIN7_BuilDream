@@ -34,6 +34,10 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\RateLimitHeaders::class,
         ]);
 
+        $middleware->api(append: [
+            \App\Http\Middleware\SecurityHeaders::class,
+        ]);
+
         $middleware->alias([
             'role.selected' => \App\Http\Middleware\EnsureRoleSelected::class,
             '2fa' => \App\Http\Middleware\TwoFactorAuth::class,
