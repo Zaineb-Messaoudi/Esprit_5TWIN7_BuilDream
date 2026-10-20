@@ -47,6 +47,22 @@ class AiService
         $this->circuitBreaker['timeout'] = config('ai.circuit_breaker.timeout', 60);
     }
 
+    /**
+     * Check if AI service is enabled and properly configured.
+     * Respects the AI_ENABLED feature flag.
+     */
+    public function isConfigured(): bool
+    {
+        if (!config('ai.enabled', true)) {
+            return false;
+        }
+        
+        if ($this->provider === 'ollama') {
+            return !empty($this->baseUrl);
+        }
+        return !empty($this->apiKey);
+    }
+
     public function getProvider(): string
     {
         return $this->provider;
