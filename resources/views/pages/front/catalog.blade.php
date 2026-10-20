@@ -48,9 +48,45 @@
                     <p class="text-theme-xs font-semibold uppercase tracking-[0.16em] text-brand-700 dark:text-brand-300">{{ __('Search the network') }}</p>
                     <h2 class="mt-1 text-lg font-semibold tracking-tight text-gray-900 dark:text-white">{{ __('Refine your search') }}</h2>
                 </div>
+                
+                {{-- AI Natural Language Search --}}
+                <div x-data="aiNaturalSearch()" class="mb-4 p-4 rounded-xl bg-brand-50 border border-brand-100 dark:bg-brand-500/10 dark:border-brand-500/20">
+                    <label class="flex items-center gap-2 mb-2 text-sm font-medium text-gray-700 dark:text-gray-300">
+                        <svg class="w-5 h-5 text-brand-600 dark:text-brand-400" fill="none" stroke="currentColor" viewBox="0 0 24 24" stroke-width="2"><path stroke-linecap="round" stroke-linejoin="round" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/></svg>
+                        <span>{{ __('AI Search (Natural Language)') }}</span>
+                    </label>
+                    <p class="text-xs text-gray-500 dark:text-gray-400 mb-3">{{ __('Describe what you need in plain language, e.g. "Battery for 2 days camping with fridge, under 20 TND"') }}</p>
+                    <div class="flex gap-2">
+                        <input type="text" x-model="query" @keydown.enter.prevent="search()" placeholder="{{ __('e.g. Solar panel for camping, under 15 TND/day...') }}" class="flex-1 min-h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                        <button @click="search()" :disabled="loading" class="px-4 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed">
+                            <span x-show="!loading">{{ __('Search') }}</span>
+                            <span x-show="loading">{{ __('Searching...') }}</span>
+                        </button>
+                    </div>
+                    <div x-show="error" class="mt-2 text-xs text-error-600 dark:text-error-400" x-text="error"></div>
+                    <div x-show="appliedFilters.length" class="mt-3 flex flex-wrap gap-1.5" x-cloak>
+                        <template x-for="filter in appliedFilters" :key="filter.key">
+                            <span class="inline-flex items-center gap-1 px-2.5 py-1 rounded-full bg-brand-100 text-brand-700 text-xs font-medium dark:bg-brand-500/20 dark:text-brand-300">
+                                <span x-text="filter.label"></span>
+                                <button @click="removeFilter(filter.key)" class="ml-1 hover:text-brand-900 dark:hover:text-brand-100">×</button>
+                            </span>
+                        </template>
+                    </div>
+                </div>
+
+                {{-- Regular Search --}}
                 <div>
-                    <label for="q" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Search') }}</label>
+                    <div class="flex items-center justify-between mb-1.5">
+                        <label for="q" class="mb-0 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Keyword Search') }}</label>
+                        <label class="flex items-center gap-2 cursor-pointer">
+                            <input type="checkbox" x-model="useSemanticSearch" class="rounded border-gray-300 text-brand-600 focus:ring-brand-500">
+                            <span class="text-xs text-gray-500 dark:text-gray-400">{{ __('Semantic Search (AI)') }}</span>
+                        </label>
+                    </div>
                     <input id="q" type="search" name="q" autocomplete="off" value="{{ $filters['q'] ?? '' }}" placeholder="{{ __('Name, brand, technology or city…') }}" class="{{ $field }}" />
+                    <div x-show="useSemanticSearch" class="mt-2 p-3 rounded-lg bg-brand-50 border border-brand-100 dark:bg-brand-500/10 dark:border-brand-500/20" x-cloak>
+                        <p class="text-xs text-brand-700 dark:text-brand-300">{{ __('Semantic search finds conceptually similar equipment using AI embeddings. Falls back to keyword search if embeddings unavailable.') }}</p>
+                    </div>
                 </div>
                 <div class="mt-4">
                     <div>
@@ -189,3 +225,137 @@
         </section>
     </div>
 @endsection
+
+@push('scripts')
+<script>
+function aiNaturalSearch() {
+    return {
+        query: '',
+        loading: false,
+        error: null,
+        appliedFilters: [],
+        useSemanticSearch: false,
+
+        async search() {
+            if (!this.query.trim()) return;
+            this.loading = true;
+            this.error = null;
+
+            try {
+                const endpoint = this.useSemanticSearch 
+                    ? '{{ route("ai.semantic-search") }}'
+                    : '{{ route("ai.natural-language-search") }}';
+                
+                const response = await fetch(endpoint, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Accept': 'application/json',
+                        'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').getAttribute('content'),
+                    },
+                    body: JSON.stringify({ q: this.query }),
+                });
+
+                const data = await response.json();
+
+                if (data.error) {
+                    this.error = data.error;
+                    return;
+                }
+
+                if (data.filters) {
+                    this.applyFilters(data.filters);
+                    this.appliedFilters = this.formatFilters(data.filters);
+                }
+
+                // If there are results, we could show them, but for now just apply filters
+                // The form will submit with the new filters
+                this.submitFilters(data.filters);
+
+            } catch (e) {
+                this.error = '{{ __('Failed to process search. Please try again.') }}';
+            } finally {
+                this.loading = false;
+            }
+        },
+
+        applyFilters(filters) {
+            // Update the form fields with the AI-extracted filters
+            const form = document.querySelector('form[action="{{ route("front.catalog") }}"]');
+            if (!form) return;
+
+            // Clear existing filter inputs except sort
+            const inputs = form.querySelectorAll('input[name], select[name]');
+            inputs.forEach(input => {
+                if (input.name !== 'sort') {
+                    input.value = '';
+                }
+            });
+
+            // Set new filter values
+            Object.entries(filters).forEach(([key, value]) => {
+                const input = form.querySelector(`[name="${this.mapFilterKey(key)}"]`);
+                if (input && value !== null && value !== undefined) {
+                    input.value = value;
+                }
+            });
+        },
+
+        mapFilterKey(aiKey) {
+            const mapping = {
+                'category': 'category',
+                'brand': 'brand',
+                'min_price': 'min_price',
+                'max_price': 'max_price',
+                'condition': 'condition',
+                'location': 'location',
+                'min_power': 'min_power',
+                'max_power': 'max_power',
+                'min_capacity': 'min_capacity',
+                'max_capacity': 'max_capacity',
+                'technology': 'technology',
+            };
+            return mapping[aiKey] || aiKey;
+        },
+
+        formatFilters(filters) {
+            const labels = {
+                'category': '{{ __('Category') }}',
+                'brand': '{{ __('Brand') }}',
+                'min_price': '{{ __('Min Price') }}',
+                'max_price': '{{ __('Max Price') }}',
+                'condition': '{{ __('Condition') }}',
+                'location': '{{ __('Location') }}',
+                'min_power': '{{ __('Min Power') }}',
+                'max_power': '{{ __('Max Power') }}',
+                'min_capacity': '{{ __('Min Capacity') }}',
+                'max_capacity': '{{ __('Max Capacity') }}',
+                'technology': '{{ __('Technology') }}',
+            };
+            return Object.entries(filters).map(([key, value]) => ({
+                key,
+                label: `${labels[key] || key}: ${value}`,
+                value,
+            }));
+        },
+
+        removeFilter(key) {
+            const form = document.querySelector('form[action="{{ route("front.catalog") }}"]');
+            if (!form) return;
+            const input = form.querySelector(`[name="${this.mapFilterKey(key)}"]`);
+            if (input) {
+                input.value = '';
+            }
+            this.appliedFilters = this.appliedFilters.filter(f => f.key !== key);
+        },
+
+        submitFilters(filters) {
+            const form = document.querySelector('form[action="{{ route("front.catalog") }}"]');
+            if (form) {
+                form.submit();
+            }
+        },
+    };
+}
+</script>
+@endpush

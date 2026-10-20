@@ -2,14 +2,17 @@
 
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
 use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
+use App\Http\Controllers\Admin\EnergyProfileController as AdminEnergyProfileController;
 use App\Http\Controllers\Admin\RentalContractController;
 use App\Http\Controllers\Admin\RentalController;
 use App\Http\Controllers\Admin\RentalExtensionController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
+use App\Http\Controllers\Admin\AdminAiSettingsController;
 use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\Auth\RoleSetupController;
 use App\Http\Controllers\AuthDemoController;
 use App\Http\Controllers\ChartShowcaseController;
+use App\Http\Controllers\CatalogueToolsController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EcommerceController;
 use App\Http\Controllers\FaqController;
@@ -23,11 +26,11 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 
 RateLimiter::for('global', function (Request $request) {
-    return \Illuminate\Cache\RateLimit::perMinute(60)->by($request->ip());
+    return \Illuminate\Cache\RateLimiter::perMinute(60)->by($request->ip());
 });
 
 RateLimiter::for('auth', function (Request $request) {
-    return \Illuminate\Cache\RateLimit::perMinute(5)->by($request->ip());
+    return \Illuminate\Cache\RateLimiter::perMinute(5)->by($request->ip());
 });
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
@@ -44,6 +47,11 @@ Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
     ->name('locale.switch');
 Route::get('/', [FrontController::class, 'home'])->name('home');
 Route::get('/catalog', [FrontController::class, 'catalog'])->name('front.catalog');
+Route::get('/equipment/map', [FrontController::class, 'equipmentMap'])->name('front.equipment.map');
+Route::get('/equipment/{id}/solar-production', [FrontController::class, 'solarProduction'])->name('front.equipment.solar-production');
+Route::get('/equipment/{id}/technical-sheet.pdf', [FrontController::class, 'exportPdf'])->name('front.equipment.pdf');
+Route::get('/energy-calculator', [CatalogueToolsController::class, 'energyCalculator'])->name('front.energy-calculator');
+Route::get('/equipment/compare', [CatalogueToolsController::class, 'compare'])->name('front.equipment.compare');
 Route::get('/equipment/{id}', [FrontController::class, 'show'])
     ->whereNumber('id')
     ->name('front.equipment.show');
@@ -147,6 +155,7 @@ Route::get('/two-factor', [AuthDemoController::class, 'show'])
     ->name('auth.two-factor');
 
 Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    Route::post('/equipment/{id}/favorite', [FrontController::class, 'toggleFavorite'])->name('front.equipment.favorite');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -156,9 +165,8 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
 });
 
 Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard.main');
+    Route::get('/dashboard', [\App\Http\Controllers\SolarShareDashboardController::class, 'index'])->name('dashboard.main');
+    Route::get('/ecommerce', [DashboardController::class, 'ecommerce'])->name('dashboard.ecommerce');
     Route::get('/stocks', [DashboardController::class, 'sector'])->defaults('dashboard', 'stocks')->name('dashboard.stocks');
     Route::get('/finance', [DashboardController::class, 'sector'])->defaults('dashboard', 'finance')->name('dashboard.finance');
     Route::get('/sales', [DashboardController::class, 'sector'])->defaults('dashboard', 'sales')->name('dashboard.sales');
@@ -216,8 +224,22 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     // Admin User Management
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', AdminUserController::class);
-        Route::resource('categories', AdminCategoryController::class)->except(['show']);
+        Route::resource('categories', AdminCategoryController::class);
         Route::resource('equipment', AdminEquipmentController::class);
+        Route::get('equipment-export.csv', [AdminEquipmentController::class, 'exportCsv'])->name('equipment.export');
+        Route::post('equipment-import.csv', [AdminEquipmentController::class, 'importCsv'])->name('equipment.import');
+        Route::resource('equipment.energy-profile', AdminEnergyProfileController::class)
+            ->only(['index', 'create', 'store'])
+            ->parameters(['equipment.energy-profile' => 'equipment'])
+            ->names('equipment.energy-profile');
+        Route::get('equipment/{equipment}/energy-profile/show', [AdminEnergyProfileController::class, 'show'])
+            ->name('equipment.energy-profile.show');
+        Route::get('equipment/{equipment}/energy-profile/edit', [AdminEnergyProfileController::class, 'edit'])
+            ->name('equipment.energy-profile.edit');
+        Route::put('equipment/{equipment}/energy-profile', [AdminEnergyProfileController::class, 'update'])
+            ->name('equipment.energy-profile.update');
+        Route::delete('equipment/{equipment}/energy-profile', [AdminEnergyProfileController::class, 'destroy'])
+            ->name('equipment.energy-profile.destroy');
         Route::put('equipment/{equipment}/approve', [AdminEquipmentController::class, 'approve'])->name('equipment.approve');
         Route::put('equipment/{equipment}/reject', [AdminEquipmentController::class, 'reject'])->name('equipment.reject');
         Route::resource('rentals', RentalController::class);
@@ -235,10 +257,16 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
             ->name('rental-extensions.approve');
         Route::post('rental-extensions/{rental_extension}/reject', [RentalExtensionController::class, 'reject'])
             ->name('rental-extensions.reject');
+
+        // AI Settings
+        Route::get('ai-settings', [AdminAiSettingsController::class, 'index'])->name('ai-settings.index');
+        Route::put('ai-settings', [AdminAiSettingsController::class, 'update'])->name('ai-settings.update');
+        Route::post('ai-settings/test', [AdminAiSettingsController::class, 'testConnection'])->name('ai-settings.test');
+        Route::post('ai-settings/pull-model', [AdminAiSettingsController::class, 'pullModel'])->name('ai-settings.pull-model');
     });
 
     // Dashboard Routes
-    Route::get('/ecommerce', [DashboardController::class, 'ecommerce'])->name('dashboard.ecommerce');
+    })->name('dashboard.main');
     Route::get('/analytics', function () {
         return view('pages.dashboard.analytics', ['title' => 'Analytics Dashboard']);
     })->name('dashboard.analytics');
@@ -424,7 +452,6 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/vector-maps', function () {
         return view('pages.applications.vector-maps', ['title' => __('Vector Maps')]);
     })->name('maps.vector');
-});
 // Isolated technical module. Owner access is scoped to equipment ownership in the controllers.
 Route::middleware(['auth', 'verified', 'role.selected'])->prefix('technical')->name('technical.')->group(function () {
     Route::resource('maintenances', MaintenanceController::class);
