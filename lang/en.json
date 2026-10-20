@@ -1500,6 +1500,8 @@
     "Voltage (V)": "Voltage (V)",
     "Efficiency (%)": "Efficiency (%)",
     "Max output (W)": "Max output (W)",
+    "Operating duration (h)": "Operating duration (h)",
+    "Layout direction": "Layout direction",
     "Foldable panels for camping, vans and off-grid weekends.": "Foldable panels for camping, vans and off-grid weekends.",
     "Rechargeable power stations for fridges, lights, tools and weekend trips.": "Rechargeable power stations for fridges, lights, tools and weekend trips."
 }

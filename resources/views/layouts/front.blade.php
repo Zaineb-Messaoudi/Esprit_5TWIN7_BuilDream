@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr" class="h-full scroll-smooth">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full scroll-smooth">
 
 <head>
     <meta charset="utf-8">
@@ -20,6 +20,12 @@
         (function () {
             if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
             if (localStorage.getItem('navigation-layout') === 'sidebar') document.documentElement.classList.add('nav-sidebar');
+            // Restore the saved direction before the page is rendered.
+            const savedDir = localStorage.getItem('dir');
+            const initialDir = savedDir === 'ltr' || savedDir === 'rtl'
+                ? savedDir
+                : @js(session('dir', 'ltr'));
+            document.documentElement.setAttribute('dir', initialDir);
         })();
     </script>
 

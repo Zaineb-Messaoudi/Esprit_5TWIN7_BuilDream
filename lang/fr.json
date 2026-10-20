@@ -1521,6 +1521,8 @@
     "Voltage (V)": "Tension (V)",
     "Efficiency (%)": "Rendement (%)",
     "Max output (W)": "Puissance maximale (W)",
+    "Operating duration (h)": "Durée de fonctionnement (h)",
+    "Layout direction": "Direction de la mise en page",
     "Foldable panels for camping, vans and off-grid weekends.": "Panneaux pliables pour le camping, les vans et les week-ends autonomes.",
     "Rechargeable power stations for fridges, lights, tools and weekend trips.": "Stations électriques rechargeables pour les réfrigérateurs, les lampes, les outils et les escapades du week-end."
     ,"Controllers that safely regulate energy from panels into batteries.": "Régulateurs qui dirigent en toute sécurité l’énergie des panneaux vers les batteries.",

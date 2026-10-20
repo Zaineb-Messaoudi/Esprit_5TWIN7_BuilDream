@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="ltr" class="h-full bg-gray-50 dark:bg-gray-900">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-gray-50 dark:bg-gray-900">
 
 <head>
     <meta charset="utf-8">
@@ -59,6 +59,12 @@
                 document.documentElement.classList.add('dark');
                 document.documentElement.setAttribute('data-color-scheme', 'dark');
             }
+            // Restore the saved direction before the page is rendered.
+            const savedDir = localStorage.getItem('dir');
+            const initialDir = savedDir === 'ltr' || savedDir === 'rtl'
+                ? savedDir
+                : @js(session('dir', 'ltr'));
+            document.documentElement.setAttribute('dir', initialDir);
         })();
     </script>
 </head>

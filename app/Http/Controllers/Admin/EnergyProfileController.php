@@ -38,7 +38,7 @@ class EnergyProfileController extends Controller
 
     public function store(EnergyProfileStoreRequest $request, Equipment $equipment): RedirectResponse
     {
-        $equipment->energyProfile()->create($request->validated());
+        $equipment->energyProfile()->updateOrCreate([], $request->validated());
 
         return redirect()->route('admin.equipment.energy-profile.index', $equipment)->with('status', 'energy-profile-created');
     }

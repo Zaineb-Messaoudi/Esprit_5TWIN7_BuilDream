@@ -3,10 +3,11 @@
     isOpen: false,
     subDropdownOpen: false,
     currentLocale: @js(app()->getLocale()),
-        languages: [
-            { id: 'en', name: 'English', native: 'English' },
-            { id: 'fr', name: 'French', native: 'Français' }
-        ],
+    currentDir: @js(session('dir', 'ltr')),
+    languages: [
+        { id: 'en', name: 'English', native: 'English' },
+        { id: 'fr', name: 'French', native: 'Français' }
+    ],
     get currentLanguage() {
         return this.languages.find(item => item.id === this.currentLocale) || this.languages[0];
     },
@@ -19,8 +20,21 @@
     closeDropdown() {
         this.isOpen = false;
         this.subDropdownOpen = false;
+    },
+    init() {
+        const savedDir = localStorage.getItem('dir');
+        if (savedDir === 'ltr' || savedDir === 'rtl') {
+            this.currentDir = savedDir;
+        } else if (document.documentElement.dir === 'rtl') {
+            this.currentDir = 'rtl';
+        }
+    },
+    toggleDir() {
+        this.currentDir = this.currentDir === 'ltr' ? 'rtl' : 'ltr';
+        localStorage.setItem('dir', this.currentDir);
+        document.documentElement.setAttribute('dir', this.currentDir);
     }
-}" @click.outside="closeDropdown()">
+}" @click.outside="closeDropdown()" class="relative">
 
     <!-- User Trigger -->
     <button
@@ -178,6 +192,37 @@
                 </div>
             </li>
         </ul>
+
+        <!-- RTL Direction Toggle -->
+        <div class="pt-3 border-t border-gray-200 dark:border-gray-800">
+            <button
+                type="button"
+                @click="toggleDir()"
+                class="group flex w-full items-center justify-between gap-3 rounded-lg px-3 py-2 text-theme-sm font-medium transition-colors"
+                :class="currentDir === 'rtl'
+                    ? 'bg-brand-50 text-brand-500 dark:bg-brand-500/15 dark:text-brand-400'
+                    : 'text-gray-700 hover:bg-gray-100 hover:text-gray-900 dark:text-gray-400 dark:hover:bg-white/5 dark:hover:text-gray-300'"
+            >
+                <span class="flex items-center gap-3 text-theme-sm">
+                    <svg class="stroke-gray-500 group-hover:stroke-gray-700 dark:stroke-gray-400 dark:group-hover:stroke-gray-300"
+                        width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
+                        <path
+                            d="M12.001 2.75C17.1091 2.75 21.2501 6.89178 21.2501 11.9999C21.2501 17.108 17.1091 21.2498 12.001 21.2498M12.001 2.75C6.89289 2.75 2.75195 6.89178 2.75195 11.9999C2.75195 17.108 6.8929 21.2498 12.001 21.2498M12.001 2.75C14.2097 2.75 16.0005 6.8914 16.0005 11.9993C16.001 17.1073 14.2098 21.2498 12.001 21.2498M12.001 2.75C9.79226 2.75 8.00195 6.89141 8.00195 11.9994C8.00195 17.1073 9.79226 21.2498 12.001 21.2498M3.24561 8.99976H20.7544M3.24561 14.9998H20.7544"
+                            stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+
+                    <span>{{ __('Layout direction') }}</span>
+                </span>
+
+                <span class="flex items-center gap-1.5">
+                    <span class="size-5 rounded-full border-2 transition-colors"
+                        :class="currentDir === 'ltr'
+                            ? 'border-brand-500 bg-brand-500 text-white'
+                            : 'border-gray-300 bg-white dark:border-gray-600 dark:bg-gray-800'"></span>
+                    <span class="rounded bg-gray-100 px-2 py-0.5 text-theme-xs font-semibold text-gray-700 dark:bg-gray-800 dark:text-gray-300" x-text="currentDir === 'ltr' ? 'LTR' : 'RTL'"></span>
+                </span>
+            </button>
+        </div>
 
         <!-- Sign Out -->
         <form method="POST" action="{{ route('logout') }}" class="mt-3">
