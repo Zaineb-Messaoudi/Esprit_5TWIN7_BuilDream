@@ -174,6 +174,32 @@ test('the admin can export the rentals as a CSV file', function () {
         ->and($csv)->toContain($rental->reference); // one line per rental
 });
 
+test('the CSV uses semicolons and decimal commas, as Excel expects on a French computer', function () {
+    riskExportRental(null, ['total_amount' => 50]);
+
+    $csv = $this->actingAs(riskExportAdmin())
+        ->get(route('admin.rental-insights.export'))
+        ->streamedContent();
+
+    $header = strtok(ltrim($csv, "\xEF\xBB\xBF"), "\n"); // first line, without the BOM
+
+    expect($header)->toContain('Reference;Renter;')
+        ->and($csv)->toContain('50,00');
+});
+
+test('the international CSV format uses commas and decimal points', function () {
+    riskExportRental(null, ['total_amount' => 50]);
+
+    $csv = $this->actingAs(riskExportAdmin())
+        ->get(route('admin.rental-insights.export', ['delimiter' => 'comma']))
+        ->streamedContent();
+
+    $header = strtok(ltrim($csv, "\xEF\xBB\xBF"), "\n");
+
+    expect($header)->toContain('Reference,Renter,')
+        ->and($csv)->toContain('50.00');
+});
+
 test('the CSV export follows the status filter', function () {
     $active = riskExportRental();
     $completed = riskExportRental(null, ['status' => RentalStatus::COMPLETED->value]);

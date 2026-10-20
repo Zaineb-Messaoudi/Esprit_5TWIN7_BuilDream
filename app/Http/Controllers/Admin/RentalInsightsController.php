@@ -17,7 +17,7 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  *
  * admin.rental-insights.dashboard | GET /admin/rental-insights          | dashboard() analytics
  * admin.rental-insights.overdue    | GET /admin/rental-insights/overdue  | overdue()   late rentals, fees and delay risk
- * admin.rental-insights.export    | GET /admin/rental-insights/export   | export()    CSV file of the rentals
+ * admin.rental-insights.export    | GET /admin/rental-insights/export   | export()    CSV file of the rentals (Excel, French format)
  */
 class RentalInsightsController extends Controller
 {
@@ -69,9 +69,19 @@ class RentalInsightsController extends Controller
      * CSV export of the rentals (opens in Excel).
      * It follows the same filters as the rentals list: ?status=active&search=RNT-2026
      * The file is written line by line (200 rentals at a time), so a big list never fills the memory.
+     *
+     * EXCEL AND THE LANGUAGE OF WINDOWS: Excel splits the columns with the "list separator" of the
+     * computer. With a French Windows it is ";" and decimals are written with a comma (12,50).
+     * A file separated by commas then opens as ONE single column. So the default format is the
+     * French one (";" and decimal comma). Add ?delimiter=comma for the international format
+     * (commas and decimal points), used by English-language Excel and by most programs.
      */
     public function export(Request $request): StreamedResponse
     {
+        $international = $request->query('delimiter') === 'comma';
+        $delimiter = $international ? ',' : ';';
+        $decimal = $international ? '.' : ',';
+
         $query = Rental::query()->with(['user', 'equipment', 'contract'])->withCount('extensions');
 
         // Same filters as the list
@@ -90,7 +100,7 @@ class RentalInsightsController extends Controller
 
         $filename = 'rentals-' . now()->format('Y-m-d') . '.csv';
 
-        return response()->streamDownload(function () use ($query) {
+        return response()->streamDownload(function () use ($query, $delimiter, $decimal) {
             $out = fopen('php://output', 'w');
 
             // The BOM tells Excel that the file is UTF-8 (accents and Arabic display correctly)
@@ -100,9 +110,9 @@ class RentalInsightsController extends Controller
                 'Reference', 'Renter', 'Renter email', 'Equipment', 'Start date', 'End date', 'Days',
                 'Status', 'Total amount (TND)', 'Contract', 'Contract status', 'Deposit status',
                 'Extensions', 'Days late', 'Late fee (TND)',
-            ]);
+            ], $delimiter);
 
-            $query->orderBy('id')->chunk(200, function ($rentals) use ($out) {
+            $query->orderBy('id')->chunk(200, function ($rentals) use ($out, $delimiter, $decimal) {
                 foreach ($rentals as $rental) {
                     $this->writeCsvLine($out, [
                         $rental->reference,
@@ -113,14 +123,14 @@ class RentalInsightsController extends Controller
                         $rental->end_date->format('Y-m-d'),
                         (int) $rental->start_date->diffInDays($rental->end_date),
                         $rental->status->label(),
-                        number_format((float) $rental->total_amount, 2, '.', ''),
+                        number_format((float) $rental->total_amount, 2, $decimal, ''),
                         $rental->contract?->contract_number,
                         $rental->contract?->contract_status?->label(),
                         $rental->contract?->deposit_status?->label(),
                         $rental->extensions_count,
                         $this->insights->lateDays($rental),
-                        number_format($this->insights->lateFee($rental), 2, '.', ''),
-                    ]);
+                        number_format($this->insights->lateFee($rental), 2, $decimal, ''),
+                    ], $delimiter);
                 }
             });
 
@@ -128,11 +138,11 @@ class RentalInsightsController extends Controller
         }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
-    /** Writes one line of the CSV file. */
-    private function writeCsvLine($handle, array $cells): void
+    /** Writes one line of the CSV file, with the chosen column separator. */
+    private function writeCsvLine($handle, array $cells, string $delimiter): void
     {
         // The last argument ('') is the "escape" character: PHP 8.4 wants it written explicitly
-        fputcsv($handle, array_map(fn ($cell) => $this->csvSafe($cell), $cells), ',', '"', '');
+        fputcsv($handle, array_map(fn ($cell) => $this->csvSafe($cell), $cells), $delimiter, '"', '');
     }
 
     /**
