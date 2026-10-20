@@ -192,7 +192,7 @@ class FrontController extends Controller
             'item' => $item,
             'related' => $related,
             'gallery' => $gallery,
-            'isFavorite' => auth()->check() && Schema::hasTable('equipment_favorites') && auth()->user()->favoriteEquipment()->whereKey($id)->exists(),
+            'isFavorite' => auth()->check() && Schema::hasTable('user_equipment') && auth()->user()->favoriteEquipment()->whereKey($id)->exists(),
         ]);
     }
 
