@@ -279,4 +279,6 @@ Route::prefix('ai')->name('ai.')->middleware(['auth:sanctum', 'rate_limit_ip_use
     Route::post('/semantic-search', [AiController::class, 'semanticSearch'])->name('semantic-search');
     Route::post('/validate-image', [AiController::class, 'validateImage'])->name('validate-image');
     Route::post('/feedback', [AiController::class, 'feedback'])->name('feedback');
+    Route::post('/callback', [AiController::class, 'callback'])->name('callback')
+        ->middleware('rate_limit_callback_webhook:10,5');
 });

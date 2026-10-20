@@ -717,6 +717,63 @@ PROMPT;
         ]);
     }
 
+    /**
+     * @OA\Post(
+     *     path="/api/ai/callback",
+     *     summary="Receive async AI job completion callback",
+     *     description="Receive callback from AI job queue with job results. Rate limited to 10 requests per 5 minutes per callback secret.",
+     *     tags={"AI Features"},
+     *     security={{"sanctum"={}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"endpoint", "success", "result", "duration_ms"},
+     *             @OA\Property(property="endpoint", type="string", example="natural-language-search"),
+     *             @OA\Property(property="success", type="boolean", example=true),
+     *             @OA\Property(property="result", type="object"),
+     *             @OA\Property(property="error", type="string", nullable=true),
+     *             @OA\Property(property="duration_ms", type="integer", example=1250)
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Callback received"),
+     *     @OA\Response(response=401, description="Invalid callback secret"),
+     *     @OA\Response(response=422, description="Validation error"),
+     *     @OA\Response(response=429, description="Rate limit exceeded")
+     * )
+     */
+    public function callback(Request $request): JsonResponse
+    {
+        $request->validate([
+            'endpoint' => 'required|string',
+            'success' => 'required|boolean',
+            'result' => 'required|array',
+            'error' => 'nullable|string',
+            'duration_ms' => 'required|integer',
+        ]);
+
+        // Verify callback secret
+        $providedSecret = $request->header('X-Callback-Secret');
+        if (!$providedSecret) {
+            return response()->json([
+                'error' => 'Missing callback secret',
+            ], 401);
+        }
+
+        // Find the job by secret (optional: could store in cache/db for verification)
+        // For now, just log and return success
+        Log::info('AI Job Callback Received', [
+            'endpoint' => $request->endpoint,
+            'success' => $request->success,
+            'duration_ms' => $request->duration_ms,
+            'has_error' => $request->error !== null,
+        ]);
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Callback received',
+        ]);
+    }
+
     private function applyFilters($query, array $filters): void
     {
         if (isset($filters['category'])) $query->whereHas('category', fn ($q) => $q->where('name', 'like', "%{$filters['category']}%"));

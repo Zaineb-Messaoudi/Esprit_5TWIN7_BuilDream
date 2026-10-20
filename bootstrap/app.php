@@ -42,6 +42,7 @@ return Application::configure(basePath: dirname(__DIR__))
             'role.selected' => \App\Http\Middleware\EnsureRoleSelected::class,
             '2fa' => \App\Http\Middleware\TwoFactorAuth::class,
             'rate_limit_ip_user' => \App\Http\Middleware\RateLimitByIpAndUser::class,
+            'rate_limit_callback_webhook' => \App\Http\Middleware\RateLimitCallbackWebhook::class,
             'validate_ai_request' => \App\Http\Middleware\ValidateAiRequest::class,
         ]);
     })
