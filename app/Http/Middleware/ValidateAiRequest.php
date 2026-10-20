@@ -38,6 +38,8 @@ class ValidateAiRequest
         ],
         'semantic-search' => [
             'q' => 'required|string|max:500',
+            'page' => 'nullable|integer|min:1',
+            'per_page' => 'nullable|integer|min:1|max:50',
         ],
         'validate-image' => [
             'image' => 'required|image|max:5120',

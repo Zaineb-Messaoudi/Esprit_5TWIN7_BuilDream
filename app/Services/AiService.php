@@ -504,12 +504,15 @@ class AiService
      * Fetches all embeddings, computes similarity in PHP.
      * For production with >10k rows, use pgvector or Qdrant.
      */
-    public function semanticSearchJson(string $query, int $limit = 10): ?array
+    public function semanticSearchJson(string $query, int $limit = 10, int $page = 1): ?array
     {
         $queryEmbedding = $this->getEmbedding($query);
         if (!$queryEmbedding) {
             return null;
         }
+
+        $perPage = min($limit, 50);
+        $offset = ($page - 1) * $perPage;
 
         $equipment = Equipment::whereNotNull('embedding')
             ->where('approval_status', 'published')
@@ -518,7 +521,15 @@ class AiService
             ->get(['id', 'name', 'brand', 'model', 'price_per_day', 'location', 'category_id', 'embedding']);
 
         if ($equipment->isEmpty()) {
-            return ['results' => []];
+            return [
+                'results' => [],
+                'pagination' => [
+                    'current_page' => $page,
+                    'per_page' => $perPage,
+                    'total' => 0,
+                    'last_page' => 1,
+                ],
+            ];
         }
 
         $results = $equipment->map(function ($e) use ($queryEmbedding) {
@@ -538,8 +549,20 @@ class AiService
                 'energyProfile' => $e->energyProfile,
                 'similarity' => $score,
             ];
-        })->filter()->sortByDesc('similarity')->take($limit)->values()->toArray();
+        })->filter()->sortByDesc('similarity')->values();
 
-        return ['results' => $results];
+        $total = $results->count();
+        $paginatedResults = $results->slice($offset, $perPage)->values()->toArray();
+        $lastPage = (int) ceil($total / $perPage);
+
+        return [
+            'results' => $paginatedResults,
+            'pagination' => [
+                'current_page' => $page,
+                'per_page' => $perPage,
+                'total' => $total,
+                'last_page' => max(1, $lastPage),
+            ],
+        ];
     }
 }

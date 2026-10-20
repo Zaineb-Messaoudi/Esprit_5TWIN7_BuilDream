@@ -415,17 +415,23 @@ PROMPT;
     public function semanticSearch(Request $request): JsonResponse
     {
         if ($request->boolean('async')) {
-            return $this->dispatchAsync('semantic-search', ['q' => $request->string('q')->trim()], $request);
+            return $this->dispatchAsync('semantic-search', [
+                'q' => $request->string('q')->trim(),
+                'page' => $request->integer('page', 1),
+                'per_page' => $request->integer('per_page', 10),
+            ], $request);
         }
         
         $query = $this->sanitize($request->string('q')->trim());
+        $page = max(1, $request->integer('page', 1));
+        $perPage = min(max(1, $request->integer('per_page', 10)), 50);
         
         if (!$query || !$this->ai->isConfigured()) {
             return response()->json(['error' => 'AI not configured or query empty'], 400);
         }
 
         // Use JSON-based semantic search (works on MySQL/PostgreSQL)
-        $result = $this->ai->semanticSearchJson($query, 10);
+        $result = $this->ai->semanticSearchJson($query, $perPage, $page);
         
         if (!$result) {
             return response()->json(['error' => 'Failed to generate embedding'], 500);
