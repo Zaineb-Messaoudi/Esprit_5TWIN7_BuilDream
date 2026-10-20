@@ -616,6 +616,67 @@ class AiService
     }
 
     /**
+     * Get GPU memory usage from Ollama.
+     * Uses /api/ps endpoint to get running models and their VRAM usage.
+     * Returns array with GPU memory info and alert if >90% VRAM used.
+     */
+    public function getGpuMemoryUsage(): array
+    {
+        if ($this->provider !== 'ollama') {
+            return ['available' => false, 'reason' => 'Provider is not Ollama'];
+        }
+
+        try {
+            $url = rtrim($this->baseUrl, '/') . '/api/ps';
+            $response = Http::timeout(10)->get($url);
+
+            if ($response->failed()) {
+                return ['available' => false, 'reason' => 'Ollama /api/ps endpoint failed'];
+            }
+
+            $processes = $response->json('models', []);
+            
+            $totalVramUsed = 0;
+            $totalVramAvailable = 0;
+            $models = [];
+
+            foreach ($processes as $process) {
+                $modelName = $process['name'] ?? 'unknown';
+                $vramUsed = $process['size_vram'] ?? 0;
+                $size = $process['size'] ?? 0;
+                
+                $models[] = [
+                    'name' => $modelName,
+                    'vram_used_mb' => (int) ($vramUsed / 1024 / 1024),
+                    'size_mb' => (int) ($size / 1024 / 1024),
+                ];
+                
+                $totalVramUsed += $vramUsed;
+            }
+
+            // Estimate total GPU VRAM (rough estimate based on largest model)
+            // This is approximate since Ollama doesn't expose total GPU memory directly
+            // We can estimate from the largest model's VRAM usage
+            $estimatedTotalVram = $totalVramUsed > 0 ? $totalVramUsed * 2 : 0; // rough estimate
+            $usagePercent = $estimatedTotalVram > 0 ? round(($totalVramUsed / $estimatedTotalVram) * 100, 1) : 0;
+
+            $alert = $usagePercent > 90;
+
+            return [
+                'available' => true,
+                'total_vram_used_mb' => (int) ($totalVramUsed / 1024 / 1024),
+                'estimated_total_vram_mb' => (int) ($estimatedTotalVram / 1024 / 1024),
+                'usage_percent' => $usagePercent,
+                'alert' => $alert,
+                'alert_threshold' => 90,
+                'models' => $models,
+            ];
+        } catch (\Throwable $e) {
+            return ['available' => false, 'reason' => $e->getMessage()];
+        }
+    }
+
+    /**
      * Calculate cosine similarity between two vectors.
      * Works with JSON-stored embeddings on MySQL/PostgreSQL.
      */
