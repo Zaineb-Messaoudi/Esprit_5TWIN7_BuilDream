@@ -157,7 +157,7 @@ class User extends Authenticatable implements MustVerifyEmail
 
     public function favoriteEquipment(): BelongsToMany
     {
-        return $this->belongsToMany(Equipment::class, 'equipment_favorites')->withTimestamps();
+        return $this->belongsToMany(Equipment::class, 'user_equipment')->withTimestamps();
     }
 
     public function rentals(): HasMany

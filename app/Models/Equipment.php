@@ -114,7 +114,7 @@ class Equipment extends Model
 
     public function favoritedBy(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'equipment_favorites')->withTimestamps();
+        return $this->belongsToMany(User::class, 'user_equipment')->withTimestamps();
     }
 
     /** Rentals created from this catalogue listing. */

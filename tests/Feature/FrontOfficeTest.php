@@ -463,10 +463,10 @@ class FrontOfficeTest extends TestCase
 
         $this->actingAs($buyer)->post(route('front.equipment.favorite', $equipment->id))
             ->assertRedirect();
-        $this->assertDatabaseHas('equipment_favorites', ['user_id' => $buyer->id, 'equipment_id' => $equipment->id]);
+        $this->assertDatabaseHas('user_equipment', ['user_id' => $buyer->id, 'equipment_id' => $equipment->id]);
 
         $this->actingAs($buyer)->post(route('front.equipment.favorite', $equipment->id));
-        $this->assertDatabaseMissing('equipment_favorites', ['user_id' => $buyer->id, 'equipment_id' => $equipment->id]);
+        $this->assertDatabaseMissing('user_equipment', ['user_id' => $buyer->id, 'equipment_id' => $equipment->id]);
     }
 
     public function test_equipment_technical_sheet_pdf_is_available(): void
