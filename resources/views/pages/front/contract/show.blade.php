@@ -2,17 +2,20 @@
     Contract page (front office): the renter reads the contract, then accepts or declines it.
 
     Variables received from Front\ContractController@show:
-      $contract : the RentalContract
-      $rental   : its Rental (with user and equipment loaded)
-      $role     : 'renter', 'owner' or 'admin'
-      $canSign  : true only for the renter of a contract that is still a draft
-      $backUrl  : target of the "Back" link
-      $pdfUrl   : target of the "Download (PDF)" link
+      $contract    : the RentalContract
+      $rental      : its Rental (with user and equipment loaded)
+      $role        : 'renter', 'owner' or 'admin'
+      $canSign     : true only for the renter of a contract that is still a draft
+      $backUrl     : target of the "Back" link
+      $pdfUrl      : target of the "Download (PDF)" link
+      $summary     : the AI summary already generated (['points' => [...]]) or null
+      $aiAvailable : true when the AI service is configured on this server
 
     This page is standalone (no sidebar): a focused page to read a legal document.
 --}}
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-gray-50 dark:bg-gray-900">
+{{-- dir="rtl" for Arabic, like the other layouts of the project --}}
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="h-full bg-gray-50 dark:bg-gray-900">
 <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -45,10 +48,11 @@
     @if (session('status'))
         <p role="status" aria-live="polite" class="rounded-lg border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-300">
             {{ match (session('status')) {
-                'contract-signed'     => __('Contract signed. A copy is available as a PDF.'),
-                'contract-declined'   => __('You declined the contract. The rental has been cancelled.'),
-                'contract-read-first' => __('Please read the contract carefully, then accept it to sign.'),
-                default               => session('status'),
+                'contract-signed'        => __('Contract signed. A copy is available as a PDF.'),
+                'contract-declined'      => __('You declined the contract. The rental has been cancelled.'),
+                'contract-read-first'    => __('Please read the contract carefully, then accept it to sign.'),
+                'contract-summary-ready' => __('The summary is ready: see "Contract in simple words" below.'),
+                default                  => session('status'),
             } }}
         </p>
     @endif
@@ -119,6 +123,41 @@
             <button type="button" onclick="window.print()" class="inline-flex min-h-10 items-center rounded-lg border border-gray-300 px-4 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">{{ __('Print') }}</button>
         </div>
     </article>
+
+    {{-- AI summary: shown when a summary exists, or when the AI service is available (button).
+         On a server without the AI key, and without a saved summary, the whole card is hidden. --}}
+    @if ($summary || $aiAvailable)
+        <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03] sm:p-8">
+            <div class="flex flex-wrap items-start justify-between gap-4">
+                <div>
+                    <h2 class="font-semibold text-gray-900 dark:text-white">{{ __('Contract in simple words') }}</h2>
+                    <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __('The 5 key points of this contract, explained simply.') }}</p>
+                </div>
+
+                {{-- The button only appears while no summary exists. The button is disabled after the click (one call only). --}}
+                @if (! $summary)
+                    <form method="POST" action="{{ route('contracts.summary', $contract) }}" onsubmit="var b = this.querySelector('button'); b.disabled = true; b.textContent = '{{ __('Generating...') }}';">
+                        @csrf
+                        <button type="submit" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 text-sm font-medium text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-60">{{ __('Explain this contract in simple words') }}</button>
+                    </form>
+                @endif
+            </div>
+
+            @if ($summary)
+                <ol class="mt-5 space-y-3 text-sm leading-6 text-gray-700 dark:text-gray-300">
+                    @foreach ($summary['points'] as $index => $point)
+                        <li class="flex gap-3">
+                            <span class="flex size-6 shrink-0 items-center justify-center rounded-full bg-brand-50 text-xs font-semibold text-brand-700 dark:bg-brand-500/15 dark:text-brand-300">{{ $index + 1 }}</span>
+                            <span>{{ $point }}</span>
+                        </li>
+                    @endforeach
+                </ol>
+                <p class="mt-5 text-xs text-gray-500 dark:text-gray-400">
+                    {{ __('Generated by AI from the contract text only. This is a simplified explanation, not legal advice: the contract above is the reference.') }}
+                </p>
+            @endif
+        </section>
+    @endif
 
     {{-- Step 2: accept and sign, or decline (renter of a draft contract only) --}}
     @if ($canSign)

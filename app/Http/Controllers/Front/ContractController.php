@@ -4,9 +4,11 @@ namespace App\Http\Controllers\Front;
 
 use App\Enums\ContractStatus;
 use App\Enums\RentalStatus;
+use App\Exceptions\GroqException;
 use App\Http\Controllers\Controller;
 use App\Models\Rental;
 use App\Models\RentalContract;
+use App\Services\ContractSummaryService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
@@ -20,20 +22,25 @@ use Illuminate\View\View;
  *   1. show()    the contract page. Opening it records "the renter read the contract" in the session.
  *   2. accept()  needs the "I have read and accept" checkbox AND the page opened in the session.
  *   3. decline() the renter refuses: the contract is terminated and the rental is cancelled.
+ *   4. summary() asks the AI for a plain-language summary (5 key points) to help understand it.
  *
  * Who can do what:
- *   - the renter (the user of the rental)        : read, accept, decline, download the PDF
- *   - the owner of the rented equipment          : read only
- *   - an administrator                           : read only (an admin can never sign for a client)
+ *   - the renter (the user of the rental)        : read, summary, accept, decline, download the PDF
+ *   - the owner of the rented equipment          : read, summary
+ *   - an administrator                           : read, summary (an admin can never sign for a client)
  *
  * Routes (see routes/web.php):
  *   contracts.show    GET  /rental-contracts/{contract}
  *   contracts.accept  POST /rental-contracts/{contract}/accept
  *   contracts.decline POST /rental-contracts/{contract}/decline
+ *   contracts.summary POST /rental-contracts/{contract}/summary
  */
 class ContractController extends Controller
 {
-    /** The contract page: full contract, PDF link and, for the renter of a draft, the sign form. */
+    // The summary service is injected by Laravel
+    public function __construct(protected ContractSummaryService $summaries) {}
+
+    /** The contract page: full contract, PDF link, AI summary and, for the renter of a draft, the sign form. */
     public function show(Request $request, RentalContract $contract): View
     {
         $role = $this->roleFor($request, $contract);
@@ -49,14 +56,38 @@ class ContractController extends Controller
         }
 
         return view('pages.front.contract.show', [
-            'contract' => $contract,
-            'rental'   => $contract->rental,
-            'role'     => $role,
-            'canSign'  => $canSign,
-            'backUrl'  => $this->backUrl($request, $contract, $role),
-            'pdfUrl'   => $this->pdfUrl($request, $contract, $role),
-            'title'    => __('Rental Contract'),
+            'contract'    => $contract,
+            'rental'      => $contract->rental,
+            'role'        => $role,
+            'canSign'     => $canSign,
+            'backUrl'     => $this->backUrl($request, $contract, $role),
+            'pdfUrl'      => $this->pdfUrl($request, $contract, $role),
+            // The summary generated earlier (null if none). This never calls the AI service.
+            'summary'     => $this->summaries->cached($contract, app()->getLocale()),
+            'aiAvailable' => $this->summaries->isAvailable(),
+            'title'       => __('Rental Contract'),
         ]);
+    }
+
+    /**
+     * Asks the AI for a plain-language summary of the contract, then goes back to the page,
+     * where the summary is displayed (it is kept in the cache).
+     * Any person who can read the contract may ask for it; the route is limited to 6 calls a minute.
+     */
+    public function summary(Request $request, RentalContract $contract): RedirectResponse
+    {
+        $this->roleFor($request, $contract); // 403 for anyone who cannot read this contract
+
+        try {
+            $this->summaries->summarize($contract, app()->getLocale());
+        } catch (GroqException $e) {
+            // The technical reason is already in the logs: the user only sees a friendly message
+            return redirect()
+                ->route('contracts.show', $contract)
+                ->withErrors(['summary' => $e->userMessage()]);
+        }
+
+        return redirect()->route('contracts.show', $contract)->with('status', 'contract-summary-ready');
     }
 
     /** The renter accepts the contract: it becomes SIGNED. */
@@ -177,9 +208,9 @@ class ContractController extends Controller
         // The front routes use the rental reference in the URL ({rental:reference}):
         // route() reads it from the model automatically.
         return match (true) {
-            $role === 'admin'                    => route('admin.rental-contracts.show', $contract),
+            $role === 'admin'                                 => route('admin.rental-contracts.show', $contract),
             $role === 'renter' && $request->user()->isBuyer() => route('front.buyer-rental-detail', $contract->rental),
-            default                              => route('front.my-rental-detail', $contract->rental),
+            default                                           => route('front.my-rental-detail', $contract->rental),
         };
     }
 
@@ -187,9 +218,9 @@ class ContractController extends Controller
     private function pdfUrl(Request $request, RentalContract $contract, string $role): string
     {
         return match (true) {
-            $role === 'admin'                    => route('admin.rental-contracts.export-pdf', $contract),
+            $role === 'admin'                                 => route('admin.rental-contracts.export-pdf', $contract),
             $role === 'renter' && $request->user()->isBuyer() => route('front.rental-contract.export-pdf', $contract->rental),
-            default                              => route('front.owner-rental-contract.export-pdf', $contract->rental),
+            default                                           => route('front.owner-rental-contract.export-pdf', $contract->rental),
         };
     }
 }

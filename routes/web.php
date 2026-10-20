@@ -454,6 +454,9 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     Route::get('/rental-contracts/{contract}', [ContractController::class, 'show'])->name('contracts.show');
     Route::post('/rental-contracts/{contract}/accept', [ContractController::class, 'accept'])->name('contracts.accept');
     Route::post('/rental-contracts/{contract}/decline', [ContractController::class, 'decline'])->name('contracts.decline');
+        // AI summary of the contract (limited to 6 calls per minute and per user)
+    Route::post('/rental-contracts/{contract}/summary', [ContractController::class, 'summary'])
+        ->middleware('throttle:6,1')->name('contracts.summary');
     Route::post('/owner/reservations/{reservation}/decision', [MarketplaceController::class, 'decideReservation'])
         ->middleware('can:owner-only')->name('owner.reservations.decision');
 
