@@ -54,7 +54,8 @@ class ValidateAiRequest
         $endpoint = str_replace('ai.', '', $endpoint);
 
         // Validate request size
-        if ($request->getContentLength() > 10 * 1024 * 1024) { // 10MB
+        $contentLength = $request->header('Content-Length');
+        if ($contentLength && $contentLength > 10 * 1024 * 1024) { // 10MB
             return response()->json([
                 'error' => 'Request too large',
                 'message' => 'Maximum request size is 10MB',

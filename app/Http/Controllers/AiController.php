@@ -70,10 +70,10 @@ class AiController extends Controller
         $callbackSecret = $request->input('callback_secret', Str::random(32));
 
         $job = new ProcessAiRequest($endpoint, $payload, $callbackUrl, $callbackSecret);
-        $jobId = $job->dispatch()->getJobId();
+        $job->dispatch();
 
         return response()->json([
-            'job_id' => $jobId,
+            'job_id' => $job->jobId,
             'status' => 'queued',
             'message' => 'Request queued for async processing. Provide callback_url for result.',
             'callback_secret' => $callbackSecret,

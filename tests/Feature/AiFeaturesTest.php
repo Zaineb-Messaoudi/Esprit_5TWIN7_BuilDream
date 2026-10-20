@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\User;
 use App\Enums\UserRole;
+use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -124,4 +125,69 @@ test('ai settings can test connection', function () {
         ->postJson(route('admin.ai-settings.test'))
         ->assertStatus(200)
         ->assertJsonStructure(['available']);
+});
+
+test('async ai request dispatches job and returns job_id', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
+    
+    $this->actingAs($user)
+        ->postJson(route('ai.natural-language-search'), [
+            'q' => 'battery for camping',
+            'async' => true,
+        ])
+        ->assertStatus(202)
+        ->assertJsonStructure(['job_id', 'status', 'message', 'callback_secret']);
+});
+
+test('ai feedback endpoint records thumbs up/down', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
+    $requestId = (string) Str::uuid();
+    $log = \App\Models\AiUsageLog::create([
+        'endpoint' => 'chatbot',
+        'provider' => 'ollama',
+        'model' => 'llama3',
+        'user_id' => $user->id,
+        'request_id' => $requestId,
+        'latency_ms' => 100,
+        'tokens_input' => 50,
+        'tokens_output' => 100,
+        'tokens_total' => 150,
+        'success' => true,
+    ]);
+
+    $this->actingAs($user)
+        ->postJson(route('ai.feedback'), [
+            'request_id' => $requestId,
+            'rating' => 1,
+            'feedback' => 'Great answer!',
+        ])
+        ->assertOk()
+        ->assertJson(['success' => true, 'message' => 'Feedback recorded']);
+
+    $log->refresh();
+    $this->assertEquals(1, $log->quality_rating);
+    $this->assertEquals('Great answer!', $log->quality_feedback);
+});
+
+test('ai feedback rejects invalid rating', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
+    $requestId = (string) Str::uuid();
+
+    $this->actingAs($user)
+        ->postJson(route('ai.feedback'), [
+            'request_id' => $requestId,
+            'rating' => 5,
+        ])
+        ->assertStatus(422);
+});
+
+test('ai feedback returns 404 for non-existent request', function () {
+    $user = User::factory()->create(['email_verified_at' => now()]);
+
+    $this->actingAs($user)
+        ->postJson(route('ai.feedback'), [
+            'request_id' => (string) Str::uuid(),
+            'rating' => 1,
+        ])
+        ->assertNotFound();
 });

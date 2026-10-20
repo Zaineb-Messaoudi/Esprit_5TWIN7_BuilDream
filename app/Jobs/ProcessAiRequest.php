@@ -9,6 +9,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 
 class ProcessAiRequest implements ShouldQueue
 {
@@ -30,14 +31,21 @@ class ProcessAiRequest implements ShouldQueue
     ];
 
     public function __construct(
-        public string $endpoint,
-        public array $payload,
-        public string $callbackUrl = '',
-        public string $callbackSecret = ''
+        public string $endpoint = '',
+        public array $payload = [],
+        public ?string $callbackUrl = null,
+        public string $callbackSecret = '',
+        public string $jobId = ''
     ) {
+        if (empty($this->jobId)) {
+            $this->jobId = (string) Str::uuid();
+        }
+        
         // Set queue based on endpoint priority
-        $priority = self::$endpointPriority[$this->endpoint] ?? 'default';
-        $this->onQueue("ai:{$priority}");
+        if ($this->endpoint) {
+            $priority = self::$endpointPriority[$this->endpoint] ?? 'default';
+            $this->onQueue("ai:{$priority}");
+        }
     }
 
     public function handle(AiService $ai): void
