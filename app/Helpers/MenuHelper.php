@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Auth;
+
 class MenuHelper
 {
     public static function getMainNavItems()
@@ -25,6 +27,8 @@ class MenuHelper
             ],
         ];
 
+        // Add admin-only menu items
+        if (Auth::check() && Auth::user()->isAdmin()) {
             array_splice($items, 1, 0, [[
                 'icon' => 'user-profile',
                 'name' => 'User Management',
@@ -56,6 +60,7 @@ class MenuHelper
                     ['name' => 'Inspections', 'path' => route('admin.technical.inspections.index'), 'activePrefix' => '/admin/technical/inspections', 'pro' => false],
                 ],
             ]]);
+        }
 
         return $items;
     }
