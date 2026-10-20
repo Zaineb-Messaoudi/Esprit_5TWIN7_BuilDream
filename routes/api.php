@@ -55,6 +55,33 @@ Route::get('/health', function () {
     } catch (\Throwable) {
         $checks['queue'] = 'failed';
     }
+
+    // AI Health Checks
+    try {
+        $aiService = app(\App\Services\AiService::class);
+        $aiHealth = [
+            'configured' => $aiService->isConfigured(),
+            'provider' => $aiService->getProvider(),
+            'model' => $aiService->getModel(),
+            'circuit_breaker' => $aiService->getCircuitBreakerStatus(),
+        ];
+
+        if ($aiService->getProvider() === 'ollama') {
+            $ollamaHealth = $aiService->checkOllamaHealth();
+            $aiHealth['ollama'] = $ollamaHealth;
+            
+            // Check if model is loaded in VRAM
+            $vramCheck = $aiService->checkModelLoadedInVram();
+            $aiHealth['vram'] = $vramCheck;
+        }
+
+        $checks['ai'] = $aiHealth;
+    } catch (\Throwable $e) {
+        $checks['ai'] = [
+            'configured' => false,
+            'error' => $e->getMessage(),
+        ];
+    }
     
     $status = in_array('failed', $checks) ? 503 : 200;
     

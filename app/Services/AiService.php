@@ -25,6 +25,15 @@ class AiService
     private string $model;
     private string $visionModel;
 
+    // Circuit breaker state
+    private array $circuitBreaker = [
+        'failures' => 0,
+        'last_failure' => 0,
+        'state' => 'closed', // closed, open, half-open
+        'threshold' => 5,
+        'timeout' => 60, // seconds
+    ];
+
     public function __construct()
     {
         $this->provider = config('ai.provider', 'ollama');
@@ -32,6 +41,10 @@ class AiService
         $this->baseUrl = config('ai.base_url', '');
         $this->model = config('ai.model', 'llama3.2');
         $this->visionModel = config('ai.vision_model', 'llava');
+        
+        // Load circuit breaker settings from config
+        $this->circuitBreaker['threshold'] = config('ai.circuit_breaker.threshold', 5);
+        $this->circuitBreaker['timeout'] = config('ai.circuit_breaker.timeout', 60);
     }
 
     public function getProvider(): string
@@ -55,15 +68,51 @@ class AiService
     }
 
     /**
-     * Check if the AI service is properly configured.
-     * For Ollama, no API key is required - just needs base URL.
+     * Check circuit breaker state and record failures.
      */
-    public function isConfigured(): bool
+    private function checkCircuitBreaker(): bool
     {
-        if ($this->provider === 'ollama') {
-            return !empty($this->baseUrl);
+        $now = time();
+        $cb = $this->circuitBreaker;
+
+        if ($cb['state'] === 'open') {
+            if ($now - $cb['last_failure'] > $cb['timeout']) {
+                // Half-open: allow one request through
+                $this->circuitBreaker['state'] = 'half-open';
+                return true;
+            }
+            return false; // Circuit open, reject request
         }
-        return !empty($this->apiKey);
+        return true; // Closed or half-open, allow request
+    }
+
+    private function recordSuccess(): void
+    {
+        $this->circuitBreaker['failures'] = 0;
+        $this->circuitBreaker['state'] = 'closed';
+    }
+
+    private function recordFailure(): void
+    {
+        $this->circuitBreaker['failures']++;
+        $this->circuitBreaker['last_failure'] = time();
+        
+        if ($this->circuitBreaker['failures'] >= $this->circuitBreaker['threshold']) {
+            $this->circuitBreaker['state'] = 'open';
+            Log::warning('AI Circuit breaker OPENED', [
+                'provider' => $this->provider,
+                'failures' => $this->circuitBreaker['failures'],
+                'threshold' => $this->circuitBreaker['threshold'],
+            ]);
+        }
+    }
+
+    /**
+     * Get circuit breaker status for health checks.
+     */
+    public function getCircuitBreakerStatus(): array
+    {
+        return $this->circuitBreaker;
     }
 
     /**
@@ -77,33 +126,40 @@ class AiService
             return null;
         }
 
+        // Check circuit breaker
+        if (!$this->checkCircuitBreaker()) {
+            Log::warning('AI Circuit breaker OPEN - request rejected', [
+                'provider' => $this->provider,
+                'failures' => $this->circuitBreaker['failures'],
+            ]);
+            return null;
+        }
+
         $hasImages = $this->hasImages($messages);
 
-        $response = match ($this->provider) {
-            'openai' => $this->callOpenAI($messages, $options),
-            'anthropic' => $this->callAnthropic($messages, $options),
-            'ollama' => $hasImages ? $this->callOllamaVision($messages, $options) : $this->callOllama($messages, $options),
-            default => $hasImages ? $this->callOllamaVision($messages, $options) : $this->callOllama($messages, $options),
-        };
+        try {
+            $response = match ($this->provider) {
+                'openai' => $this->callOpenAI($messages, $options),
+                'anthropic' => $this->callAnthropic($messages, $options),
+                'ollama' => $hasImages ? $this->callOllamaVision($messages, $options) : $this->callOllama($messages, $options),
+                default => $hasImages ? $this->callOllamaVision($messages, $options) : $this->callOllama($messages, $options),
+            };
 
-        return $response;
-    }
-
-    /**
-     * Check if messages contain image content.
-     */
-    private function hasImages(array $messages): bool
-    {
-        foreach ($messages as $message) {
-            if (is_array($message['content'] ?? null)) {
-                foreach ($message['content'] as $part) {
-                    if (isset($part['type']) && $part['type'] === 'image_url') {
-                        return true;
-                    }
-                }
+            if ($response) {
+                $this->recordSuccess();
+            } else {
+                $this->recordFailure();
             }
+
+            return $response;
+        } catch (\Throwable $e) {
+            $this->recordFailure();
+            Log::error('AI chat exception', [
+                'provider' => $this->provider,
+                'error' => $e->getMessage(),
+            ]);
+            return null;
         }
-        return false;
     }
 
     /**
@@ -476,6 +532,90 @@ class AiService
     }
 
     /**
+     * Check if a specific model is loaded in VRAM (Ollama).
+     * Uses /api/show endpoint to get model details including VRAM usage.
+     */
+    public function checkModelLoadedInVram(string $model = null): array
+    {
+        if ($this->provider !== 'ollama') {
+            return ['loaded' => false, 'reason' => 'Provider is not Ollama'];
+        }
+
+        $model = $model ?? $this->model;
+
+        try {
+            $url = rtrim($this->baseUrl, '/') . '/api/show';
+            $response = Http::timeout(10)->post($url, [
+                'name' => $model,
+            ]);
+
+            if ($response->failed()) {
+                return [
+                    'loaded' => false,
+                    'reason' => 'Model not found or Ollama error',
+                    'model' => $model,
+                ];
+            }
+
+            $details = $response->json();
+            $size = $details['details']['parameter_size'] ?? 'unknown';
+            
+            // Check if model details indicate it's loaded (has size info)
+            $isLoaded = !empty($details['details']);
+            
+            return [
+                'loaded' => $isLoaded,
+                'model' => $model,
+                'parameter_size' => $size,
+                'quantization' => $details['details']['quantization_level'] ?? 'unknown',
+                'context_length' => $details['details']['context_length'] ?? 'unknown',
+                'embedding_length' => $details['details']['embedding_length'] ?? 'unknown',
+                'vram_estimate_mb' => $this->estimateVram($details['details'] ?? []),
+            ];
+        } catch (\Throwable $e) {
+            return ['loaded' => false, 'reason' => $e->getMessage(), 'model' => $model];
+        }
+    }
+
+    /**
+     * Estimate VRAM usage from model details.
+     */
+    private function estimateVram(array $details): int
+    {
+        $paramSize = $details['parameter_size'] ?? '0';
+        $quantization = $details['quantization_level'] ?? 'Q4_0';
+        
+        // Extract number from parameter_size (e.g., "7B" -> 7)
+        preg_match('/(\d+(\.\d+)?)([KMG])?/', $paramSize, $matches);
+        if (empty($matches[1])) {
+            return 0;
+        }
+        
+        $params = (float) $matches[1];
+        $unit = $matches[3] ?? 'B';
+        
+        switch ($unit) {
+            case 'K': $params *= 1000; break;
+            case 'M': $params *= 1000000; break;
+            case 'B': $params *= 1000000000; break;
+        }
+        
+        // Estimate bytes per parameter based on quantization
+        $bytesPerParam = match (true) {
+            stripos($quantization, 'Q8') !== false => 1.0,
+            stripos($quantization, 'Q6') !== false => 0.75,
+            stripos($quantization, 'Q5') !== false => 0.625,
+            stripos($quantization, 'Q4') !== false => 0.5,
+            stripos($quantization, 'Q3') !== false => 0.375,
+            stripos($quantization, 'Q2') !== false => 0.25,
+            default => 0.5, // Assume Q4_0
+        };
+        
+        $vramBytes = $params * $bytesPerParam;
+        return (int) ($vramBytes / 1024 / 1024); // MB
+    }
+
+    /**
      * Calculate cosine similarity between two vectors.
      * Works with JSON-stored embeddings on MySQL/PostgreSQL.
      */
@@ -564,5 +704,91 @@ class AiService
                 'last_page' => max(1, $lastPage),
             ],
         ];
+    }
+
+    /**
+     * Execute chat with fallback provider chain.
+     * Tries primary provider, then falls back to configured alternatives.
+     * 
+     * @param array $messages
+     * @param array $options
+     * @param array $fallbackChain Ordered list of providers to try: ['ollama', 'openai', 'anthropic']
+     * @return array|null ['response' => string, 'provider' => string] or null
+     */
+    public function chatWithFallback(array $messages, array $options = [], array $fallbackChain = null): ?array
+    {
+        $fallbackChain = $fallbackChain ?? config('ai.fallback_chain', ['ollama', 'openai', 'anthropic']);
+        
+        $originalProvider = $this->provider;
+        $originalModel = $this->model;
+        $originalBaseUrl = $this->baseUrl;
+        $originalApiKey = $this->apiKey;
+
+        foreach ($fallbackChain as $provider) {
+            // Skip if provider not configured
+            $providerConfig = config("ai.providers.$provider");
+            if (!$providerConfig) {
+                continue;
+            }
+
+            // Switch to this provider
+            $this->provider = $provider;
+            $this->model = $providerConfig['model'] ?? $this->model;
+            $this->baseUrl = $providerConfig['base_url'] ?? $this->baseUrl;
+            $this->apiKey = $providerConfig['api_key'] ?? $this->apiKey;
+            $this->visionModel = $providerConfig['vision_model'] ?? $this->visionModel;
+
+            // Reset circuit breaker for new provider
+            $this->circuitBreaker = [
+                'failures' => 0,
+                'last_failure' => 0,
+                'state' => 'closed',
+                'threshold' => 5,
+                'timeout' => 60,
+            ];
+
+            // Check if provider is configured
+            if (!$this->isConfigured()) {
+                Log::info("AI Fallback: Provider $provider not configured, skipping");
+                continue;
+            }
+
+            try {
+                $response = $this->chat($messages, $options);
+                
+                if ($response) {
+                    // Restore original provider
+                    $this->provider = $originalProvider;
+                    $this->model = $originalModel;
+                    $this->baseUrl = $originalBaseUrl;
+                    $this->apiKey = $originalApiKey;
+                    $this->visionModel = config('ai.vision_model', 'llava');
+                    
+                    return [
+                        'response' => $response,
+                        'provider' => $provider,
+                        'model' => $this->model,
+                    ];
+                }
+            } catch (\Throwable $e) {
+                Log::warning("AI Fallback: Provider $provider failed", [
+                    'error' => $e->getMessage(),
+                ]);
+                continue;
+            }
+        }
+
+        // Restore original provider on complete failure
+        $this->provider = $originalProvider;
+        $this->model = $originalModel;
+        $this->baseUrl = $originalBaseUrl;
+        $this->apiKey = $originalApiKey;
+        $this->visionModel = config('ai.vision_model', 'llava');
+
+        Log::error('AI Fallback: All providers failed', [
+            'fallback_chain' => $fallbackChain,
+        ]);
+
+        return null;
     }
 }

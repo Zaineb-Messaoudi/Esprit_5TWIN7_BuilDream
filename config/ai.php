@@ -76,6 +76,56 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Fallback Provider Chain
+    |--------------------------------------------------------------------------
+    | Ordered list of providers to try when primary fails.
+    | Each provider must have its configuration in 'providers' below.
+    */
+    'fallback_chain' => env('AI_FALLBACK_CHAIN', 'ollama,openai,anthropic'),
+
+    /*
+    |--------------------------------------------------------------------------
+    | Provider Configurations (for fallback chain)
+    |--------------------------------------------------------------------------
+    | Each provider needs its own model, base_url, and api_key (if applicable).
+    | These are used by chatWithFallback() when primary provider fails.
+    */
+    'providers' => [
+        'ollama' => [
+            'model' => env('AI_MODEL', 'llama3.2'),
+            'vision_model' => env('AI_VISION_MODEL', 'llava'),
+            'embedding_model' => env('AI_EMBEDDING_MODEL', 'nomic-embed-text'),
+            'base_url' => env('AI_BASE_URL', 'http://localhost:11434'),
+            'api_key' => null,
+        ],
+        'openai' => [
+            'model' => env('AI_OPENAI_MODEL', 'gpt-4o-mini'),
+            'vision_model' => env('AI_OPENAI_VISION_MODEL', 'gpt-4o-mini'),
+            'embedding_model' => env('AI_OPENAI_EMBEDDING_MODEL', 'text-embedding-3-small'),
+            'base_url' => env('AI_OPENAI_BASE_URL', 'https://api.openai.com/v1'),
+            'api_key' => env('AI_OPENAI_API_KEY'),
+        ],
+        'anthropic' => [
+            'model' => env('AI_ANTHROPIC_MODEL', 'claude-3-haiku'),
+            'vision_model' => env('AI_ANTHROPIC_VISION_MODEL', 'claude-3-haiku'),
+            'embedding_model' => null,
+            'base_url' => env('AI_ANTHROPIC_BASE_URL', 'https://api.anthropic.com/v1'),
+            'api_key' => env('AI_ANTHROPIC_API_KEY'),
+        ],
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
+    | Circuit Breaker Settings
+    |--------------------------------------------------------------------------
+    */
+    'circuit_breaker' => [
+        'threshold' => env('AI_CB_THRESHOLD', 5),     // failures before opening
+        'timeout' => env('AI_CB_TIMEOUT', 60),        // seconds before half-open
+    ],
+
+    /*
+    |--------------------------------------------------------------------------
     | Default Generation Options
     |--------------------------------------------------------------------------
     */
