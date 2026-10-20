@@ -1,5 +1,15 @@
 <?php
 
+namespace App\Http\Controllers;
+
+use App\Jobs\ProcessAiRequest;
+use App\Models\Equipment;
+use App\Services\AiService;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
+
 /**
  * @OA\Info(
  *     title="SolarShare API Documentation",
@@ -16,18 +26,6 @@
  * )
  * @OA\Tag(name="AI Features", description="AI-powered features for equipment catalog")
  */
-
-namespace App\Http\Controllers;
-
-use App\Jobs\ProcessAiRequest;
-use App\Models\Equipment;
-use App\Services\AiService;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Str;
-use OpenApi\Attributes as OA;
-
 class AiController extends Controller
 {
     public function __construct(private readonly AiService $ai) {}
@@ -445,7 +443,7 @@ PROMPT;
 
         $result = $this->ai->chatJson([
             ['role' => 'system', 'content' => $systemPrompt],
-            ['role' => 'user', 'content' => "Name: {$name}\nDescription: {$description}"],
+            ['role' => 'user', 'content' => $userPrompt],
         ]);
 
         return response()->json($result ?? [
@@ -667,6 +665,55 @@ PROMPT;
             'valid' => true,
             'confidence' => 50,
             'reason' => 'Unable to validate image',
+        ]);
+    }
+
+    /**
+     * @OA\Post(
+     *     path="/api/ai/feedback",
+     *     summary="Record quality feedback for AI response",
+     *     description="Record thumbs up/down feedback for an AI response using the request_id",
+     *     tags={"AI Features"},
+     *     security={{"sanctum"={}}},
+     *     @OA\RequestBody(
+     *         required=true,
+     *         @OA\JsonContent(
+     *             required={"request_id", "rating"},
+     *             @OA\Property(property="request_id", type="string", example="uuid-from-response"),
+     *             @OA\Property(property="rating", type="integer", enum={1, -1}, example=1, description="1 = thumbs up, -1 = thumbs down"),
+     *             @OA\Property(property="feedback", type="string", example="Great response!")
+     *         )
+     *     ),
+     *     @OA\Response(response=200, description="Feedback recorded"),
+     *     @OA\Response(response=400, description="Invalid rating"),
+     *     @OA\Response(response=401, description="Unauthenticated"),
+     *     @OA\Response(response=404, description="Request not found"),
+     *     @OA\Response(response=422, description="Validation error")
+     * )
+     */
+    public function feedback(Request $request): JsonResponse
+    {
+        $request->validate([
+            'request_id' => 'required|string|uuid',
+            'rating' => 'required|integer|in:1,-1',
+            'feedback' => 'nullable|string|max:500',
+        ]);
+
+        $recorded = \App\Models\AiUsageLog::recordFeedback(
+            $request->request_id,
+            $request->rating,
+            $request->feedback
+        );
+
+        if (!$recorded) {
+            return response()->json([
+                'error' => 'Request not found or invalid rating',
+            ], 404);
+        }
+
+        return response()->json([
+            'success' => true,
+            'message' => 'Feedback recorded',
         ]);
     }
 

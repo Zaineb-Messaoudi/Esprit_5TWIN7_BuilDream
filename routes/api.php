@@ -278,4 +278,5 @@ Route::prefix('ai')->name('ai.')->middleware(['auth:sanctum', 'rate_limit_ip_use
     Route::post('/chatbot', [AiController::class, 'chatbot'])->name('chatbot');
     Route::post('/semantic-search', [AiController::class, 'semanticSearch'])->name('semantic-search');
     Route::post('/validate-image', [AiController::class, 'validateImage'])->name('validate-image');
+    Route::post('/feedback', [AiController::class, 'feedback'])->name('feedback');
 });

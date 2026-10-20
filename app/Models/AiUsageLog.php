@@ -25,6 +25,8 @@ class AiUsageLog extends Model
         'success',
         'error_message',
         'prompt_hash',
+        'quality_rating',
+        'quality_feedback',
     ];
 
     protected $casts = [
@@ -38,6 +40,7 @@ class AiUsageLog extends Model
         'gpu_time_ms' => 'integer',
         'vram_used_mb' => 'integer',
         'success' => 'boolean',
+        'quality_rating' => 'integer',
     ];
 
     public function user(): BelongsTo
@@ -69,6 +72,8 @@ class AiUsageLog extends Model
             'success' => $data['success'] ?? true,
             'error_message' => $data['error_message'] ?? null,
             'prompt_hash' => $data['prompt_hash'] ?? null,
+            'quality_rating' => $data['quality_rating'] ?? 0,
+            'quality_feedback' => $data['quality_feedback'] ?? null,
         ]);
     }
 
@@ -92,17 +97,44 @@ class AiUsageLog extends Model
 
         $logs = $query->get();
 
+        $total = $logs->count();
+        $successful = $logs->where('success', true)->count();
+        $withFeedback = $logs->where('quality_rating', '!=', 0)->count();
+        $positive = $logs->where('quality_rating', 1)->count();
+        $negative = $logs->where('quality_rating', -1)->count();
+
         return [
-            'total_requests' => $logs->count(),
-            'success_rate' => $logs->count() > 0
-                ? round($logs->where('success', true)->count() / $logs->count() * 100, 2)
-                : 0,
+            'total_requests' => $total,
+            'success_rate' => $total > 0 ? round($successful / $total * 100, 2) : 0,
             'avg_latency_ms' => $logs->avg('latency_ms') ?? 0,
             'total_tokens' => $logs->sum('tokens_total'),
             'total_cost_usd' => round($logs->sum('cost_usd'), 6),
             'avg_gpu_time_ms' => $logs->avg('gpu_time_ms') ?? 0,
             'avg_vram_mb' => $logs->avg('vram_used_mb') ?? 0,
             'error_count' => $logs->where('success', false)->count(),
+            'feedback' => [
+                'total_feedback' => $withFeedback,
+                'feedback_rate' => $total > 0 ? round($withFeedback / $total * 100, 2) : 0,
+                'positive' => $positive,
+                'negative' => $negative,
+                'satisfaction_rate' => $withFeedback > 0 ? round($positive / $withFeedback * 100, 2) : 0,
+            ],
         ];
+    }
+
+    /**
+     * Record quality feedback (thumbs up/down) for a request.
+     */
+    public static function recordFeedback(string $requestId, int $rating, ?string $feedback = null): bool
+    {
+        if (!in_array($rating, [1, -1])) {
+            return false;
+        }
+
+        return self::where('request_id', $requestId)
+            ->update([
+                'quality_rating' => $rating,
+                'quality_feedback' => $feedback,
+            ]) > 0;
     }
 }
