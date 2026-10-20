@@ -266,7 +266,6 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     });
 
     // Dashboard Routes
-    })->name('dashboard.main');
     Route::get('/analytics', function () {
         return view('pages.dashboard.analytics', ['title' => 'Analytics Dashboard']);
     })->name('dashboard.analytics');
@@ -452,6 +451,8 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/vector-maps', function () {
         return view('pages.applications.vector-maps', ['title' => __('Vector Maps')]);
     })->name('maps.vector');
+});
+
 // Isolated technical module. Owner access is scoped to equipment ownership in the controllers.
 Route::middleware(['auth', 'verified', 'role.selected'])->prefix('technical')->name('technical.')->group(function () {
     Route::resource('maintenances', MaintenanceController::class);

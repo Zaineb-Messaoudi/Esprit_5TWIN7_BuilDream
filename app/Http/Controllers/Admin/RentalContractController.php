@@ -160,9 +160,36 @@ class RentalContractController extends Controller
         return $data;
     }
 
-    /** Hold deposit (admin). */
+    /**
+     * SECURITY: the deposit actions below are used by two groups of routes:
+     *  - the admin routes   (/admin/rental-contracts/{id}/deposit/...)
+     *  - the owner routes   (/owner/rental-contracts/{id}/deposit/...)
+     * The owner routes only check that the user HAS the owner role. Without this check,
+     * an owner could change the id in the URL and manage the deposit of ANOTHER owner's contract.
+     * An admin may act on any contract; an owner only on contracts of rentals of his own equipment.
+     */
+    private function authorizeDepositAction(RentalContract $contract): void
+    {
+        $user = request()->user();
+
+        if ($user->isAdmin()) {
+            return;
+        }
+
+        $contract->loadMissing('rental.equipment');
+
+        abort_unless(
+            (int) $contract->rental?->equipment?->owner_id === (int) $user->id,
+            403,
+            'You can only manage the deposit of your own equipment rentals.'
+        );
+    }
+
+    /** Hold deposit (admin or the owner of the equipment). */
     public function holdDeposit(RentalContract $rentalContract): RedirectResponse
     {
+        $this->authorizeDepositAction($rentalContract);
+
         if (! $rentalContract->canHoldDeposit()) {
             return back()->with('error', 'Deposit cannot be held in current state.');
         }
@@ -171,9 +198,11 @@ class RentalContractController extends Controller
         return back()->with('status', 'deposit-held');
     }
 
-    /** Release deposit (admin). */
+    /** Release deposit (admin or the owner of the equipment). */
     public function releaseDeposit(RentalContract $rentalContract): RedirectResponse
     {
+        $this->authorizeDepositAction($rentalContract);
+
         if (! $rentalContract->canReleaseDeposit()) {
             return back()->with('error', 'Deposit cannot be released in current state.');
         }
@@ -182,9 +211,11 @@ class RentalContractController extends Controller
         return back()->with('status', 'deposit-released');
     }
 
-    /** Forfeit deposit (admin). */
+    /** Forfeit deposit (admin or the owner of the equipment). */
     public function forfeitDeposit(RentalContract $rentalContract): RedirectResponse
     {
+        $this->authorizeDepositAction($rentalContract);
+
         if (! $rentalContract->canForfeitDeposit()) {
             return back()->with('error', 'Deposit cannot be forfeited in current state.');
         }

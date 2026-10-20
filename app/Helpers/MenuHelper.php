@@ -50,6 +50,8 @@ class MenuHelper
                     ['name' => 'Invoices', 'path' => route('rental.invoices.index'), 'activePrefix' => '/rental/invoices', 'pro' => false],
                     ['name' => 'Contracts', 'path' => route('admin.rental-contracts.index'), 'activePrefix' => '/admin/rental-contracts', 'pro' => false],
                     ['name' => 'Extensions', 'path' => route('admin.rental-extensions.index'), 'activePrefix' => '/admin/rental-extensions', 'pro' => false],
+                    ['name' => 'Overdue rentals', 'path' => route('admin.rental-insights.overdue'), 'pro' => false],
+                    ['name' => 'Rental analytics', 'path' => route('admin.rental-insights.dashboard'), 'pro' => false],
                 ],
             ], [
                 'icon' => 'logistics',
