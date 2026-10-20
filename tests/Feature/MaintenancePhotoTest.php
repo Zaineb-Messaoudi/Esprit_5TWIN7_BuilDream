@@ -7,10 +7,8 @@ use App\Models\Equipment;
 use App\Models\Maintenance;
 use App\Models\MaintenancePhoto;
 use App\Models\User;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
@@ -25,12 +23,6 @@ class MaintenancePhotoTest extends TestCase
     {
         parent::setUp();
         Storage::fake('public');
-        Schema::create('equipment', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name');
-            $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
-            $table->timestamps();
-        });
 
         $this->owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true, 'email_verified_at' => now()]);
         $equipment = Equipment::query()->create(['name' => 'Repairable battery', 'owner_id' => $this->owner->id]);
@@ -95,3 +87,4 @@ class MaintenancePhotoTest extends TestCase
         return UploadedFile::fake()->createWithContent($name, $content);
     }
 }
+

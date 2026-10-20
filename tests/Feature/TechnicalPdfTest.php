@@ -7,9 +7,7 @@ use App\Models\Equipment;
 use App\Models\Inspection;
 use App\Models\Maintenance;
 use App\Models\User;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class TechnicalPdfTest extends TestCase
@@ -23,12 +21,6 @@ class TechnicalPdfTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Schema::create('equipment', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name');
-            $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
-            $table->timestamps();
-        });
         $this->owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true, 'email_verified_at' => now()]);
         $equipment = Equipment::query()->create(['name' => 'PDF equipment', 'owner_id' => $this->owner->id]);
         $this->inspection = Inspection::factory()->create(['equipment_id' => $equipment->id]);
@@ -55,3 +47,4 @@ class TechnicalPdfTest extends TestCase
         $this->actingAs($this->owner)->get('/technical/inspections/999999/pdf')->assertNotFound();
     }
 }
+

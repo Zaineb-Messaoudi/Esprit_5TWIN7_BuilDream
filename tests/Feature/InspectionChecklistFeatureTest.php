@@ -8,9 +8,7 @@ use App\Models\Equipment;
 use App\Models\InspectionChecklist;
 use App\Models\InspectionChecklistItem;
 use App\Models\User;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class InspectionChecklistFeatureTest extends TestCase
@@ -20,12 +18,6 @@ class InspectionChecklistFeatureTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Schema::create('equipment', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name');
-            $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
-            $table->timestamps();
-        });
     }
 
     public function test_owner_can_submit_checklist_and_critical_failure_creates_damage(): void
@@ -69,3 +61,4 @@ class InspectionChecklistFeatureTest extends TestCase
         ])->assertSessionHasErrors(['checklist_results', 'checklist_results.0.passed']);
     }
 }
+

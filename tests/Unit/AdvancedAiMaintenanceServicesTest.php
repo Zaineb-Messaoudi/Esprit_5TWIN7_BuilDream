@@ -11,10 +11,8 @@ use App\Models\User;
 use App\Notifications\AbnormalMaintenanceCostNotification;
 use App\Services\Maintenance\MaintenanceCostAnomalyService;
 use App\Services\Maintenance\RepairCostEstimatorService;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class AdvancedAiMaintenanceServicesTest extends TestCase
@@ -24,13 +22,6 @@ class AdvancedAiMaintenanceServicesTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Schema::create('equipment', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name');
-            $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
-            $table->unsignedBigInteger('category_id')->nullable()->index();
-            $table->timestamps();
-        });
     }
 
     public function test_z_score_handles_outlier_small_samples_and_zero_deviation(): void
@@ -93,3 +84,4 @@ class AdvancedAiMaintenanceServicesTest extends TestCase
         ]);
     }
 }
+

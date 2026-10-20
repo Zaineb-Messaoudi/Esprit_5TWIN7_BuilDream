@@ -8,9 +8,7 @@ use App\Models\Equipment;
 use App\Models\Inspection;
 use App\Models\Maintenance;
 use App\Models\User;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class MaintenanceDashboardTest extends TestCase
@@ -22,17 +20,6 @@ class MaintenanceDashboardTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Schema::create('categories', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name');
-        });
-        Schema::create('equipment', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name');
-            $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
-            $table->foreignId('category_id')->constrained('categories');
-            $table->timestamps();
-        });
         $this->admin = User::factory()->create(['role' => UserRole::ADMIN, 'role_setup_completed' => true, 'email_verified_at' => now()]);
     }
 
@@ -82,3 +69,5 @@ class MaintenanceDashboardTest extends TestCase
         $this->actingAs($owner)->getJson(route('admin.technical.dashboard.costs'))->assertForbidden();
     }
 }
+
+

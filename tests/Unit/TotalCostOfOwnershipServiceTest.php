@@ -3,10 +3,8 @@
 namespace Tests\Unit;
 
 use App\Services\Maintenance\TotalCostOfOwnershipService;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class TotalCostOfOwnershipServiceTest extends TestCase
@@ -16,11 +14,6 @@ class TotalCostOfOwnershipServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Schema::create('rentals', function (Blueprint $table): void {
-            $table->id();
-            $table->unsignedBigInteger('equipment_id');
-            $table->decimal('total_amount', 10, 2);
-        });
     }
 
     public function test_calculation_is_exact_for_known_data(): void
@@ -63,3 +56,4 @@ class TotalCostOfOwnershipServiceTest extends TestCase
         ]);
     }
 }
+

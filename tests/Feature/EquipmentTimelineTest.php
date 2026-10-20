@@ -8,9 +8,7 @@ use App\Models\Inspection;
 use App\Models\Maintenance;
 use App\Models\User;
 use App\Services\Maintenance\EquipmentTimelineService;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use Tests\TestCase;
 
 class EquipmentTimelineTest extends TestCase
@@ -20,12 +18,6 @@ class EquipmentTimelineTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        Schema::create('equipment', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name');
-            $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
-            $table->timestamps();
-        });
     }
 
     public function test_timeline_merges_sorts_and_isolates_equipment(): void
@@ -55,3 +47,4 @@ class EquipmentTimelineTest extends TestCase
         $this->actingAs($otherOwner)->get(route('technical.equipment.history', $equipment))->assertForbidden();
     }
 }
+

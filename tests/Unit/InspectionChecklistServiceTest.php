@@ -9,9 +9,7 @@ use App\Models\InspectionChecklist;
 use App\Models\InspectionChecklistItem;
 use App\Models\User;
 use App\Services\Maintenance\InspectionChecklistService;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Support\Facades\Schema;
 use Illuminate\Validation\ValidationException;
 use Tests\TestCase;
 
@@ -28,13 +26,6 @@ class InspectionChecklistServiceTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
-        Schema::create('equipment', function (Blueprint $table): void {
-            $table->id();
-            $table->string('name');
-            $table->foreignId('owner_id')->constrained('users')->cascadeOnDelete();
-            $table->timestamps();
-        });
 
         $owner = User::factory()->create();
         $this->equipment = Equipment::query()->create(['name' => 'Test battery', 'owner_id' => $owner->id]);
@@ -109,3 +100,4 @@ class InspectionChecklistServiceTest extends TestCase
         ];
     }
 }
+
