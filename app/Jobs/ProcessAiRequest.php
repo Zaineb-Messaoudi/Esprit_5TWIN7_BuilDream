@@ -18,9 +18,6 @@ class ProcessAiRequest implements ShouldQueue
     public int $backoff = 5;
     public int $timeout = 180;
 
-    // Use dedicated AI connection
-    public string $connection = 'ai';
-
     // High priority for user-facing, low for batch
     protected static array $endpointPriority = [
         'chatbot' => 'high',
