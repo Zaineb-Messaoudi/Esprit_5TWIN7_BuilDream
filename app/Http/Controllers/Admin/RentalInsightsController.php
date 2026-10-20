@@ -2,22 +2,30 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Enums\RentalStatus;
 use App\Http\Controllers\Controller;
 use App\Models\Rental;
+use App\Services\LateRiskService;
 use App\Services\RentalInsightsService;
+use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 /**
  * Back office pages for the advanced features of the rental module.
  * Protected by the admin-only middleware of the "admin." route group.
  *
  * admin.rental-insights.dashboard | GET /admin/rental-insights          | dashboard() analytics
- * admin.rental-insights.overdue   | GET /admin/rental-insights/overdue  | overdue()   late rentals and fees
+ * admin.rental-insights.overdue    | GET /admin/rental-insights/overdue  | overdue()   late rentals, fees and delay risk
+ * admin.rental-insights.export    | GET /admin/rental-insights/export   | export()    CSV file of the rentals
  */
 class RentalInsightsController extends Controller
 {
-    // Laravel injects the service automatically (same pattern as UserController with UserService)
-    public function __construct(protected RentalInsightsService $insights) {}
+    // Laravel injects the two services automatically (same pattern as UserController with UserService)
+    public function __construct(
+        protected RentalInsightsService $insights,
+        protected LateRiskService $risk,
+    ) {}
 
     /** Analytics dashboard: figures, rentals by status, last months, top equipment. */
     public function dashboard(): View
@@ -37,15 +45,16 @@ class RentalInsightsController extends Controller
         ]);
     }
 
-    /** Overdue rentals with the number of late days and the late fee of each one. */
+    /** Overdue rentals with the number of late days, the late fee and the delay risk of each one. */
     public function overdue(): View
     {
-        // One row per overdue rental, with the calculations done by the service
+        // One row per overdue rental, with the calculations done by the services
         $rows = $this->insights->overdueRentals()->map(fn (Rental $rental) => [
             'rental'     => $rental,
             'late_days'  => $this->insights->lateDays($rental),
             'daily_rate' => $this->insights->dailyRate($rental),
             'late_fee'   => $this->insights->lateFee($rental),
+            'risk'       => $this->risk->assess($rental),
         ]);
 
         return view('pages.admin.rental-insights.overdue', [
@@ -54,5 +63,88 @@ class RentalInsightsController extends Controller
             'multiplier' => RentalInsightsService::LATE_FEE_MULTIPLIER,
             'title'      => __('Overdue Rentals'),
         ]);
+    }
+
+    /**
+     * CSV export of the rentals (opens in Excel).
+     * It follows the same filters as the rentals list: ?status=active&search=RNT-2026
+     * The file is written line by line (200 rentals at a time), so a big list never fills the memory.
+     */
+    public function export(Request $request): StreamedResponse
+    {
+        $query = Rental::query()->with(['user', 'equipment', 'contract'])->withCount('extensions');
+
+        // Same filters as the list
+        if ($request->filled('status') && RentalStatus::tryFrom($request->status)) {
+            $query->where('status', $request->status);
+        }
+
+        if ($request->filled('search')) {
+            $search = $request->search;
+            $query->where(function ($q) use ($search) {
+                $q->where('reference', 'like', '%' . $search . '%')
+                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%' . $search . '%'))
+                    ->orWhereHas('equipment', fn ($e) => $e->where('name', 'like', '%' . $search . '%'));
+            });
+        }
+
+        $filename = 'rentals-' . now()->format('Y-m-d') . '.csv';
+
+        return response()->streamDownload(function () use ($query) {
+            $out = fopen('php://output', 'w');
+
+            // The BOM tells Excel that the file is UTF-8 (accents and Arabic display correctly)
+            fwrite($out, "\xEF\xBB\xBF");
+
+            $this->writeCsvLine($out, [
+                'Reference', 'Renter', 'Renter email', 'Equipment', 'Start date', 'End date', 'Days',
+                'Status', 'Total amount (TND)', 'Contract', 'Contract status', 'Deposit status',
+                'Extensions', 'Days late', 'Late fee (TND)',
+            ]);
+
+            $query->orderBy('id')->chunk(200, function ($rentals) use ($out) {
+                foreach ($rentals as $rental) {
+                    $this->writeCsvLine($out, [
+                        $rental->reference,
+                        $rental->user?->name,
+                        $rental->user?->email,
+                        $rental->equipment?->name,
+                        $rental->start_date->format('Y-m-d'),
+                        $rental->end_date->format('Y-m-d'),
+                        (int) $rental->start_date->diffInDays($rental->end_date),
+                        $rental->status->label(),
+                        number_format((float) $rental->total_amount, 2, '.', ''),
+                        $rental->contract?->contract_number,
+                        $rental->contract?->contract_status?->label(),
+                        $rental->contract?->deposit_status?->label(),
+                        $rental->extensions_count,
+                        $this->insights->lateDays($rental),
+                        number_format($this->insights->lateFee($rental), 2, '.', ''),
+                    ]);
+                }
+            });
+
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /** Writes one line of the CSV file. */
+    private function writeCsvLine($handle, array $cells): void
+    {
+        // The last argument ('') is the "escape" character: PHP 8.4 wants it written explicitly
+        fputcsv($handle, array_map(fn ($cell) => $this->csvSafe($cell), $cells), ',', '"', '');
+    }
+
+    /**
+     * Protection against "CSV injection": a text that starts with = + - or @ would be run as a
+     * formula by Excel (a renter could choose such a name). An apostrophe in front makes it plain text.
+     */
+    private function csvSafe(mixed $value): mixed
+    {
+        if (is_string($value) && preg_match('/^[=+\-@\t\r]/', $value)) {
+            return "'" . $value;
+        }
+
+        return $value;
     }
 }

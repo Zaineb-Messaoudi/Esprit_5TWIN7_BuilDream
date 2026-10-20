@@ -36,7 +36,7 @@
         </p>
 
         <div class="overflow-x-auto">
-            <table class="w-full min-w-[800px] border-collapse text-start">
+            <table class="w-full min-w-[900px] border-collapse text-start">
                 <thead>
                     <tr class="bg-gray-50 text-xs uppercase text-gray-600 dark:bg-gray-800 dark:text-gray-400">
                         <th class="p-3 border-b dark:border-gray-700">Rental</th>
@@ -46,6 +46,7 @@
                         <th class="p-3 border-b dark:border-gray-700">Days late</th>
                         <th class="p-3 border-b dark:border-gray-700">Daily rate</th>
                         <th class="p-3 border-b dark:border-gray-700">Late fee</th>
+                        <th class="p-3 border-b dark:border-gray-700">Delay risk</th>
                     </tr>
                 </thead>
                 <tbody class="text-gray-800 dark:text-white">
@@ -63,10 +64,14 @@
                             </td>
                             <td class="p-3">{{ number_format($row['daily_rate'], 2) }}</td>
                             <td class="p-3 font-semibold">{{ number_format($row['late_fee'], 2) }}</td>
+                            {{-- Delay risk score (0-100) computed by LateRiskService --}}
+                            <td class="p-3">
+                                <x-ui.badge :color="$row['risk']['color']">{{ $row['risk']['label'] }} ({{ $row['risk']['score'] }})</x-ui.badge>
+                            </td>
                         </tr>
                     @empty
                         <tr>
-                            <td colspan="7" class="p-8 text-center text-sm text-gray-500 dark:text-gray-400">No overdue rentals. Every active rental is within its dates.</td>
+                            <td colspan="8" class="p-8 text-center text-sm text-gray-500 dark:text-gray-400">No overdue rentals. Every active rental is within its dates.</td>
                         </tr>
                     @endforelse
                 </tbody>

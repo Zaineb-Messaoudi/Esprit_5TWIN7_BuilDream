@@ -28,7 +28,11 @@ class ExtensionAdvisorService
     /** A rental already extended this many times (or more) gets a warning. */
     public const MAX_COMFORTABLE_EXTENSIONS = 2;
 
-    public function __construct(protected ExtensionAvailabilityService $availability) {}
+    // Both services are injected by Laravel
+    public function __construct(
+        protected ExtensionAvailabilityService $availability,
+        protected LateRiskService $lateRisk,
+    ) {}
 
     /**
      * @return array{recommendation: string, label: string, color: string, reasons: array<int, array{level: string, text: string}>}
@@ -74,6 +78,16 @@ class ExtensionAdvisorService
 
         // 6) History of the renter on other rentals
         $reasons = array_merge($reasons, $this->renterHistory($rental, $extension));
+
+        // 7) Delay risk score of this rental (see LateRiskService)
+        $risk = $this->lateRisk->assess($rental);
+        if ($risk['level'] === 'high') {
+            $reasons[] = ['level' => 'warning', 'text' => "The delay risk is high (score {$risk['score']}/100)."];
+        } elseif ($risk['level'] === 'low') {
+            $reasons[] = ['level' => 'positive', 'text' => "The delay risk is low (score {$risk['score']}/100)."];
+        } else {
+            $reasons[] = ['level' => 'info', 'text' => "The delay risk is medium (score {$risk['score']}/100)."];
+        }
 
         // Final recommendation
         $levels = array_column($reasons, 'level');

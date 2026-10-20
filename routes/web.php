@@ -239,7 +239,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         // Advanced features: analytics and overdue rentals with late fees
         Route::get('rental-insights', [RentalInsightsController::class, 'dashboard'])->name('rental-insights.dashboard');
         Route::get('rental-insights/overdue', [RentalInsightsController::class, 'overdue'])->name('rental-insights.overdue');    
-
+        Route::get('rental-insights/export', [RentalInsightsController::class, 'export'])->name('rental-insights.export');
     });
 
     // Dashboard Routes

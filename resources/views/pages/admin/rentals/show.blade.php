@@ -131,5 +131,57 @@
                 </table>
             </div>
         </x-common.component-card>
+
+        {{-- The two blocks below use services directly from the view, so this page works
+             without changing RentalController (written by a teammate). --}}
+        @php
+            $risk = app(\App\Services\LateRiskService::class)->assess($rental);
+            $timeline = app(\App\Services\RentalTimelineService::class)->events($rental);
+            // Full class names on purpose: Tailwind only keeps the classes it can read in the file
+            $dotClasses = [
+                'success' => 'bg-success-100 text-success-700 dark:bg-success-500/15 dark:text-success-300',
+                'info'    => 'bg-brand-50 text-brand-700 dark:bg-brand-500/15 dark:text-brand-300',
+                'warning' => 'bg-warning-100 text-warning-800 dark:bg-warning-500/15 dark:text-warning-300',
+                'error'   => 'bg-error-50 text-error-700 dark:bg-error-500/15 dark:text-error-300',
+            ];
+        @endphp
+
+        {{-- Delay risk (rule-based score from 0 to 100, see LateRiskService) --}}
+        @if (in_array($rental->status->value, ['pending', 'active']))
+            <x-common.component-card :title="__('Delay risk')" :desc="__('How likely this rental is to end late, from the history of the renter and of the rental.')">
+                <div class="mb-4 flex items-center gap-3">
+                    <x-ui.badge :color="$risk['color']">{{ $risk['label'] }}</x-ui.badge>
+                    <span class="text-sm font-medium text-gray-800 dark:text-white">{{ $risk['score'] }} / 100</span>
+                </div>
+                <ul class="space-y-1 text-sm text-gray-700 dark:text-gray-300">
+                    @foreach ($risk['reasons'] as $reason)
+                        <li>{{ $reason['direction'] === 'up' ? '▲' : ($reason['direction'] === 'down' ? '▼' : '•') }} {{ $reason['text'] }}</li>
+                    @endforeach
+                </ul>
+            </x-common.component-card>
+        @endif
+
+        {{-- Timeline: the whole life of the rental in one list, oldest first --}}
+        <x-common.component-card :title="__('Timeline')" :desc="__('Reserved, paid, rented, extended and returned: every step with its date.')">
+            <ol class="relative ms-3 space-y-6 border-s border-gray-200 dark:border-gray-700">
+                @foreach ($timeline as $event)
+                    <li class="ms-6 {{ $event['planned'] ? 'opacity-60' : '' }}">
+                        <span class="absolute -start-3 flex size-6 items-center justify-center rounded-full text-xs font-semibold {{ $dotClasses[$event['type']] }}" aria-hidden="true">
+                            {{ ['success' => '✓', 'info' => '•', 'warning' => '!', 'error' => '✕'][$event['type']] }}
+                        </span>
+                        <p class="text-sm font-medium text-gray-800 dark:text-white">
+                            {{ $event['title'] }}
+                            @if ($event['planned'])
+                                <span class="ms-2 text-xs font-normal text-gray-500 dark:text-gray-400">(planned)</span>
+                            @endif
+                        </p>
+                        <p class="text-xs text-gray-500 dark:text-gray-400">{{ $event['at']->format('d/m/Y H:i') }}</p>
+                        @if ($event['detail'])
+                            <p class="mt-1 text-sm text-gray-600 dark:text-gray-300">{{ $event['detail'] }}</p>
+                        @endif
+                    </li>
+                @endforeach
+            </ol>
+        </x-common.component-card>
     </div>
 @endsection
