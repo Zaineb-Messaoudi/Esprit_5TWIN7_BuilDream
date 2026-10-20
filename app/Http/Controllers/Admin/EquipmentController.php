@@ -9,6 +9,8 @@ use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\User;
 use App\Services\EquipmentCatalogService;
+use App\Services\Maintenance\EquipmentHealthScoreService;
+use App\Services\Maintenance\EquipmentFailureRiskService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -16,7 +18,11 @@ use Illuminate\View\View;
 /** Back Office CRUD for all equipment listings and their energy profiles. */
 class EquipmentController extends Controller
 {
-    public function __construct(private readonly EquipmentCatalogService $catalog) {}
+    public function __construct(
+        private readonly EquipmentCatalogService $catalog,
+        private readonly EquipmentHealthScoreService $healthScoreService,
+        private readonly EquipmentFailureRiskService $failureRiskService,
+    ) {}
 
     public function index(Request $request): View
     {
@@ -51,7 +57,12 @@ class EquipmentController extends Controller
     {
         $equipment->load(['category', 'owner', 'energyProfile', 'maintenances.report']);
 
-        return view('pages.admin.equipment.show', compact('equipment') + ['title' => $equipment->name]);
+        return view('pages.admin.equipment.show', [
+            'equipment' => $equipment,
+            'healthScore' => $this->healthScoreService->score($equipment),
+            'failureRisk' => $this->failureRiskService->forEquipment($equipment),
+            'title' => $equipment->name,
+        ]);
     }
 
     public function edit(Equipment $equipment): View

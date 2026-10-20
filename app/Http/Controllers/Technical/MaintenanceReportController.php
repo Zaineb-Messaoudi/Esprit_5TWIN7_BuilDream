@@ -4,10 +4,9 @@ namespace App\Http\Controllers\Technical;
 
 use App\Models\Maintenance;
 use App\Models\MaintenanceReport;
-use Illuminate\Database\Eloquent\Builder;
+use App\Http\Requests\Technical\StoreMaintenanceReportRequest;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class MaintenanceReportController extends TechnicalCrudController
 {
@@ -31,11 +30,6 @@ class MaintenanceReportController extends TechnicalCrudController
         return ['maintenance.equipment'];
     }
 
-    protected function scope(Builder $query, Request $request): Builder
-    {
-        return $this->isAdmin($request) ? $query : $query->whereHas('maintenance.equipment', fn (Builder $q) => $q->where('owner_id', $request->user()->id));
-    }
-
     protected function fields(): array
     {
         return [
@@ -50,7 +44,7 @@ class MaintenanceReportController extends TechnicalCrudController
 
     protected function formOptions(Request $request, ?Model $record = null): array
     {
-        $query = Maintenance::query()->with('equipment')->where(function (Builder $q) use ($record) {
+        $query = Maintenance::query()->with('equipment')->where(function ($q) use ($record) {
             $q->whereDoesntHave('report');
             if ($record) {
                 $q->orWhere('id', $record->maintenance_id);
@@ -65,20 +59,5 @@ class MaintenanceReportController extends TechnicalCrudController
         )->all()];
     }
 
-    protected function rules(Request $request, ?Model $record = null): array
-    {
-        $exists = Rule::exists('maintenances', 'id');
-        if (! $this->isAdmin($request)) {
-            $exists->whereIn('equipment_id', fn ($q) => $q->select('id')->from('equipment')->where('owner_id', $request->user()->id));
-        }
-
-        return [
-            'maintenance_id' => ['required', 'integer', $exists, Rule::unique('maintenance_reports', 'maintenance_id')->ignore($record?->id)],
-            'diagnosis' => ['required', 'string', 'max:10000'],
-            'actions_taken' => ['required', 'string', 'max:10000'],
-            'parts_replaced' => ['nullable', 'string', 'max:10000'],
-            'technician_notes' => ['nullable', 'string', 'max:10000'],
-            'report_date' => ['required', 'date'],
-        ];
-    }
+    protected function requestClass(): string { return StoreMaintenanceReportRequest::class; }
 }

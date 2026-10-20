@@ -4,8 +4,11 @@
     <x-common.page-breadcrumb>
         <a href="{{ route('admin.equipment.index') }}" class="text-gray-500 hover:text-brand-600">{{ __('Equipment') }}</a> / {{ $equipment->name }}
     </x-common.page-breadcrumb>
-    <div class="flex items-center justify-between">
-        <h1 class="text-title-md font-semibold text-gray-800 dark:text-white">{{ $equipment->name }}</h1>
+    <div class="flex flex-wrap items-center justify-between gap-4">
+        <div>
+            <h1 class="text-title-md font-semibold text-gray-800 dark:text-white">{{ $equipment->name }}</h1>
+            <x-ui.health-score-badge :health="$healthScore" class="mt-3" />
+        </div>
         <a href="{{ route('admin.equipment.edit', $equipment) }}" class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white">{{ __('Edit') }}</a>
     </div>
     <x-common.component-card>
@@ -45,6 +48,10 @@
         </div>
         @endif
     </x-common.component-card>
+
+    <x-maintenance.failure-risk-card :risk="$failureRisk" />
+
+    <x-maintenance.inspection-qr-card :equipment="$equipment" />
 
     {{-- Maintenance History --}}
     <x-common.component-card :title="__('Maintenance history')">
