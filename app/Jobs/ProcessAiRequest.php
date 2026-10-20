@@ -15,15 +15,33 @@ class ProcessAiRequest implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
-    public int $backoff = 5; // seconds
-    public int $timeout = 180; // 3 minutes for slow LLM calls
+    public int $backoff = 5;
+    public int $timeout = 180;
+
+    // Use dedicated AI connection
+    public string $connection = 'ai';
+
+    // High priority for user-facing, low for batch
+    protected static array $endpointPriority = [
+        'chatbot' => 'high',
+        'generate-description' => 'high',
+        'suggest-price' => 'high',
+        'auto-categorize' => 'high',
+        'natural-language-search' => 'high',
+        'validate-image' => 'high',
+        'semantic-search' => 'low',
+    ];
 
     public function __construct(
         public string $endpoint,
         public array $payload,
         public string $callbackUrl = '',
         public string $callbackSecret = ''
-    ) {}
+    ) {
+        // Set queue based on endpoint priority
+        $priority = self::$endpointPriority[$this->endpoint] ?? 'default';
+        $this->onQueue("ai:{$priority}");
+    }
 
     public function handle(AiService $ai): void
     {

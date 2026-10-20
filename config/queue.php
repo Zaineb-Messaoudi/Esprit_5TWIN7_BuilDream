@@ -72,6 +72,36 @@ return [
             'after_commit' => false,
         ],
 
+        // Dedicated AI queue connection with priority queues
+        'ai' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => env('REDIS_AI_QUEUE', 'ai:default'),
+            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 180),
+            'block_for' => null,
+            'after_commit' => false,
+        ],
+
+        // High priority AI queue
+        'ai:high' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => env('REDIS_AI_HIGH_QUEUE', 'ai:high'),
+            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 180),
+            'block_for' => null,
+            'after_commit' => false,
+        ],
+
+        // Low priority AI queue (batch)
+        'ai:low' => [
+            'driver' => 'redis',
+            'connection' => env('REDIS_QUEUE_CONNECTION', 'default'),
+            'queue' => env('REDIS_AI_LOW_QUEUE', 'ai:low'),
+            'retry_after' => (int) env('REDIS_QUEUE_RETRY_AFTER', 300),
+            'block_for' => null,
+            'after_commit' => false,
+        ],
+
     ],
 
     /*
