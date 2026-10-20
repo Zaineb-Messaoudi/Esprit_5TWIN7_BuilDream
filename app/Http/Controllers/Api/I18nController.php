@@ -43,7 +43,7 @@ class I18nController
     public function switch(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'locale' => 'required|in:en,fr,ar,de,es,it,pt,tr',
+            'locale' => 'required|in:en,fr',
         ]);
 
         $success = $this->service->setLocale($validated['locale']);
@@ -194,7 +194,7 @@ class I18nController
     public function updateUserLocale(Request $request): JsonResponse
     {
         $validated = $request->validate([
-            'locale' => 'required|in:en,fr,ar,de,es,it,pt,tr',
+            'locale' => 'required|in:en,fr',
         ]);
 
         $success = $this->service->setUserLocale($request->user(), $validated['locale']);

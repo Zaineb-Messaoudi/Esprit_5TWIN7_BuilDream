@@ -2,6 +2,8 @@
 
 namespace App\Helpers;
 
+use Illuminate\Support\Facades\Auth;
+
 class MenuHelper
 {
     public static function getMainNavItems()
@@ -10,23 +12,7 @@ class MenuHelper
             [
                 'icon' => 'dashboard',
                 'name' => 'Dashboard',
-                'subItems' => [
-                    ['name' => 'Ecommerce', 'icon' => 'ecommerce', 'path' => route('dashboard.ecommerce'), 'pro' => false],
-                    ['name' => 'Analytics', 'icon' => 'charts', 'path' => route('dashboard.analytics'), 'pro' => false],
-                    ['name' => 'Marketing', 'icon' => 'email', 'path' => route('dashboard.marketing'), 'pro' => false],
-                    ['name' => 'CRM', 'icon' => 'user-profile', 'path' => route('dashboard.crm'), 'pro' => false],
-                    ['name' => 'SaaS', 'icon' => 'saas', 'path' => route('dashboard.saas'), 'pro' => false],
-                    ['name' => 'AI Dashboard', 'icon' => 'ai-assistant', 'path' => route('dashboard.ai'), 'pro' => false],
-                    ['name' => 'Stocks', 'icon' => 'stocks', 'path' => route('dashboard.stocks'), 'pro' => false],
-                    ['name' => 'Finance', 'icon' => 'finance', 'path' => route('dashboard.finance'), 'pro' => false],
-                    ['name' => 'Sales', 'icon' => 'task', 'path' => route('dashboard.sales'), 'pro' => false],
-                    ['name' => 'Logistics', 'icon' => 'logistics', 'path' => route('dashboard.logistics'), 'pro' => false],
-                ],
-            ],
-            [
-                'icon' => 'calendar',
-                'name' => 'Calendar',
-                'path' => route('calendar'),
+                'path' => route('dashboard.main'),
             ],
             [
                 'icon' => 'user-profile',
@@ -37,13 +23,13 @@ class MenuHelper
                     ['name' => 'Preferences', 'path' => route('settings.preferences'), 'pro' => false],
                     ['name' => 'Sessions & Security', 'path' => route('settings.sessions'), 'pro' => false],
                     ['name' => 'Notifications', 'path' => route('settings.notifications'), 'pro' => false],
-                    ['name' => 'Connected Accounts', 'path' => route('settings.connections'), 'pro' => false],
                 ],
             ],
         ];
 
-        if (auth()->user()?->isAdmin()) {
-            array_splice($items, 2, 0, [[
+        // Add admin-only menu items
+        if (Auth::check() && Auth::user()->isAdmin()) {
+            array_splice($items, 1, 0, [[
                 'icon' => 'user-profile',
                 'name' => 'User Management',
                 'path' => route('admin.users.index'),
@@ -54,10 +40,7 @@ class MenuHelper
                     ['name' => 'Categories', 'path' => route('admin.categories.index'), 'pro' => false],
                     ['name' => 'Equipment', 'path' => route('admin.equipment.index'), 'pro' => false],
                 ],
-            ]]);
-
-            // Rentals module (Student 3), visible to admins only
-            $items[] = [
+            ], [
                 'icon' => 'logistics',
                 'name' => 'Rentals',
                 'subItems' => [
@@ -70,10 +53,7 @@ class MenuHelper
                     ['name' => 'Overdue rentals', 'path' => route('admin.rental-insights.overdue'), 'pro' => false],
                     ['name' => 'Rental analytics', 'path' => route('admin.rental-insights.dashboard'), 'pro' => false],
                 ],
-            ];
-
-            // Technical module (Student 2), visible to admins only
-            $items[] = [
+            ], [
                 'icon' => 'logistics',
                 'name' => 'Technical',
                 'subItems' => [
@@ -81,7 +61,7 @@ class MenuHelper
                     ['name' => 'Reports', 'path' => route('admin.technical.reports.index'), 'activePrefix' => '/admin/technical/reports', 'pro' => false],
                     ['name' => 'Inspections', 'path' => route('admin.technical.inspections.index'), 'activePrefix' => '/admin/technical/inspections', 'pro' => false],
                 ],
-            ];
+            ]]);
         }
 
         return $items;

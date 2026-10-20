@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\OwnerController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\StripeConnectController;
 use App\Http\Controllers\Api\StripeWebhookController;
+use App\Http\Controllers\AiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -28,6 +29,69 @@ use Illuminate\Support\Facades\Route;
 // Stripe webhook (no auth required)
 Route::post('/stripe/webhook', [StripeWebhookController::class, 'handle'])
     ->name('stripe.webhook');
+
+// Health check (no auth required)
+Route::get('/health', function () {
+    $checks = [
+        'database' => 'ok',
+        'cache' => 'ok',
+        'queue' => 'ok',
+    ];
+    
+    try {
+        \Illuminate\Support\Facades\DB::connection()->getPdo();
+    } catch (\Throwable) {
+        $checks['database'] = 'failed';
+    }
+    
+    try {
+        \Illuminate\Support\Facades\Cache::get('health-check');
+    } catch (\Throwable) {
+        $checks['cache'] = 'failed';
+    }
+    
+    try {
+        \Illuminate\Support\Facades\Queue::size('default');
+    } catch (\Throwable) {
+        $checks['queue'] = 'failed';
+    }
+
+    // AI Health Checks
+    try {
+        $aiService = app(\App\Services\AiService::class);
+        $aiHealth = [
+            'configured' => $aiService->isConfigured(),
+            'provider' => $aiService->getProvider(),
+            'model' => $aiService->getModel(),
+            'circuit_breaker' => $aiService->getCircuitBreakerStatus(),
+        ];
+
+        if ($aiService->getProvider() === 'ollama') {
+            $ollamaHealth = $aiService->checkOllamaHealth();
+            $aiHealth['ollama'] = $ollamaHealth;
+            
+            // Check if model is loaded in VRAM
+            $vramCheck = $aiService->checkModelLoadedInVram();
+            $aiHealth['vram'] = $vramCheck;
+        }
+
+        $checks['ai'] = $aiHealth;
+    } catch (\Throwable $e) {
+        $checks['ai'] = [
+            'configured' => false,
+            'error' => $e->getMessage(),
+        ];
+    }
+    
+    $status = in_array('failed', $checks) ? 503 : 200;
+    
+    return response()->json([
+        'status' => $status === 200 ? 'healthy' : 'unhealthy',
+        'checks' => $checks,
+        'timestamp' => now()->toISOString(),
+        'version' => config('app.version', '1.0.0'),
+    ], $status);
+})->name('health');
 
 Route::middleware('auth:sanctum')->group(function () {
     // ---- Authenticated user -------------------------------------------------
@@ -203,4 +267,18 @@ Route::prefix('i18n')->name('i18n.')->group(function () {
     Route::post('/currency', [I18nController::class, 'updateUserCurrency'])->name('user-currency.update');
     Route::get('/rtl', [I18nController::class, 'rtl'])->name('rtl');
     Route::get('/switcher', [I18nController::class, 'switcherData'])->name('switcher');
+});
+
+// AI Features
+Route::prefix('ai')->name('ai.')->middleware(['auth:sanctum', 'rate_limit_ip_user:30,1', 'validate_ai_request'])->group(function () {
+    Route::post('/natural-language-search', [AiController::class, 'naturalLanguageSearch'])->name('natural-language-search');
+    Route::post('/generate-description', [AiController::class, 'generateDescription'])->name('generate-description');
+    Route::post('/suggest-price', [AiController::class, 'suggestPrice'])->name('suggest-price');
+    Route::post('/auto-categorize', [AiController::class, 'autoCategorize'])->name('auto-categorize');
+    Route::post('/chatbot', [AiController::class, 'chatbot'])->name('chatbot');
+    Route::post('/semantic-search', [AiController::class, 'semanticSearch'])->name('semantic-search');
+    Route::post('/validate-image', [AiController::class, 'validateImage'])->name('validate-image');
+    Route::post('/feedback', [AiController::class, 'feedback'])->name('feedback');
+    Route::post('/callback', [AiController::class, 'callback'])->name('callback')
+        ->middleware('rate_limit_callback_webhook:10,5');
 });

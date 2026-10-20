@@ -1,0 +1,4 @@
+@extends('layouts.app')
+@section('content')
+<div class="mx-auto max-w-5xl space-y-6"><x-common.page-breadcrumb><a href="{{ route('admin.equipment.show', $equipment) }}" class="text-gray-500 hover:text-brand-600">{{ $equipment->name }}</a> / {{ __('Create energy profile') }}</x-common.page-breadcrumb><x-common.component-card :title="__('Create energy profile')"><form method="POST" action="{{ route('admin.equipment.energy-profile.store', $equipment) }}" class="space-y-6">@csrf @include('pages.admin.energy-profiles._form')<div class="flex justify-end gap-3"><a href="{{ route('admin.equipment.energy-profile.index', $equipment) }}" class="rounded-lg border px-4 py-2 text-sm">{{ __('Cancel') }}</a><button class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white" type="submit">{{ __('Create energy profile') }}</button></div></form></x-common.component-card></div>
+@endsection

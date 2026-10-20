@@ -2,13 +2,17 @@
 
 namespace App\Models;
 
+use App\Services\AiService;
+use App\Traits\Translatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Laravel\Scout\Searchable;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * A renewable-energy item published in the SolarShare catalogue.
@@ -19,7 +23,9 @@ use Laravel\Scout\Searchable;
  */
 class Equipment extends Model
 {
-    use HasFactory, Searchable, SoftDeletes;
+    use HasFactory, Searchable, SoftDeletes, Translatable;
+
+    protected $translatable = ['name', 'description'];
 
     protected $table = 'equipment';
 
@@ -101,6 +107,16 @@ class Equipment extends Model
         return $this->hasOne(EnergyProfile::class);
     }
 
+    public function images(): HasMany
+    {
+        return $this->hasMany(EquipmentImage::class)->orderBy('sort_order');
+    }
+
+    public function favoritedBy(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'user_equipment')->withTimestamps();
+    }
+
     /** Rentals created from this catalogue listing. */
     public function rentals(): HasMany
     {
@@ -139,5 +155,47 @@ class Equipment extends Model
             'ST_Distance_Sphere(POINT(longitude, latitude), POINT(?, ?)) <= ?',
             [$lng, $lat, $radiusKm * 1000]
         );
+    }
+
+    public function toEmbeddingText(): string
+    {
+        $energy = $this->energyProfile;
+        $parts = [
+            $this->name,
+            $this->brand,
+            $this->model,
+            $this->category?->name,
+        ];
+
+        if ($energy) {
+            if ($energy->power_watts) $parts[] = "power: {$energy->power_watts}W";
+            if ($energy->capacity_wh) $parts[] = "capacity: {$energy->capacity_wh}Wh";
+            if ($energy->technology) $parts[] = "technology: {$energy->technology}";
+            if ($energy->efficiency) $parts[] = "efficiency: {$energy->efficiency}%";
+        }
+
+        return implode(' | ', $parts);
+    }
+
+    protected static function booted(): void
+    {
+        static::saved(function (self $equipment) {
+            // Invalidate AI embedding cache when equipment specs change
+            $energyFields = ['power_watts', 'capacity_wh', 'voltage', 'efficiency', 'technology', 'max_output', 'operating_duration'];
+            $hasEnergyChanges = $equipment->isDirty($energyFields);
+
+            if ($hasEnergyChanges) {
+                $embeddingModel = config('ai.embedding_model', 'nomic-embed-text');
+                $cacheKey = 'ai_embedding_' . md5($equipment->toEmbeddingText() . '|' . config('ai.provider') . '|' . $embeddingModel);
+                Cache::forget($cacheKey);
+            }
+        });
+
+        static::deleted(function (self $equipment) {
+            // Clean up embedding cache when equipment is deleted
+            $embeddingModel = config('ai.embedding_model', 'nomic-embed-text');
+            $cacheKey = 'ai_embedding_' . md5($equipment->toEmbeddingText() . '|' . config('ai.provider') . '|' . $embeddingModel);
+            Cache::forget($cacheKey);
+        });
     }
 }

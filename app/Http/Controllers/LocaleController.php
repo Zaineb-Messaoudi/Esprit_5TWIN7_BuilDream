@@ -13,7 +13,7 @@ class LocaleController extends Controller
     public const SUPPORTED_LOCALES = [
         'en' => [
             'name' => 'English',
-            'native' => 'English (US)',
+            'native' => 'English',
             'flag' => 'us',
             'dir' => 'ltr',
         ],
@@ -21,24 +21,6 @@ class LocaleController extends Controller
             'name' => 'French',
             'native' => 'Français',
             'flag' => 'fr',
-            'dir' => 'ltr',
-        ],
-        'ar' => [
-            'name' => 'Arabic',
-            'native' => 'العربية',
-            'flag' => 'sa',
-            'dir' => 'rtl',
-        ],
-        'es' => [
-            'name' => 'Spanish',
-            'native' => 'Español',
-            'flag' => 'es',
-            'dir' => 'ltr',
-        ],
-        'de' => [
-            'name' => 'German',
-            'native' => 'Deutsch',
-            'flag' => 'de',
             'dir' => 'ltr',
         ],
     ];
