@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\EnergyProfile;
 use App\Models\Equipment;
 use App\Support\FrontDemo;
+use App\Services\Maintenance\EquipmentHealthScoreService;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
@@ -13,6 +14,8 @@ use Illuminate\Support\Collection;
 /** Public Front Office pages for browsing the Eloquent-backed catalogue. */
 class FrontController extends Controller
 {
+    public function __construct(private readonly EquipmentHealthScoreService $healthScoreService) {}
+
     public function home(): View
     {
         return view('pages.front.home', [
@@ -122,10 +125,17 @@ class FrontController extends Controller
             ->get()
             ->map(fn (Equipment $equipment) => FrontDemo::equipmentViewModel($equipment));
 
+        $healthScore = $this->healthScoreService->calculate(match ($item->condition) {
+            'New' => ['age_years' => 0, 'damage_severities' => [], 'days_since_last_maintenance' => 0, 'rental_count' => 0],
+            'Good' => ['age_years' => 2, 'damage_severities' => [], 'days_since_last_maintenance' => 30, 'rental_count' => 10],
+            default => ['age_years' => 6, 'damage_severities' => ['moderate'], 'days_since_last_maintenance' => 365, 'rental_count' => 25],
+        });
+
         return view('pages.front.equipment', [
             'title' => $item->name,
             'item' => $item,
             'related' => $related,
+            'healthScore' => $healthScore,
         ]);
     }
 }

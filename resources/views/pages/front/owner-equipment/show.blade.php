@@ -6,6 +6,7 @@
         <div>
             <p class="text-theme-xs font-semibold uppercase tracking-[0.2em] text-warning-300">{{ __('Owner workspace') }} <span class="mx-1 text-gray-500">/</span> {{ __('Equipment') }}</p>
             <h1 class="mt-3 text-title-sm font-semibold sm:text-title-md">{{ $equipment->name }}</h1>
+            <x-ui.health-score-badge :health="$healthScore" class="mt-3" />
             <p class="mt-2 text-theme-sm text-gray-300">{{ $equipment->brand }} {{ $equipment->model }} · {{ $equipment->location }}</p>
         </div>
         <a href="{{ route('front.my-equipment-edit', $equipment) }}" class="button-base button-primary min-h-11 px-4 text-theme-sm">{{ __('Edit equipment') }}</a>
@@ -50,6 +51,10 @@
             @endif
         </section>
     </div>
+
+    <x-maintenance.failure-risk-card :risk="$failureRisk" />
+
+    <x-maintenance.inspection-qr-card :equipment="$equipment" />
 
     {{-- Maintenance History --}}
     <section class="rounded-2xl border border-gray-200 bg-white p-5 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03] sm:p-7">

@@ -22,10 +22,12 @@ class InspectionFactory extends Factory
             'rental_id' => class_exists(Rental::class) && Schema::hasTable('rentals')
                 ? Rental::query()->where('equipment_id', $equipment->getKey())->inRandomOrder()->value('id')
                 : null,
+            'inspection_checklist_id' => null,
             'inspection_date' => fake()->dateTimeBetween('-3 months', 'now'),
             'condition_before' => fake()->randomElement(['New', 'Good', 'Fair']),
             'condition_after' => fake()->randomElement(['Good', 'Fair', 'Damaged']),
             'damage_detected' => fake()->boolean(25),
+            'checklist_results' => null,
             'comments' => fake()->optional()->sentence(),
         ];
     }

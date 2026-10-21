@@ -5,8 +5,10 @@ namespace App\Http\Controllers\Technical;
 use App\Events\MaintenanceCompleted;
 use App\Events\MaintenanceCreated;
 use App\Http\Controllers\Controller;
+use App\Http\Requests\Technical\TechnicalRecordRequest;
 use App\Models\Equipment;
 use App\Models\Maintenance;
+use App\Services\Technical\TechnicalRecordService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\RedirectResponse;
@@ -23,9 +25,7 @@ abstract class TechnicalCrudController extends Controller
 
     abstract protected function fields(): array;
 
-    abstract protected function rules(Request $request, ?Model $record = null): array;
-
-    abstract protected function scope(Builder $query, Request $request): Builder;
+    abstract protected function requestClass(): string;
 
     protected function eagerLoads(): array
     {
@@ -35,11 +35,6 @@ abstract class TechnicalCrudController extends Controller
     private function prefix(Request $request): string
     {
         return $request->routeIs('admin.technical.*') ? 'admin.technical.' : 'technical.';
-    }
-
-    protected function requireActor(Request $request): void
-    {
-        abort_unless($request->user()?->isAdmin() || $request->user()?->isOwner(), 403);
     }
 
     protected function isAdmin(Request $request): bool
@@ -75,38 +70,32 @@ abstract class TechnicalCrudController extends Controller
 
     private function find(Request $request, int $id): Model
     {
-        $this->requireActor($request);
-        $class = $this->modelClass();
-
-        return $this->scope($class::query(), $request)->with($this->eagerLoads())->findOrFail($id);
+        return app(TechnicalRecordService::class)->find($this->modelClass(), $id, $request, $this->isAdmin($request), $this->eagerLoads());
     }
 
     public function index(Request $request): View
     {
-        $this->requireActor($request);
-        $class = $this->modelClass();
-        $records = $this->scope($class::query(), $request)
-            ->with($this->eagerLoads())->latest('id')->paginate(15);
+        $this->authorize('viewAny', $this->modelClass());
+        $records = app(TechnicalRecordService::class)->paginate($this->modelClass(), $request, $this->isAdmin($request), $this->eagerLoads());
 
         return view('pages.technical.index', $this->data($request) + compact('records'));
     }
 
     public function create(Request $request): View
     {
-        $this->requireActor($request);
+        $this->authorize('create', $this->modelClass());
 
         return view('pages.technical.create', $this->data($request));
     }
 
     public function store(Request $request): RedirectResponse
     {
-        $this->requireActor($request);
-        $data = $request->validate($this->rules($request));
-        $class = $this->modelClass();
-        $record = $class::create($data);
+        $this->authorize('create', $this->modelClass());
+        $data = $this->validatedData($request);
+        $record = $this->createRecord($data);
 
         // Dispatch events for Maintenance model
-        if ($class === Maintenance::class) {
+        if ($this->modelClass() === Maintenance::class) {
             $record->load('equipment.owner');
             if ($record->equipment?->owner) {
                 MaintenanceCreated::dispatch($record, $record->equipment->owner);
@@ -120,6 +109,7 @@ abstract class TechnicalCrudController extends Controller
     public function show(Request $request, int $id): View
     {
         $record = $this->find($request, $id);
+        $this->authorize('view', $record);
 
         return view('pages.technical.show', $this->data($request, $record));
     }
@@ -127,6 +117,7 @@ abstract class TechnicalCrudController extends Controller
     public function edit(Request $request, int $id): View
     {
         $record = $this->find($request, $id);
+        $this->authorize('view', $record);
 
         return view('pages.technical.edit', $this->data($request, $record));
     }
@@ -135,7 +126,8 @@ abstract class TechnicalCrudController extends Controller
     {
         $record = $this->find($request, $id);
         $wasCompleted = $record instanceof Maintenance && $record->status === 'completed';
-        $record->update($request->validate($this->rules($request, $record)));
+        $this->authorize('update', $record);
+        $record = $this->updateRecord($record, $this->validatedData($request, $record));
 
         // Dispatch MaintenanceCompleted event when maintenance is completed
         if ($record instanceof Maintenance && ! $wasCompleted && $record->status === 'completed') {
@@ -152,9 +144,31 @@ abstract class TechnicalCrudController extends Controller
     public function destroy(Request $request, int $id): RedirectResponse
     {
         $record = $this->find($request, $id);
-        $record->delete();
+        $this->authorize('delete', $record);
+        app(TechnicalRecordService::class)->delete($record);
 
         return redirect()->route($this->prefix($request).$this->resource().'.index')
             ->with('status', __('Record deleted.'));
+    }
+
+    private function validatedData(Request $request, ?Model $record = null): array
+    {
+        $requestClass = $this->requestClass();
+        /** @var TechnicalRecordRequest $formRequest */
+        $formRequest = $requestClass::createFrom($request);
+        $formRequest->setContainer(app())->setRedirector(app('redirect'));
+        $formRequest->setActorAndRoute($request, $record);
+
+        return $formRequest->validateRecord();
+    }
+
+    protected function createRecord(array $data): Model
+    {
+        return app(TechnicalRecordService::class)->create($this->modelClass(), $data);
+    }
+
+    protected function updateRecord(Model $record, array $data): Model
+    {
+        return app(TechnicalRecordService::class)->update($record, $data);
     }
 }

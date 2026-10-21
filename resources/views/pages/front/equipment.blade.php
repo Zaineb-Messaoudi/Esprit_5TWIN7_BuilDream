@@ -38,6 +38,7 @@
                         <p class="text-theme-xs font-semibold uppercase tracking-[0.16em] text-brand-700 dark:text-brand-300">{{ __($item->category->name) }} <span class="px-1 text-warning-500" aria-hidden="true">/</span> {{ $item->location }}</p>
                         <h1 class="mt-2 text-title-sm font-semibold tracking-tight text-gray-950 dark:text-white sm:text-title-md">{{ __($item->name) }}</h1>
                         <p class="mt-2 text-theme-sm text-gray-500 dark:text-gray-400">{{ $item->brand }} {{ $item->model }} · {{ __('shared by') }} {{ $item->owner }}</p>
+                        <x-ui.health-score-badge :health="$healthScore" class="mt-3" />
                     </div>
                     <p class="rounded-2xl bg-brand-50 px-4 py-3 text-end dark:bg-brand-500/10">
                         <span class="block text-theme-xs uppercase tracking-wider text-gray-500 dark:text-gray-400">{{ __('Starting at') }}</span>
