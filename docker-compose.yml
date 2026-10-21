@@ -27,9 +27,12 @@ services:
       REVERB_SERVER_PORT: 8080
       SCOUT_DRIVER: meilisearch
       MEILISEARCH_HOST: http://meilisearch:7700
-    ports:
-      - "${APP_PORT:-8000}:8000"
-    command: sh -c "php artisan migrate --force && php artisan serve --host=0.0.0.0 --port=8000"
+    expose:
+      - "9000"
+    command: php-fpm -F
+    volumes:
+      - solarshare-storage:/var/www/html/storage/app/private
+      - solarshare-public-storage:/var/www/html/storage/app/public
     depends_on:
       mysql:
         condition: service_healthy
@@ -40,13 +43,23 @@ services:
     networks:
       - solarshare
 
-  tunnel:
-    image: cloudflare/cloudflared:latest
-    command: tunnel --no-autoupdate --url http://app:8000
-    profiles: [public]
+  web:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    image: ${WEB_IMAGE:-solarshare/nginx:local}
+    ports:
+      - "${APP_PORT:-8000}:8080"
+    volumes:
+      - solarshare-public-storage:/var/www/html/public/storage
     depends_on:
       app:
         condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider --quiet http://127.0.0.1:8080/up || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
     networks:
       - solarshare
 
@@ -121,6 +134,8 @@ services:
     environment:
       MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-solarshare}
       MYSQL_DATABASE: ${DB_DATABASE:-SolarShare}
+      MYSQL_USER: ${MYSQL_USER:-solarshare}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-${DB_PASSWORD:-solarshare}}
       MYSQL_ROOT_HOST: "%"
       MYSQL_ALLOW_EMPTY_PASSWORD: "no"
     ports:
@@ -179,6 +194,8 @@ networks:
     driver: bridge
 
 volumes:
+  solarshare-storage:
+  solarshare-public-storage:
   solarshare-mysql:
   solarshare-redis:
   solarshare-meilisearch:

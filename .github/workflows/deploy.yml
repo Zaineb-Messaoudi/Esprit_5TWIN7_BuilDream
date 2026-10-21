@@ -2,13 +2,15 @@ name: Deploy Production
 
 on:
   push:
-    branches:
-      - dev
-    tags:
-      - 'v*'
+    branches: [main]
+  workflow_dispatch:
 
 env:
   REGISTRY: docker.io
+
+concurrency:
+  group: solarshare-production
+  cancel-in-progress: false
 
 jobs:
   build-and-test:
@@ -39,6 +41,8 @@ jobs:
           test -n "$username"
           echo "username=$username" >> "$GITHUB_OUTPUT"
           echo "image=docker.io/$username/solarshare" >> "$GITHUB_OUTPUT"
+          echo "web-image=docker.io/$username/solarshare-nginx" >> "$GITHUB_OUTPUT"
+          echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Container Registry
         uses: docker/login-action@v3
@@ -57,7 +61,7 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix=sha-
+            type=sha,prefix=sha-,format=short
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
@@ -70,27 +74,116 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy-staging:
-    name: Deploy to Staging
+      - name: Extract Nginx image metadata
+        id: web-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.docker-image.outputs.web-image }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Nginx image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/nginx/Dockerfile
+          push: true
+          tags: ${{ steps.web-meta.outputs.tags }}
+          labels: ${{ steps.web-meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan Laravel image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.docker-image.outputs.image }}:${{ steps.docker-image.outputs.tag }}
+          format: table
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Scan Nginx image with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          image-ref: ${{ steps.docker-image.outputs.web-image }}:${{ steps.docker-image.outputs.tag }}
+          format: table
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+
+  staging-smoke:
+    name: Staging smoke test
     needs: docker-build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-    runs-on: [self-hosted, linux, x64]
-    environment: staging
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
     steps:
-      - name: Checkout tested source
+      - name: Checkout deployment definition
         uses: actions/checkout@v4
 
-      - name: Deploy staging automatically on WSL
+      - name: Normalize Docker Hub image name
+        id: docker-image
         env:
           DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+        shell: bash
         run: |
-          ./scripts/deploy/local-compose.sh staging "sha-$GITHUB_SHA"
+          username="$(printf '%s' "$DOCKERHUB_USERNAME" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')"
+          test -n "$username"
+          echo "image=docker.io/$username/solarshare:sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "web-image=docker.io/$username/solarshare-nginx:sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+
+      - name: Log in to Docker Hub
+        uses: docker/login-action@v3
+        with:
+          registry: ${{ env.REGISTRY }}
+          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+      - name: Create isolated staging environment
+        run: |
+          cat > .env <<'EOF'
+          APP_ENV=testing
+          APP_DEBUG=false
+          APP_KEY=base64:SGVsbG9Tb2xhclNoYXJlU3RhZ2luZ0tleQ==
+          APP_URL=http://127.0.0.1:18000
+          APP_PORT=18000
+          DB_DATABASE=SolarShare
+          DB_USERNAME=root
+          DB_PASSWORD=solarshare
+          FORWARD_DB_PORT=13306
+          FORWARD_REDIS_PORT=16379
+          FORWARD_MEILISEARCH_PORT=17700
+          FORWARD_MAILPIT_PORT=11025
+          FORWARD_MAILPIT_DASHBOARD_PORT=18025
+          REVERB_PORT=18081
+          MEILISEARCH_KEY=staging-master-key
+          EOF
+
+      - name: Start staging stack from the published image
+        env:
+          APP_IMAGE: ${{ steps.docker-image.outputs.image }}
+          WEB_IMAGE: ${{ steps.docker-image.outputs.web-image }}
+        run: docker compose -p solarshare-staging up -d --no-build --remove-orphans
+
+      - name: Wait for staging health endpoint
+        run: curl --fail --retry 30 --retry-delay 5 http://127.0.0.1:18000/up
+
+      - name: Show staging services
+        if: always()
+        run: docker compose -p solarshare-staging ps
+
+      - name: Tear down staging
+        if: always()
+        run: docker compose -p solarshare-staging down -v --remove-orphans
 
   deploy-production:
     name: Deploy to Production
-    needs: docker-build
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    needs: staging-smoke
+    if: github.ref == 'refs/heads/main'
     runs-on: [self-hosted, linux, x64]
     environment: production
     steps:
@@ -103,13 +196,3 @@ jobs:
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           ./scripts/deploy/local-compose.sh production "sha-$GITHUB_SHA"
-
-  notify-success:
-    name: Notify Success
-    needs: [deploy-staging, deploy-production]
-    if: success() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send success notification
-        run: |
-          echo "::notice ::Deployment successful!"

@@ -21,6 +21,20 @@ env:
   SESSION_DRIVER: array
   SCOUT_DRIVER: 'null'
   AI_ENABLED: false
+  AI_PARSER_ENABLED: false
+  AI_STUDIO_ENABLED: false
+  AI_PROVIDER: ollama
+  AI_API_KEY: ''
+  AI_BASE_URL: http://127.0.0.1:11434
+  GEMINI_API_KEY: ''
+  GROQ_API_KEY: ''
+  CLOUDFLARE_ACCOUNT_ID: ''
+  CLOUDFLARE_API_TOKEN: ''
+  MAINTENANCE_AI_API_KEY: ''
+  MAIL_MAILER: log
+  STRIPE_KEY: ''
+  STRIPE_SECRET: ''
+  STRIPE_WEBHOOK_SECRET: ''
   BROADCAST_CONNECTION: log
 
 jobs:
@@ -133,6 +147,20 @@ jobs:
       - name: Run PHP tests (Pest)
         run: php artisan test --parallel
 
+      - name: Run validation smoke flows
+        run: >-
+          php artisan test
+          tests/Feature/Auth/AuthenticationTest.php
+          tests/Feature/Auth/RegistrationTest.php
+          tests/Feature/TwoFactorAuthFlowTest.php
+          tests/Feature/AiFeaturesTest.php
+          tests/Feature/AiStudioTest.php
+          tests/Feature/ReservationInstallmentWorkflowTest.php
+          tests/Feature/ReservationPaymentBackendValidationTest.php
+          tests/Feature/StripeCheckoutReturnTest.php
+          tests/Feature/MaintenanceRoutesSmokeTest.php
+          tests/Feature/MaintenanceDashboardTest.php
+
       - name: Run static analysis (Pint)
         run: vendor/bin/pint --test
 
@@ -192,6 +220,17 @@ jobs:
 
       - name: NPM audit
         run: npm audit --audit-level=high
+
+      - name: Scan repository with Trivy
+        uses: aquasecurity/trivy-action@v0.36.0
+        with:
+          scan-type: fs
+          scan-ref: .
+          scanners: vuln,secret,misconfig
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+          skip-dirs: vendor,node_modules,.git
 
   notify:
     name: Notify on Failure

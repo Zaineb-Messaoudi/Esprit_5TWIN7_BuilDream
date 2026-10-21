@@ -20,7 +20,7 @@ COPY public ./public
 COPY vite.config.js .
 RUN npm run build
 
-FROM php:8.3-cli-bookworm AS application
+FROM php:8.3-fpm-bookworm AS application
 WORKDIR /var/www/html
 
 RUN apt-get update \
@@ -55,9 +55,9 @@ RUN rm -f bootstrap/cache/*.php \
     && chmod -R ug+rw storage bootstrap/cache
 
 USER www-data
-EXPOSE 8000 8080
+EXPOSE 9000 8080
 
-HEALTHCHECK --interval=30s --timeout=5s --start-period=5m --retries=10 \
-    CMD curl --fail http://127.0.0.1:8000/up || exit 1
+HEALTHCHECK --interval=30s --timeout=5s --start-period=30s --retries=5 \
+    CMD php-fpm -t || exit 1
 
-CMD ["php", "artisan", "serve", "--host=0.0.0.0", "--port=8000"]
+CMD ["php-fpm", "-F"]
