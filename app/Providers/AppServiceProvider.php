@@ -6,6 +6,8 @@ use App\Models\Inspection;
 use App\Models\Maintenance;
 use App\Observers\InspectionObserver;
 use App\Observers\MaintenanceObserver;
+use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -41,8 +43,14 @@ class AppServiceProvider extends ServiceProvider
         Maintenance::observe(MaintenanceObserver::class);
 
         // Register AI prompt versions (only if table exists)
-        if (\Illuminate\Support\Facades\Schema::hasTable('ai_prompts')) {
-            app(\App\Services\PromptVersionService::class)->registerEndpointPrompts();
+        try {
+            if (Schema::hasTable('ai_prompts')) {
+                app(\App\Services\PromptVersionService::class)->registerEndpointPrompts();
+            }
+        } catch (\Throwable $exception) {
+            Log::debug('AI prompt registration skipped because the database is unavailable.', [
+                'exception' => $exception,
+            ]);
         }
 
         // Force HTTPS in production

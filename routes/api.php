@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\OwnerController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\StripeConnectController;
 use App\Http\Controllers\Api\StripeWebhookController;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -77,13 +78,22 @@ Route::get('/health', function () {
 
         $checks['ai'] = $aiHealth;
     } catch (\Throwable $e) {
+        Log::warning('AI health check failed.', [
+            'exception' => $e,
+        ]);
+
         $checks['ai'] = [
             'configured' => false,
-            'error' => $e->getMessage(),
+            'status' => 'failed',
+            'error' => 'AI health check unavailable',
         ];
     }
 
-    $status = in_array('failed', $checks) ? 503 : 200;
+    $hasFailure = collect($checks)->contains(function (mixed $check): bool {
+        return $check === 'failed' || data_get($check, 'status') === 'failed';
+    });
+
+    $status = $hasFailure ? 503 : 200;
 
     return response()->json([
         'status' => $status === 200 ? 'healthy' : 'unhealthy',
