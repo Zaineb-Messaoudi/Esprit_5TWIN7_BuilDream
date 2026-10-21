@@ -22,7 +22,7 @@ class RentalTimelineService
 {
     /**
      * @return Collection<int, array{at: Carbon, title: string, detail: ?string, type: string, planned: bool}>
-     *         type is one of: success, info, warning, error. "planned" is true for future dates.
+     *                                                                                                         type is one of: success, info, warning, error. "planned" is true for future dates.
      */
     public function events(Rental $rental): Collection
     {
@@ -36,10 +36,10 @@ class RentalTimelineService
                 return;
             }
             $events->push([
-                'at'      => $at,
-                'title'   => $title,
-                'detail'  => $detail,
-                'type'    => $type,
+                'at' => $at,
+                'title' => $title,
+                'detail' => $detail,
+                'type' => $type,
                 'planned' => $at->isFuture(),
             ]);
         };
@@ -53,7 +53,7 @@ class RentalTimelineService
             $add($reservation->created_at, "Reservation {$reservation->reference} requested");
 
             foreach ($reservation->payments as $payment) {
-                $amount = number_format((float) $payment->amount, 2) . ' TND';
+                $amount = number_format((float) $payment->amount, 2).' TND';
                 if ($payment->status === 'paid') {
                     $add($payment->payment_date ?? $payment->created_at, "Payment of {$amount} received", (string) $payment->payment_method, 'success');
                 } else {
@@ -88,7 +88,7 @@ class RentalTimelineService
             $add($extension->created_at ?? $extension->requested_date, "Extension requested until {$until}", $extension->reason);
 
             if ($extension->status === ExtensionStatus::APPROVED) {
-                $add($extension->updated_at, "Extension approved until {$until}", '+' . number_format((float) $extension->additional_amount, 2) . ' TND', 'success');
+                $add($extension->updated_at, "Extension approved until {$until}", '+'.number_format((float) $extension->additional_amount, 2).' TND', 'success');
             } elseif ($extension->status === ExtensionStatus::REJECTED) {
                 $add($extension->updated_at, 'Extension rejected', null, 'error');
             }

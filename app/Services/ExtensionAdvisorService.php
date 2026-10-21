@@ -53,7 +53,7 @@ class ExtensionAdvisorService
 
         // 2) The rental itself must still be running or about to start
         if (! in_array($rental->status, [RentalStatus::PENDING, RentalStatus::ACTIVE], true)) {
-            $reasons[] = ['level' => 'blocker', 'text' => 'The rental is ' . strtolower($rental->status->label()) . ': it can no longer be extended.'];
+            $reasons[] = ['level' => 'blocker', 'text' => 'The rental is '.strtolower($rental->status->label()).': it can no longer be extended.'];
         }
 
         // 3) Is the rental already late?
@@ -94,14 +94,14 @@ class ExtensionAdvisorService
         $recommendation = match (true) {
             in_array('blocker', $levels, true) => 'refuse',
             in_array('warning', $levels, true) => 'review',
-            default                            => 'approve',
+            default => 'approve',
         };
 
         return [
             'recommendation' => $recommendation,
-            'label'          => ['approve' => 'Approve', 'review' => 'Review carefully', 'refuse' => 'Refuse'][$recommendation],
-            'color'          => ['approve' => 'success', 'review' => 'warning', 'refuse' => 'error'][$recommendation],
-            'reasons'        => $reasons,
+            'label' => ['approve' => 'Approve', 'review' => 'Review carefully', 'refuse' => 'Refuse'][$recommendation],
+            'color' => ['approve' => 'success', 'review' => 'warning', 'refuse' => 'error'][$recommendation],
+            'reasons' => $reasons,
         ];
     }
 

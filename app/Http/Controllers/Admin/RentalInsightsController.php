@@ -31,17 +31,17 @@ class RentalInsightsController extends Controller
     public function dashboard(): View
     {
         $statuses = $this->insights->statusBreakdown();
-        $months   = $this->insights->monthlyActivity(6);
+        $months = $this->insights->monthlyActivity(6);
 
         return view('pages.admin.rental-insights.dashboard', [
-            'kpis'         => $this->insights->kpis(),
-            'statuses'     => $statuses,
+            'kpis' => $this->insights->kpis(),
+            'statuses' => $statuses,
             // Largest value of each list: the longest bar of a chart = 100%
-            'statusMax'    => max(1, collect($statuses)->max('count')),
-            'months'       => $months,
-            'monthMax'     => max(1, collect($months)->max('count')),
+            'statusMax' => max(1, collect($statuses)->max('count')),
+            'months' => $months,
+            'monthMax' => max(1, collect($months)->max('count')),
             'topEquipment' => $this->insights->topEquipment(5),
-            'title'        => __('Rental Analytics'),
+            'title' => __('Rental Analytics'),
         ]);
     }
 
@@ -50,18 +50,18 @@ class RentalInsightsController extends Controller
     {
         // One row per overdue rental, with the calculations done by the services
         $rows = $this->insights->overdueRentals()->map(fn (Rental $rental) => [
-            'rental'     => $rental,
-            'late_days'  => $this->insights->lateDays($rental),
+            'rental' => $rental,
+            'late_days' => $this->insights->lateDays($rental),
             'daily_rate' => $this->insights->dailyRate($rental),
-            'late_fee'   => $this->insights->lateFee($rental),
-            'risk'       => $this->risk->assess($rental),
+            'late_fee' => $this->insights->lateFee($rental),
+            'risk' => $this->risk->assess($rental),
         ]);
 
         return view('pages.admin.rental-insights.overdue', [
-            'rows'       => $rows,
-            'totalFee'   => round($rows->sum('late_fee'), 2),
+            'rows' => $rows,
+            'totalFee' => round($rows->sum('late_fee'), 2),
             'multiplier' => RentalInsightsService::LATE_FEE_MULTIPLIER,
-            'title'      => __('Overdue Rentals'),
+            'title' => __('Overdue Rentals'),
         ]);
     }
 
@@ -92,13 +92,13 @@ class RentalInsightsController extends Controller
         if ($request->filled('search')) {
             $search = $request->search;
             $query->where(function ($q) use ($search) {
-                $q->where('reference', 'like', '%' . $search . '%')
-                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%' . $search . '%'))
-                    ->orWhereHas('equipment', fn ($e) => $e->where('name', 'like', '%' . $search . '%'));
+                $q->where('reference', 'like', '%'.$search.'%')
+                    ->orWhereHas('user', fn ($u) => $u->where('name', 'like', '%'.$search.'%'))
+                    ->orWhereHas('equipment', fn ($e) => $e->where('name', 'like', '%'.$search.'%'));
             });
         }
 
-        $filename = 'rentals-' . now()->format('Y-m-d') . '.csv';
+        $filename = 'rentals-'.now()->format('Y-m-d').'.csv';
 
         return response()->streamDownload(function () use ($query, $delimiter, $decimal) {
             $out = fopen('php://output', 'w');
@@ -152,7 +152,7 @@ class RentalInsightsController extends Controller
     private function csvSafe(mixed $value): mixed
     {
         if (is_string($value) && preg_match('/^[=+\-@\t\r]/', $value)) {
-            return "'" . $value;
+            return "'".$value;
         }
 
         return $value;

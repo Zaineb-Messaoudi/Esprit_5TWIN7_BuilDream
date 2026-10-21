@@ -16,7 +16,9 @@ class SyncBladeTranslations extends Command
     protected $description = 'Scan Blade views for __() strings and auto-translate to target locales';
 
     protected AutomatedTranslationService $translator;
+
     protected string $sourceLocale;
+
     protected array $targetLocales;
 
     public function __construct(AutomatedTranslationService $translator)
@@ -33,7 +35,8 @@ class SyncBladeTranslations extends Command
         $bladeFiles = $this->getBladeFiles($viewsPath);
 
         if (empty($bladeFiles)) {
-            $this->error('No Blade files found in ' . $viewsPath);
+            $this->error('No Blade files found in '.$viewsPath);
+
             return self::FAILURE;
         }
 
@@ -60,13 +63,13 @@ class SyncBladeTranslations extends Command
         $bar->start();
 
         foreach ($strings as $string) {
-            if (!array_key_exists($string, $existingSource)) {
+            if (! array_key_exists($string, $existingSource)) {
                 $existingSource[$string] = $string;
                 $newSource++;
             }
 
             foreach ($this->targetLocales as $locale) {
-                if (!array_key_exists($string, $existingTargets[$locale])) {
+                if (! array_key_exists($string, $existingTargets[$locale])) {
                     $translation = $this->translator->translate($string, $locale);
                     $existingTargets[$locale][$string] = $translation;
                     $newTargets[$locale]++;
@@ -137,7 +140,7 @@ class SyncBladeTranslations extends Command
             foreach ($patterns as $pattern) {
                 if (preg_match_all($pattern, $content, $matches)) {
                     foreach ($matches[1] as $match) {
-                        if (!Str::contains($match, ['->', ':']) && !is_numeric($match)) {
+                        if (! Str::contains($match, ['->', ':']) && ! is_numeric($match)) {
                             $strings[$match] = true;
                         }
                     }
@@ -150,9 +153,9 @@ class SyncBladeTranslations extends Command
 
     protected function loadJsonTranslations(string $locale): array
     {
-        $path = lang_path($locale . '.json');
+        $path = lang_path($locale.'.json');
 
-        if (!File::exists($path)) {
+        if (! File::exists($path)) {
             return [];
         }
 
@@ -164,13 +167,13 @@ class SyncBladeTranslations extends Command
 
     protected function saveJsonTranslations(string $locale, array $translations): void
     {
-        $path = lang_path($locale . '.json');
+        $path = lang_path($locale.'.json');
         $json = json_encode($translations, JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES | JSON_UNESCAPED_UNICODE);
 
         if ($this->option('dry-run')) {
             return;
         }
 
-        File::put($path, $json . "\n");
+        File::put($path, $json."\n");
     }
 }

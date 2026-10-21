@@ -16,7 +16,9 @@ use Illuminate\Support\Str;
  *     version="1.0.0",
  *     description="SolarShare renewable energy equipment rental marketplace API"
  * )
+ *
  * @OA\Server(url="http://localhost", description="Local development server")
+ *
  * @OA\SecurityScheme(
  *     securityScheme="sanctum",
  *     type="apiKey",
@@ -24,6 +26,7 @@ use Illuminate\Support\Str;
  *     in="header",
  *     description="Enter token in format (Bearer <token>)"
  * )
+ *
  * @OA\Tag(name="AI Features", description="AI-powered features for equipment catalog")
  */
 class AiController extends Controller
@@ -87,15 +90,19 @@ class AiController extends Controller
      *     description="Convert a natural language query into structured equipment filters (e.g., 'Battery for 2 days camping with fridge, under 20 TND')",
      *     tags={"AI Features"},
      *     security={{"sanctum"={}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"q"},
+     *
      *             @OA\Property(property="q", type="string", example="Battery for 2 days camping with fridge, under 20 TND"),
      *             @OA\Property(property="async", type="boolean", example=false),
      *             @OA\Property(property="callback_url", type="string", format="uri", example="https://example.com/webhook")
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Search results with filters and matching equipment"),
      *     @OA\Response(response=202, description="Async job queued"),
      *     @OA\Response(response=400, description="AI not configured or query empty"),
@@ -111,7 +118,7 @@ class AiController extends Controller
 
         $query = $this->sanitize($request->string('q')->trim());
 
-        if (!$query || !$this->ai->isConfigured()) {
+        if (! $query || ! $this->ai->isConfigured()) {
             return response()->json(['error' => 'AI not configured or query empty'], 400);
         }
 
@@ -158,7 +165,7 @@ PROMPT;
             ['role' => 'user', 'content' => $query],
         ]);
 
-        if (!$filters) {
+        if (! $filters) {
             return response()->json(['error' => 'Failed to parse query'], 500);
         }
 
@@ -197,10 +204,13 @@ PROMPT;
      *     description="Generate a professional French equipment description for rental listings from name, brand, model, category, and energy specs",
      *     tags={"AI Features"},
      *     security={{"sanctum"={}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"name", "brand", "model", "category"},
+     *
      *             @OA\Property(property="name", type="string", example="Portable Power Station 1000Wh"),
      *             @OA\Property(property="brand", type="string", example="EcoFlow"),
      *             @OA\Property(property="model", type="string", example="River 2 Pro"),
@@ -214,6 +224,7 @@ PROMPT;
      *             @OA\Property(property="callback_url", type="string", format="uri")
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Generated description", @OA\JsonContent(@OA\Property(property="description", type="string"))),
      *     @OA\Response(response=202, description="Async job queued"),
      *     @OA\Response(response=400, description="AI not configured"),
@@ -241,7 +252,7 @@ PROMPT;
             'energy_profile' => 'array',
         ]);
 
-        if (!$this->ai->isConfigured()) {
+        if (! $this->ai->isConfigured()) {
             return response()->json(['error' => 'AI not configured'], 400);
         }
 
@@ -292,10 +303,13 @@ PROMPT;
      *     description="Calculate median price of similar equipment and get AI explanation for suggested daily rental price in TND",
      *     tags={"AI Features"},
      *     security={{"sanctum"={}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"category"},
+     *
      *             @OA\Property(property="category", type="string", example="Battery"),
      *             @OA\Property(property="brand", type="string", example="EcoFlow"),
      *             @OA\Property(property="power_watts", type="integer", example=600),
@@ -304,6 +318,7 @@ PROMPT;
      *             @OA\Property(property="callback_url", type="string", format="uri")
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Price suggestion with median and explanation"),
      *     @OA\Response(response=202, description="Async job queued"),
      *     @OA\Response(response=400, description="AI not configured"),
@@ -329,7 +344,7 @@ PROMPT;
             'capacity_wh' => 'nullable|integer',
         ]);
 
-        if (!$this->ai->isConfigured()) {
+        if (! $this->ai->isConfigured()) {
             return response()->json(['error' => 'AI not configured'], 400);
         }
 
@@ -366,10 +381,16 @@ PROMPT;
 
         $userPrompt = "Equipment details:\n";
         $userPrompt .= "- Category: {$request->category}\n";
-        if ($request->filled('brand')) $userPrompt .= "- Brand: {$request->brand}\n";
-        if ($request->filled('power_watts')) $userPrompt .= "- Power: {$request->power_watts}W\n";
-        if ($request->filled('capacity_wh')) $userPrompt .= "- Capacity: {$request->capacity_wh}Wh\n";
-        $userPrompt .= "- Median price of similar equipment: " . ($medianPrice ? "{$medianPrice} TND/day" : "No data available") . "\n";
+        if ($request->filled('brand')) {
+            $userPrompt .= "- Brand: {$request->brand}\n";
+        }
+        if ($request->filled('power_watts')) {
+            $userPrompt .= "- Power: {$request->power_watts}W\n";
+        }
+        if ($request->filled('capacity_wh')) {
+            $userPrompt .= "- Capacity: {$request->capacity_wh}Wh\n";
+        }
+        $userPrompt .= '- Median price of similar equipment: '.($medianPrice ? "{$medianPrice} TND/day" : 'No data available')."\n";
 
         $result = $this->ai->chatJson([
             ['role' => 'system', 'content' => $systemPrompt],
@@ -393,20 +414,26 @@ PROMPT;
      *     description="Suggest the most appropriate equipment category from name and description with confidence score",
      *     tags={"AI Features"},
      *     security={{"sanctum"={}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"name"},
+     *
      *             @OA\Property(property="name", type="string", example="Portable Power Station 1000Wh"),
      *             @OA\Property(property="description", type="string", example="High capacity portable battery for camping"),
      *             @OA\Property(property="async", type="boolean", example=false),
      *             @OA\Property(property="callback_url", type="string", format="uri")
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Suggested category with confidence", @OA\JsonContent(
+     *
      *         @OA\Property(property="category", type="string"),
      *         @OA\Property(property="confidence", type="integer")
      *     )),
+     *
      *     @OA\Response(response=202, description="Async job queued"),
      *     @OA\Response(response=400, description="AI not configured"),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -427,7 +454,7 @@ PROMPT;
             'description' => 'nullable|string',
         ]);
 
-        if (!$this->ai->isConfigured()) {
+        if (! $this->ai->isConfigured()) {
             return response()->json(['error' => 'AI not configured'], 400);
         }
 
@@ -459,16 +486,20 @@ PROMPT;
      *     description="Ask questions about equipment using RAG - answers only from provided equipment data context",
      *     tags={"AI Features"},
      *     security={{"sanctum"={}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"message"},
+     *
      *             @OA\Property(property="message", type="string", example="What is the capacity and power output?"),
      *             @OA\Property(property="context_equipment_ids", type="array", @OA\Items(type="integer"), example={1, 2, 3}),
      *             @OA\Property(property="async", type="boolean", example=false),
      *             @OA\Property(property="callback_url", type="string", format="uri")
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Chatbot response", @OA\JsonContent(@OA\Property(property="response", type="string"))),
      *     @OA\Response(response=202, description="Async job queued"),
      *     @OA\Response(response=400, description="AI not configured"),
@@ -490,7 +521,7 @@ PROMPT;
             'context_equipment_ids' => 'array',
         ]);
 
-        if (!$this->ai->isConfigured()) {
+        if (! $this->ai->isConfigured()) {
             return response()->json(['error' => 'AI not configured'], 400);
         }
 
@@ -531,7 +562,7 @@ PROMPT;
 
         $response = $this->ai->chat([
             ['role' => 'system', 'content' => $systemPrompt],
-            ['role' => 'user', 'content' => "Available equipment:\n" . json_encode($context, JSON_PRETTY_PRINT) . "\n\nUser question: {$message}"],
+            ['role' => 'user', 'content' => "Available equipment:\n".json_encode($context, JSON_PRETTY_PRINT)."\n\nUser question: {$message}"],
         ]);
 
         return response()->json([
@@ -546,10 +577,13 @@ PROMPT;
      *     description="Search equipment using AI embeddings for conceptually similar results (falls back to keyword search if embeddings unavailable)",
      *     tags={"AI Features"},
      *     security={{"sanctum"={}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"q"},
+     *
      *             @OA\Property(property="q", type="string", example="solar panel for camping"),
      *             @OA\Property(property="page", type="integer", example=1),
      *             @OA\Property(property="per_page", type="integer", example=10),
@@ -557,6 +591,7 @@ PROMPT;
      *             @OA\Property(property="callback_url", type="string", format="uri")
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Search results with pagination"),
      *     @OA\Response(response=202, description="Async job queued"),
      *     @OA\Response(response=400, description="AI not configured or query empty"),
@@ -578,13 +613,13 @@ PROMPT;
         $page = max(1, $request->integer('page', 1));
         $perPage = min(max(1, $request->integer('per_page', 10)), 50);
 
-        if (!$query || !$this->ai->isConfigured()) {
+        if (! $query || ! $this->ai->isConfigured()) {
             return response()->json(['error' => 'AI not configured or query empty'], 400);
         }
 
         $result = $this->ai->semanticSearchJson($query, $perPage, $page);
 
-        if (!$result) {
+        if (! $result) {
             return response()->json(['error' => 'Failed to generate embedding'], 500);
         }
 
@@ -602,23 +637,30 @@ PROMPT;
      *     description="Verify uploaded image matches equipment name/category using vision model (LLaVA for Ollama, gpt-4o for OpenAI)",
      *     tags={"AI Features"},
      *     security={{"sanctum"={}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\MediaType(
      *             mediaType="multipart/form-data",
+     *
      *             @OA\Schema(
      *                 required={"image", "equipment_name", "category"},
+     *
      *                 @OA\Property(property="image", type="string", format="binary", description="Image file (max 5MB)"),
      *                 @OA\Property(property="equipment_name", type="string", example="Portable Power Station 1000Wh"),
      *                 @OA\Property(property="category", type="string", example="Battery")
      *             )
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Validation result", @OA\JsonContent(
+     *
      *         @OA\Property(property="valid", type="boolean"),
      *         @OA\Property(property="confidence", type="integer", minimum=0, maximum=100),
      *         @OA\Property(property="reason", type="string")
      *     )),
+     *
      *     @OA\Response(response=400, description="AI not configured or not using vision-capable model"),
      *     @OA\Response(response=401, description="Unauthenticated"),
      *     @OA\Response(response=422, description="Validation error")
@@ -632,7 +674,7 @@ PROMPT;
             'category' => 'required|string',
         ]);
 
-        if (!$this->ai->isConfigured() || $this->ai->provider !== 'openai') {
+        if (! $this->ai->isConfigured() || $this->ai->provider !== 'openai') {
             return response()->json([
                 'valid' => true,
                 'note' => 'Image validation requires OpenAI with vision model. Skipped.',
@@ -675,15 +717,19 @@ PROMPT;
      *     description="Record thumbs up/down feedback for an AI response using the request_id",
      *     tags={"AI Features"},
      *     security={{"sanctum"={}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"request_id", "rating"},
+     *
      *             @OA\Property(property="request_id", type="string", example="uuid-from-response"),
      *             @OA\Property(property="rating", type="integer", enum={1, -1}, example=1, description="1 = thumbs up, -1 = thumbs down"),
      *             @OA\Property(property="feedback", type="string", example="Great response!")
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Feedback recorded"),
      *     @OA\Response(response=400, description="Invalid rating"),
      *     @OA\Response(response=401, description="Unauthenticated"),
@@ -705,7 +751,7 @@ PROMPT;
             $request->feedback
         );
 
-        if (!$recorded) {
+        if (! $recorded) {
             return response()->json([
                 'error' => 'Request not found or invalid rating',
             ], 404);
@@ -724,10 +770,13 @@ PROMPT;
      *     description="Receive callback from AI job queue with job results. Rate limited to 10 requests per 5 minutes per callback secret.",
      *     tags={"AI Features"},
      *     security={{"sanctum"={}}},
+     *
      *     @OA\RequestBody(
      *         required=true,
+     *
      *         @OA\JsonContent(
      *             required={"endpoint", "success", "result", "duration_ms"},
+     *
      *             @OA\Property(property="endpoint", type="string", example="natural-language-search"),
      *             @OA\Property(property="success", type="boolean", example=true),
      *             @OA\Property(property="result", type="object"),
@@ -735,6 +784,7 @@ PROMPT;
      *             @OA\Property(property="duration_ms", type="integer", example=1250)
      *         )
      *     ),
+     *
      *     @OA\Response(response=200, description="Callback received"),
      *     @OA\Response(response=401, description="Invalid callback secret"),
      *     @OA\Response(response=422, description="Validation error"),
@@ -753,7 +803,7 @@ PROMPT;
 
         // Verify callback secret
         $providedSecret = $request->header('X-Callback-Secret');
-        if (!$providedSecret) {
+        if (! $providedSecret) {
             return response()->json([
                 'error' => 'Missing callback secret',
             ], 401);
@@ -776,16 +826,38 @@ PROMPT;
 
     private function applyFilters($query, array $filters): void
     {
-        if (isset($filters['category'])) $query->whereHas('category', fn ($q) => $q->where('name', 'like', "%{$filters['category']}%"));
-        if (isset($filters['brand'])) $query->where('brand', 'like', "%{$filters['brand']}%");
-        if (isset($filters['min_price'])) $query->where('price_per_day', '>=', $filters['min_price']);
-        if (isset($filters['max_price'])) $query->where('price_per_day', '<=', $filters['max_price']);
-        if (isset($filters['condition'])) $query->where('condition', $filters['condition']);
-        if (isset($filters['location'])) $query->where('location', 'like', "%{$filters['location']}%");
-        if (isset($filters['min_power'])) $query->whereHas('energyProfile', fn ($q) => $q->where('power_watts', '>=', $filters['min_power']));
-        if (isset($filters['max_power'])) $query->whereHas('energyProfile', fn ($q) => $q->where('power_watts', '<=', $filters['max_power']));
-        if (isset($filters['min_capacity'])) $query->whereHas('energyProfile', fn ($q) => $q->where('capacity_wh', '>=', $filters['min_capacity']));
-        if (isset($filters['max_capacity'])) $query->whereHas('energyProfile', fn ($q) => $q->where('capacity_wh', '<=', $filters['max_capacity']));
-        if (isset($filters['technology'])) $query->whereHas('energyProfile', fn ($q) => $q->where('technology', 'like', "%{$filters['technology']}%"));
+        if (isset($filters['category'])) {
+            $query->whereHas('category', fn ($q) => $q->where('name', 'like', "%{$filters['category']}%"));
+        }
+        if (isset($filters['brand'])) {
+            $query->where('brand', 'like', "%{$filters['brand']}%");
+        }
+        if (isset($filters['min_price'])) {
+            $query->where('price_per_day', '>=', $filters['min_price']);
+        }
+        if (isset($filters['max_price'])) {
+            $query->where('price_per_day', '<=', $filters['max_price']);
+        }
+        if (isset($filters['condition'])) {
+            $query->where('condition', $filters['condition']);
+        }
+        if (isset($filters['location'])) {
+            $query->where('location', 'like', "%{$filters['location']}%");
+        }
+        if (isset($filters['min_power'])) {
+            $query->whereHas('energyProfile', fn ($q) => $q->where('power_watts', '>=', $filters['min_power']));
+        }
+        if (isset($filters['max_power'])) {
+            $query->whereHas('energyProfile', fn ($q) => $q->where('power_watts', '<=', $filters['max_power']));
+        }
+        if (isset($filters['min_capacity'])) {
+            $query->whereHas('energyProfile', fn ($q) => $q->where('capacity_wh', '>=', $filters['min_capacity']));
+        }
+        if (isset($filters['max_capacity'])) {
+            $query->whereHas('energyProfile', fn ($q) => $q->where('capacity_wh', '<=', $filters['max_capacity']));
+        }
+        if (isset($filters['technology'])) {
+            $query->whereHas('energyProfile', fn ($q) => $q->where('technology', 'like', "%{$filters['technology']}%"));
+        }
     }
 }

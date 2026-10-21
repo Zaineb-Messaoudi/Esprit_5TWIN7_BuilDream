@@ -9,6 +9,7 @@ use Illuminate\Support\Facades\Storage;
 class BackupDatabase extends Command
 {
     protected $signature = 'backup:database {--disk=s3 : Storage disk to use} {--path=backups/database : Path to store backup}';
+
     protected $description = 'Create a database backup';
 
     public function handle(): int
@@ -27,22 +28,22 @@ class BackupDatabase extends Command
 
         try {
             $tables = DB::select('SHOW TABLES');
-            $tableKey = 'Tables_in_' . config('database.connections.' . config('database.default') . '.database');
+            $tableKey = 'Tables_in_'.config('database.connections.'.config('database.default').'.database');
             $tables = array_column((array) $tables, $tableKey);
 
             $dump = '';
-            $dump .= "-- Database backup for " . config('app.name') . "\n";
-            $dump .= "-- Generated at: " . now()->toDateTimeString() . "\n\n";
+            $dump .= '-- Database backup for '.config('app.name')."\n";
+            $dump .= '-- Generated at: '.now()->toDateTimeString()."\n\n";
 
             foreach ($tables as $table) {
                 $dump .= "DROP TABLE IF EXISTS `{$table}`;\n";
                 $createTable = DB::select("SHOW CREATE TABLE `{$table}`");
-                $dump .= $createTable[0]->{'Create Table'} . ";\n\n";
+                $dump .= $createTable[0]->{'Create Table'}.";\n\n";
 
                 $rows = DB::table($table)->get();
                 if ($rows->isNotEmpty()) {
                     $columns = array_keys((array) $rows->first());
-                    $dump .= "INSERT INTO `{$table}` (`" . implode('`, `', $columns) . "`) VALUES\n";
+                    $dump .= "INSERT INTO `{$table}` (`".implode('`, `', $columns)."`) VALUES\n";
 
                     $values = [];
                     foreach ($rows as $row) {
@@ -56,12 +57,12 @@ class BackupDatabase extends Command
                             } elseif (is_numeric($value)) {
                                 $rowValues[] = $value;
                             } else {
-                                $rowValues[] = "'" . addslashes($value) . "'";
+                                $rowValues[] = "'".addslashes($value)."'";
                             }
                         }
-                        $values[] = '(' . implode(', ', $rowValues) . ')';
+                        $values[] = '('.implode(', ', $rowValues).')';
                     }
-                    $dump .= implode(",\n", $values) . ";\n\n";
+                    $dump .= implode(",\n", $values).";\n\n";
                 }
             }
 
@@ -75,6 +76,7 @@ class BackupDatabase extends Command
             return self::SUCCESS;
         } catch (\Throwable $e) {
             $this->error("Backup failed: {$e->getMessage()}");
+
             return self::FAILURE;
         }
     }

@@ -18,7 +18,7 @@ class SecureHeaders
         $response->headers->set('X-XSS-Protection', '1; mode=block');
         $response->headers->set('Referrer-Policy', 'strict-origin-when-cross-origin');
         $response->headers->set('Permissions-Policy', 'camera=(), microphone=(), geolocation=()');
-        
+
         // CSP for API responses
         if ($request->is('api/*')) {
             $response->headers->set('Content-Security-Policy', "default-src 'none'; frame-ancestors 'none';");

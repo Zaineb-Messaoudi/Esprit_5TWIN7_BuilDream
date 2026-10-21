@@ -30,7 +30,7 @@ class GroqClient
      *
      * @param  array<int, array{role: string, content: string}>  $messages  e.g. [['role' => 'user', 'content' => '...']]
      * @param  array{model?: string, temperature?: float, max_tokens?: int, json?: bool, reasoning_effort?: string}  $options
-     *                    json = true asks for a JSON answer (the prompt must also mention "JSON")
+     *                                                                                                                         json = true asks for a JSON answer (the prompt must also mention "JSON")
      *
      * @throws GroqException
      */
@@ -43,9 +43,9 @@ class GroqClient
         $model = $options['model'] ?? config('groq.model');
 
         $payload = [
-            'model'                 => $model,
-            'messages'              => $messages,
-            'temperature'           => $options['temperature'] ?? 0.2, // low = steady, factual answers
+            'model' => $model,
+            'messages' => $messages,
+            'temperature' => $options['temperature'] ?? 0.2, // low = steady, factual answers
             'max_completion_tokens' => $options['max_tokens'] ?? config('groq.max_completion_tokens'),
         ];
 
@@ -62,9 +62,9 @@ class GroqClient
             $response = Http::withToken(config('groq.key'))
                 ->acceptJson()
                 ->timeout(config('groq.timeout'))
-                ->post(rtrim(config('groq.base_url'), '/') . '/chat/completions', $payload);
+                ->post(rtrim(config('groq.base_url'), '/').'/chat/completions', $payload);
         } catch (ConnectionException $e) {
-            Log::warning('Groq unreachable: ' . $e->getMessage());
+            Log::warning('Groq unreachable: '.$e->getMessage());
             throw new GroqException('network');
         }
 
@@ -77,9 +77,9 @@ class GroqClient
             // The body explains the error; it never contains our key
             Log::warning('Groq request failed', [
                 'status' => $response->status(),
-                'body'   => mb_substr($response->body(), 0, 500),
+                'body' => mb_substr($response->body(), 0, 500),
             ]);
-            throw new GroqException('http_error', 'HTTP ' . $response->status());
+            throw new GroqException('http_error', 'HTTP '.$response->status());
         }
 
         $content = data_get($response->json(), 'choices.0.message.content');

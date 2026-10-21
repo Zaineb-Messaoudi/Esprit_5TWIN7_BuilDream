@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\Admin\EnergyProfileStoreRequest;
 use App\Http\Requests\Admin\EnergyProfileUpdateRequest;
-use App\Models\Equipment;
 use App\Models\EnergyProfile;
+use App\Models\Equipment;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\View\View;
 

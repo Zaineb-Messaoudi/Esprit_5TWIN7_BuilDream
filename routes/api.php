@@ -1,5 +1,6 @@
 <?php
 
+use App\Http\Controllers\AiController;
 use App\Http\Controllers\Api\AccountController;
 use App\Http\Controllers\Api\AnalyticsController;
 use App\Http\Controllers\Api\BuyerController;
@@ -12,7 +13,6 @@ use App\Http\Controllers\Api\OwnerController;
 use App\Http\Controllers\Api\ReviewController;
 use App\Http\Controllers\Api\StripeConnectController;
 use App\Http\Controllers\Api\StripeWebhookController;
-use App\Http\Controllers\AiController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -37,19 +37,19 @@ Route::get('/health', function () {
         'cache' => 'ok',
         'queue' => 'ok',
     ];
-    
+
     try {
         \Illuminate\Support\Facades\DB::connection()->getPdo();
     } catch (\Throwable) {
         $checks['database'] = 'failed';
     }
-    
+
     try {
         \Illuminate\Support\Facades\Cache::get('health-check');
     } catch (\Throwable) {
         $checks['cache'] = 'failed';
     }
-    
+
     try {
         \Illuminate\Support\Facades\Queue::size('default');
     } catch (\Throwable) {
@@ -69,7 +69,7 @@ Route::get('/health', function () {
         if ($aiService->getProvider() === 'ollama') {
             $ollamaHealth = $aiService->checkOllamaHealth();
             $aiHealth['ollama'] = $ollamaHealth;
-            
+
             // Check if model is loaded in VRAM
             $vramCheck = $aiService->checkModelLoadedInVram();
             $aiHealth['vram'] = $vramCheck;
@@ -82,9 +82,9 @@ Route::get('/health', function () {
             'error' => $e->getMessage(),
         ];
     }
-    
+
     $status = in_array('failed', $checks) ? 503 : 200;
-    
+
     return response()->json([
         'status' => $status === 200 ? 'healthy' : 'unhealthy',
         'checks' => $checks,

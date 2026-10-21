@@ -9,10 +9,15 @@ use Illuminate\Support\Facades\Log;
 class AutomatedTranslationService
 {
     protected array $supportedSources = ['libretranslate', 'mock'];
+
     protected int $rateLimitMs;
+
     protected int $timeout;
+
     protected ?string $apiKey;
+
     protected string $endpoint;
+
     protected int $cacheTtl;
 
     public function __construct()
@@ -48,7 +53,7 @@ class AutomatedTranslationService
             return $text;
         }
 
-        $cacheKey = "auto_translation_{$sourceLocale}_{$targetLocale}_" . md5($text);
+        $cacheKey = "auto_translation_{$sourceLocale}_{$targetLocale}_".md5($text);
 
         $cached = Cache::get($cacheKey);
         if ($cached !== null) {
@@ -63,7 +68,7 @@ class AutomatedTranslationService
             $translated = $this->libretranslateTranslate($text, $targetLocale, $sourceLocale);
         }
 
-        if (!empty($translated) && $translated !== $text) {
+        if (! empty($translated) && $translated !== $text) {
             Cache::put($cacheKey, $translated, $this->cacheTtl);
         }
 
@@ -86,13 +91,13 @@ class AutomatedTranslationService
                 $payload['api_key'] = $this->apiKey;
             }
 
-            $response = Http::timeout($this->timeout)->post($this->endpoint . '/translate', $payload);
+            $response = Http::timeout($this->timeout)->post($this->endpoint.'/translate', $payload);
 
             if ($response->successful()) {
                 $data = $response->json();
                 $translated = $data['translatedText'] ?? null;
 
-                if (!empty($translated)) {
+                if (! empty($translated)) {
                     return $translated;
                 }
             }

@@ -108,7 +108,7 @@ test('the summary of a contract is generated only once', function () {
 });
 
 test('a model answer wrapped in a markdown block is still understood', function () {
-    summaryFakeGroq("Here is the summary:\n```json\n" . json_encode(['points' => summaryPoints()]) . "\n```");
+    summaryFakeGroq("Here is the summary:\n```json\n".json_encode(['points' => summaryPoints()])."\n```");
     ['renter' => $renter, 'contract' => $contract] = summaryScenario();
 
     $this->actingAs($renter)->post(route('contracts.summary', $contract));

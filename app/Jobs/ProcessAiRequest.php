@@ -16,7 +16,9 @@ class ProcessAiRequest implements ShouldQueue
     use Dispatchable, InteractsWithQueue, Queueable, SerializesModels;
 
     public int $tries = 3;
+
     public int $backoff = 5;
+
     public int $timeout = 180;
 
     // High priority for user-facing, low for batch
@@ -40,7 +42,7 @@ class ProcessAiRequest implements ShouldQueue
         if (empty($this->jobId)) {
             $this->jobId = (string) Str::uuid();
         }
-        
+
         // Set queue based on endpoint priority
         if ($this->endpoint) {
             $priority = self::$endpointPriority[$this->endpoint] ?? 'default';
@@ -51,7 +53,7 @@ class ProcessAiRequest implements ShouldQueue
     public function handle(AiService $ai): void
     {
         $startTime = microtime(true);
-        
+
         try {
             $result = match ($this->endpoint) {
                 'natural-language-search' => $this->handleNaturalLanguageSearch($ai),
@@ -65,20 +67,20 @@ class ProcessAiRequest implements ShouldQueue
             };
 
             $this->sendCallback($result, null, $startTime);
-            
+
         } catch (\Throwable $e) {
             Log::error('AI Job failed', [
                 'endpoint' => $this->endpoint,
                 'attempt' => $this->attempts(),
                 'error' => $e->getMessage(),
             ]);
-            
+
             $this->sendCallback(null, $e->getMessage(), $startTime);
-            
+
             if ($this->attempts() >= $this->tries) {
                 throw $e; // Mark as failed permanently
             }
-            
+
             throw $e; // Retry
         }
     }
@@ -86,7 +88,7 @@ class ProcessAiRequest implements ShouldQueue
     private function handleNaturalLanguageSearch(AiService $ai): array
     {
         $query = $this->payload['q'] ?? '';
-        if (!$query || !$ai->isConfigured()) {
+        if (! $query || ! $ai->isConfigured()) {
             return ['error' => 'AI not configured or query empty'];
         }
 
@@ -133,7 +135,7 @@ PROMPT;
             ['role' => 'user', 'content' => $query],
         ]);
 
-        if (!$filters) {
+        if (! $filters) {
             return ['error' => 'Failed to parse query'];
         }
 
@@ -173,7 +175,7 @@ PROMPT;
         $category = $this->payload['category'] ?? '';
         $energy = $this->payload['energy_profile'] ?? [];
 
-        if (!$ai->isConfigured()) {
+        if (! $ai->isConfigured()) {
             return ['error' => 'AI not configured'];
         }
 
@@ -190,7 +192,7 @@ PROMPT;
         $userPrompt .= "- Brand: {$brand}\n";
         $userPrompt .= "- Model: {$model}\n";
         $userPrompt .= "- Category: {$category}\n";
-        
+
         if ($energy) {
             $userPrompt .= "\nTechnical specs:\n";
             foreach ($energy as $key => $value) {
@@ -215,7 +217,7 @@ PROMPT;
         $powerWatts = $this->payload['power_watts'] ?? null;
         $capacityWh = $this->payload['capacity_wh'] ?? null;
 
-        if (!$ai->isConfigured()) {
+        if (! $ai->isConfigured()) {
             return ['error' => 'AI not configured'];
         }
 
@@ -224,9 +226,15 @@ PROMPT;
             ->where('status', 'available')
             ->whereHas('category', fn ($q) => $q->where('name', 'like', "%{$category}%"));
 
-        if ($brand) $similarQuery->where('brand', $brand);
-        if ($powerWatts) $similarQuery->whereHas('energyProfile', fn ($q) => $q->where('power_watts', $powerWatts));
-        if ($capacityWh) $similarQuery->whereHas('energyProfile', fn ($q) => $q->where('capacity_wh', $capacityWh));
+        if ($brand) {
+            $similarQuery->where('brand', $brand);
+        }
+        if ($powerWatts) {
+            $similarQuery->whereHas('energyProfile', fn ($q) => $q->where('power_watts', $powerWatts));
+        }
+        if ($capacityWh) {
+            $similarQuery->whereHas('energyProfile', fn ($q) => $q->where('capacity_wh', $capacityWh));
+        }
 
         $similar = $similarQuery->get(['price_per_day']);
         $prices = $similar->pluck('price_per_day')->filter()->values();
@@ -240,10 +248,16 @@ PROMPT;
 
         $userPrompt = "Equipment details:\n";
         $userPrompt .= "- Category: {$category}\n";
-        if ($brand) $userPrompt .= "- Brand: {$brand}\n";
-        if ($powerWatts) $userPrompt .= "- Power: {$powerWatts}W\n";
-        if ($capacityWh) $userPrompt .= "- Capacity: {$capacityWh}Wh\n";
-        $userPrompt .= "- Median price of similar equipment: " . ($medianPrice ? "{$medianPrice} TND/day" : "No data available") . "\n";
+        if ($brand) {
+            $userPrompt .= "- Brand: {$brand}\n";
+        }
+        if ($powerWatts) {
+            $userPrompt .= "- Power: {$powerWatts}W\n";
+        }
+        if ($capacityWh) {
+            $userPrompt .= "- Capacity: {$capacityWh}Wh\n";
+        }
+        $userPrompt .= '- Median price of similar equipment: '.($medianPrice ? "{$medianPrice} TND/day" : 'No data available')."\n";
 
         $result = $ai->chatJson([
             ['role' => 'system', 'content' => $systemPrompt],
@@ -265,7 +279,7 @@ PROMPT;
         $name = $this->payload['name'] ?? '';
         $description = $this->payload['description'] ?? '';
 
-        if (!$ai->isConfigured()) {
+        if (! $ai->isConfigured()) {
             return ['error' => 'AI not configured'];
         }
 
@@ -287,7 +301,7 @@ PROMPT;
         $message = $this->payload['message'] ?? '';
         $equipmentIds = $this->payload['context_equipment_ids'] ?? [];
 
-        if (!$ai->isConfigured()) {
+        if (! $ai->isConfigured()) {
             return ['error' => 'AI not configured'];
         }
 
@@ -325,7 +339,7 @@ PROMPT;
 
         $response = $ai->chat([
             ['role' => 'system', 'content' => $systemPrompt],
-            ['role' => 'user', 'content' => "Available equipment:\n" . json_encode($context, JSON_PRETTY_PRINT) . "\n\nUser question: {$this->payload['message']}"],
+            ['role' => 'user', 'content' => "Available equipment:\n".json_encode($context, JSON_PRETTY_PRINT)."\n\nUser question: {$this->payload['message']}"],
         ]);
 
         return ['response' => $response ?? "I'm unable to answer right now. Please try again."];
@@ -334,14 +348,14 @@ PROMPT;
     private function handleSemanticSearch(AiService $ai): array
     {
         $query = $this->payload['q'] ?? '';
-        
-        if (!$query || !$ai->isConfigured()) {
+
+        if (! $query || ! $ai->isConfigured()) {
             return ['error' => 'AI not configured or query empty'];
         }
 
         $result = $ai->semanticSearchJson($query, 10);
-        
-        if (!$result) {
+
+        if (! $result) {
             return ['error' => 'Failed to generate embedding'];
         }
 
@@ -354,7 +368,7 @@ PROMPT;
 
     private function handleValidateImage(AiService $ai): array
     {
-        if (!$ai->isConfigured()) {
+        if (! $ai->isConfigured()) {
             return ['error' => 'AI not configured'];
         }
 
@@ -364,22 +378,46 @@ PROMPT;
 
     private function applyFilters($query, array $filters): void
     {
-        if (isset($filters['category'])) $query->whereHas('category', fn ($q) => $q->where('name', 'like', "%{$filters['category']}%"));
-        if (isset($filters['brand'])) $query->where('brand', 'like', "%{$filters['brand']}%");
-        if (isset($filters['min_price'])) $query->where('price_per_day', '>=', $filters['min_price']);
-        if (isset($filters['max_price'])) $query->where('price_per_day', '<=', $filters['max_price']);
-        if (isset($filters['condition'])) $query->where('condition', $filters['condition']);
-        if (isset($filters['location'])) $query->where('location', 'like', "%{$filters['location']}%");
-        if (isset($filters['min_power'])) $query->whereHas('energyProfile', fn ($q) => $q->where('power_watts', '>=', $filters['min_power']));
-        if (isset($filters['max_power'])) $query->whereHas('energyProfile', fn ($q) => $q->where('power_watts', '<=', $filters['max_power']));
-        if (isset($filters['min_capacity'])) $query->whereHas('energyProfile', fn ($q) => $q->where('capacity_wh', '>=', $filters['min_capacity']));
-        if (isset($filters['max_capacity'])) $query->whereHas('energyProfile', fn ($q) => $q->where('capacity_wh', '<=', $filters['max_capacity']));
-        if (isset($filters['technology'])) $query->whereHas('energyProfile', fn ($q) => $q->where('technology', 'like', "%{$filters['technology']}%"));
+        if (isset($filters['category'])) {
+            $query->whereHas('category', fn ($q) => $q->where('name', 'like', "%{$filters['category']}%"));
+        }
+        if (isset($filters['brand'])) {
+            $query->where('brand', 'like', "%{$filters['brand']}%");
+        }
+        if (isset($filters['min_price'])) {
+            $query->where('price_per_day', '>=', $filters['min_price']);
+        }
+        if (isset($filters['max_price'])) {
+            $query->where('price_per_day', '<=', $filters['max_price']);
+        }
+        if (isset($filters['condition'])) {
+            $query->where('condition', $filters['condition']);
+        }
+        if (isset($filters['location'])) {
+            $query->where('location', 'like', "%{$filters['location']}%");
+        }
+        if (isset($filters['min_power'])) {
+            $query->whereHas('energyProfile', fn ($q) => $q->where('power_watts', '>=', $filters['min_power']));
+        }
+        if (isset($filters['max_power'])) {
+            $query->whereHas('energyProfile', fn ($q) => $q->where('power_watts', '<=', $filters['max_power']));
+        }
+        if (isset($filters['min_capacity'])) {
+            $query->whereHas('energyProfile', fn ($q) => $q->where('capacity_wh', '>=', $filters['min_capacity']));
+        }
+        if (isset($filters['max_capacity'])) {
+            $query->whereHas('energyProfile', fn ($q) => $q->where('capacity_wh', '<=', $filters['max_capacity']));
+        }
+        if (isset($filters['technology'])) {
+            $query->whereHas('energyProfile', fn ($q) => $q->where('technology', 'like', "%{$filters['technology']}%"));
+        }
     }
 
     private function sendCallback(array $result, ?string $error, float $startTime): void
     {
-        if (!$this->callbackUrl) return;
+        if (! $this->callbackUrl) {
+            return;
+        }
 
         $duration = round((microtime(true) - $startTime) * 1000);
 

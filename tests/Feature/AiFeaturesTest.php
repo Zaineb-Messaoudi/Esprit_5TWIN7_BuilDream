@@ -2,12 +2,12 @@
 
 namespace Tests\Feature;
 
+use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\User;
-use App\Enums\UserRole;
-use Illuminate\Support\Str;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Str;
 use Tests\TestCase;
 
 uses(TestCase::class, RefreshDatabase::class)->in('Feature');
@@ -129,7 +129,7 @@ test('ai settings can test connection', function () {
 
 test('async ai request dispatches job and returns job_id', function () {
     $user = User::factory()->create(['email_verified_at' => now()]);
-    
+
     $this->actingAs($user)
         ->postJson(route('ai.natural-language-search'), [
             'q' => 'battery for camping',

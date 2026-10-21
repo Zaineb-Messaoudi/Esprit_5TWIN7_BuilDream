@@ -82,34 +82,34 @@ class RentalInsightsService
     {
         $approved = RentalExtension::where('status', ExtensionStatus::APPROVED->value)->count();
         $rejected = RentalExtension::where('status', ExtensionStatus::REJECTED->value)->count();
-        $decided  = $approved + $rejected;
+        $decided = $approved + $rejected;
 
         return [
-            'total_rentals'      => Rental::count(),
-            'active_rentals'     => Rental::where('status', RentalStatus::ACTIVE->value)->count(),
-            'overdue_rentals'    => Rental::where('status', RentalStatus::ACTIVE->value)
+            'total_rentals' => Rental::count(),
+            'active_rentals' => Rental::where('status', RentalStatus::ACTIVE->value)->count(),
+            'overdue_rentals' => Rental::where('status', RentalStatus::ACTIVE->value)
                 ->whereDate('end_date', '<', today())->count(),
             // Revenue = rentals that are running or finished (extensions are already in the total)
-            'revenue'            => (float) Rental::whereIn('status', [
+            'revenue' => (float) Rental::whereIn('status', [
                 RentalStatus::ACTIVE->value,
                 RentalStatus::COMPLETED->value,
             ])->sum('total_amount'),
-            'deposits_held'      => (float) RentalContract::where('deposit_status', DepositStatus::HELD->value)
+            'deposits_held' => (float) RentalContract::where('deposit_status', DepositStatus::HELD->value)
                 ->sum('deposit_amount'),
             'pending_signatures' => RentalContract::where('contract_status', ContractStatus::DRAFT->value)->count(),
 
             // Contracts by status
             'contracts' => [
-                'draft'      => RentalContract::where('contract_status', ContractStatus::DRAFT->value)->count(),
-                'signed'     => RentalContract::where('contract_status', ContractStatus::SIGNED->value)->count(),
+                'draft' => RentalContract::where('contract_status', ContractStatus::DRAFT->value)->count(),
+                'signed' => RentalContract::where('contract_status', ContractStatus::SIGNED->value)->count(),
                 'terminated' => RentalContract::where('contract_status', ContractStatus::TERMINATED->value)->count(),
             ],
 
             // Extension requests by status + approval rate (only decided requests count)
             'extensions' => [
-                'pending'       => RentalExtension::where('status', ExtensionStatus::PENDING->value)->count(),
-                'approved'      => $approved,
-                'rejected'      => $rejected,
+                'pending' => RentalExtension::where('status', ExtensionStatus::PENDING->value)->count(),
+                'approved' => $approved,
+                'rejected' => $rejected,
                 'approval_rate' => $decided > 0 ? round($approved / $decided * 100) : null,
             ],
         ];
@@ -159,8 +159,8 @@ class RentalInsightsService
             $group = $rentals->get($month->format('Y-m'), collect());
 
             $rows[] = [
-                'label'   => $month->format('M Y'),
-                'count'   => $group->count(),
+                'label' => $month->format('M Y'),
+                'count' => $group->count(),
                 'revenue' => round((float) $group->sum('total_amount'), 2),
             ];
         }
@@ -183,7 +183,7 @@ class RentalInsightsService
         $names = Equipment::whereIn('id', $stats->pluck('equipment_id'))->pluck('name', 'id');
 
         return $stats->map(fn ($row) => [
-            'name'    => $names[$row->equipment_id] ?? ('Equipment #' . $row->equipment_id),
+            'name' => $names[$row->equipment_id] ?? ('Equipment #'.$row->equipment_id),
             'rentals' => (int) $row->rentals_count,
             'revenue' => round((float) $row->revenue, 2),
         ]);

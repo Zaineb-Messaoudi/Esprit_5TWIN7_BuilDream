@@ -51,10 +51,10 @@ class ExtensionAvailabilityService
             ->where('end_date', '>=', $from->toDateString())
             ->get()
             ->map(fn (Reservation $reservation) => [
-                'type'      => 'reservation',
+                'type' => 'reservation',
                 'reference' => $reservation->reference,
-                'start'     => $reservation->start_date->copy(),
-                'end'       => $reservation->end_date->copy(),
+                'start' => $reservation->start_date->copy(),
+                'end' => $reservation->end_date->copy(),
             ]);
 
         // 2) Other rentals of this equipment that are not finished or cancelled
@@ -66,10 +66,10 @@ class ExtensionAvailabilityService
             ->where('end_date', '>=', $from->toDateString())
             ->get()
             ->map(fn (Rental $other) => [
-                'type'      => 'rental',
+                'type' => 'rental',
                 'reference' => $other->reference,
-                'start'     => $other->start_date->copy(),
-                'end'       => $other->end_date->copy(),
+                'start' => $other->start_date->copy(),
+                'end' => $other->end_date->copy(),
             ]);
 
         return $reservations->concat($rentals)->values();

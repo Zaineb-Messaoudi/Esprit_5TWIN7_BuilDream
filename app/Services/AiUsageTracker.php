@@ -177,7 +177,7 @@ class AiUsageTracker
             return 0.0; // Free local
         }
 
-        if (!isset($costs[$provider][$model])) {
+        if (! isset($costs[$provider][$model])) {
             return 0.0;
         }
 

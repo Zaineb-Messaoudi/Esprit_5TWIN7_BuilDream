@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Services\AutomatedTranslationService;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\File;
 
 class SyncDatabaseTranslations extends Command
 {
@@ -26,12 +25,14 @@ class SyncDatabaseTranslations extends Command
 
         if (empty($translatableModels)) {
             $this->warn('No translatable models configured in config/translation.php');
+
             return self::SUCCESS;
         }
 
         foreach ($translatableModels as $modelClass => $fields) {
-            if (!class_exists($modelClass)) {
+            if (! class_exists($modelClass)) {
                 $this->warn("Model {$modelClass} does not exist, skipping.");
+
                 continue;
             }
 
@@ -39,17 +40,18 @@ class SyncDatabaseTranslations extends Command
             $tableName = $model->getTable();
             $recordCount = $modelClass::count();
 
-            $this->info("Found {$recordCount} record(s) in {$tableName} with translatable fields: " . implode(', ', $fields));
+            $this->info("Found {$recordCount} record(s) in {$tableName} with translatable fields: ".implode(', ', $fields));
 
             if ($this->option('dry-run')) {
                 $this->warn('[DRY RUN] Would translate each record.');
+
                 continue;
             }
 
             $bar = $this->output->createProgressBar($recordCount);
             $bar->start();
 
-            $modelClass::each(function ($record) use ($fields, $modelClass) {
+            $modelClass::each(function ($record) {
                 $record->syncTranslations();
                 $bar->advance();
             });

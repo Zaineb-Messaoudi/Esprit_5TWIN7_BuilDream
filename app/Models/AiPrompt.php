@@ -3,9 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Str;
 
 class AiPrompt extends Model
 {
@@ -31,7 +28,7 @@ class AiPrompt extends Model
 
     public static function computeHash(string $systemPrompt, string $userPromptTemplate): string
     {
-        return hash('sha256', $systemPrompt . '|' . $userPromptTemplate);
+        return hash('sha256', $systemPrompt.'|'.$userPromptTemplate);
     }
 
     public static function register(
@@ -67,7 +64,7 @@ class AiPrompt extends Model
     {
         $userPrompt = $this->user_prompt_template;
         foreach ($variables as $key => $value) {
-            $userPrompt = str_replace('{' . $key . '}', $value, $userPrompt);
+            $userPrompt = str_replace('{'.$key.'}', $value, $userPrompt);
         }
 
         return [

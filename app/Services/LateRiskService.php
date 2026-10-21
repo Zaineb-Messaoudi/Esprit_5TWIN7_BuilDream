@@ -19,7 +19,9 @@ use App\Models\Rental;
 class LateRiskService
 {
     public const BASE_SCORE = 10;      // every rental starts here
+
     public const MEDIUM_FROM = 30;
+
     public const HIGH_FROM = 60;
 
     /**
@@ -84,16 +86,16 @@ class LateRiskService
         $score = max(0, min(100, $score));
 
         [$level, $label, $color] = match (true) {
-            $score >= self::HIGH_FROM   => ['high', 'High', 'error'],
+            $score >= self::HIGH_FROM => ['high', 'High', 'error'],
             $score >= self::MEDIUM_FROM => ['medium', 'Medium', 'warning'],
-            default                     => ['low', 'Low', 'success'],
+            default => ['low', 'Low', 'success'],
         };
 
         return [
-            'score'   => $score,
-            'level'   => $level,
-            'label'   => $label,
-            'color'   => $color,
+            'score' => $score,
+            'level' => $level,
+            'label' => $label,
+            'color' => $color,
             'reasons' => $reasons,
         ];
     }

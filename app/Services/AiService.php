@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Log;
  * - OpenAI (cloud, paid)
  * - Anthropic (cloud, paid)
  * - Ollama (local, FREE - runs on your machine)
- * 
+ *
  * Configuration via config/ai.php and .env:
  * - AI_PROVIDER=ollama|openai|anthropic
  * - AI_BASE_URL (for Ollama: http://localhost:11434)
@@ -20,9 +20,13 @@ use Illuminate\Support\Facades\Log;
 class AiService
 {
     private string $provider;
+
     private ?string $apiKey;
+
     private string $baseUrl;
+
     private string $model;
+
     private string $visionModel;
 
     // Circuit breaker state
@@ -41,7 +45,7 @@ class AiService
         $this->baseUrl = config('ai.base_url', '');
         $this->model = config('ai.model', 'llama3.2');
         $this->visionModel = config('ai.vision_model', 'llava');
-        
+
         // Load circuit breaker settings from config
         $this->circuitBreaker['threshold'] = config('ai.circuit_breaker.threshold', 5);
         $this->circuitBreaker['timeout'] = config('ai.circuit_breaker.timeout', 60);
@@ -53,14 +57,15 @@ class AiService
      */
     public function isConfigured(): bool
     {
-        if (!config('ai.enabled', true)) {
+        if (! config('ai.enabled', true)) {
             return false;
         }
-        
+
         if ($this->provider === 'ollama') {
-            return !empty($this->baseUrl);
+            return ! empty($this->baseUrl);
         }
-        return !empty($this->apiKey);
+
+        return ! empty($this->apiKey);
     }
 
     public function getProvider(): string
@@ -95,10 +100,13 @@ class AiService
             if ($now - $cb['last_failure'] > $cb['timeout']) {
                 // Half-open: allow one request through
                 $this->circuitBreaker['state'] = 'half-open';
+
                 return true;
             }
+
             return false; // Circuit open, reject request
         }
+
         return true; // Closed or half-open, allow request
     }
 
@@ -112,7 +120,7 @@ class AiService
     {
         $this->circuitBreaker['failures']++;
         $this->circuitBreaker['last_failure'] = time();
-        
+
         if ($this->circuitBreaker['failures'] >= $this->circuitBreaker['threshold']) {
             $this->circuitBreaker['state'] = 'open';
             Log::warning('AI Circuit breaker OPENED', [
@@ -137,17 +145,19 @@ class AiService
      */
     public function chat(array $messages, array $options = []): ?string
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             Log::warning('AI service not configured', ['provider' => $this->provider]);
+
             return null;
         }
 
         // Check circuit breaker
-        if (!$this->checkCircuitBreaker()) {
+        if (! $this->checkCircuitBreaker()) {
             Log::warning('AI Circuit breaker OPEN - request rejected', [
                 'provider' => $this->provider,
                 'failures' => $this->circuitBreaker['failures'],
             ]);
+
             return null;
         }
 
@@ -174,6 +184,7 @@ class AiService
                 'provider' => $this->provider,
                 'error' => $e->getMessage(),
             ]);
+
             return null;
         }
     }
@@ -185,13 +196,13 @@ class AiService
     public function chatJson(array $messages, array $options = []): ?array
     {
         // Only OpenAI supports response_format natively
-        $formatOptions = ($this->provider === 'openai') 
-            ? ['response_format' => ['type' => 'json_object']] 
+        $formatOptions = ($this->provider === 'openai')
+            ? ['response_format' => ['type' => 'json_object']]
             : [];
 
         $response = $this->chat($messages, array_merge($options, $formatOptions));
-        
-        if (!$response) {
+
+        if (! $response) {
             return null;
         }
 
@@ -211,6 +222,7 @@ class AiService
                     // Fall through to null
                 }
             }
+
             return null;
         }
     }
@@ -221,7 +233,7 @@ class AiService
     private function callOpenAI(array $messages, array $options): ?string
     {
         $url = $this->baseUrl ?: 'https://api.openai.com/v1/chat/completions';
-        
+
         $payload = array_merge([
             'model' => $this->model,
             'messages' => $messages,
@@ -231,7 +243,7 @@ class AiService
 
         try {
             $response = Http::withHeaders([
-                'Authorization' => 'Bearer ' . $this->apiKey,
+                'Authorization' => 'Bearer '.$this->apiKey,
                 'Content-Type' => 'application/json',
             ])->timeout(60)->post($url, $payload);
 
@@ -240,12 +252,14 @@ class AiService
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
+
                 return null;
             }
 
             return $response->json('choices.0.message.content');
         } catch (\Throwable $e) {
             Log::warning('OpenAI request failed', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
@@ -256,10 +270,10 @@ class AiService
     private function callAnthropic(array $messages, array $options): ?string
     {
         $url = $this->baseUrl ?: 'https://api.anthropic.com/v1/messages';
-        
+
         $systemMessage = '';
         $userMessages = [];
-        
+
         foreach ($messages as $message) {
             if ($message['role'] === 'system') {
                 $systemMessage = $message['content'];
@@ -288,19 +302,21 @@ class AiService
                     'status' => $response->status(),
                     'body' => $response->body(),
                 ]);
+
                 return null;
             }
 
             return $response->json('content.0.text');
         } catch (\Throwable $e) {
             Log::warning('Anthropic request failed', ['error' => $e->getMessage()]);
+
             return null;
         }
     }
 
     /**
      * Call Ollama local API (FREE - runs on your machine)
-     * 
+     *
      * Ollama API: http://localhost:11434/api/chat
      * Models: llama3.2, mistral, phi3, qwen2.5, gemma2, etc.
      * Install: curl -fsSL https://ollama.com/install.sh | sh
@@ -308,8 +324,8 @@ class AiService
      */
     private function callOllama(array $messages, array $options): ?string
     {
-        $url = rtrim($this->baseUrl, '/') . '/api/chat';
-        
+        $url = rtrim($this->baseUrl, '/').'/api/chat';
+
         // Convert messages to Ollama format
         $ollamaMessages = [];
         foreach ($messages as $message) {
@@ -339,6 +355,7 @@ class AiService
                     'url' => $url,
                     'model' => $this->model,
                 ]);
+
                 return null;
             }
 
@@ -350,29 +367,30 @@ class AiService
                 'url' => $url,
                 'model' => $this->model,
             ]);
+
             return null;
         }
     }
 
     /**
      * Get text embeddings for semantic search.
-     * 
+     *
      * Note: Ollama supports embeddings via /api/embeddings with models like:
      * - nomic-embed-text (recommended)
      * - mxbai-embed-large
      * - all-minilm
-     * 
+     *
      * For OpenAI, uses text-embedding-3-small.
      * Results are cached for 24 hours to avoid repeated API calls.
      */
     public function getEmbedding(string $text): ?array
     {
-        if (!$this->isConfigured()) {
+        if (! $this->isConfigured()) {
             return null;
         }
 
-        $cacheKey = 'ai_embedding_' . md5($text . '|' . $this->provider . '|' . $this->model);
-        
+        $cacheKey = 'ai_embedding_'.md5($text.'|'.$this->provider.'|'.$this->model);
+
         return \Illuminate\Support\Facades\Cache::remember($cacheKey, 86400, function () use ($text) {
             try {
                 if ($this->provider === 'ollama') {
@@ -380,12 +398,14 @@ class AiService
                 } elseif ($this->provider === 'openai') {
                     return $this->getOpenAIEmbedding($text);
                 }
+
                 return null;
             } catch (\Throwable $e) {
                 Log::warning('Embedding request failed', [
                     'provider' => $this->provider,
                     'error' => $e->getMessage(),
                 ]);
+
                 return null;
             }
         });
@@ -396,11 +416,11 @@ class AiService
      */
     private function getOllamaEmbedding(string $text): ?array
     {
-        $url = rtrim($this->baseUrl, '/') . '/api/embeddings';
-        
+        $url = rtrim($this->baseUrl, '/').'/api/embeddings';
+
         // Use a dedicated embedding model if configured, otherwise use the chat model
         $embeddingModel = config('ai.embedding_model', 'nomic-embed-text');
-        
+
         $response = Http::timeout(60)->post($url, [
             'model' => $embeddingModel,
             'prompt' => $text,
@@ -412,6 +432,7 @@ class AiService
                 'body' => $response->body(),
                 'model' => $embeddingModel,
             ]);
+
             return null;
         }
 
@@ -425,7 +446,7 @@ class AiService
     private function getOpenAIEmbedding(string $text): ?array
     {
         $response = Http::withHeaders([
-            'Authorization' => 'Bearer ' . $this->apiKey,
+            'Authorization' => 'Bearer '.$this->apiKey,
             'Content-Type' => 'application/json',
         ])->timeout(30)->post('https://api.openai.com/v1/embeddings', [
             'model' => 'text-embedding-3-small',
@@ -441,14 +462,14 @@ class AiService
 
     /**
      * Call Ollama vision model (LLaVA) for image validation.
-     * 
+     *
      * Requires a vision model like llava, llava-llama3, llava-mistral, etc.
      * Pull first: ollama pull llava
      */
     private function callOllamaVision(array $messages, array $options): ?string
     {
-        $url = rtrim($this->baseUrl, '/') . '/api/chat';
-        
+        $url = rtrim($this->baseUrl, '/').'/api/chat';
+
         $ollamaMessages = [];
         foreach ($messages as $message) {
             if (is_array($message['content'])) {
@@ -501,6 +522,7 @@ class AiService
                     'url' => $url,
                     'model' => $visionModel,
                 ]);
+
                 return null;
             }
 
@@ -511,6 +533,7 @@ class AiService
                 'url' => $url,
                 'model' => $visionModel,
             ]);
+
             return null;
         }
     }
@@ -526,7 +549,7 @@ class AiService
         }
 
         try {
-            $url = rtrim($this->baseUrl, '/') . '/api/tags';
+            $url = rtrim($this->baseUrl, '/').'/api/tags';
             $response = Http::timeout(10)->get($url);
 
             if ($response->failed()) {
@@ -534,7 +557,7 @@ class AiService
             }
 
             $models = collect($response->json('models', []))->pluck('name')->toArray();
-            
+
             return [
                 'available' => true,
                 'models' => $models,
@@ -551,7 +574,7 @@ class AiService
      * Check if a specific model is loaded in VRAM (Ollama).
      * Uses /api/show endpoint to get model details including VRAM usage.
      */
-    public function checkModelLoadedInVram(string $model = null): array
+    public function checkModelLoadedInVram(?string $model = null): array
     {
         if ($this->provider !== 'ollama') {
             return ['loaded' => false, 'reason' => 'Provider is not Ollama'];
@@ -560,7 +583,7 @@ class AiService
         $model = $model ?? $this->model;
 
         try {
-            $url = rtrim($this->baseUrl, '/') . '/api/show';
+            $url = rtrim($this->baseUrl, '/').'/api/show';
             $response = Http::timeout(10)->post($url, [
                 'name' => $model,
             ]);
@@ -575,10 +598,10 @@ class AiService
 
             $details = $response->json();
             $size = $details['details']['parameter_size'] ?? 'unknown';
-            
+
             // Check if model details indicate it's loaded (has size info)
-            $isLoaded = !empty($details['details']);
-            
+            $isLoaded = ! empty($details['details']);
+
             return [
                 'loaded' => $isLoaded,
                 'model' => $model,
@@ -600,22 +623,25 @@ class AiService
     {
         $paramSize = $details['parameter_size'] ?? '0';
         $quantization = $details['quantization_level'] ?? 'Q4_0';
-        
+
         // Extract number from parameter_size (e.g., "7B" -> 7)
         preg_match('/(\d+(\.\d+)?)([KMG])?/', $paramSize, $matches);
         if (empty($matches[1])) {
             return 0;
         }
-        
+
         $params = (float) $matches[1];
         $unit = $matches[3] ?? 'B';
-        
+
         switch ($unit) {
-            case 'K': $params *= 1000; break;
-            case 'M': $params *= 1000000; break;
-            case 'B': $params *= 1000000000; break;
+            case 'K': $params *= 1000;
+                break;
+            case 'M': $params *= 1000000;
+                break;
+            case 'B': $params *= 1000000000;
+                break;
         }
-        
+
         // Estimate bytes per parameter based on quantization
         $bytesPerParam = match (true) {
             stripos($quantization, 'Q8') !== false => 1.0,
@@ -626,8 +652,9 @@ class AiService
             stripos($quantization, 'Q2') !== false => 0.25,
             default => 0.5, // Assume Q4_0
         };
-        
+
         $vramBytes = $params * $bytesPerParam;
+
         return (int) ($vramBytes / 1024 / 1024); // MB
     }
 
@@ -643,7 +670,7 @@ class AiService
         }
 
         try {
-            $url = rtrim($this->baseUrl, '/') . '/api/ps';
+            $url = rtrim($this->baseUrl, '/').'/api/ps';
             $response = Http::timeout(10)->get($url);
 
             if ($response->failed()) {
@@ -651,7 +678,7 @@ class AiService
             }
 
             $processes = $response->json('models', []);
-            
+
             $totalVramUsed = 0;
             $totalVramAvailable = 0;
             $models = [];
@@ -660,13 +687,13 @@ class AiService
                 $modelName = $process['name'] ?? 'unknown';
                 $vramUsed = $process['size_vram'] ?? 0;
                 $size = $process['size'] ?? 0;
-                
+
                 $models[] = [
                     'name' => $modelName,
                     'vram_used_mb' => (int) ($vramUsed / 1024 / 1024),
                     'size_mb' => (int) ($size / 1024 / 1024),
                 ];
-                
+
                 $totalVramUsed += $vramUsed;
             }
 
@@ -724,7 +751,7 @@ class AiService
     public function semanticSearchJson(string $query, int $limit = 10, int $page = 1): ?array
     {
         $queryEmbedding = $this->getEmbedding($query);
-        if (!$queryEmbedding) {
+        if (! $queryEmbedding) {
             return null;
         }
 
@@ -751,10 +778,11 @@ class AiService
 
         $results = $equipment->map(function ($e) use ($queryEmbedding) {
             $embedding = is_array($e->embedding) ? $e->embedding : json_decode($e->embedding, true);
-            if (!$embedding) {
+            if (! $embedding) {
                 return null;
             }
             $score = $this->cosineSimilarity($queryEmbedding, $embedding);
+
             return [
                 'id' => $e->id,
                 'name' => $e->name,
@@ -786,16 +814,14 @@ class AiService
     /**
      * Execute chat with fallback provider chain.
      * Tries primary provider, then falls back to configured alternatives.
-     * 
-     * @param array $messages
-     * @param array $options
-     * @param array $fallbackChain Ordered list of providers to try: ['ollama', 'openai', 'anthropic']
+     *
+     * @param  array  $fallbackChain  Ordered list of providers to try: ['ollama', 'openai', 'anthropic']
      * @return array|null ['response' => string, 'provider' => string] or null
      */
-    public function chatWithFallback(array $messages, array $options = [], array $fallbackChain = null): ?array
+    public function chatWithFallback(array $messages, array $options = [], ?array $fallbackChain = null): ?array
     {
         $fallbackChain = $fallbackChain ?? config('ai.fallback_chain', ['ollama', 'openai', 'anthropic']);
-        
+
         $originalProvider = $this->provider;
         $originalModel = $this->model;
         $originalBaseUrl = $this->baseUrl;
@@ -804,7 +830,7 @@ class AiService
         foreach ($fallbackChain as $provider) {
             // Skip if provider not configured
             $providerConfig = config("ai.providers.$provider");
-            if (!$providerConfig) {
+            if (! $providerConfig) {
                 continue;
             }
 
@@ -825,14 +851,15 @@ class AiService
             ];
 
             // Check if provider is configured
-            if (!$this->isConfigured()) {
+            if (! $this->isConfigured()) {
                 Log::info("AI Fallback: Provider $provider not configured, skipping");
+
                 continue;
             }
 
             try {
                 $response = $this->chat($messages, $options);
-                
+
                 if ($response) {
                     // Restore original provider
                     $this->provider = $originalProvider;
@@ -840,7 +867,7 @@ class AiService
                     $this->baseUrl = $originalBaseUrl;
                     $this->apiKey = $originalApiKey;
                     $this->visionModel = config('ai.vision_model', 'llava');
-                    
+
                     return [
                         'response' => $response,
                         'provider' => $provider,
@@ -851,6 +878,7 @@ class AiService
                 Log::warning("AI Fallback: Provider $provider failed", [
                     'error' => $e->getMessage(),
                 ]);
+
                 continue;
             }
         }

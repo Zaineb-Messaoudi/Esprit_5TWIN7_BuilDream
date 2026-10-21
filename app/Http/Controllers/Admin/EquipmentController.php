@@ -118,9 +118,12 @@ class EquipmentController extends Controller
 
         while (($values = fgetcsv($handle)) !== false) {
             $line++;
-            if (count(array_filter($values, fn ($value) => trim((string) $value) !== '')) === 0) continue;
+            if (count(array_filter($values, fn ($value) => trim((string) $value) !== '')) === 0) {
+                continue;
+            }
             if (count($values) !== count($headers)) {
                 $errors["csv row {$line}"][] = __('The number of values does not match the CSV header.');
+
                 continue;
             }
             $row = array_combine($headers, array_pad($values, count($headers), null));
@@ -143,14 +146,19 @@ class EquipmentController extends Controller
             ];
             $validator = Validator::make($payload, EquipmentStoreRequest::equipmentRules());
             if ($validator->fails()) {
-                foreach ($validator->errors()->all() as $message) $errors["csv row {$line}"][] = $message;
+                foreach ($validator->errors()->all() as $message) {
+                    $errors["csv row {$line}"][] = $message;
+                }
+
                 continue;
             }
             $this->catalog->createEquipment($validator->validated());
         }
         fclose($handle);
 
-        if ($errors) return back()->withErrors($errors)->with('status', __('Some CSV rows were skipped.'));
+        if ($errors) {
+            return back()->withErrors($errors)->with('status', __('Some CSV rows were skipped.'));
+        }
 
         return back()->with('status', __('Equipment CSV imported successfully.'));
     }

@@ -11,7 +11,7 @@ class TranslationServiceProvider extends ServiceProvider
     public function register(): void
     {
         $this->app->singleton(AutomatedTranslationService::class, function ($app) {
-            return new AutomatedTranslationService();
+            return new AutomatedTranslationService;
         });
     }
 

@@ -81,7 +81,7 @@ trait Translatable
                     ->where('locale', $locale)
                     ->exists();
 
-                if (!$alreadyHasTranslation || $sourceTranslation->wasRecentlyCreated || $sourceTranslation->wasChanged()) {
+                if (! $alreadyHasTranslation || $sourceTranslation->wasRecentlyCreated || $sourceTranslation->wasChanged()) {
                     $translated = $translator->translate($baseValue, $locale);
 
                     Translation::updateOrCreate(
@@ -95,6 +95,6 @@ trait Translatable
 
     public function getTranslatableKey(string $field): string
     {
-        return strtolower(class_basename(static::class)) . '.' . $this->getKey() . '.' . $field;
+        return strtolower(class_basename(static::class)).'.'.$this->getKey().'.'.$field;
     }
 }

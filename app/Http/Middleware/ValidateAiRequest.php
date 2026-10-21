@@ -63,7 +63,7 @@ class ValidateAiRequest
         }
 
         // Validate content type for JSON endpoints
-        if (!$request->is('api/ai/validate-image') && !$request->isJson()) {
+        if (! $request->is('api/ai/validate-image') && ! $request->isJson()) {
             return response()->json([
                 'error' => 'Invalid content type',
                 'message' => 'Expected application/json',

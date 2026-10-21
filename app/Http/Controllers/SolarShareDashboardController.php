@@ -4,7 +4,6 @@ namespace App\Http\Controllers;
 
 use App\Models\Category;
 use App\Models\Equipment;
-use App\Models\EquipmentImage;
 use App\Models\Invoice;
 use App\Models\Maintenance;
 use App\Models\Payment;
@@ -14,7 +13,6 @@ use App\Models\RentalExtension;
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
-use Illuminate\Support\Facades\Schema;
 
 class SolarShareDashboardController extends Controller
 {
@@ -103,6 +101,7 @@ class SolarShareDashboardController extends Controller
             ->get()
             ->mapWithKeys(function ($item) {
                 $key = sprintf('%04d-%02d', $item->year, $item->month);
+
                 return [$key => (float) $item->total];
             });
 
@@ -132,6 +131,7 @@ class SolarShareDashboardController extends Controller
                 $status = $item->status instanceof \BackedEnum
                     ? $item->status->value
                     : $item->status;
+
                 return [ucfirst((string) $status) => $item->count];
             });
 
@@ -143,6 +143,7 @@ class SolarShareDashboardController extends Controller
                 $status = $item->status instanceof \BackedEnum
                     ? $item->status->value
                     : $item->status;
+
                 return [ucfirst((string) $status) => $item->count];
             });
 
@@ -154,6 +155,7 @@ class SolarShareDashboardController extends Controller
                 $status = $item->status instanceof \BackedEnum
                     ? $item->status->value
                     : $item->status;
+
                 return [ucfirst((string) $status) => $item->count];
             });
 
@@ -182,8 +184,8 @@ class SolarShareDashboardController extends Controller
         // Equipment needing attention
         $equipmentNeedingAttention = Equipment::where(function ($query) {
             $query->where('status', 'maintenance')
-                  ->orWhere('approval_status', 'rejected')
-                  ->orWhere('approval_status', 'pending');
+                ->orWhere('approval_status', 'rejected')
+                ->orWhere('approval_status', 'pending');
         })->count();
 
         // Upcoming contract expirations

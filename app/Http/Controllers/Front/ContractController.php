@@ -56,16 +56,16 @@ class ContractController extends Controller
         }
 
         return view('pages.front.contract.show', [
-            'contract'    => $contract,
-            'rental'      => $contract->rental,
-            'role'        => $role,
-            'canSign'     => $canSign,
-            'backUrl'     => $this->backUrl($request, $contract, $role),
-            'pdfUrl'      => $this->pdfUrl($request, $contract, $role),
+            'contract' => $contract,
+            'rental' => $contract->rental,
+            'role' => $role,
+            'canSign' => $canSign,
+            'backUrl' => $this->backUrl($request, $contract, $role),
+            'pdfUrl' => $this->pdfUrl($request, $contract, $role),
             // The summary generated earlier (null if none). This never calls the AI service.
-            'summary'     => $this->summaries->cached($contract, app()->getLocale()),
+            'summary' => $this->summaries->cached($contract, app()->getLocale()),
             'aiAvailable' => $this->summaries->isAvailable(),
-            'title'       => __('Rental Contract'),
+            'title' => __('Rental Contract'),
         ]);
     }
 
@@ -124,7 +124,7 @@ class ContractController extends Controller
 
             $locked->update([
                 'contract_status' => ContractStatus::SIGNED,
-                'signed_at'       => now(),
+                'signed_at' => now(),
             ]);
         });
 
@@ -199,7 +199,7 @@ class ContractController extends Controller
     /** Session key that remembers "this user opened this contract". */
     private function readKey(RentalContract $contract): string
     {
-        return 'contract_read.' . $contract->id;
+        return 'contract_read.'.$contract->id;
     }
 
     /** Where the "Back" link of the contract page goes. */
@@ -208,9 +208,9 @@ class ContractController extends Controller
         // The front routes use the rental reference in the URL ({rental:reference}):
         // route() reads it from the model automatically.
         return match (true) {
-            $role === 'admin'                                 => route('admin.rental-contracts.show', $contract),
+            $role === 'admin' => route('admin.rental-contracts.show', $contract),
             $role === 'renter' && $request->user()->isBuyer() => route('front.buyer-rental-detail', $contract->rental),
-            default                                           => route('front.my-rental-detail', $contract->rental),
+            default => route('front.my-rental-detail', $contract->rental),
         };
     }
 
@@ -218,9 +218,9 @@ class ContractController extends Controller
     private function pdfUrl(Request $request, RentalContract $contract, string $role): string
     {
         return match (true) {
-            $role === 'admin'                                 => route('admin.rental-contracts.export-pdf', $contract),
+            $role === 'admin' => route('admin.rental-contracts.export-pdf', $contract),
             $role === 'renter' && $request->user()->isBuyer() => route('front.rental-contract.export-pdf', $contract->rental),
-            default                                           => route('front.owner-rental-contract.export-pdf', $contract->rental),
+            default => route('front.owner-rental-contract.export-pdf', $contract->rental),
         };
     }
 }

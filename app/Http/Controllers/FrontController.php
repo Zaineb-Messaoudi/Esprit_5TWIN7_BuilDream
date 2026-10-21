@@ -5,13 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\EnergyProfile;
 use App\Models\Equipment;
 use App\Support\FrontDemo;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Http;
 use Illuminate\Support\Facades\Schema;
-use Barryvdh\DomPDF\Facade\Pdf;
 
 /** Public Front Office pages for browsing the Eloquent-backed catalogue. */
 class FrontController extends Controller

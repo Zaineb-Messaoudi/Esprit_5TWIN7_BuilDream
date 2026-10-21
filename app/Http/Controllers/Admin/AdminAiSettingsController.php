@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Admin;
 
-use App\Services\AiService;
 use App\Http\Controllers\Controller;
+use App\Services\AiService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Http;
@@ -31,14 +31,14 @@ class AdminAiSettingsController extends Controller
 
         $availableModels = $this->getAvailableModels($config['provider']);
         $visionModels = $this->getAvailableVisionModels($config['provider']);
-        
+
         // Format models for JavaScript
         $availableModelsFormatted = array_map(
             fn ($label, $value) => ['value' => $value, 'label' => $label],
             array_keys($availableModels),
             $availableModels
         );
-        
+
         $visionModelsFormatted = array_map(
             fn ($label, $value) => ['value' => $value, 'label' => $label],
             array_keys($visionModels),
@@ -92,6 +92,7 @@ class AdminAiSettingsController extends Controller
     {
         if ($this->ai->getProvider() === 'ollama') {
             $health = $this->ai->checkOllamaHealth();
+
             return response()->json($health);
         }
 
@@ -122,7 +123,7 @@ class AdminAiSettingsController extends Controller
         $request->validate(['model' => ['required', 'string']]);
 
         try {
-            $url = rtrim($this->ai->getBaseUrl(), '/') . '/api/pull';
+            $url = rtrim($this->ai->getBaseUrl(), '/').'/api/pull';
             $response = Http::timeout(300)->post($url, [
                 'model' => $request->model,
                 'stream' => false,
@@ -131,7 +132,7 @@ class AdminAiSettingsController extends Controller
             if ($response->failed()) {
                 return response()->json([
                     'success' => false,
-                    'message' => 'Failed to pull model: ' . $response->body(),
+                    'message' => 'Failed to pull model: '.$response->body(),
                 ], 500);
             }
 
@@ -223,7 +224,7 @@ class AdminAiSettingsController extends Controller
         foreach ($mapping as $key => $envKey) {
             $value = $settings[$key] ?? '';
             $pattern = "/^{$envKey}=.*/m";
-            $replacement = "{$envKey}=" . ($value !== '' ? $value : '');
+            $replacement = "{$envKey}=".($value !== '' ? $value : '');
 
             if (preg_match($pattern, $content)) {
                 $content = preg_replace($pattern, $replacement, $content);
@@ -235,6 +236,6 @@ class AdminAiSettingsController extends Controller
         // Handle temperature and max_tokens in config file instead
         // (they're runtime options, not env vars)
 
-        file_put_contents($envPath, trim($content) . "\n");
+        file_put_contents($envPath, trim($content)."\n");
     }
 }

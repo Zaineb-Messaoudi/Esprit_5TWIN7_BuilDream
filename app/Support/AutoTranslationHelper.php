@@ -24,11 +24,11 @@ class AutoTranslationHelper
         }
 
         $targetLocales = $this->translator->getSupportedLocales();
-        if (!in_array($locale, $targetLocales)) {
+        if (! in_array($locale, $targetLocales)) {
             return $key;
         }
 
-        $cacheKey = "auto_translation_runtime_{$sourceLocale}_{$locale}_" . md5($key);
+        $cacheKey = "auto_translation_runtime_{$sourceLocale}_{$locale}_".md5($key);
 
         $cached = Cache::get($cacheKey);
         if ($cached !== null) {

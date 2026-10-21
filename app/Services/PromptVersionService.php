@@ -138,11 +138,12 @@ PROMPT,
     public function getPromptWithVariables(string $endpoint, array $variables): ?array
     {
         $prompt = $this->getPrompt($endpoint);
-        if (!$prompt) {
+        if (! $prompt) {
             return null;
         }
 
         $prompt->incrementUsage();
+
         return $prompt->getPromptWithVariables($variables);
     }
 

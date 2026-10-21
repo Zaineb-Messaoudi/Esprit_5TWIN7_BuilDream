@@ -21,9 +21,9 @@ class GroqException extends RuntimeException
     {
         return match ($this->reason) {
             'not_configured' => 'The AI explanation is not available on this server.',
-            'rate_limited'   => 'The AI service is busy. Please try again in a minute.',
-            'network'        => 'The AI service cannot be reached right now. Please try again later.',
-            default          => 'The AI explanation is not available right now. Please read the contract text.',
+            'rate_limited' => 'The AI service is busy. Please try again in a minute.',
+            'network' => 'The AI service cannot be reached right now. Please try again later.',
+            default => 'The AI explanation is not available right now. Please read the contract text.',
         };
     }
 }

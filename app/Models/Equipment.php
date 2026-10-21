@@ -2,17 +2,16 @@
 
 namespace App\Models;
 
-use App\Services\AiService;
 use App\Traits\Translatable;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Laravel\Scout\Searchable;
 use Illuminate\Support\Facades\Cache;
+use Laravel\Scout\Searchable;
 
 /**
  * A renewable-energy item published in the SolarShare catalogue.
@@ -168,10 +167,18 @@ class Equipment extends Model
         ];
 
         if ($energy) {
-            if ($energy->power_watts) $parts[] = "power: {$energy->power_watts}W";
-            if ($energy->capacity_wh) $parts[] = "capacity: {$energy->capacity_wh}Wh";
-            if ($energy->technology) $parts[] = "technology: {$energy->technology}";
-            if ($energy->efficiency) $parts[] = "efficiency: {$energy->efficiency}%";
+            if ($energy->power_watts) {
+                $parts[] = "power: {$energy->power_watts}W";
+            }
+            if ($energy->capacity_wh) {
+                $parts[] = "capacity: {$energy->capacity_wh}Wh";
+            }
+            if ($energy->technology) {
+                $parts[] = "technology: {$energy->technology}";
+            }
+            if ($energy->efficiency) {
+                $parts[] = "efficiency: {$energy->efficiency}%";
+            }
         }
 
         return implode(' | ', $parts);
@@ -186,7 +193,7 @@ class Equipment extends Model
 
             if ($hasEnergyChanges) {
                 $embeddingModel = config('ai.embedding_model', 'nomic-embed-text');
-                $cacheKey = 'ai_embedding_' . md5($equipment->toEmbeddingText() . '|' . config('ai.provider') . '|' . $embeddingModel);
+                $cacheKey = 'ai_embedding_'.md5($equipment->toEmbeddingText().'|'.config('ai.provider').'|'.$embeddingModel);
                 Cache::forget($cacheKey);
             }
         });
@@ -194,7 +201,7 @@ class Equipment extends Model
         static::deleted(function (self $equipment) {
             // Clean up embedding cache when equipment is deleted
             $embeddingModel = config('ai.embedding_model', 'nomic-embed-text');
-            $cacheKey = 'ai_embedding_' . md5($equipment->toEmbeddingText() . '|' . config('ai.provider') . '|' . $embeddingModel);
+            $cacheKey = 'ai_embedding_'.md5($equipment->toEmbeddingText().'|'.config('ai.provider').'|'.$embeddingModel);
             Cache::forget($cacheKey);
         });
     }

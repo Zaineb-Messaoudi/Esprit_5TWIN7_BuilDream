@@ -13,9 +13,6 @@ class RateLimitCallbackWebhook
      * Handle an incoming request.
      *
      * @param  \Closure(\Illuminate\Http\Request): (\Symfony\Component\HttpFoundation\Response)  $next
-     * @param  int  $maxAttempts
-     * @param  int  $decayMinutes
-     * @return \Symfony\Component\HttpFoundation\Response
      */
     public function handle(Request $request, Closure $next, int $maxAttempts = 10, int $decayMinutes = 5): Response
     {
@@ -41,15 +38,16 @@ class RateLimitCallbackWebhook
     protected function resolveKey(Request $request): string
     {
         // Try to get callback secret from various sources
-        $secret = $request->header('X-Callback-Secret') 
+        $secret = $request->header('X-Callback-Secret')
             ?? $request->input('callback_secret')
             ?? $request->query('callback_secret');
-        
+
         $ip = $request->ip();
-        
+
         if ($secret) {
             // Hash the secret to avoid storing it in rate limiter keys
             $secretHash = substr(hash('sha256', $secret), 0, 16);
+
             return "callback_webhook:secret:{$secretHash}:ip:{$ip}";
         }
 

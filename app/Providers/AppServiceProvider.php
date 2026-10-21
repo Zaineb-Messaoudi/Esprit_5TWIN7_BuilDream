@@ -6,7 +6,6 @@ use App\Models\Inspection;
 use App\Models\Maintenance;
 use App\Observers\InspectionObserver;
 use App\Observers\MaintenanceObserver;
-use App\Services\PromptVersionService;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 

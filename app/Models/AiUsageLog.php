@@ -77,7 +77,7 @@ class AiUsageLog extends Model
         ]);
     }
 
-    public static function getStats(string $endpoint = null, string $period = '24h'): array
+    public static function getStats(?string $endpoint = null, string $period = '24h'): array
     {
         $query = self::query();
 
@@ -127,7 +127,7 @@ class AiUsageLog extends Model
      */
     public static function recordFeedback(string $requestId, int $rating, ?string $feedback = null): bool
     {
-        if (!in_array($rating, [1, -1])) {
+        if (! in_array($rating, [1, -1])) {
             return false;
         }
 

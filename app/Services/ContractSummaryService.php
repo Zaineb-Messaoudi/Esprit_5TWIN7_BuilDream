@@ -77,9 +77,9 @@ class ContractSummaryService
         }
 
         $result = [
-            'points'       => $points,
-            'model'        => (string) config('groq.model'),
-            'locale'       => $locale,
+            'points' => $points,
+            'model' => (string) config('groq.model'),
+            'locale' => $locale,
             'generated_at' => now()->toIso8601String(),
         ];
 
@@ -137,10 +137,10 @@ PROMPT;
         $days = max(1, (int) $rental->start_date->diffInDays($rental->end_date));
 
         return implode("\n", [
-            'Equipment: ' . ($rental->equipment?->name ?? 'not specified'),
+            'Equipment: '.($rental->equipment?->name ?? 'not specified'),
             sprintf('Rental period: %s to %s (%d days)', $rental->start_date->format('d/m/Y'), $rental->end_date->format('d/m/Y'), $days),
-            'Rental amount: ' . number_format((float) $rental->total_amount, 2) . ' TND',
-            'Security deposit: ' . number_format((float) $contract->deposit_amount, 2) . ' TND',
+            'Rental amount: '.number_format((float) $rental->total_amount, 2).' TND',
+            'Security deposit: '.number_format((float) $contract->deposit_amount, 2).' TND',
             'Contract terms:',
             (string) $contract->terms,
         ]);

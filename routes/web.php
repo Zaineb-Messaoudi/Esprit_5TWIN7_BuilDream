@@ -1,18 +1,18 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminAiSettingsController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
-use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
 use App\Http\Controllers\Admin\EnergyProfileController as AdminEnergyProfileController;
+use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
 use App\Http\Controllers\Admin\RentalContractController;
 use App\Http\Controllers\Admin\RentalController;
 use App\Http\Controllers\Admin\RentalExtensionController;
 use App\Http\Controllers\Admin\UserController as AdminUserController;
-use App\Http\Controllers\Admin\AdminAiSettingsController;
 use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\Auth\RoleSetupController;
 use App\Http\Controllers\AuthDemoController;
-use App\Http\Controllers\ChartShowcaseController;
 use App\Http\Controllers\CatalogueToolsController;
+use App\Http\Controllers\ChartShowcaseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EcommerceController;
 use App\Http\Controllers\FaqController;

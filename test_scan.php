@@ -9,11 +9,11 @@ try {
     $reflection = new ReflectionMethod($generator, 'scanFilesForDocumentation');
     $reflection->setAccessible(true);
     $files = $reflection->invoke($generator);
-    echo "Files found: " . count($files) . PHP_EOL;
+    echo 'Files found: '.count($files).PHP_EOL;
     foreach ($files as $file) {
-        echo "  - $file" . PHP_EOL;
+        echo "  - $file".PHP_EOL;
     }
 } catch (Throwable $e) {
-    echo "Error: " . $e->getMessage() . PHP_EOL;
-    echo $e->getTraceAsString() . PHP_EOL;
+    echo 'Error: '.$e->getMessage().PHP_EOL;
+    echo $e->getTraceAsString().PHP_EOL;
 }

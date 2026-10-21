@@ -95,7 +95,7 @@ test('opening the contract page records that the renter read it', function () {
         ->get(route('contracts.show', $contract))
         ->assertOk()
         ->assertSee($contract->contract_number)
-        ->assertSessionHas('contract_read.' . $contract->id);
+        ->assertSessionHas('contract_read.'.$contract->id);
 });
 
 test('the renter reads the contract, ticks the box and signs it', function () {
@@ -103,7 +103,7 @@ test('the renter reads the contract, ticks the box and signs it', function () {
 
     // withSession() puts the "contract was read" mark in the session explicitly
     $this->actingAs($renter)
-        ->withSession(['contract_read.' . $contract->id => now()->timestamp])
+        ->withSession(['contract_read.'.$contract->id => now()->timestamp])
         ->post(route('contracts.accept', $contract), ['accept_terms' => '1'])
         ->assertRedirect(route('contracts.show', $contract))
         ->assertSessionHas('status', 'contract-signed');
@@ -117,7 +117,7 @@ test('signing needs the accept checkbox', function () {
     ['renter' => $renter, 'contract' => $contract] = contractSigningScenario();
 
     $this->actingAs($renter)
-        ->withSession(['contract_read.' . $contract->id => now()->timestamp])
+        ->withSession(['contract_read.'.$contract->id => now()->timestamp])
         ->post(route('contracts.accept', $contract), [])
         ->assertSessionHasErrors('accept_terms');
 
@@ -153,7 +153,7 @@ test('the old one-click signing route no longer signs the contract', function ()
 test('the owner and the admin can read the contract but never sign it', function () {
     ['owner' => $owner, 'contract' => $contract] = contractSigningScenario();
     $admin = contractSigningUser(UserRole::ADMIN);
-    $read = ['contract_read.' . $contract->id => now()->timestamp];
+    $read = ['contract_read.'.$contract->id => now()->timestamp];
 
     foreach ([$owner, $admin] as $user) {
         $this->actingAs($user)

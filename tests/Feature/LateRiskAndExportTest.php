@@ -1,7 +1,6 @@
 <?php
 
 use App\Enums\ContractStatus;
-use App\Enums\ExtensionStatus;
 use App\Enums\RentalStatus;
 use App\Enums\UserRole;
 use App\Models\Category;
