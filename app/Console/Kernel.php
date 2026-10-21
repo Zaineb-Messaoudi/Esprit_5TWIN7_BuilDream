@@ -29,12 +29,12 @@ class Kernel extends ConsoleKernel
             }
         })->dailyAt('03:00')->description('Auto-cancel stale pending reservations');
 
-        // Send payment reminder for pending payments on confirmed reservations
+        // Preserve reminders for pending payment attempts shortly before pickup.
         $schedule->call(function () {
             $payments = \App\Models\Payment::query()
                 ->where('status', 'pending')
-                ->whereHas('reservation', function ($q) {
-                    $q->where('status', \App\Enums\ReservationStatus::CONFIRMED)
+                ->whereHas('reservation', function ($query) {
+                    $query->where('status', \App\Enums\ReservationStatus::CONFIRMED)
                         ->where('start_date', '<=', now()->addDays(2));
                 })
                 ->with('reservation.equipment', 'reservation.user')
@@ -47,10 +47,15 @@ class Kernel extends ConsoleKernel
                 );
             }
 
-            if ($payments->count() > 0) {
+            if ($payments->isNotEmpty()) {
                 \Log::info("Sent {$payments->count()} payment reminders");
             }
         })->dailyAt('09:00')->description('Send payment reminders for upcoming rentals');
+
+        $schedule->command('payments:send-overdue-reminders')
+            ->dailyAt('09:00')
+            ->withoutOverlapping()
+            ->description('Send one-time overdue reservation balance reminders');
 
         // Auto-release deposits for completed rentals (7 days after return)
         $schedule->call(function () {

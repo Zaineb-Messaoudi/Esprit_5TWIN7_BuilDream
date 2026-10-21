@@ -67,6 +67,8 @@ class BuyerController
                 'id' => $p->id,
                 'transaction_reference' => $p->transaction_reference,
                 'amount' => (float) $p->amount,
+                'stage' => $p->payment_stage,
+                'due_date' => $p->due_date?->toDateString(),
                 'payment_method' => $p->payment_method,
                 'status' => $p->status,
                 'payment_date' => $p->payment_date?->toIso8601String(),
@@ -118,6 +120,8 @@ class BuyerController
 
     private function transformReservation(Reservation $r): array
     {
+        $paymentPlan = app(\App\Services\ReservationPaymentService::class);
+
         return [
             'id' => $r->id,
             'reference' => $r->reference,
@@ -126,11 +130,23 @@ class BuyerController
             'start_date' => $r->start_date->toDateString(),
             'end_date' => $r->end_date->toDateString(),
             'total_amount' => (float) $r->total_amount,
+            'total_with_tax' => $paymentPlan->totalWithTax($r),
+            'amount_paid' => $paymentPlan->amountPaid($r),
+            'amount_due' => $paymentPlan->remainingAmount($r),
+            'next_payment_amount' => $paymentPlan->nextPaymentAmount($r),
+            'next_payment_stage' => $paymentPlan->remainingAmount($r) > 0
+                ? $paymentPlan->nextPaymentStage($r)
+                : null,
+            'next_payment_due_date' => $paymentPlan->remainingAmount($r) > 0
+                ? $paymentPlan->nextPaymentDueDate($r)
+                : null,
             'rental' => $r->rental ? ['reference' => $r->rental->reference, 'status' => $r->rental->status->value] : null,
             'invoice' => $r->invoice ? ['invoice_number' => $r->invoice->invoice_number, 'status' => $r->invoice->status] : null,
             'payments' => $r->payments->map(fn (Payment $p) => [
                 'transaction_reference' => $p->transaction_reference,
                 'amount' => (float) $p->amount,
+                'stage' => $p->payment_stage,
+                'due_date' => $p->due_date?->toDateString(),
                 'status' => $p->status,
             ]),
         ];

@@ -54,6 +54,9 @@ test('live booking reads persisted equipment and server checks existing rental a
         ->assertOk()
         ->assertSee('Availability Connected Battery')
         ->assertSee('Choose your rental dates')
+        ->assertSee('AI Dashboard')
+        ->assertSee('SolarShare AI Assistant')
+        ->assertSee('equipment reservation')
         ->assertSee('Availability is checked again when you submit the request.')
         ->assertDontSee('Backend-connected preview.');
 });

@@ -35,6 +35,7 @@ RateLimiter::for('auth', function (Request $request) {
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReservationCancellationController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SpecialPageController;
 use App\Http\Controllers\Technical\InspectionController;
@@ -50,7 +51,8 @@ Route::get('/catalog', [FrontController::class, 'catalog'])->name('front.catalog
 Route::get('/equipment/map', [FrontController::class, 'equipmentMap'])->name('front.equipment.map');
 Route::get('/equipment/{id}/solar-production', [FrontController::class, 'solarProduction'])->name('front.equipment.solar-production');
 Route::get('/equipment/{id}/technical-sheet.pdf', [FrontController::class, 'exportPdf'])->name('front.equipment.pdf');
-Route::get('/energy-calculator', [CatalogueToolsController::class, 'energyCalculator'])->name('front.energy-calculator');
+Route::get('/energy-calculator', [\App\Http\Controllers\EnergyCalculatorController::class, 'index'])->name('front.energy-calculator');
+Route::post('/energy-calculator', [\App\Http\Controllers\EnergyCalculatorController::class, 'calculate'])->name('front.energy-calculator.calculate');
 Route::get('/equipment/compare', [CatalogueToolsController::class, 'compare'])->name('front.equipment.compare');
 Route::get('/equipment/{id}', [FrontController::class, 'show'])
     ->whereNumber('id')
@@ -112,8 +114,16 @@ foreach (config('front.pages') as $slug => $page) {
 
 // Post-login landing: admins -> Back Office, everyone else -> Front Office.
 // Keeps the `dashboard` route name used by the auth controllers.
-Route::get('/portal', function () {
+Route::get('/dashboard', function () {
     $user = auth()->user();
+
+    if (! $user->role_setup_completed) {
+        return redirect()->route('role.setup');
+    }
+
+    if (! $user->hasVerifiedEmail()) {
+        return redirect()->route('verification.notice');
+    }
 
     if ($user->isAdmin()) {
         return redirect()->route('dashboard.ecommerce');
@@ -164,8 +174,28 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     })->name('profile.overview');
 });
 
+Route::middleware(['auth', 'verified', 'role.selected', 'can:buyer-only'])->group(function () {
+    Route::get('/reservation-assistant', [\App\Http\Controllers\ReservationAssistantController::class, 'index'])
+        ->name('front.reservation-assistant');
+    Route::post('/reservation-assistant/analyze', [\App\Http\Controllers\ReservationAssistantController::class, 'analyze'])
+        ->name('front.reservation-assistant.analyze');
+    Route::post('/reservation-assistant/recommend', [\App\Http\Controllers\ReservationAssistantController::class, 'recommend'])
+        ->name('front.reservation-assistant.recommend');
+    Route::post('/reservation-assistant/service-providers/{workRequest}', [\App\Http\Controllers\ReservationAssistantController::class, 'recommendServiceProviders'])
+        ->name('front.reservation-assistant.service-providers');
+    Route::post('/reservation-assistant', [\App\Http\Controllers\ReservationAssistantController::class, 'store'])
+        ->name('front.reservation-assistant.store');
+});
+
+Route::middleware(['auth', 'verified', 'role.selected', 'can:owner-only'])->group(function () {
+    Route::get('/owner/service-provider-profile', [\App\Http\Controllers\ServiceProviderProfileController::class, 'edit'])
+        ->name('front.owner-service-provider-profile');
+    Route::put('/owner/service-provider-profile', [\App\Http\Controllers\ServiceProviderProfileController::class, 'update'])
+        ->name('front.owner-service-provider-profile.update');
+});
+
 Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\SolarShareDashboardController::class, 'index'])->name('dashboard.main');
+    Route::get('/admin/dashboard', [\App\Http\Controllers\SolarShareDashboardController::class, 'index'])->name('dashboard.main');
     Route::get('/ecommerce', [DashboardController::class, 'ecommerce'])->name('dashboard.ecommerce');
     Route::get('/stocks', [DashboardController::class, 'sector'])->defaults('dashboard', 'stocks')->name('dashboard.stocks');
     Route::get('/finance', [DashboardController::class, 'sector'])->defaults('dashboard', 'finance')->name('dashboard.finance');
@@ -266,13 +296,19 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         Route::get('rental-insights/export', [\App\Http\Controllers\Admin\RentalInsightsController::class, 'export'])
             ->name('rental-insights.export');
 
+        // Reservation Cancellation (admin)
+        Route::post('reservations/{reservation}/cancellation-decision', [ReservationCancellationController::class, 'decide'])
+            ->name('reservations.cancellation-decision');
+
         // AI Settings
         Route::get('ai-settings', [AdminAiSettingsController::class, 'index'])->name('ai-settings.index');
         Route::put('ai-settings', [AdminAiSettingsController::class, 'update'])->name('ai-settings.update');
         Route::post('ai-settings/test', [AdminAiSettingsController::class, 'testConnection'])->name('ai-settings.test');
         Route::post('ai-settings/pull-model', [AdminAiSettingsController::class, 'pullModel'])->name('ai-settings.pull-model');
     });
+});
 
+Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
     // Dashboard Routes
     Route::get('/analytics', function () {
         return view('pages.dashboard.analytics', ['title' => 'Analytics Dashboard']);
@@ -286,9 +322,11 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/saas', function () {
         return view('pages.dashboard.saas', ['title' => 'SaaS Dashboard']);
     })->name('dashboard.saas');
-    Route::get('/ai-dashboard', function () {
-        return view('pages.dashboard.ai', ['title' => 'AI Dashboard']);
-    })->name('dashboard.ai');
+    Route::get('/ai-dashboard', [AiDemoController::class, 'index'])->name('dashboard.ai');
+});
+
+Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    // AI Studio (accessible to authenticated users with role selected)
     Route::get('/ai', [AiDemoController::class, 'index'])->name('ai.index');
     Route::get('/ai/usage', [AiDemoController::class, 'usage'])->name('ai.usage');
     Route::get('/ai/text-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'text')->name('ai.text');
@@ -298,7 +336,15 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/ai/chat', [AiDemoController::class, 'tool'])->defaults('tool', 'chat')->name('ai.chat');
     Route::get('/ai/history', [AiDemoController::class, 'tool'])->defaults('tool', 'history')->name('ai.history');
     Route::get('/ai/settings', [AiDemoController::class, 'tool'])->defaults('tool', 'settings')->name('ai.settings');
+    Route::match(['put', 'post'], '/ai/settings', [AiDemoController::class, 'updateSettings'])->name('ai.settings.update');
+    Route::post('/ai/generate', [AiDemoController::class, 'generate'])->name('ai.generate');
+    Route::get('/ai/generations/{generation}/media', [AiDemoController::class, 'media'])
+        ->name('ai.generations.media');
+    Route::delete('/ai/generations/{generation}', [AiDemoController::class, 'destroy'])
+        ->name('ai.generations.destroy');
+});
 
+Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
     // Calendar
     Route::get('/calendar', function () {
         return view('pages.applications.calendar', ['title' => 'Calendar']);
@@ -480,6 +526,8 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])
 Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     Route::post('/booking/reservations', [MarketplaceController::class, 'storeReservation'])->name('booking.reservations.store');
     Route::post('/booking/reservations/{reservation}/payment', [MarketplaceController::class, 'pay'])->name('booking.reservations.pay');
+    Route::post('/booking/reservations/{reservation}/cancellation', [ReservationCancellationController::class, 'request'])
+        ->name('booking.reservations.cancellation');
     Route::post('/rental-contracts/{contract}/sign', [MarketplaceController::class, 'signContract'])->name('buyer.contracts.sign');
     Route::post('/owner/reservations/{reservation}/decision', [MarketplaceController::class, 'decideReservation'])
         ->middleware('can:owner-only')->name('owner.reservations.decision');

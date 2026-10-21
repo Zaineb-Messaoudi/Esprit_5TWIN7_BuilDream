@@ -9,6 +9,7 @@
         </select>
         @error('equipment_id')<p class="text-error-600 text-sm">{{ $message }}</p>@enderror
     </div>
+
     <div class="grid gap-5 sm:grid-cols-2">
         <div>
             <label for="reservation-start-date" class="block">{{ __('Start date') }}</label>
@@ -21,7 +22,9 @@
             @error('end_date')<p class="text-error-600 text-sm">{{ $message }}</p>@enderror
         </div>
     </div>
+
     <p class="text-theme-xs text-gray-500">{{ __('Choose dates from the calendar. The server recalculates the total and rejects overlapping reservations.') }}</p>
+
     @if (isset($reservation) && auth()->user()->isAdmin())
         <div>
             <label for="status" class="block">{{ __('Reservation status') }}</label>

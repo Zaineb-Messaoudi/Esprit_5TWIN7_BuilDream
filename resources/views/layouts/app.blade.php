@@ -185,6 +185,12 @@
         </div>
     </div>
 
+    @auth
+        @if (auth()->user()->role_setup_completed)
+        <x-ai.assistant-widget />
+        @endif
+    @endauth
+
 </body>
 
 @stack('scripts')

@@ -270,10 +270,10 @@ class AdminPagesTest extends TestCase
         $this->actingAs($user)
             ->get(route('ai.settings'))
             ->assertOk()
-            ->assertSee('API base URL')
+            ->assertSee('The provider key is managed securely by the server')
             ->assertSee('Maximum output tokens')
             ->assertSee('Temperature')
-            ->assertSee('not save, transmit, or connect');
+            ->assertSee('Provider status');
         $this->actingAs($user)
             ->get(route('ui.alerts'))
             ->assertOk()

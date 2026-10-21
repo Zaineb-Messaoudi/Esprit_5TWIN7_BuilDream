@@ -48,4 +48,13 @@ return [
         ],
     ],
 
+    'stripe' => [
+        'key' => env('STRIPE_KEY'),
+        'secret' => env('STRIPE_SECRET'),
+        'publishable' => env('STRIPE_PUBLISHABLE_KEY'),
+        'webhook_secret' => env('STRIPE_WEBHOOK_SECRET'),
+        'checkout_currency' => env('STRIPE_CHECKOUT_CURRENCY', 'usd'),
+        'tnd_to_checkout_rate' => env('STRIPE_TND_TO_CHECKOUT_RATE', 0.32),
+    ],
+
 ];

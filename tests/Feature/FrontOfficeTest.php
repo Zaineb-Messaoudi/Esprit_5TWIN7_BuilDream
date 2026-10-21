@@ -330,7 +330,7 @@ class FrontOfficeTest extends TestCase
             ['front.my-contract', [], 'No rental contracts yet.'],
             ['front.my-extensions', [], 'No extension requests yet.'],
             ['front.my-payments', [], 'No payments yet.'],
-            ['front.my-notifications', [], 'Your updates'],
+            ['front.my-notifications', [], 'No notifications yet.'],
         ] as [$route, $parameters, $content]) {
             $response = $this->get(route($route, $parameters))->assertOk()->assertSee($content);
             if ($route !== 'front.my-notifications') {

@@ -58,6 +58,14 @@
         @include('layouts.partials.front-footer')
     </div>
 
+    @auth
+        @if (auth()->user()->role_setup_completed)
+            <x-ai.assistant-widget />
+        @endif
+    @else
+        <x-ai.assistant-widget />
+    @endauth
+
     @stack('scripts')
 </body>
 

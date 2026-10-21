@@ -4,10 +4,11 @@ namespace App\Services;
 
 use App\Models\EscrowAccount;
 use App\Models\Payment;
-use App\Models\Rental;
+use App\Models\Reservation;
 use App\Models\StripeAccount;
 use App\Models\StripeWebhookEvent;
 use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Log;
 use Stripe\Stripe;
 
@@ -76,6 +77,78 @@ class StripeConnectService
             'return_url' => $returnUrl,
             'type' => 'account_onboarding',
         ]);
+    }
+
+    /**
+     * Create a hosted Stripe Checkout session for a real reservation payment.
+     */
+    public function createCheckoutSession(
+        float $amount,
+        string $currency,
+        string $reservationReference,
+        int $reservationId,
+        int $userId,
+        string $successUrl,
+        string $cancelUrl
+    ): \Stripe\Checkout\Session {
+        return \Stripe\Checkout\Session::create([
+            'mode' => 'payment',
+            'managed_payments' => ['enabled' => false],
+            'line_items' => [[
+                'price_data' => [
+                    'currency' => strtolower($currency),
+                    'unit_amount' => (int) round($amount * 100),
+                    'product_data' => [
+                        'name' => 'Reservation '.$reservationReference,
+                    ],
+                ],
+                'quantity' => 1,
+            ]],
+            'metadata' => [
+                'reservation_id' => $reservationId,
+                'user_id' => $userId,
+                'reservation_reference' => $reservationReference,
+            ],
+            'success_url' => $successUrl,
+            'cancel_url' => $cancelUrl,
+        ]);
+    }
+
+    public function retrieveCheckoutSession(string $sessionId): \Stripe\Checkout\Session
+    {
+        return \Stripe\Checkout\Session::retrieve($sessionId);
+    }
+
+    public function createReservationRefund(
+        string $sessionId,
+        string $idempotencyKey,
+        int $paymentId,
+        ?int $amountMinor = null
+    ): \Stripe\Refund {
+        $session = $this->retrieveCheckoutSession($sessionId);
+        $paymentIntent = $session->payment_intent;
+        $paymentIntentId = is_string($paymentIntent) ? $paymentIntent : ($paymentIntent->id ?? null);
+
+        if (! $paymentIntentId) {
+            throw new \RuntimeException('The Stripe Checkout Session has no PaymentIntent to refund.');
+        }
+
+        $refundData = ['payment_intent' => $paymentIntentId];
+        $refundData['metadata'] = [
+            'reservation_id' => (string) ($session->metadata['reservation_id'] ?? ''),
+            'payment_id' => (string) $paymentId,
+        ];
+        if ($amountMinor !== null) {
+            if ($amountMinor < 1 || $amountMinor > (int) $session->amount_total) {
+                throw new \InvalidArgumentException('The requested refund amount is outside the paid Checkout amount.');
+            }
+            $refundData['amount'] = $amountMinor;
+        }
+
+        return \Stripe\Refund::create(
+            $refundData,
+            ['idempotency_key' => $idempotencyKey]
+        );
     }
 
     /**
@@ -194,28 +267,58 @@ class StripeConnectService
     public function handleWebhook(string $payload, string $sigHeader): void
     {
         $endpointSecret = config('services.stripe.webhook_secret');
-        $event = null;
+        if (! filled($endpointSecret)) {
+            throw new \RuntimeException('Stripe webhook secret is not configured.');
+        }
 
         try {
             $event = \Stripe\Webhook::constructEvent($payload, $sigHeader, $endpointSecret);
-        } catch (\Exception $e) {
-            Log::error('Stripe webhook signature verification failed: '.$e->getMessage());
-            throw new \Exception('Invalid webhook signature');
+        } catch (\Stripe\Exception\SignatureVerificationException|\Stripe\Exception\UnexpectedValueException $e) {
+            Log::warning('Stripe webhook signature or payload validation failed.', [
+                'exception' => $e->getMessage(),
+            ]);
+            throw new \InvalidArgumentException('Invalid Stripe webhook signature or payload.', 0, $e);
         }
 
-        // Log webhook event
-        $webhookEvent = StripeWebhookEvent::create([
+        DB::table('stripe_webhook_events')->insertOrIgnore([
             'stripe_event_id' => $event->id,
             'type' => $event->type,
-            'payload' => $event->toArray(),
+            'payload' => json_encode($event->toArray(), JSON_THROW_ON_ERROR),
             'status' => 'pending',
+            'created_at' => now(),
+            'updated_at' => now(),
         ]);
 
         try {
-            $this->processWebhookEvent($event);
-            $webhookEvent->markProcessed();
-        } catch (\Exception $e) {
-            $webhookEvent->markFailed($e->getMessage());
+            DB::transaction(function () use ($event): void {
+                $webhookEvent = StripeWebhookEvent::where('stripe_event_id', $event->id)
+                    ->lockForUpdate()
+                    ->firstOrFail();
+
+                if ($webhookEvent->isProcessed()) {
+                    return;
+                }
+
+                $webhookEvent->update([
+                    'status' => 'pending',
+                    'error_message' => null,
+                ]);
+
+                $this->processWebhookEvent($event);
+                $webhookEvent->markProcessed();
+            });
+        } catch (\Throwable $e) {
+            StripeWebhookEvent::where('stripe_event_id', $event->id)->update([
+                'status' => 'failed',
+                'error_message' => mb_substr($e->getMessage(), 0, 65535),
+            ]);
+
+            Log::error('Stripe webhook event processing failed.', [
+                'event_id' => $event->id,
+                'type' => $event->type,
+                'exception' => $e->getMessage(),
+            ]);
+
             throw $e;
         }
     }
@@ -228,6 +331,20 @@ class StripeConnectService
         switch ($event->type) {
             case 'account.updated':
                 $this->handleAccountUpdated($event->data->object);
+                break;
+
+            case 'checkout.session.completed':
+            case 'checkout.session.async_payment_succeeded':
+                $this->handleCheckoutSessionCompleted(
+                    \Stripe\Checkout\Session::constructFrom($event->data->object->toArray())
+                );
+                break;
+
+            case 'checkout.session.async_payment_failed':
+            case 'checkout.session.expired':
+                $this->handleCheckoutSessionFailed(
+                    \Stripe\Checkout\Session::constructFrom($event->data->object->toArray())
+                );
                 break;
 
             case 'payment_intent.succeeded':
@@ -250,10 +367,117 @@ class StripeConnectService
                 $this->handleChargeRefunded($event->data->object);
                 break;
 
+            case 'refund.updated':
+                $this->handleRefundUpdated(\Stripe\Refund::constructFrom($event->data->object->toArray()));
+                break;
+
             case 'charge.dispute.created':
                 $this->handleDisputeCreated($event->data->object);
                 break;
         }
+    }
+
+    protected function handleCheckoutSessionCompleted(\Stripe\Checkout\Session $session): void
+    {
+        if ($session->payment_status !== 'paid') {
+            return;
+        }
+
+        $reservationId = $session->metadata['reservation_id'] ?? null;
+        $userId = $session->metadata['user_id'] ?? null;
+        if (! $reservationId || ! $userId) {
+            return;
+        }
+
+        $reservation = Reservation::find($reservationId);
+        if ($reservation) {
+            $paymentExists = Payment::where('transaction_reference', $session->id)
+                ->where('reservation_id', $reservation->id)
+                ->exists();
+
+            if (! $paymentExists) {
+                throw new \RuntimeException('No local payment attempt matches the completed Stripe Checkout Session.');
+            }
+
+            if (! $this->completeCheckoutSession($session, $reservation, (int) $userId)) {
+                Log::warning('Stripe Checkout Session did not match the reservation payment details.', [
+                    'reservation_id' => $reservation->id,
+                    'session_id' => $session->id,
+                ]);
+            }
+        }
+    }
+
+    protected function handleCheckoutSessionFailed(\Stripe\Checkout\Session $session): void
+    {
+        Payment::where('transaction_reference', $session->id)
+            ->where('status', 'pending')
+            ->update(['status' => 'failed']);
+    }
+
+    public function completeCheckoutSession(
+        \Stripe\Checkout\Session $session,
+        Reservation $reservation,
+        int $userId
+    ): bool {
+        $payment = Payment::where('transaction_reference', $session->id)
+            ->where('reservation_id', $reservation->id)
+            ->first();
+        if (! $payment) {
+            return false;
+        }
+
+        $expectedAmount = round((float) $payment->amount, 2);
+        $checkoutCurrency = strtolower((string) config('services.stripe.checkout_currency', 'usd'));
+        $conversionRate = (float) config('services.stripe.tnd_to_checkout_rate', 0);
+        $expectedCheckoutAmount = round($expectedAmount * $conversionRate, 2);
+        $expectedAmountInMinorUnits = (int) round($expectedCheckoutAmount * 100);
+
+        if (
+            $session->mode !== 'payment'
+            || $session->payment_status !== 'paid'
+            || (int) ($session->metadata['reservation_id'] ?? 0) !== (int) $reservation->id
+            || (int) ($session->metadata['user_id'] ?? 0) !== $userId
+            || (int) $reservation->user_id !== $userId
+            || $reservation->status !== 'confirmed'
+            || $conversionRate <= 0
+            || strtolower((string) $session->currency) !== $checkoutCurrency
+            || (int) $session->amount_total !== $expectedAmountInMinorUnits
+        ) {
+            return false;
+        }
+
+        return DB::transaction(function () use ($session, $reservation, $expectedAmount): bool {
+            $lockedReservation = Reservation::whereKey($reservation->id)->lockForUpdate()->first();
+            if (! $lockedReservation || $lockedReservation->status !== 'confirmed') {
+                return false;
+            }
+
+            $payment = Payment::where('transaction_reference', $session->id)
+                ->lockForUpdate()
+                ->first();
+
+            if (
+                ! $payment
+                || (int) $payment->reservation_id !== (int) $lockedReservation->id
+                || round((float) $payment->amount, 2) !== $expectedAmount
+                || $payment->status === 'failed'
+            ) {
+                return false;
+            }
+
+            if ($payment->status !== 'paid') {
+                $payment->update([
+                    'status' => 'paid',
+                    'payment_method' => 'CARD',
+                    'payment_date' => now(),
+                ]);
+            }
+
+            app(ReservationPaymentService::class)->synchronizeAfterPayment($lockedReservation);
+
+            return true;
+        });
     }
 
     protected function handleAccountUpdated(\Stripe\Account $account): void
@@ -318,6 +542,80 @@ class StripeConnectService
                 'stripe_refund_id' => $charge->refunds->data[0]->id ?? null,
             ]);
         }
+
+        $paymentIntentId = is_string($charge->payment_intent)
+            ? $charge->payment_intent
+            : ($charge->payment_intent->id ?? null);
+        $payment = $paymentIntentId
+            ? Payment::where('stripe_payment_intent_id', $paymentIntentId)->first()
+            : null;
+
+        if ($payment && $charge->refunded) {
+            $this->recordStripeRefund(
+                $payment,
+                (int) $charge->amount_refunded,
+                $charge->refunds->data[0]->id ?? null,
+                true
+            );
+            app(ReservationCancellationService::class)->finishIfRefunded($payment->reservation);
+        }
+    }
+
+    protected function handleRefundUpdated(\Stripe\Refund $refund): void
+    {
+        $paymentIntentId = is_string($refund->payment_intent)
+            ? $refund->payment_intent
+            : ($refund->payment_intent->id ?? null);
+        $paymentId = $refund->metadata['payment_id'] ?? null;
+        $payment = $paymentId
+            ? Payment::find($paymentId)
+            : ($paymentIntentId
+                ? Payment::where('stripe_payment_intent_id', $paymentIntentId)->first()
+                : null);
+
+        if (! $payment) {
+            return;
+        }
+
+        if ($refund->status === 'succeeded') {
+            $this->recordStripeRefund($payment, (int) $refund->amount, $refund->id, true);
+            app(ReservationCancellationService::class)->finishIfRefunded($payment->reservation);
+        } elseif ($refund->status === 'pending' || $refund->status === 'requires_action') {
+            $this->recordStripeRefund($payment, (int) $refund->amount, $refund->id, false);
+        } elseif ($refund->status === 'failed' || $refund->status === 'canceled') {
+            $payment->update([
+                'refund_status' => 'failed',
+                'stripe_refund_id' => null,
+            ]);
+        }
+    }
+
+    private function recordStripeRefund(Payment $payment, int $amountMinor, ?string $refundId, bool $succeeded): void
+    {
+        $rate = (float) config('services.stripe.tnd_to_checkout_rate', 0);
+        if ($rate <= 0) {
+            throw new \RuntimeException('Stripe refund exchange rate is not configured.');
+        }
+
+        $refundedAmount = round($amountMinor / 100 / $rate, 2);
+        $sameRefund = $refundId && $payment->stripe_refund_id === $refundId;
+        $newTotalRefunded = ! $succeeded
+            ? (float) $payment->refunded_amount
+            : ($sameRefund
+                ? max((float) $payment->refunded_amount, $refundedAmount)
+                : min((float) $payment->amount, round((float) $payment->refunded_amount + $refundedAmount, 2)));
+        $fullyRefunded = $newTotalRefunded >= (float) $payment->amount - 0.02;
+
+        $payment->update([
+            'refunded_amount' => min((float) $payment->amount, $newTotalRefunded),
+            'status' => $succeeded
+                ? ($fullyRefunded ? 'refunded' : 'partially_refunded')
+                : $payment->status,
+            'refund_status' => $succeeded ? 'succeeded' : 'pending',
+            'stripe_payment_intent_id' => $paymentIntentId ?? $payment->stripe_payment_intent_id,
+            'stripe_refund_id' => $refundId ?? $payment->stripe_refund_id,
+            'refunded_at' => $succeeded ? now() : null,
+        ]);
     }
 
     protected function handleDisputeCreated(\Stripe\Dispute $dispute): void

@@ -114,8 +114,9 @@ class DashboardController extends Controller
             ->count();
         $completedRentals = Rental::where('status', 'completed')
             ->count();
-        $totalRevenue = Payment::where('status', 'paid')
-            ->sum('amount');
+        $totalRevenue = Payment::whereIn('status', ['paid', 'partially_refunded'])
+            ->selectRaw('COALESCE(SUM(amount - refunded_amount), 0) as net_revenue')
+            ->value('net_revenue');
         $pendingRevenue = Payment::where('status', 'pending')
             ->sum('amount');
         $totalInvoices = Invoice::count();
@@ -130,20 +131,20 @@ class DashboardController extends Controller
         $isSqlite = $driver === 'sqlite';
 
         $yearExpr = $isSqlite
-            ? 'strftime("%Y", payment_date)'
+            ? "CAST(strftime('%Y', payment_date) AS INTEGER)"
             : 'YEAR(payment_date)';
         $monthExpr = $isSqlite
-            ? 'strftime("%m", payment_date)'
+            ? "CAST(strftime('%m', payment_date) AS INTEGER)"
             : 'MONTH(payment_date)';
 
-        $monthlyRevenue = Payment::where('status', 'paid')
+        $monthlyRevenue = Payment::whereIn('status', ['paid', 'partially_refunded'])
             ->where(
                 'payment_date',
                 '>=',
                 now()->subMonths(11)->startOfMonth()
             )
             ->selectRaw(
-                "{$yearExpr} as year, {$monthExpr} as month, SUM(amount) as total"
+                "{$yearExpr} as year, {$monthExpr} as month, SUM(amount - refunded_amount) as total"
             )
             ->groupBy('year', 'month')
             ->orderBy('year')

@@ -23,7 +23,7 @@ class ReservationApprovedNotification extends BaseNotification
 
     public function body(): string
     {
-        return __('Your request for :equipment has been approved. You can now record your payment.', [
+        return __('Your reservation for :equipment has been approved. Complete payment to confirm your rental.', [
             'equipment' => $this->reservation->equipment->name,
         ]);
     }
@@ -48,7 +48,7 @@ class ReservationApprovedNotification extends BaseNotification
 
     public function actionLabel(): ?string
     {
-        return __('Continue to payment');
+        return __('Pay now');
     }
 
     public function emailPreferenceKey(): string

@@ -23,8 +23,8 @@ class PaymentRequest extends FormRequest
     {
         return [
             'reservation_id' => ['required', 'exists:reservations,id'],
-            'amount' => ['required', 'numeric', 'min:0.01'],
-            'payment_date' => ['required', 'date'],
+            'amount' => ['required', 'numeric', 'decimal:0,2', 'min:0.01', 'max:99999999.99'],
+            'payment_date' => ['required', 'date', 'before_or_equal:now'],
             'status' => ['required', 'in:pending,paid,failed'],
             'payment_method' => ['required', 'in:CARD,BANK_TRANSFER,CASH'],
         ];

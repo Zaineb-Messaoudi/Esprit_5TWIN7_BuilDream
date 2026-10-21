@@ -9,6 +9,14 @@ abstract class TestCase extends BaseTestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->withoutMiddleware(\App\Http\Middleware\VerifyCsrfToken::class);
+        $this->withoutMiddleware([
+            \App\Http\Middleware\VerifyCsrfToken::class,
+            \Illuminate\Routing\Middleware\ThrottleRequests::class,
+            \Illuminate\Routing\Middleware\ThrottleRequestsWithRedis::class,
+            \App\Http\Middleware\ValidateAiRequest::class,
+            \App\Http\Middleware\RateLimitByIpAndUser::class,
+            \App\Http\Middleware\EnsureRoleSelected::class,
+            \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
+        ]);
     }
 }

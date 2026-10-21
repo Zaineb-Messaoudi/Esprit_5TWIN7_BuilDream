@@ -16,6 +16,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Schema;
 
 /** Renders any page declared in config/front.php (section-based pages). */
@@ -28,6 +29,8 @@ class PageController extends Controller
 
         return view('pages.front.live-record-detail', [
             'title' => __('Reservation details'), 'record' => $reservation, 'recordType' => 'reservation', 'owner' => false,
+            'paymentPlan' => app(\App\Services\ReservationPaymentService::class),
+            'cancellationQuote' => app(\App\Services\ReservationCancellationService::class)->quote($reservation),
         ]);
     }
 
@@ -38,6 +41,7 @@ class PageController extends Controller
 
         return view('pages.front.live-record-detail', [
             'title' => __('Reservation details'), 'record' => $reservation, 'recordType' => 'reservation', 'owner' => true,
+            'paymentPlan' => app(\App\Services\ReservationPaymentService::class),
         ]);
     }
 
@@ -177,6 +181,49 @@ class PageController extends Controller
                     ->where('user_id', $request->user()->id)
                     ->where('equipment_id', $equipmentId)
                     ->findOrFail($request->integer('reservation'));
+
+                if (
+                    $slug === 'confirmed'
+                    && $request->query('checkout') === 'success'
+                    && filled(config('services.stripe.secret'))
+                ) {
+                    $sessionId = $request->query('session_id');
+                    $payment = is_string($sessionId) && str_starts_with($sessionId, 'cs_')
+                        ? $reservation->payments->firstWhere('transaction_reference', $sessionId)
+                        : null;
+
+                    if ($payment?->status === 'pending') {
+                        try {
+                            $stripe = app(\App\Services\StripeConnectService::class);
+                            $session = $stripe->retrieveCheckoutSession($sessionId);
+
+                            if (
+                                $session->payment_status === 'paid'
+                                && ! $stripe->completeCheckoutSession($session, $reservation, (int) $request->user()->id)
+                            ) {
+                                Log::warning('Stripe Checkout return did not match the reservation payment details.', [
+                                    'reservation_id' => $reservation->id,
+                                    'session_id' => $sessionId,
+                                ]);
+                            }
+                        } catch (\Stripe\Exception\ApiConnectionException $exception) {
+                            Log::warning('Unable to verify the Stripe Checkout return.', [
+                                'reservation_id' => $reservation->id,
+                                'session_id' => $sessionId,
+                                'exception' => $exception->getMessage(),
+                            ]);
+                        } catch (\Stripe\Exception\ApiErrorException $exception) {
+                            Log::warning('Stripe rejected Checkout return verification.', [
+                                'reservation_id' => $reservation->id,
+                                'session_id' => $sessionId,
+                                'exception' => $exception->getMessage(),
+                            ]);
+                        }
+
+                        $reservation->load(['payments', 'invoice', 'rental.contract']);
+                    }
+                }
+
                 if ($slug === 'invoice') {
                     abort_unless($reservation->invoice, 404);
                 }
@@ -205,6 +252,7 @@ class PageController extends Controller
                 'slug' => $slug,
                 'item' => $equipment,
                 'reservation' => $reservation,
+                'paymentPlan' => $reservation ? app(\App\Services\ReservationPaymentService::class) : null,
                 'startDate' => $request->query('start', ''),
                 'endDate' => $request->query('end', ''),
                 'blockedIntervals' => $blockedIntervals,
@@ -236,7 +284,7 @@ class PageController extends Controller
                 : 'technical.inspections.index');
         }
 
-        if (in_array($slug, ['my-reservations', 'my-rentals', 'my-contract', 'my-extensions', 'my-payments', 'my-earnings'], true)) {
+        if (in_array($slug, ['my-reservations', 'my-rentals', 'my-contract', 'my-extensions', 'my-payments', 'my-earnings', 'my-notifications'], true)) {
             $owner = $request->user()->isOwner();
             $reservations = Reservation::with(['equipment', 'user', 'payments', 'invoice'])
                 ->when($owner,
@@ -266,11 +314,14 @@ class PageController extends Controller
                         ? $query->whereHas('equipment', fn ($equipment) => $equipment->where('owner_id', $request->user()->id))
                         : $query->where('user_id', $request->user()->id);
                 })->latest()->get();
+            $notifications = $request->user()->notifications()->latest()->get();
 
             return view('pages.front.live-workspace', [
                 'title' => __($page['title']), 'slug' => $slug, 'owner' => $owner,
                 'reservations' => $reservations, 'rentals' => $rentals,
                 'payments' => $payments, 'contracts' => $contracts, 'extensions' => $extensions,
+                'notifications' => $notifications,
+                'paymentPlan' => app(\App\Services\ReservationPaymentService::class),
             ]);
         }
 
@@ -287,11 +338,11 @@ class PageController extends Controller
                 fn ($query) => $query->whereHas('equipment', fn ($equipment) => $equipment->where('owner_id', $request->user()->id)),
                 fn ($query) => $query->where('user_id', $request->user()->id));
             $equipmentCount = $owner ? Equipment::where('owner_id', $request->user()->id)->count() : null;
-            $revenue = Payment::query()->where('status', 'paid')->whereHas('reservation', function ($query) use ($owner, $request): void {
+            $revenue = Payment::query()->whereIn('status', ['paid', 'partially_refunded'])->whereHas('reservation', function ($query) use ($owner, $request): void {
                 $owner
                     ? $query->whereHas('equipment', fn ($equipment) => $equipment->where('owner_id', $request->user()->id))
                     : $query->where('user_id', $request->user()->id);
-            })->sum('amount');
+            })->selectRaw('COALESCE(SUM(amount - refunded_amount), 0) as net_revenue')->value('net_revenue');
 
             return view('pages.front.live-dashboard', [
                 'title' => __($page['title']), 'owner' => $owner, 'reservations' => $reservations,
