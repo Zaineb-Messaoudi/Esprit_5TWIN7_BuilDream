@@ -4,6 +4,7 @@
 .env.backup
 .env.production
 .env.testing
+!.env.production.example
 .phpactor.json
 .phpunit.result.cache
 /.fleet
@@ -19,7 +20,9 @@
 /public/storage
 /storage/*.key
 /storage/pail
+/storage/framework/*.php
 /vendor
+routes.txt
 Homestead.json
 Homestead.yaml
 Thumbs.db

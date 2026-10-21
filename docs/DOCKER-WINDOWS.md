@@ -61,17 +61,10 @@ Never commit `.env`, API keys, Stripe secrets, or OAuth secrets.
 
 ## CI/CD deployment contract
 
-The deployment workflow builds and publishes the image to GitHub Container
-Registry. To enable its SSH deployment jobs, configure these GitHub Environment
-secrets for both `staging` and `production`:
-
-- `DEPLOY_HOST` — server hostname or IP address.
-- `DEPLOY_USER` — deployment user with Docker Compose access.
-- `DEPLOY_SSH_KEY` — private key whose public key is installed on the server.
-- `DEPLOY_PATH` — directory containing the production `.env` and Compose file.
-
-The server must already have Docker Engine, Compose, the checked-out Compose
-files, and its private `.env`. The workflow pulls the immutable SHA-tagged image,
-starts the stack without rebuilding, runs migrations, prints service status, and
-verifies the `/up` health endpoint. See [DEPLOYMENT.md](DEPLOYMENT.md) for the
-server bootstrap and GitHub Environment checklist.
+The production image is built and published to Docker Hub. The Compose stack
+uses a PHP-FPM application container behind Nginx, plus MySQL, Redis,
+Meilisearch, queue, scheduler and Reverb services. Deployment pulls immutable
+image tags, creates a database backup before migrations, verifies `/up`, and
+rolls back the application images if the rollout fails. See
+[DEPLOYMENT.md](DEPLOYMENT.md) and [ENVIRONMENT.md](ENVIRONMENT.md) for the
+complete contract.

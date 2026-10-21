@@ -41,6 +41,8 @@ jobs:
           test -n "$username"
           echo "username=$username" >> "$GITHUB_OUTPUT"
           echo "image=docker.io/$username/solarshare" >> "$GITHUB_OUTPUT"
+          echo "web-image=docker.io/$username/solarshare-nginx" >> "$GITHUB_OUTPUT"
+          echo "tag=sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Container Registry
         uses: docker/login-action@v3
@@ -59,7 +61,7 @@ jobs:
             type=ref,event=pr
             type=semver,pattern={{version}}
             type=semver,pattern={{major}}.{{minor}}
-            type=sha,prefix=sha-
+            type=sha,prefix=sha-,format=short
             type=raw,value=latest,enable={{is_default_branch}}
 
       - name: Build and push Docker image
@@ -71,6 +73,47 @@ jobs:
           labels: ${{ steps.meta.outputs.labels }}
           cache-from: type=gha
           cache-to: type=gha,mode=max
+
+      - name: Extract Nginx image metadata
+        id: web-meta
+        uses: docker/metadata-action@v5
+        with:
+          images: ${{ steps.docker-image.outputs.web-image }}
+          tags: |
+            type=ref,event=branch
+            type=sha,prefix=sha-,format=short
+            type=raw,value=latest,enable={{is_default_branch}}
+
+      - name: Build and push Nginx image
+        uses: docker/build-push-action@v5
+        with:
+          context: .
+          file: docker/nginx/Dockerfile
+          push: true
+          tags: ${{ steps.web-meta.outputs.tags }}
+          labels: ${{ steps.web-meta.outputs.labels }}
+          cache-from: type=gha
+          cache-to: type=gha,mode=max
+
+      - name: Scan Laravel image with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ steps.docker-image.outputs.image }}:${{ steps.docker-image.outputs.tag }}
+          format: table
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
+
+      - name: Scan Nginx image with Trivy
+        uses: aquasecurity/trivy-action@0.28.0
+        with:
+          image-ref: ${{ steps.docker-image.outputs.web-image }}:${{ steps.docker-image.outputs.tag }}
+          format: table
+          vuln-type: os,library
+          severity: CRITICAL,HIGH
+          ignore-unfixed: true
+          exit-code: '1'
 
   staging-smoke:
     name: Staging smoke test
@@ -91,6 +134,7 @@ jobs:
           username="$(printf '%s' "$DOCKERHUB_USERNAME" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')"
           test -n "$username"
           echo "image=docker.io/$username/solarshare:sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+          echo "web-image=docker.io/$username/solarshare-nginx:sha-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
 
       - name: Log in to Docker Hub
         uses: docker/login-action@v3
@@ -122,6 +166,7 @@ jobs:
       - name: Start staging stack from the published image
         env:
           APP_IMAGE: ${{ steps.docker-image.outputs.image }}
+          WEB_IMAGE: ${{ steps.docker-image.outputs.web-image }}
         run: docker compose -p solarshare-staging up -d --no-build --remove-orphans
 
       - name: Wait for staging health endpoint
