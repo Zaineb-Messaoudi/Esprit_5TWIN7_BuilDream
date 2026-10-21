@@ -38,7 +38,12 @@ class EnergyCalculatorController extends Controller
                     ->limit(200)
                     ->get();
 
-                $matches = $matcher->match($result, $listings);
+                $matches = collect($matcher->match($result, $listings))
+                    ->flatten(1)
+                    ->map(fn (array $match) => $listings->firstWhere('id', $match['equipment_id']))
+                    ->filter()
+                    ->unique('id')
+                    ->values();
             }
 
             return view('pages.front.energy-calculator', [
@@ -96,7 +101,12 @@ class EnergyCalculatorController extends Controller
                 ->limit(200)
                 ->get();
 
-            $matches = $matcher->match($result, $listings);
+            $matches = collect($matcher->match($result, $listings))
+                ->flatten(1)
+                ->map(fn (array $match) => $listings->firstWhere('id', $match['equipment_id']))
+                ->filter()
+                ->unique('id')
+                ->values();
         }
 
         return view('pages.front.energy-calculator', [

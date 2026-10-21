@@ -150,9 +150,9 @@
         @endif
     </div>
 
-    @if(isset($result['matches']) && $result['matches']->isNotEmpty())
+    @if($matches?->isNotEmpty())
         <div class="grid gap-5 md:grid-cols-2 xl:grid-cols-3">
-            @foreach($result['matches'] as $item)
+            @foreach($matches as $item)
                 <article class="overflow-hidden rounded-3xl border border-gray-200 bg-white shadow-theme-sm transition-transform hover:-translate-y-1 dark:border-gray-800 dark:bg-white/[0.03]">
                     <div class="h-32 bg-gray-100 dark:bg-gray-900">
                         <img src="{{ $item->image }}" alt="" class="size-full object-cover">
