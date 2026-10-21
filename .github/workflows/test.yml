@@ -20,7 +20,7 @@ env:
   SESSION_DRIVER: array
   SCOUT_DRIVER: 'null'
   AI_ENABLED: false
-  BROADCAST_DRIVER: log
+  BROADCAST_CONNECTION: log
 
 jobs:
   frontend-tests:
