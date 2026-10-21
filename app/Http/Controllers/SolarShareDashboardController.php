@@ -89,11 +89,21 @@ class SolarShareDashboardController extends Controller
         $pendingInvoices = Invoice::where('status', 'pending')->count();
         $overdueInvoices = Invoice::where('status', 'overdue')->count();
 
-        // Monthly revenue chart data (last 12 months)
+        // Monthly revenue chart data (last 12 months) - database-agnostic
+        $driver = DB::getDriverName();
+        $isSqlite = $driver === 'sqlite';
+
+        $yearExpr = $isSqlite
+            ? 'strftime("%Y", payment_date)'
+            : 'YEAR(payment_date)';
+        $monthExpr = $isSqlite
+            ? 'strftime("%m", payment_date)'
+            : 'MONTH(payment_date)';
+
         $monthlyRevenue = Payment::where('status', 'paid')
             ->where('payment_date', '>=', now()->subMonths(11)->startOfMonth())
             ->selectRaw(
-                'strftime("%Y", payment_date) as year, strftime("%m", payment_date) as month, SUM(amount) as total'
+                "{$yearExpr} as year, {$monthExpr} as month, SUM(amount) as total"
             )
             ->groupBy('year', 'month')
             ->orderBy('year')
