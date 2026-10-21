@@ -3,6 +3,7 @@
 namespace Tests\Unit;
 
 use App\Enums\UserRole;
+use App\Models\Category;
 use App\Models\Damage;
 use App\Models\Equipment;
 use App\Models\Inspection;
@@ -39,7 +40,7 @@ class AdvancedAiMaintenanceServicesTest extends TestCase
         Notification::fake();
         $admin = User::factory()->create(['role' => UserRole::ADMIN]);
         $owner = User::factory()->create(['role' => UserRole::OWNER]);
-        $equipment = Equipment::query()->create(['name' => 'Inverter', 'owner_id' => $owner->id, 'category_id' => 7]);
+        $equipment = Equipment::factory()->create(['name' => 'Inverter', 'owner_id' => $owner->id]);
         foreach ([90, 100, 110] as $cost) {
             Maintenance::factory()->create(['equipment_id' => $equipment->id, 'cost' => $cost]);
         }
@@ -54,8 +55,10 @@ class AdvancedAiMaintenanceServicesTest extends TestCase
     public function test_repair_estimation_uses_category_statistics_and_global_fallback(): void
     {
         $owner = User::factory()->create(['role' => UserRole::OWNER]);
-        $categoryEquipment = Equipment::query()->create(['name' => 'Panel', 'owner_id' => $owner->id, 'category_id' => 4]);
-        $otherEquipment = Equipment::query()->create(['name' => 'Battery', 'owner_id' => $owner->id, 'category_id' => 5]);
+        $category = Category::factory()->create();
+        $otherCategory = Category::factory()->create();
+        $categoryEquipment = Equipment::factory()->create(['name' => 'Panel', 'owner_id' => $owner->id, 'category_id' => $category->id]);
+        $otherEquipment = Equipment::factory()->create(['name' => 'Battery', 'owner_id' => $owner->id, 'category_id' => $otherCategory->id]);
         $this->damage($categoryEquipment->id, 100);
         $this->damage($categoryEquipment->id, 200);
         $this->damage($categoryEquipment->id, 600);

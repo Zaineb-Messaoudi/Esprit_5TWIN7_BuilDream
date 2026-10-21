@@ -23,8 +23,8 @@ test('buyers are denied technical pages and owners only see their own records', 
     $otherOwner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true]);
     $buyer = User::factory()->create(['role' => UserRole::BUYER, 'role_setup_completed' => true]);
 
-    $ownedEquipment = Equipment::query()->create(['name' => 'Owner equipment', 'owner_id' => $owner->id]);
-    $otherEquipment = Equipment::query()->create(['name' => 'Other equipment', 'owner_id' => $otherOwner->id]);
+    $ownedEquipment = Equipment::factory()->create(['name' => 'Owner equipment', 'owner_id' => $owner->id]);
+    $otherEquipment = Equipment::factory()->create(['name' => 'Other equipment', 'owner_id' => $otherOwner->id]);
     $ownedMaintenance = Maintenance::factory()->create(['equipment_id' => $ownedEquipment->id]);
     $otherMaintenance = Maintenance::factory()->create(['equipment_id' => $otherEquipment->id]);
 

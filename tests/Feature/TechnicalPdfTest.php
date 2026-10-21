@@ -22,7 +22,7 @@ class TechnicalPdfTest extends TestCase
     {
         parent::setUp();
         $this->owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true, 'email_verified_at' => now()]);
-        $equipment = Equipment::query()->create(['name' => 'PDF equipment', 'owner_id' => $this->owner->id]);
+        $equipment = Equipment::factory()->create(['name' => 'PDF equipment', 'owner_id' => $this->owner->id]);
         $this->inspection = Inspection::factory()->create(['equipment_id' => $equipment->id]);
         $this->maintenance = Maintenance::factory()->create(['equipment_id' => $equipment->id]);
     }

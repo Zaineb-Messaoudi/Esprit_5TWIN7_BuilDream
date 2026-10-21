@@ -23,7 +23,7 @@ class InspectionChecklistFeatureTest extends TestCase
     public function test_owner_can_submit_checklist_and_critical_failure_creates_damage(): void
     {
         $owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true, 'email_verified_at' => now()]);
-        $equipment = Equipment::query()->create(['name' => 'Battery', 'owner_id' => $owner->id]);
+        $equipment = Equipment::factory()->create(['name' => 'Battery', 'owner_id' => $owner->id]);
         $checklist = InspectionChecklist::factory()->create();
         $item = InspectionChecklistItem::factory()->create(['inspection_checklist_id' => $checklist->id, 'is_critical' => true]);
 
@@ -45,7 +45,7 @@ class InspectionChecklistFeatureTest extends TestCase
     public function test_checklist_input_rejects_missing_and_foreign_items(): void
     {
         $owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true, 'email_verified_at' => now()]);
-        $equipment = Equipment::query()->create(['name' => 'Panel', 'owner_id' => $owner->id]);
+        $equipment = Equipment::factory()->create(['name' => 'Panel', 'owner_id' => $owner->id]);
         $checklist = InspectionChecklist::factory()->create();
         InspectionChecklistItem::factory()->create(['inspection_checklist_id' => $checklist->id]);
         $foreignItem = InspectionChecklistItem::factory()->create();

@@ -25,7 +25,7 @@ class MaintenancePhotoTest extends TestCase
         Storage::fake('public');
 
         $this->owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true, 'email_verified_at' => now()]);
-        $equipment = Equipment::query()->create(['name' => 'Repairable battery', 'owner_id' => $this->owner->id]);
+        $equipment = Equipment::factory()->create(['name' => 'Repairable battery', 'owner_id' => $this->owner->id]);
         $this->maintenance = Maintenance::factory()->create(['equipment_id' => $equipment->id]);
     }
 

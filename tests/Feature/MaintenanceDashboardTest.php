@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\UserRole;
 use App\Models\Damage;
+use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\Inspection;
 use App\Models\Maintenance;
@@ -26,8 +27,8 @@ class MaintenanceDashboardTest extends TestCase
     public function test_endpoints_return_exact_aggregated_data(): void
     {
         $owner = User::factory()->create(['role' => UserRole::OWNER]);
-        $categoryId = \Illuminate\Support\Facades\DB::table('categories')->insertGetId(['name' => 'Batteries']);
-        $equipment = Equipment::query()->create(['name' => 'Battery', 'owner_id' => $owner->id, 'category_id' => $categoryId]);
+        $categoryId = Category::factory()->create(['name' => 'Batteries'])->id;
+        $equipment = Equipment::factory()->create(['name' => 'Battery', 'owner_id' => $owner->id, 'category_id' => $categoryId]);
 
         Maintenance::factory()->create(['equipment_id' => $equipment->id, 'start_date' => '2026-01-10', 'cost' => 100]);
         Maintenance::factory()->create(['equipment_id' => $equipment->id, 'start_date' => '2026-01-20', 'cost' => 50.50]);

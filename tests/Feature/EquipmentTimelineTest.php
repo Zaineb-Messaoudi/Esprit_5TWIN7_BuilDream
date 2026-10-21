@@ -23,8 +23,8 @@ class EquipmentTimelineTest extends TestCase
     public function test_timeline_merges_sorts_and_isolates_equipment(): void
     {
         $owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true, 'email_verified_at' => now()]);
-        $equipment = Equipment::query()->create(['name' => 'Tracked equipment', 'owner_id' => $owner->id]);
-        $other = Equipment::query()->create(['name' => 'Other equipment', 'owner_id' => $owner->id]);
+        $equipment = Equipment::factory()->create(['name' => 'Tracked equipment', 'owner_id' => $owner->id]);
+        $other = Equipment::factory()->create(['name' => 'Other equipment', 'owner_id' => $owner->id]);
         Maintenance::factory()->create(['equipment_id' => $equipment->id, 'start_date' => '2026-01-10', 'reason' => 'Older maintenance']);
         Inspection::factory()->create(['equipment_id' => $equipment->id, 'inspection_date' => '2026-03-10', 'comments' => 'Latest inspection', 'damage_detected' => false]);
         Maintenance::factory()->create(['equipment_id' => $other->id, 'start_date' => '2026-04-10', 'reason' => 'Must stay isolated']);
@@ -41,7 +41,7 @@ class EquipmentTimelineTest extends TestCase
     {
         $owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true, 'email_verified_at' => now()]);
         $otherOwner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true, 'email_verified_at' => now()]);
-        $equipment = Equipment::query()->create(['name' => 'New equipment', 'owner_id' => $owner->id]);
+        $equipment = Equipment::factory()->create(['name' => 'New equipment', 'owner_id' => $owner->id]);
 
         $this->actingAs($owner)->get(route('technical.equipment.history', $equipment))->assertOk()->assertSee('No technical history.');
         $this->actingAs($otherOwner)->get(route('technical.equipment.history', $equipment))->assertForbidden();

@@ -28,7 +28,7 @@ class InspectionChecklistServiceTest extends TestCase
         parent::setUp();
 
         $owner = User::factory()->create();
-        $this->equipment = Equipment::query()->create(['name' => 'Test battery', 'owner_id' => $owner->id]);
+        $this->equipment = Equipment::factory()->create(['name' => 'Test battery', 'owner_id' => $owner->id]);
         $this->checklist = InspectionChecklist::factory()->create();
         $this->criticalItem = InspectionChecklistItem::factory()->create([
             'inspection_checklist_id' => $this->checklist->id,
