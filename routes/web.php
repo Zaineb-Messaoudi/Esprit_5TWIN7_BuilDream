@@ -165,6 +165,24 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     })->name('profile.overview');
 });
 
+Route::middleware(['auth', 'verified', 'role.selected', 'can:buyer-only'])->group(function () {
+    Route::get('/reservation-assistant', [\App\Http\Controllers\ReservationAssistantController::class, 'index'])
+        ->name('front.reservation-assistant');
+    Route::post('/reservation-assistant/analyze', [\App\Http\Controllers\ReservationAssistantController::class, 'analyze'])
+        ->name('front.reservation-assistant.analyze');
+    Route::post('/reservation-assistant/recommend', [\App\Http\Controllers\ReservationAssistantController::class, 'recommend'])
+        ->name('front.reservation-assistant.recommend');
+    Route::post('/reservation-assistant/service-providers/{reservationAssistantRequest}', [\App\Http\Controllers\ReservationAssistantController::class, 'recommendServiceProviders'])
+        ->name('front.reservation-assistant.service-providers');
+    Route::post('/reservation-assistant', [\App\Http\Controllers\ReservationAssistantController::class, 'store'])
+        ->name('front.reservation-assistant.store');
+
+    Route::get('/owner/service-provider-profile', [\App\Http\Controllers\ServiceProviderProfileController::class, 'edit'])
+        ->name('front.owner-service-provider-profile');
+    Route::put('/owner/service-provider-profile', [\App\Http\Controllers\ServiceProviderProfileController::class, 'update'])
+        ->name('front.owner-service-provider-profile.update');
+});
+
 Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
     Route::get('/dashboard', [\App\Http\Controllers\SolarShareDashboardController::class, 'index'])->name('dashboard.main');
     Route::get('/ecommerce', [DashboardController::class, 'ecommerce'])->name('dashboard.ecommerce');

@@ -17,23 +17,23 @@ class EnergyNeedsCalculator
     /**
      * Typical values. Hours are the effective daily hours of use.
      *
-     * @return array<string, array{label: string, watts: int, hours: float, surge: float}>
+     * @return array<string, array{label: string, watts: int, hours: float, surge: float, icon: string}>
      */
     public function appliances(): array
     {
         return [
-            'led_lamp' => ['label' => 'LED lamp', 'watts' => 10, 'hours' => 5.0, 'surge' => 1.0],
-            'fridge' => ['label' => 'Refrigerator', 'watts' => 150, 'hours' => 8.0, 'surge' => 3.0],
-            'tv' => ['label' => 'Television', 'watts' => 80, 'hours' => 4.0, 'surge' => 1.0],
-            'laptop' => ['label' => 'Laptop', 'watts' => 60, 'hours' => 6.0, 'surge' => 1.0],
-            'phone_charger' => ['label' => 'Phone charger', 'watts' => 10, 'hours' => 3.0, 'surge' => 1.0],
-            'fan' => ['label' => 'Fan', 'watts' => 50, 'hours' => 6.0, 'surge' => 1.5],
-            'router' => ['label' => 'Internet router', 'watts' => 12, 'hours' => 24.0, 'surge' => 1.0],
-            'water_pump' => ['label' => 'Water pump', 'watts' => 750, 'hours' => 1.0, 'surge' => 3.0],
-            'power_tool' => ['label' => 'Power tool', 'watts' => 600, 'hours' => 1.0, 'surge' => 2.0],
-            'washing_machine' => ['label' => 'Washing machine', 'watts' => 500, 'hours' => 1.0, 'surge' => 2.0],
-            'microwave' => ['label' => 'Microwave', 'watts' => 1000, 'hours' => 0.5, 'surge' => 1.0],
-            'air_conditioner' => ['label' => 'Small air conditioner', 'watts' => 900, 'hours' => 4.0, 'surge' => 3.0],
+            'led_lamp' => ['label' => 'LED lamp', 'watts' => 10, 'hours' => 5.0, 'surge' => 1.0, 'icon' => '💡'],
+            'fridge' => ['label' => 'Refrigerator', 'watts' => 150, 'hours' => 8.0, 'surge' => 3.0, 'icon' => '🧊'],
+            'tv' => ['label' => 'Television', 'watts' => 80, 'hours' => 4.0, 'surge' => 1.0, 'icon' => '📺'],
+            'laptop' => ['label' => 'Laptop', 'watts' => 60, 'hours' => 6.0, 'surge' => 1.0, 'icon' => '💻'],
+            'phone_charger' => ['label' => 'Phone charger', 'watts' => 10, 'hours' => 3.0, 'surge' => 1.0, 'icon' => '🔌'],
+            'fan' => ['label' => 'Fan', 'watts' => 50, 'hours' => 6.0, 'surge' => 1.5, 'icon' => '🌬️'],
+            'router' => ['label' => 'Internet router', 'watts' => 12, 'hours' => 24.0, 'surge' => 1.0, 'icon' => '📶'],
+            'water_pump' => ['label' => 'Water pump', 'watts' => 750, 'hours' => 1.0, 'surge' => 3.0, 'icon' => '💧'],
+            'power_tool' => ['label' => 'Power tool', 'watts' => 600, 'hours' => 1.0, 'surge' => 2.0, 'icon' => '🔧'],
+            'washing_machine' => ['label' => 'Washing machine', 'watts' => 500, 'hours' => 1.0, 'surge' => 2.0, 'icon' => '🧺'],
+            'microwave' => ['label' => 'Microwave', 'watts' => 1000, 'hours' => 0.5, 'surge' => 1.0, 'icon' => '🍲'],
+            'air_conditioner' => ['label' => 'Small air conditioner', 'watts' => 900, 'hours' => 4.0, 'surge' => 3.0, 'icon' => '❄️'],
         ];
     }
 
