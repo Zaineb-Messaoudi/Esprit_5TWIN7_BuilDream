@@ -153,17 +153,10 @@ abstract class TechnicalCrudController extends Controller
 
     private function validatedData(Request $request, ?Model $record = null): array
     {
+        $requestClass = $this->requestClass();
         /** @var TechnicalRecordRequest $formRequest */
-        $formRequest = app($this->requestClass());
-        $formRequest->initialize(
-            $request->query->all(),
-            $request->request->all(),
-            $request->attributes->all(),
-            $request->cookies->all(),
-            $request->files->all(),
-            $request->server->all(),
-            $request->getContent(),
-        );
+        $formRequest = $requestClass::createFrom($request);
+        $formRequest->setContainer(app())->setRedirector(app('redirect'));
         $formRequest->setActorAndRoute($request, $record);
 
         return $formRequest->validateRecord();

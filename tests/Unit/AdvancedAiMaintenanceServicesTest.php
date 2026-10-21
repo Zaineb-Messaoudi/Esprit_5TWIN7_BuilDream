@@ -65,12 +65,12 @@ class AdvancedAiMaintenanceServicesTest extends TestCase
         $this->damage($otherEquipment->id, 900);
 
         $service = new RepairCostEstimatorService();
-        $category = $service->estimate(4, 'moderate');
+        $categoryEstimate = $service->estimate($category->id, 'moderate');
         $fallback = $service->estimate(99, 'moderate');
 
-        $this->assertSame(300.0, $category['average']);
-        $this->assertSame(200.0, $category['median']);
-        $this->assertSame([100.0, 600.0], [$category['minimum'], $category['maximum']]);
+        $this->assertSame(300.0, $categoryEstimate['average']);
+        $this->assertSame(200.0, $categoryEstimate['median']);
+        $this->assertSame([100.0, 600.0], [$categoryEstimate['minimum'], $categoryEstimate['maximum']]);
         $this->assertSame('global', $fallback['source']);
         $this->assertGreaterThan(0, $service->estimate(null, 'minor')['average']);
     }
