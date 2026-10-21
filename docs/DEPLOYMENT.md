@@ -16,6 +16,16 @@ The server needs:
 - The public key matching `DEPLOY_SSH_KEY` in the user's
   `~/.ssh/authorized_keys`.
 
+For a fresh Ubuntu host, the repository includes a one-time bootstrap script:
+
+```bash
+sudo bash scripts/deploy/bootstrap-ubuntu.sh
+```
+
+If the repository is not checked out yet, copy that script to the server first
+or download it from the `dev` branch. Review scripts before running them on a
+production host.
+
 Copy only the deployment files to the server:
 
 ```bash
@@ -69,6 +79,17 @@ Add these secrets to each environment:
 Protect `production` with a required reviewer before enabling real production
 deployments. The workflow does not need the private `.env` as a GitHub secret;
 that file remains on the server.
+
+From Windows, after installing GitHub CLI and running `gh auth login`, the
+repository helper can configure both environments without printing the private
+key:
+
+```powershell
+.\scripts\deploy\Set-GitHubDeploymentSecrets.ps1
+```
+
+The helper asks for the server host, SSH user, deployment path, and local
+private-key path. It never stores the key in the repository.
 
 ## 3. Deployment behavior
 
