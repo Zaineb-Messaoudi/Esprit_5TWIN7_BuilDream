@@ -23,7 +23,7 @@ jobs:
     runs-on: ubuntu-latest
     strategy:
       matrix:
-        php-version: ['8.2', '8.3']
+        php-version: ['8.3']
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -65,10 +65,9 @@ jobs:
         run: vendor/bin/pint --test
 
       - name: Upload coverage
-        if: matrix.php-version == '8.3'
         uses: actions/upload-artifact@v4
         with:
-          name: coverage-${{ matrix.php-version }}
+          name: coverage
           path: coverage/
           retention-days: 7
 
@@ -82,7 +81,7 @@ jobs:
       - name: Setup Node
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           cache: 'npm'
 
       - name: Install dependencies
@@ -126,8 +125,17 @@ jobs:
           php-version: '8.3'
           tools: composer:v2
 
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+          cache: 'npm'
+
       - name: Install dependencies
         run: composer install --prefer-dist --no-progress --no-interaction
+
+      - name: Install NPM dependencies
+        run: npm ci
 
       - name: Composer audit
         run: composer audit --no-interaction
