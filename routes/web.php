@@ -177,7 +177,9 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:buyer-only'])->grou
         ->name('front.reservation-assistant.service-providers');
     Route::post('/reservation-assistant', [\App\Http\Controllers\ReservationAssistantController::class, 'store'])
         ->name('front.reservation-assistant.store');
+});
 
+Route::middleware(['auth', 'verified', 'role.selected', 'can:owner-only'])->group(function () {
     Route::get('/owner/service-provider-profile', [\App\Http\Controllers\ServiceProviderProfileController::class, 'edit'])
         ->name('front.owner-service-provider-profile');
     Route::put('/owner/service-provider-profile', [\App\Http\Controllers\ServiceProviderProfileController::class, 'update'])
