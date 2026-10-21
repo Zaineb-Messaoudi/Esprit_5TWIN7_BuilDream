@@ -7,8 +7,13 @@ use App\Http\Requests\ProfileUpdateRequest;
 use App\Services\UserService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Redirect;
+use Illuminate\Support\Facades\Schema;
+use Illuminate\Support\Facades\Storage;
+use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 
@@ -65,9 +70,51 @@ class ProfileController extends Controller
             ]);
         }
 
-        Auth::logout();
+        $hasMarketplaceHistory = $user->reservations()->exists()
+            || $user->rentals()->exists()
+            || $user->equipment()->exists();
 
-        $user->delete();
+        if ($hasMarketplaceHistory) {
+            DB::transaction(function () use ($user): void {
+                \App\Models\ReservationAssistantRequest::query()->where('user_id', $user->id)->delete();
+                $user->serviceProviderProfile()->delete();
+                $user->notifications()->delete();
+
+                if (Schema::hasTable('sessions')) {
+                    DB::table('sessions')->where('user_id', $user->id)->delete();
+                }
+
+                $profilePhoto = $user->profile_photo_path;
+                $user->forceFill([
+                    'name' => 'Deleted account',
+                    'email' => 'deleted+'.$user->id.'+'.Str::uuid().'@example.invalid',
+                    'email_verified_at' => null,
+                    'password' => Hash::make(Str::random(64)),
+                    'remember_token' => null,
+                    'phone_number' => null,
+                    'address' => null,
+                    'profile_photo_path' => null,
+                    'google_id' => null,
+                    'facebook_id' => null,
+                    'two_factor_secret' => null,
+                    'two_factor_confirmed_at' => null,
+                    'two_factor_recovery_codes' => null,
+                    'notification_preferences' => null,
+                    'current_organization_id' => null,
+                    'current_team_id' => null,
+                    'organization_preferences' => null,
+                ])->save();
+
+                if ($profilePhoto) {
+                    Storage::disk('public')->delete($profilePhoto);
+                }
+            });
+        } else {
+            Auth::logout();
+            $user->delete();
+        }
+
+        Auth::logout();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

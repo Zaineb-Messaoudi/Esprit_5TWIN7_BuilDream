@@ -113,8 +113,9 @@ class DashboardController extends Controller
             ->count();
         $completedRentals = Rental::where('status', 'completed')
             ->count();
-        $totalRevenue = Payment::where('status', 'paid')
-            ->sum('amount');
+        $totalRevenue = Payment::whereIn('status', ['paid', 'partially_refunded'])
+            ->selectRaw('COALESCE(SUM(amount - refunded_amount), 0) as net_revenue')
+            ->value('net_revenue');
         $pendingRevenue = Payment::where('status', 'pending')
             ->sum('amount');
         $totalInvoices = Invoice::count();
@@ -125,14 +126,14 @@ class DashboardController extends Controller
         $totalMaintenanceCost = Maintenance::sum('cost');
 
         // Monthly revenue for chart (last 12 months)
-        $monthlyRevenue = Payment::where('status', 'paid')
+        $monthlyRevenue = Payment::whereIn('status', ['paid', 'partially_refunded'])
             ->where(
                 'payment_date',
                 '>=',
                 now()->subMonths(11)->startOfMonth()
             )
             ->selectRaw(
-                'YEAR(payment_date) as year, MONTH(payment_date) as month, SUM(amount) as total'
+                'YEAR(payment_date) as year, MONTH(payment_date) as month, SUM(amount - refunded_amount) as total'
             )
             ->groupBy('year', 'month')
             ->orderBy('year')

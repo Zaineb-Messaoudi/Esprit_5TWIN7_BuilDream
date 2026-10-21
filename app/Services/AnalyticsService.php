@@ -329,19 +329,24 @@ class AnalyticsService
         $equipmentRevenue = Payment::query()
             ->whereHas('reservation.equipment')
             ->whereBetween('payment_date', [$start, $end])
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'partially_refunded'])
             ->with('reservation.equipment')
             ->get()
             ->groupBy('reservation.equipment_id')
             ->map(function ($payments, $equipmentId) {
                 $first = $payments->first();
+                $netAmounts = $payments->map(
+                    fn (Payment $payment) => max(0, (float) $payment->amount - (float) $payment->refunded_amount)
+                );
+                $bookingCount = $payments->pluck('reservation_id')->unique()->count();
+                $totalRevenue = $netAmounts->sum();
 
                 return [
                     'equipment_id' => $equipmentId,
                     'equipment_name' => $first->reservation->equipment->name ?? 'Unknown',
-                    'total_revenue' => round($payments->sum('amount'), 2),
-                    'booking_count' => $payments->count(),
-                    'avg_booking_value' => round($payments->avg('amount'), 2),
+                    'total_revenue' => round($totalRevenue, 2),
+                    'booking_count' => $bookingCount,
+                    'avg_booking_value' => $bookingCount > 0 ? round($totalRevenue / $bookingCount, 2) : 0,
                 ];
             })
             ->sortByDesc('total_revenue')

@@ -69,14 +69,16 @@ class OwnerController
 
         $paidPayments = Payment::query()
             ->whereHas('reservation.equipment', fn ($q) => $q->where('owner_id', $ownerId))
-            ->where('status', 'paid')
-            ->sum('amount');
+            ->whereIn('status', ['paid', 'partially_refunded'])
+            ->selectRaw('COALESCE(SUM(amount - refunded_amount), 0) as net_earnings')
+            ->value('net_earnings');
 
         $thisMonth = Payment::query()
             ->whereHas('reservation.equipment', fn ($q) => $q->where('owner_id', $ownerId))
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'partially_refunded'])
             ->whereMonth('payment_date', now()->month)
-            ->sum('amount');
+            ->selectRaw('COALESCE(SUM(amount - refunded_amount), 0) as net_earnings')
+            ->value('net_earnings');
 
         $pendingPayments = Payment::query()
             ->whereHas('reservation.equipment', fn ($q) => $q->where('owner_id', $ownerId))
@@ -140,6 +142,8 @@ class OwnerController
             'payments' => $r->payments->map(fn (Payment $p) => [
                 'transaction_reference' => $p->transaction_reference,
                 'amount' => (float) $p->amount,
+                'stage' => $p->payment_stage,
+                'due_date' => $p->due_date?->toDateString(),
                 'status' => $p->status,
             ]),
         ];

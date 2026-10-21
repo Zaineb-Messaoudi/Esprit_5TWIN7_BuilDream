@@ -10,11 +10,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Notification;
+use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory;
+    use HasApiTokens, HasFactory;
 
     /**
      * Send a notification using both the custom system and Laravel's facade.
@@ -148,6 +149,11 @@ class User extends Authenticatable implements MustVerifyEmail
     public function equipment(): HasMany
     {
         return $this->hasMany(\App\Models\Equipment::class, 'owner_id');
+    }
+
+    public function serviceProviderProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\ServiceProviderProfile::class);
     }
 
     public function rentals(): HasMany

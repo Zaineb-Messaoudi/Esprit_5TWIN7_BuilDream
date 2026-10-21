@@ -25,13 +25,13 @@ class StripeWebhookController
         }
 
         try {
-            $this->service->handleWebhook($payload, $request->header('Stripe-Signature'));
-
-            return response()->json(['received' => true]);
-        } catch (\Exception $e) {
-            \Log::error('Stripe webhook error: '.$e->getMessage());
-
-            return response()->json(['error' => 'Webhook processing failed'], 400);
+            $this->service->handleWebhook($payload, $sigHeader);
+        } catch (\InvalidArgumentException $e) {
+            return response()->json(['error' => 'Invalid Stripe webhook signature or payload'], 400);
+        } catch (\Throwable $e) {
+            return response()->json(['error' => 'Webhook processing failed'], 500);
         }
+
+        return response()->json(['received' => true]);
     }
 }

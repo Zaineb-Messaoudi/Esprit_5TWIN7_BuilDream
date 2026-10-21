@@ -48,7 +48,7 @@ class SecurityHeaders
 
     private function buildCspPolicy(Request $request): string
     {
-        $isDev = config('app.debug');
+        $isDebug = config('app.debug');
         $isApi = $request->is('api/*');
 
         // For API routes, use a more permissive CSP
@@ -57,7 +57,8 @@ class SecurityHeaders
         }
 
         $devOrigin = 'http://localhost:5173';
-        $devWs = 'ws://localhost:5173';
+        $isLocalLoopback = app()->environment('local')
+            && in_array($request->getHost(), ['localhost', '127.0.0.1'], true);
 
         $base = [
             "default-src 'self'",
@@ -73,9 +74,14 @@ class SecurityHeaders
             "frame-ancestors 'self'",
         ];
 
-        if (config('app.debug')) {
-            // Merge dev origins into existing directives instead of duplicating
-            $base = array_map(function ($directive) use ($devOrigin) {
+        // Local development servers may be opened through either loopback alias.
+        // Keep this broader HTTP allowance out of every non-local environment.
+        $base = array_map(function ($directive) use ($devOrigin, $isLocalLoopback, $isDebug) {
+            if (str_starts_with($directive, 'form-action') && $isLocalLoopback) {
+                return $directive.' http:';
+            }
+
+            if ($isDebug) {
                 if (str_starts_with($directive, 'script-src')) {
                     return $directive.' '.$devOrigin;
                 }
@@ -88,10 +94,10 @@ class SecurityHeaders
                 if (str_starts_with($directive, 'connect-src')) {
                     return $directive.' '.$devOrigin.' ws: wss:';
                 }
+            }
 
-                return $directive;
-            }, $base);
-        }
+            return $directive;
+        }, $base);
 
         return implode('; ', $base);
     }

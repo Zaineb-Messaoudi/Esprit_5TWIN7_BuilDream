@@ -29,6 +29,11 @@ class MenuHelper
                 'path' => route('calendar'),
             ],
             [
+                'icon' => 'ai-assistant',
+                'name' => 'Energy calculator',
+                'path' => route('front.energy-calculator'),
+            ],
+            [
                 'icon' => 'user-profile',
                 'name' => 'User Profile',
                 'subItems' => [
@@ -78,6 +83,18 @@ class MenuHelper
                     ['name' => 'Maintenances', 'path' => route('admin.technical.maintenances.index'), 'activePrefix' => '/admin/technical/maintenances', 'pro' => false],
                     ['name' => 'Reports', 'path' => route('admin.technical.reports.index'), 'activePrefix' => '/admin/technical/reports', 'pro' => false],
                     ['name' => 'Inspections', 'path' => route('admin.technical.inspections.index'), 'activePrefix' => '/admin/technical/inspections', 'pro' => false],
+                ],
+            ];
+        }
+
+        if (auth()->user()?->isOwner()) {
+            $items[] = [
+                'icon' => 'logistics',
+                'name' => 'Technical records',
+                'subItems' => [
+                    ['name' => 'Maintenances', 'path' => route('technical.maintenances.index'), 'activePrefix' => '/technical/maintenances', 'pro' => false],
+                    ['name' => 'Maintenance reports', 'path' => route('technical.reports.index'), 'activePrefix' => '/technical/reports', 'pro' => false],
+                    ['name' => 'Inspections', 'path' => route('technical.inspections.index'), 'activePrefix' => '/technical/inspections', 'pro' => false],
                 ],
             ];
         }

@@ -2,6 +2,7 @@
     $publicLinks = [
         ['label' => __('Home'), 'href' => route('home'), 'active' => request()->routeIs('home'), 'icon' => 'home'],
         ['label' => __('Catalog'), 'href' => route('front.catalog'), 'active' => request()->routeIs('front.catalog'), 'icon' => 'catalog'],
+        ['label' => __('Energy calculator'), 'href' => route('front.energy-calculator'), 'active' => request()->routeIs('front.energy-calculator'), 'icon' => 'energy'],
         ['label' => __('How it works'), 'href' => route('front.how-it-works'), 'active' => request()->routeIs('front.how-it-works'), 'icon' => 'overview'],
         ['label' => __('Plans'), 'href' => route('front.plans'), 'active' => request()->routeIs('front.plans'), 'icon' => 'contract'],
         ['label' => __('For owners'), 'href' => route('front.owners'), 'active' => request()->routeIs('front.owners'), 'icon' => 'equipment'],
@@ -14,10 +15,16 @@
         ? (auth()->user()->isOwner() ? [
             ['label' => __('Home'), 'href' => route('home'), 'active' => request()->routeIs('home')],
             ['label' => __('Catalog'), 'href' => route('front.catalog'), 'active' => request()->routeIs('front.catalog')],
-            ['label' => __('Owner workspace'), 'href' => route('front.owner-dashboard'), 'active' => request()->routeIs('front.owner-dashboard', 'front.my-equipment', 'front.my-publish', 'front.my-equipment-detail', 'front.my-equipment-edit', 'front.my-calendar', 'front.my-reservations', 'front.my-reservation-detail', 'front.my-rentals', 'front.my-rental-detail', 'front.my-contract', 'front.my-extensions', 'front.my-maintenance', 'front.my-inspections', 'front.my-earnings')],
+            ['label' => __('Energy calculator'), 'href' => route('front.energy-calculator'), 'active' => request()->routeIs('front.energy-calculator')],
+            ['label' => __('AI Dashboard'), 'href' => route('ai.index'), 'active' => request()->routeIs('ai.*', 'dashboard.ai')],
+            ['label' => __('Technical records'), 'href' => route('technical.maintenances.index'), 'active' => request()->routeIs('technical.*')],
+            ['label' => __('Owner workspace'), 'href' => route('front.owner-dashboard'), 'active' => request()->routeIs('front.owner-dashboard', 'front.my-equipment', 'front.my-publish', 'front.my-equipment-detail', 'front.my-equipment-edit', 'front.my-calendar', 'front.my-reservations', 'front.my-reservation-detail', 'front.my-rentals', 'front.my-rental-detail', 'front.my-contract', 'front.my-extensions', 'front.my-maintenance', 'front.my-inspections', 'front.my-earnings', 'front.owner-service-provider-profile*')],
         ] : [
             ['label' => __('Home'), 'href' => route('home'), 'active' => request()->routeIs('home')],
             ['label' => __('Catalog'), 'href' => route('front.catalog'), 'active' => request()->routeIs('front.catalog')],
+            ['label' => __('Energy calculator'), 'href' => route('front.energy-calculator'), 'active' => request()->routeIs('front.energy-calculator')],
+            ['label' => __('AI Dashboard'), 'href' => route('ai.index'), 'active' => request()->routeIs('ai.*', 'dashboard.ai')],
+            ['label' => __('Reservation assistant'), 'href' => route('front.reservation-assistant'), 'active' => request()->routeIs('front.reservation-assistant')],
             ['label' => __('Dashboard'), 'href' => route('front.my-dashboard'), 'active' => request()->routeIs('front.my-dashboard')],
             ['label' => __('Reservations'), 'href' => route('front.my-reservations'), 'active' => request()->routeIs('front.my-reservations')],
             ['label' => __('Rentals'), 'href' => route('front.my-rentals'), 'active' => request()->routeIs('front.my-rentals')],
@@ -30,6 +37,7 @@
     $sidebarGlobalLinks = [
         ['label' => __('Home'), 'href' => route('home'), 'active' => request()->routeIs('home'), 'icon' => 'home'],
         ['label' => __('Catalog'), 'href' => route('front.catalog'), 'active' => request()->routeIs('front.catalog'), 'icon' => 'catalog'],
+        ['label' => __('Energy calculator'), 'href' => route('front.energy-calculator'), 'active' => request()->routeIs('front.energy-calculator'), 'icon' => 'energy'],
     ];
     $sidebarWorkspaceLabel = null;
     $sidebarWorkspaceLinks = [];
@@ -37,6 +45,10 @@
         $sidebarWorkspaceLabel = __('OWNER STUDIO');
         $sidebarWorkspaceLinks = [
             ['label' => __('Overview'), 'href' => route('front.owner-dashboard'), 'active' => request()->routeIs('front.owner-dashboard'), 'icon' => 'overview'],
+            ['label' => __('AI Dashboard'), 'href' => route('ai.index'), 'active' => request()->routeIs('ai.*', 'dashboard.ai'), 'icon' => 'ai'],
+            ['label' => __('Technical records'), 'href' => route('technical.maintenances.index'), 'active' => request()->routeIs('technical.*'), 'icon' => 'maintenance'],
+            ['label' => __('Energy calculator'), 'href' => route('front.energy-calculator'), 'active' => request()->routeIs('front.energy-calculator'), 'icon' => 'energy'],
+            ['label' => __('Artisan profile'), 'href' => route('front.owner-service-provider-profile'), 'active' => request()->routeIs('front.owner-service-provider-profile*'), 'icon' => 'profile'],
             ['label' => __('Equipment'), 'href' => route('front.my-equipment'), 'active' => request()->routeIs('front.my-equipment', 'front.my-publish', 'front.my-equipment-detail', 'front.my-equipment-edit'), 'icon' => 'equipment'],
             ['label' => __('Availability'), 'href' => route('front.my-calendar'), 'active' => request()->routeIs('front.my-calendar'), 'icon' => 'calendar'],
             ['label' => __('Reservations'), 'href' => route('front.my-reservations'), 'active' => request()->routeIs('front.my-reservations', 'front.my-reservation-detail'), 'icon' => 'reservations'],
@@ -52,6 +64,9 @@
         $sidebarWorkspaceLabel = __('My SolarShare');
         $sidebarWorkspaceLinks = [
             ['label' => __('Overview'), 'href' => route('front.my-dashboard'), 'active' => request()->routeIs('front.my-dashboard'), 'icon' => 'overview'],
+            ['label' => __('AI Dashboard'), 'href' => route('ai.index'), 'active' => request()->routeIs('ai.*', 'dashboard.ai'), 'icon' => 'ai'],
+            ['label' => __('Energy calculator'), 'href' => route('front.energy-calculator'), 'active' => request()->routeIs('front.energy-calculator'), 'icon' => 'energy'],
+            ['label' => __('Reservation assistant'), 'href' => route('front.reservation-assistant'), 'active' => request()->routeIs('front.reservation-assistant'), 'icon' => 'reservations'],
             ['label' => __('Reservations'), 'href' => route('front.my-reservations'), 'active' => request()->routeIs('front.my-reservations', 'front.buyer-reservation-detail'), 'icon' => 'reservations'],
             ['label' => __('Rentals'), 'href' => route('front.my-rentals'), 'active' => request()->routeIs('front.my-rentals', 'front.buyer-rental-detail', 'front.my-contract'), 'icon' => 'rentals'],
             ['label' => __('Extensions'), 'href' => route('front.my-extensions'), 'active' => request()->routeIs('front.my-extensions'), 'icon' => 'extensions'],
@@ -210,6 +225,8 @@
                                 @case('inspections')<path d="m4 12 5 5L20 6" /><circle cx="12" cy="12" r="9" />@break
                                 @case('earnings')<path d="M3 6h18v14H3zM3 10h18M7 15h4" /><path d="M7 3h10" />@break
                                 @case('notifications')<path d="M18 9a6 6 0 0 0-12 0c0 7-3 7-3 9h18c0-2-3-2-3-9M10 21h4" />@break
+                                @case('ai')<path d="M12 3v2m0 14v2M3 12h2m14 0h2M5.6 5.6 7 7m10 10 1.4 1.4m0-12.8L17 7M7 17l-1.4 1.4"/><circle cx="12" cy="12" r="5"/><path d="M10 12h.01M14 12h.01"/>@break
+                                @case('energy')<path d="m13 2-9 12h7l-1 8 10-13h-7l1-7Z"/>@break
                                 @default<circle cx="12" cy="12" r="8" />
                             @endswitch
                         </svg>

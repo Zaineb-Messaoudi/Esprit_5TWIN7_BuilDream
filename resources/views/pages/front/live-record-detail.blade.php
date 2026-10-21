@@ -3,6 +3,17 @@
 @php
     $equipment = $record->equipment;
     $reservation = $recordType === 'reservation' ? $record : $record->reservation;
+    $amountPaid = $recordType === 'reservation' ? $paymentPlan->amountPaid($record) : 0;
+    $remainingAmount = $recordType === 'reservation' ? $paymentPlan->remainingAmount($record) : 0;
+    $nextPaymentAmount = $recordType === 'reservation' ? $paymentPlan->nextPaymentAmount($record) : 0;
+    $nextPaymentStage = $recordType === 'reservation' ? $paymentPlan->nextPaymentStage($record) : null;
+    $nextPaymentDueDate = $recordType === 'reservation' && $remainingAmount > 0
+        ? $paymentPlan->nextPaymentDueDate($record)
+        : null;
+    $pendingPayment = $recordType === 'reservation' ? $record->payments->firstWhere('status', 'pending') : null;
+    $totalWithTax = $recordType === 'reservation'
+        ? ($record->invoice?->total ?? $paymentPlan->totalWithTax($record))
+        : ($record->reservation?->invoice?->total ?? (float) $record->total_amount);
 @endphp
 
 @section('content')
@@ -10,12 +21,76 @@
     @if ($owner) @include('pages.front.partials.owner-nav') @else @include('pages.front.partials.buyer-nav') @endif
     <main class="mx-auto max-w-4xl space-y-5 px-4 py-8 sm:px-8 lg:px-10">
         @if (session('status'))<div role="status" class="rounded-xl border border-success-200 bg-success-50 p-4 text-theme-sm text-success-800 dark:border-success-500/30 dark:bg-success-500/10 dark:text-success-200">{{ session('status') }}</div>@endif
+        @if ($errors->any())<div role="alert" class="rounded-xl border border-error-200 bg-error-50 p-4 text-theme-sm text-error-800 dark:border-error-500/30 dark:bg-error-500/10 dark:text-error-200">{{ $errors->first() }}</div>@endif
         @if ($recordType === 'reservation')
             <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]">
                 <div class="flex flex-wrap items-start justify-between gap-4"><div><p class="text-theme-xs uppercase tracking-wide text-gray-500">{{ __('Reservation reference') }}</p><h2 class="mt-1 text-xl font-semibold text-gray-900 dark:text-white">{{ $record->reference }}</h2></div><span class="rounded-full bg-warning-50 px-3 py-1 text-theme-xs font-semibold text-warning-800 dark:bg-warning-500/15 dark:text-warning-300">{{ __(ucfirst($record->status)) }}</span></div>
-                <dl class="mt-6 grid gap-4 sm:grid-cols-2">@foreach ([[__('Equipment'), $equipment?->name], [$owner ? __('Renter') : __('Owner'), $owner ? $record->user?->name : $equipment?->owner?->name], [__('Start date'), $record->start_date->format('M j, Y')], [__('End date'), $record->end_date->format('M j, Y')], [__('Subtotal'), number_format((float) $record->total_amount, 2).' TND'], [__('Total with tax'), number_format((float) $record->total_amount * 1.19, 2).' TND']] as [$label, $value])<div class="rounded-xl bg-gray-50 p-4 dark:bg-white/5"><dt class="text-theme-xs text-gray-500">{{ $label }}</dt><dd class="mt-1 font-semibold text-gray-900 dark:text-white">{{ $value }}</dd></div>@endforeach</dl>
+                <dl class="mt-6 grid gap-4 sm:grid-cols-2">@foreach ([[__('Equipment'), $equipment?->name], [$owner ? __('Renter') : __('Owner'), $owner ? $record->user?->name : $equipment?->owner?->name], [__('Start date'), $record->start_date->format('M j, Y')], [__('End date'), $record->end_date->format('M j, Y')], [__('Subtotal'), number_format((float) $record->total_amount, 2).' TND'], [__('Total with tax'), number_format((float) $totalWithTax, 2).' TND']] as [$label, $value])<div class="rounded-xl bg-gray-50 p-4 dark:bg-white/5"><dt class="text-theme-xs text-gray-500">{{ $label }}</dt><dd class="mt-1 font-semibold text-gray-900 dark:text-white">{{ $value }}</dd></div>@endforeach</dl>
                 @if ($owner && $record->status === 'pending')<div class="mt-6 flex gap-3"><form method="POST" action="{{ route('owner.reservations.decision', $record) }}">@csrf<input type="hidden" name="decision" value="approve"><button class="button-base button-primary min-h-10 px-4 text-theme-xs">{{ __('Approve request') }}</button></form><form method="POST" action="{{ route('owner.reservations.decision', $record) }}">@csrf<input type="hidden" name="decision" value="reject"><button class="min-h-10 rounded-lg border border-error-300 px-4 text-theme-xs font-semibold text-error-700 dark:border-error-500/40 dark:text-error-300">{{ __('Decline') }}</button></form></div>@endif
-                @if (! $owner && $record->status === 'confirmed')<a href="{{ route('front.booking-summary', ['equipment' => $equipment->id, 'reservation' => $record->id]) }}" class="mt-6 inline-flex button-base button-primary min-h-10 items-center px-4 text-theme-xs">{{ __('Continue reservation') }}</a>@endif
+                @if (! $owner && $record->status === 'confirmed')
+                    @if ($remainingAmount <= 0)
+                        <p class="mt-6 rounded-xl bg-success-50 p-4 text-theme-sm text-success-800 dark:bg-success-500/10 dark:text-success-200">{{ __('Payment verified. Your rental, contract, and invoice are available in your account.') }}</p>
+                    @else
+                        @if ($amountPaid <= 0)
+                            <p class="mt-6 rounded-xl bg-success-50 p-4 text-theme-sm text-success-800 dark:bg-success-500/10 dark:text-success-200">{{ __('The owner approved your reservation. Complete payment to secure your rental.') }}</p>
+                        @endif
+                        <p class="mt-6 rounded-xl bg-brand-50 p-4 text-theme-sm text-brand-900 dark:bg-brand-500/10 dark:text-brand-100">{{ __('Amount paid') }}: {{ number_format($amountPaid, 2) }} TND · {{ __('Remaining balance') }}: {{ number_format($remainingAmount, 2) }} TND</p>
+                        @if ($nextPaymentStage === 'deposit')
+                            <p class="mt-3 text-theme-sm text-gray-600 dark:text-gray-300">{{ __('Pay a 30% deposit of :amount TND now. The remaining balance is due by :date.', ['amount' => number_format($nextPaymentAmount, 2), 'date' => $record->start_date->copy()->subDays(7)->format('M j, Y')]) }}</p>
+                        @elseif ($nextPaymentStage === 'full')
+                            <p class="mt-3 text-theme-sm text-gray-600 dark:text-gray-300">{{ __('Your rental starts within 7 days, so the full :amount TND is due now.', ['amount' => number_format($nextPaymentAmount, 2)]) }}</p>
+                        @else
+                            <p class="mt-3 text-theme-sm text-gray-600 dark:text-gray-300">{{ __('Your remaining balance of :amount TND is due by :date. You may pay it earlier.', ['amount' => number_format($nextPaymentAmount, 2), 'date' => \Illuminate\Support\Carbon::parse($nextPaymentDueDate)->format('M j, Y')]) }}</p>
+                        @endif
+                        @if (! filled(config('services.stripe.secret')) && $pendingPayment)
+                            <p class="mt-3 rounded-xl bg-warning-50 p-4 text-theme-sm text-warning-900 dark:bg-warning-500/10 dark:text-warning-200">{{ __('Payment is awaiting administrator verification. You will find the rental and invoice here after it is marked paid.') }}</p>
+                        @else
+                        <form method="POST" action="{{ route('booking.reservations.pay', $record, false) }}" class="mt-6 flex flex-wrap items-end gap-3 border-t border-gray-100 pt-5 dark:border-gray-800">
+                            @csrf
+                            @if (filled(config('services.stripe.secret')))
+                                <input type="hidden" name="payment_method" value="CARD">
+                                <div class="flex-1 text-theme-sm text-gray-700 dark:text-gray-300">
+                                    <p class="font-semibold">{{ __('Pay securely by card with Stripe') }}</p>
+                                    <p class="mt-1 text-theme-xs text-gray-500 dark:text-gray-400">{{ __('Next payment') }}: {{ number_format($nextPaymentAmount, 2) }} TND. {{ __('You will be redirected to Stripe to complete payment. You can retry if a previous checkout was cancelled.') }}</p>
+                                </div>
+                                <button class="button-base button-primary min-h-11 px-5 text-theme-sm">{{ __('Pay now') }}</button>
+                            @else
+                                <label class="min-w-52 flex-1 text-theme-sm text-gray-700 dark:text-gray-300">{{ __('Payment method') }}
+                                    <select name="payment_method" required class="mt-1.5 min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                                        <option value="BANK_TRANSFER">{{ __('Bank transfer') }}</option>
+                                        <option value="CASH">{{ __('Cash on pickup') }}</option>
+                                    </select>
+                                </label>
+                                <button class="button-base button-primary min-h-11 px-5 text-theme-sm">{{ __('Continue to payment') }}</button>
+                                <p class="basis-full text-theme-xs text-warning-700 dark:text-warning-300">{{ __('Stripe is not configured, so online card payment is unavailable. Configure Stripe to enable it.') }}</p>
+                            @endif
+                        </form>
+                        @endif
+                    @endif
+                    @if (! $owner && $recordType === 'reservation' && in_array($record->status, ['pending', 'confirmed', 'cancellation_requested'], true))
+                        @if ($record->cancellation_status === 'requested')
+                            @php($refundFailed = $record->payments->contains(fn ($payment) => $payment->refund_status === 'failed'))
+                            @php($refundPending = $record->payments->contains(fn ($payment) => $payment->refund_status === 'pending'))
+                            <p class="mt-5 rounded-xl bg-warning-50 p-4 text-theme-sm text-warning-900 dark:bg-warning-500/10 dark:text-warning-200">{{ $refundFailed ? __('Stripe refund failed. Retry or contact support.') : ($refundPending ? __('Stripe is processing the refund. This page will update when it is confirmed.') : __('Cancellation request under review.')) }}</p>
+                            @if ($record->start_date->isAfter(today()) && $refundFailed)
+                                <form method="POST" action="{{ route('booking.reservations.cancellation', $record) }}" class="mt-3">
+                                    @csrf
+                                    <button class="button-base button-primary min-h-10 px-4 text-theme-xs">{{ __('Retry Stripe refund') }}</button>
+                                </form>
+                            @endif
+                        @elseif ($record->status === 'confirmed')
+                            <form method="POST" action="{{ route('booking.reservations.cancellation', $record) }}" class="mt-6 space-y-3 border-t border-gray-100 pt-5 dark:border-gray-800">
+                                @csrf
+                                <label class="block text-theme-sm text-gray-700 dark:text-gray-300">{{ __('Reason for cancellation') }}
+                                    <textarea name="reason" required minlength="5" maxlength="1000" rows="3" class="mt-1.5 w-full rounded-lg border border-gray-300 bg-white px-3 py-2 dark:border-gray-700 dark:bg-gray-900 dark:text-white">{{ old('reason') }}</textarea>
+                                </label>
+                                <p class="text-theme-xs text-gray-500 dark:text-gray-400">{{ __('Cancellation refund policy: :days days before the rental, :percent% refund of :paid TND paid (:refund TND refunded; :retained TND retained).', ['days' => max(0, $cancellationQuote['days_until_start']), 'percent' => $cancellationQuote['percentage'], 'paid' => number_format($cancellationQuote['paid_amount'], 2), 'refund' => number_format($cancellationQuote['refund_amount'], 2), 'retained' => number_format($cancellationQuote['retained_amount'], 2)]) }}</p>
+                                <p class="text-theme-xs text-gray-500 dark:text-gray-400">{{ __('At least 7 days before: full refund. 1–6 days before: 50% refund. On or after the start date: no refund; administrator review is required.') }}</p>
+                                <button class="min-h-10 rounded-lg border border-error-300 px-4 text-theme-xs font-semibold text-error-700 dark:border-error-500/40 dark:text-error-300">{{ __('Request cancellation') }}</button>
+                            </form>
+                        @endif
+                    @endif
+                @endif
             </section>
         @else
             <section class="rounded-2xl border border-gray-200 bg-white p-6 shadow-theme-xs dark:border-gray-800 dark:bg-white/[0.03]"><div class="flex flex-wrap items-start justify-between gap-4"><div><p class="text-theme-xs uppercase tracking-wide text-gray-500">{{ __('Rental reference') }}</p><h2 class="mt-1 text-xl font-semibold text-gray-900 dark:text-white">{{ $record->reference }}</h2></div><span class="rounded-full bg-brand-50 px-3 py-1 text-theme-xs font-semibold text-brand-800 dark:bg-brand-500/15 dark:text-brand-300">{{ __($record->status->label()) }}</span></div>

@@ -81,6 +81,65 @@
                     <x-ui.button variant="primary" className="mt-5 w-full">Continue to checkout</x-ui.button>
                 </x-common.component-card>
             </div>
+        @elseif ($type === 'checkout')
+            <div class="min-h-[720px] rounded-[28px] border border-gray-200 bg-white shadow-[0_32px_80px_rgba(15,23,42,0.08)] dark:border-gray-800 dark:bg-gray-900">
+                <div class="grid min-h-[720px] grid-cols-1 lg:grid-cols-[1.15fr_1fr]">
+                    <div class="flex items-center justify-center border-b border-gray-200 bg-[#f5f5f5] p-8 lg:border-b-0 lg:border-e dark:border-gray-800 dark:bg-gray-950/60">
+                        <div class="text-5xl font-black tracking-[-0.06em] text-gray-900 dark:text-white">140,22 $US</div>
+                    </div>
+
+                    <div class="flex items-center justify-center p-6 sm:p-8 lg:p-10">
+                        <div class="w-full max-w-[420px]">
+                            <div class="space-y-6">
+                                <div>
+                                    <h2 class="text-xl font-semibold text-gray-900 dark:text-white">Coordonnées</h2>
+                                </div>
+
+                                <div class="space-y-3">
+                                    <label class="block text-sm font-medium text-gray-700 dark:text-gray-200">
+                                        <span class="mb-2 block">E-mail</span>
+                                        <input type="email" value="nawres.bejaoui@esprit.tn" class="w-full rounded-xl border border-gray-300 bg-gray-50 px-3 py-3 text-base text-gray-900 outline-none transition focus:border-blue-500 focus:ring-2 focus:ring-blue-200 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:border-blue-500 dark:focus:ring-blue-900/50" />
+                                    </label>
+                                </div>
+
+                                <div class="space-y-4">
+                                    <div class="text-lg font-semibold text-gray-900 dark:text-white">Moyen de paiement</div>
+
+                                    <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-300 bg-white px-4 py-4 shadow-sm dark:border-gray-700 dark:bg-gray-900">
+                                        <input type="radio" checked class="h-5 w-5 accent-black" name="payment-method" />
+                                        <span class="text-[28px]" aria-hidden="true">💳</span>
+                                        <span class="text-xl font-semibold text-gray-900 dark:text-white">Carte</span>
+                                    </label>
+
+                                    <div class="space-y-4 rounded-2xl border border-gray-200 bg-white p-4 shadow-sm dark:border-gray-700 dark:bg-gray-800/80">
+                                        <div class="relative">
+                                            <input type="text" value="1234 1234 1234 1234" class="w-full rounded-xl border border-blue-500 bg-transparent px-3 py-3 text-lg tracking-[0.18em] text-gray-900 outline-none dark:text-white" />
+                                            <span class="absolute inset-y-0 right-3 flex items-center text-gray-400">ⓘ</span>
+                                        </div>
+
+                                        <div class="grid grid-cols-2 gap-3">
+                                            <input type="text" value="12 / 30" class="w-full rounded-xl border border-gray-300 bg-transparent px-3 py-3 text-lg text-gray-900 outline-none dark:border-gray-600 dark:text-white" />
+                                            <input type="text" value="CVC" class="w-full rounded-xl border border-gray-300 bg-transparent px-3 py-3 text-lg text-gray-900 outline-none dark:border-gray-600 dark:text-white" />
+                                        </div>
+
+                                        <input type="text" value="Nom complet" class="w-full rounded-xl border border-gray-300 bg-transparent px-3 py-3 text-base text-gray-500 outline-none dark:border-gray-600 dark:text-gray-300" />
+
+                                        <select class="w-full appearance-none rounded-xl border border-gray-300 bg-transparent px-3 py-3 text-base text-gray-800 outline-none dark:border-gray-600 dark:text-white">
+                                            <option selected>Tunisie</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                <label class="flex cursor-pointer items-center gap-3 rounded-xl border border-gray-200 bg-[#f8fafc] px-4 py-3 dark:border-gray-700 dark:bg-gray-800/60">
+                                    <input type="checkbox" class="h-4 w-4 rounded border-gray-300 accent-emerald-500" />
+                                    <span class="inline-flex h-7 w-7 items-center justify-center rounded-md bg-emerald-500 text-xs font-bold text-white">$</span>
+                                    <span class="text-base font-medium text-gray-800 dark:text-white">Cash App Pay</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
         @else
             <div class="grid grid-cols-1 gap-6 xl:grid-cols-3">
                 <x-common.component-card title="Shipping details" class="xl:col-span-2">
