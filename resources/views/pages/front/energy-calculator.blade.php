@@ -72,6 +72,9 @@
             @if(isset($result) && $result['status'] === 'ok')
                 <p class="mt-3 text-4xl font-semibold tracking-tight text-brand-950 dark:text-white">{{ number_format($result['daily_wh'], 0) }} <span class="text-base font-medium">Wh/day</span></p>
                 <p class="mt-2 text-theme-sm text-brand-800 dark:text-brand-100">{{ __('Minimum capacity') }}: {{ number_format($result['daily_wh'], 0) }} Wh · {{ __('simultaneous power') }}: {{ number_format($result['required_power'] ?? $result['panel_w'], 0) }} W</p>
+            @elseif(isset($result) && $result['status'] === 'empty')
+                <p class="mt-3 text-2xl font-semibold tracking-tight text-brand-950 dark:text-white">{{ __('Select at least one appliance.') }}</p>
+                <p class="mt-2 text-theme-sm leading-6 text-brand-800 dark:text-brand-100">{{ __('Choose an appliance and set quantity to calculate your energy needs.') }}</p>
             @else
                 <p class="mt-3 text-2xl font-semibold tracking-tight text-brand-950 dark:text-white">{{ __('Ready when you are') }}</p>
                 <p class="mt-2 text-theme-sm leading-6 text-brand-800 dark:text-brand-100">{{ __('Enter your appliances to unlock equipment recommendations.') }}</p>
