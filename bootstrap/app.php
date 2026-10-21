@@ -23,6 +23,7 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withProviders([
         \App\Providers\EventServiceProvider::class,
+        \App\Providers\TranslationServiceProvider::class,
         \Laravel\Sanctum\SanctumServiceProvider::class,
     ])
     ->withMiddleware(function (Middleware $middleware): void {
@@ -40,9 +41,16 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\RateLimitHeaders::class,
         ]);
 
+        $middleware->api(append: [
+            \App\Http\Middleware\SecurityHeaders::class,
+        ]);
+
         $middleware->alias([
             'role.selected' => \App\Http\Middleware\EnsureRoleSelected::class,
             '2fa' => \App\Http\Middleware\TwoFactorAuth::class,
+            'rate_limit_ip_user' => \App\Http\Middleware\RateLimitByIpAndUser::class,
+            'rate_limit_callback_webhook' => \App\Http\Middleware\RateLimitCallbackWebhook::class,
+            'validate_ai_request' => \App\Http\Middleware\ValidateAiRequest::class,
         ]);
     })
     ->withExceptions(function (Exceptions $exceptions): void {
@@ -58,5 +66,9 @@ return Application::configure(basePath: dirname(__DIR__))
     })
     ->withCommands([
         \App\Console\Commands\ScoutSetupMeilisearch::class,
+        \App\Console\Commands\SyncBladeTranslations::class,
+        \App\Console\Commands\SyncDatabaseTranslations::class,
+        \App\Console\Commands\BackupDatabase::class,
+        \App\Console\Commands\SyncSpatieRoles::class,
     ])
     ->create();

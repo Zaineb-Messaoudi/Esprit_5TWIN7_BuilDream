@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="h-full bg-gray-50 dark:bg-gray-900">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-gray-50 dark:bg-gray-900">
 
 <head>
     <meta charset="utf-8">
@@ -123,16 +123,31 @@
                     }
                 }
             });
+
+            Alpine.store('notifications', {
+                add(message, type = 'info') {
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 text-white animate-slide-up';
+                    const colors = {
+                        success: 'bg-success-600',
+                        warning: 'bg-warning-600',
+                        error: 'bg-error-600',
+                        info: 'bg-brand-600'
+                    };
+                    toast.classList.add(colors[type] || colors.info);
+                    toast.textContent = message;
+                    document.body.appendChild(toast);
+                    setTimeout(() => {
+                        toast.classList.add('animate-fade-out');
+                        setTimeout(() => toast.remove(), 300);
+                    }, 4000);
+                }
+            });
         });
     </script>
 
     <script>
         (function() {
-            const savedDir = localStorage.getItem('dir');
-            if (savedDir) {
-                document.documentElement.setAttribute('dir', savedDir);
-            }
-
             const savedTheme = localStorage.getItem('theme');
             const isDark = savedTheme === 'dark';
             if (isDark) {
@@ -142,6 +157,13 @@
                 document.documentElement.classList.remove('dark');
                 document.documentElement.setAttribute('data-color-scheme', 'light');
             }
+
+            // Restore the saved direction before the page is rendered.
+            const savedDir = localStorage.getItem('dir');
+            const initialDir = savedDir === 'ltr' || savedDir === 'rtl'
+                ? savedDir
+                : @js(session('dir', 'ltr'));
+            document.documentElement.setAttribute('dir', initialDir);
         })();
     </script>
 </head>

@@ -5,10 +5,13 @@ namespace App\Http\Controllers;
 use App\Models\EnergyProfile;
 use App\Models\Equipment;
 use App\Support\FrontDemo;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\Request;
 use Illuminate\Pagination\LengthAwarePaginator;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Schema;
 
 /** Public Front Office pages for browsing the Eloquent-backed catalogue. */
 class FrontController extends Controller
@@ -109,6 +112,57 @@ class FrontController extends Controller
         ]);
     }
 
+    public function equipmentMap(): View
+    {
+        $cityCoordinates = [
+            'tunis' => [36.8065, 10.1815],
+            'la marsa' => [36.8782, 10.3247],
+            'sousse' => [35.8256, 10.6084],
+            'sfax' => [34.7406, 10.7603],
+            'gabes' => [33.8815, 10.0982],
+            'bizerte' => [37.2744, 9.8739],
+            'ariana' => [36.8665, 10.1647],
+            'ben arous' => [36.7531, 10.2282],
+            'monastir' => [35.7643, 10.8113],
+            'hammamet' => [36.4000, 10.6167],
+            'djerba' => [33.8076, 10.8451],
+            'kélibia' => [36.8476, 11.0939],
+            'kelibia' => [36.8476, 11.0939],
+            'aïn draham' => [36.7750, 8.6833],
+            'ain draham' => [36.7750, 8.6833],
+            'le kef' => [36.1742, 8.7049],
+            'kairouan' => [35.6781, 10.0963],
+            'tabarka' => [36.9544, 8.7580],
+            'mahdia' => [35.5047, 11.0622],
+            'nabeul' => [36.4513, 10.7357],
+        ];
+
+        $equipment = FrontDemo::publishedEquipmentQuery()
+            ->with(['category', 'energyProfile'])
+            ->where('status', 'available')
+            ->latest()
+            ->get()
+            ->map(function (Equipment $item) use ($cityCoordinates): array {
+                $fallback = $cityCoordinates[mb_strtolower(trim((string) $item->location))] ?? null;
+
+                return [
+                    'id' => $item->id,
+                    'name' => $item->name,
+                    'brand' => $item->brand,
+                    'location' => $item->location,
+                    'latitude' => (float) ($item->latitude ?? $fallback[0] ?? 36.8065),
+                    'longitude' => (float) ($item->longitude ?? $fallback[1] ?? 10.1815),
+                    'price' => number_format((float) $item->price_per_day, 2).' TND / day',
+                    'url' => route('front.equipment.show', $item->id),
+                ];
+            });
+
+        return view('pages.front.equipment-map', [
+            'title' => __('Equipment map'),
+            'equipment' => $equipment,
+        ]);
+    }
+
     public function show(int $id): View
     {
         $item = FrontDemo::findEquipment($id);
@@ -122,10 +176,77 @@ class FrontController extends Controller
             ->get()
             ->map(fn (Equipment $equipment) => FrontDemo::equipmentViewModel($equipment));
 
+        $record = Schema::hasTable('equipment') ? Equipment::with('energyProfile')->find($id) : null;
+        if ($record && Schema::hasTable('equipment_images')) {
+            $record->load('images');
+        }
+        $gallery = $record && Schema::hasTable('equipment_images')
+            ? $record->images->pluck('path')->values()
+            : collect();
+        if ($gallery->isEmpty()) {
+            $gallery = collect([$item->image]);
+        }
+
         return view('pages.front.equipment', [
             'title' => $item->name,
             'item' => $item,
             'related' => $related,
+            'gallery' => $gallery,
+            'isFavorite' => auth()->check() && Schema::hasTable('user_equipment') && auth()->user()->favoriteEquipment()->whereKey($id)->exists(),
         ]);
+    }
+
+    public function solarProduction(Request $request, int $id)
+    {
+        $item = Equipment::with('energyProfile')->findOrFail($id);
+        abort_unless($item->energyProfile, 404);
+        $lat = (float) $request->input('lat', $item->latitude ?: 36.8065);
+        $lon = (float) $request->input('lon', $item->longitude ?: 10.1815);
+        $radiation = 4.5;
+
+        try {
+            $weather = Http::timeout(6)->get('https://api.open-meteo.com/v1/forecast', [
+                'latitude' => $lat, 'longitude' => $lon,
+                'daily' => 'shortwave_radiation_sum', 'forecast_days' => 3,
+                'timezone' => 'auto',
+            ]);
+            $values = collect($weather->json('daily.shortwave_radiation_sum', []))->filter(fn ($value) => is_numeric($value));
+            if ($values->isNotEmpty()) {
+                $radiation = round($values->avg() / 1000, 2);
+            }
+        } catch (\Throwable) {
+            // Keep the calculator usable when the free weather API is unavailable.
+        }
+
+        $efficiency = ((float) ($item->energyProfile->efficiency ?: 20)) / 100;
+        $productionWh = round($radiation * (float) ($item->energyProfile->power_watts ?: 0) * $efficiency, 1);
+
+        return response()->json([
+            'equipment' => $item->name, 'radiation_kwh_m2_day' => $radiation,
+            'efficiency_percent' => $efficiency * 100, 'production_wh_day' => $productionWh,
+            'co2_avoided_kg_day' => round($productionWh * 0.42 / 1000, 2),
+        ]);
+    }
+
+    public function exportPdf(int $id)
+    {
+        $item = Equipment::with(['category', 'owner', 'energyProfile'])->findOrFail($id);
+        if (Schema::hasTable('equipment_images')) {
+            $item->load('images');
+        }
+        $url = route('front.equipment.show', $item->id);
+
+        return Pdf::loadView('pdf/equipment', [
+            'equipment' => $item, 'publicUrl' => $url,
+            'qrUrl' => 'https://quickchart.io/qr?size=180&text='.urlencode($url),
+        ])->download('solarshare-equipment-'.$item->id.'.pdf');
+    }
+
+    public function toggleFavorite(Request $request, int $id)
+    {
+        $equipment = Equipment::findOrFail($id);
+        $request->user()->favoriteEquipment()->toggle($equipment->id);
+
+        return back()->with('status', __('Favorite list updated.'));
     }
 }

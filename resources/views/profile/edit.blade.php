@@ -42,6 +42,7 @@
                         @error('address')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
                     </div>
                 </div>
+                <x-form.location-picker :location="old('address', $user->address)" :latitude="old('address_latitude', $user->address_latitude)" :longitude="old('address_longitude', $user->address_longitude)" location-name="address" latitude-name="address_latitude" longitude-name="address_longitude" location-id="profile-address" :show-input="false" />
 
                 @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && !$user->hasVerifiedEmail())
                     <div class="flex flex-wrap items-center justify-between gap-3 rounded-lg border border-warning-200 bg-warning-50 p-4 dark:border-warning-500/20 dark:bg-warning-500/10">

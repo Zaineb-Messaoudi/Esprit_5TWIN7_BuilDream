@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\Rental;
 use App\Models\Reservation;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -125,7 +126,17 @@ class DashboardController extends Controller
             ->count();
         $totalMaintenanceCost = Maintenance::sum('cost');
 
-        // Monthly revenue for chart (last 12 months)
+        // Monthly revenue for chart (last 12 months) - database-agnostic
+        $driver = DB::getDriverName();
+        $isSqlite = $driver === 'sqlite';
+
+        $yearExpr = $isSqlite
+            ? "CAST(strftime('%Y', payment_date) AS INTEGER)"
+            : 'YEAR(payment_date)';
+        $monthExpr = $isSqlite
+            ? "CAST(strftime('%m', payment_date) AS INTEGER)"
+            : 'MONTH(payment_date)';
+
         $monthlyRevenue = Payment::whereIn('status', ['paid', 'partially_refunded'])
             ->where(
                 'payment_date',
@@ -133,7 +144,7 @@ class DashboardController extends Controller
                 now()->subMonths(11)->startOfMonth()
             )
             ->selectRaw(
-                'YEAR(payment_date) as year, MONTH(payment_date) as month, SUM(amount - refunded_amount) as total'
+                "{$yearExpr} as year, {$monthExpr} as month, SUM(amount - refunded_amount) as total"
             )
             ->groupBy('year', 'month')
             ->orderBy('year')

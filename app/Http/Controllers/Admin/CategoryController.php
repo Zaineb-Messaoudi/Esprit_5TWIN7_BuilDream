@@ -28,6 +28,16 @@ class CategoryController extends Controller
         return view('pages.admin.categories.create', ['title' => __('Create category')]);
     }
 
+    public function show(Category $category): View
+    {
+        $category->load(['equipment' => fn ($query) => $query->with(['owner', 'energyProfile'])->latest()]);
+
+        return view('pages.admin.categories.show', [
+            'category' => $category,
+            'title' => $category->name,
+        ]);
+    }
+
     public function store(CategoryStoreRequest $request): RedirectResponse
     {
         $this->catalog->createCategory($request->validated());

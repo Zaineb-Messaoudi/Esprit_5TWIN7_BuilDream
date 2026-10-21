@@ -31,7 +31,7 @@
         <div class="flex flex-wrap items-center justify-between gap-4">
             <h1 class="text-title-md font-semibold text-gray-800 dark:text-white/90">Extension request #{{ $extension->id }}</h1>
             <div class="flex flex-wrap items-center gap-3">
-                {{-- Approve / Reject / Edit are only offered while the request is pending --}}
+                {{-- Approve / Reject are only offered while the request is pending --}}
                 @if ($extension->status === \App\Enums\ExtensionStatus::PENDING)
                     <form action="{{ route('admin.rental-extensions.approve', $extension) }}" method="POST">
                         @csrf
@@ -41,11 +41,39 @@
                         @csrf
                         <button type="submit" onclick="return confirm('Reject this extension request?')" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-error-500 px-4 py-2 text-sm font-medium text-white hover:bg-error-600">Reject</button>
                     </form>
-                    <a href="{{ route('admin.rental-extensions.edit', $extension) }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">Edit</a>
                 @endif
                 <a href="{{ route('admin.rental-extensions.index') }}" class="inline-flex min-h-10 items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">Back to list</a>
             </div>
         </div>
+
+        {{-- Decision aid: a recommendation with its reasons ($advice comes from ExtensionAdvisorService).
+             It is only shown for pending requests. The decision always stays human. --}}
+        @if ($advice)
+            <x-common.component-card :title="__('Decision aid')" :desc="__('A recommendation based on the booking calendar and the renter history. You make the final decision.')">
+                <div class="mb-4 flex items-center gap-3">
+                    <span class="text-sm text-gray-500 dark:text-gray-400">Recommendation:</span>
+                    <x-ui.badge :color="$advice['color']">{{ $advice['label'] }}</x-ui.badge>
+                </div>
+
+                <ul class="space-y-2 text-sm">
+                    @foreach ($advice['reasons'] as $reason)
+                        @php
+                            // Symbol and colour of each reason, chosen from its level
+                            [$symbol, $colorClass] = match ($reason['level']) {
+                                'blocker'  => ['✕', 'text-error-600'],
+                                'warning'  => ['!', 'text-warning-600'],
+                                'positive' => ['✓', 'text-success-600'],
+                                default    => ['i', 'text-gray-500'],
+                            };
+                        @endphp
+                        <li class="flex items-start gap-3">
+                            <span class="mt-0.5 flex size-5 shrink-0 items-center justify-center rounded-full border border-current text-xs font-semibold {{ $colorClass }}" aria-hidden="true">{{ $symbol }}</span>
+                            <span class="text-gray-700 dark:text-gray-300">{{ $reason['text'] }}</span>
+                        </li>
+                    @endforeach
+                </ul>
+            </x-common.component-card>
+        @endif
 
         {{-- Request details --}}
         <x-common.component-card :title="__('Request details')">

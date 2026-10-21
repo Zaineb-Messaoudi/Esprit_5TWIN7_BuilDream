@@ -205,14 +205,20 @@ class MarketplaceController extends Controller
         ])->with('status', __('Payment method recorded. Payment is awaiting back-office verification.'));
     }
 
+    /**
+     * CHANGED: a contract can no longer be signed in one click.
+     * Teacher's rule: the client must READ the contract before signing it.
+     * The old "Sign contract" buttons still post here, so instead of signing we send the
+     * renter to the contract page, where he reads it, ticks "I have read and accept",
+     * and signs (Front\ContractController@accept).
+     */
     public function signContract(Request $request, RentalContract $contract): RedirectResponse
     {
         $contract->loadMissing('rental');
         abort_unless((int) $contract->rental->user_id === (int) $request->user()->id, 403);
-        abort_unless($contract->contract_status->value === 'draft', 409);
 
-        $contract->update(['contract_status' => 'signed', 'signed_at' => now()]);
-
-        return back()->with('status', __('Rental contract signed.'));
+        return redirect()
+            ->route('contracts.show', $contract)
+            ->with('status', 'contract-read-first');
     }
 }

@@ -11,17 +11,11 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         //
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         // Define global role gates
@@ -39,6 +33,11 @@ class AppServiceProvider extends ServiceProvider
         // Register model observers
         Inspection::observe(InspectionObserver::class);
         Maintenance::observe(MaintenanceObserver::class);
+
+        // Register AI prompt versions (only if table exists)
+        if (\Illuminate\Support\Facades\Schema::hasTable('ai_prompts')) {
+            app(\App\Services\PromptVersionService::class)->registerEndpointPrompts();
+        }
 
         // Force HTTPS in production
         if (config('app.env') === 'production') {

@@ -1,6 +1,8 @@
 <?php
 
+use App\Http\Controllers\Admin\AdminAiSettingsController;
 use App\Http\Controllers\Admin\CategoryController as AdminCategoryController;
+use App\Http\Controllers\Admin\EnergyProfileController as AdminEnergyProfileController;
 use App\Http\Controllers\Admin\EquipmentController as AdminEquipmentController;
 use App\Http\Controllers\Admin\RentalContractController;
 use App\Http\Controllers\Admin\RentalController;
@@ -9,6 +11,7 @@ use App\Http\Controllers\Admin\UserController as AdminUserController;
 use App\Http\Controllers\AiDemoController;
 use App\Http\Controllers\Auth\RoleSetupController;
 use App\Http\Controllers\AuthDemoController;
+use App\Http\Controllers\CatalogueToolsController;
 use App\Http\Controllers\ChartShowcaseController;
 use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EcommerceController;
@@ -23,19 +26,16 @@ use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\Route;
 
 RateLimiter::for('global', function (Request $request) {
-    return \Illuminate\Cache\RateLimit::perMinute(60)->by($request->ip());
+    return \Illuminate\Cache\RateLimiter::perMinute(60)->by($request->ip());
 });
 
 RateLimiter::for('auth', function (Request $request) {
-    return \Illuminate\Cache\RateLimit::perMinute(5)->by($request->ip());
+    return \Illuminate\Cache\RateLimiter::perMinute(5)->by($request->ip());
 });
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
-use App\Http\Controllers\ReservationAssistantController;
-use App\Http\Controllers\ReservationCancellationController;
 use App\Http\Controllers\ReservationController;
-use App\Http\Controllers\ServiceProviderProfileController;
 use App\Http\Controllers\SpecialPageController;
 use App\Http\Controllers\Technical\InspectionController;
 use App\Http\Controllers\Technical\MaintenanceController;
@@ -47,33 +47,16 @@ Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
     ->name('locale.switch');
 Route::get('/', [FrontController::class, 'home'])->name('home');
 Route::get('/catalog', [FrontController::class, 'catalog'])->name('front.catalog');
+Route::get('/equipment/map', [FrontController::class, 'equipmentMap'])->name('front.equipment.map');
+Route::get('/equipment/{id}/solar-production', [FrontController::class, 'solarProduction'])->name('front.equipment.solar-production');
+Route::get('/equipment/{id}/technical-sheet.pdf', [FrontController::class, 'exportPdf'])->name('front.equipment.pdf');
+Route::get('/energy-calculator', [CatalogueToolsController::class, 'energyCalculator'])->name('front.energy-calculator');
+Route::get('/equipment/compare', [CatalogueToolsController::class, 'compare'])->name('front.equipment.compare');
 Route::get('/equipment/{id}', [FrontController::class, 'show'])
     ->whereNumber('id')
     ->name('front.equipment.show');
 
-Route::middleware(['auth', 'verified', 'role.selected', 'can:buyer-only'])->group(function () {
-    Route::get('/reservation-assistant', [ReservationAssistantController::class, 'index'])
-        ->name('front.reservation-assistant');
-    Route::post('/reservation-assistant/analyze', [ReservationAssistantController::class, 'analyze'])
-        ->middleware('throttle:10,1')
-        ->name('front.reservation-assistant.analyze');
-    Route::post('/reservation-assistant/recommend', [ReservationAssistantController::class, 'recommend'])
-        ->middleware('throttle:20,1')
-        ->name('front.reservation-assistant.recommend');
-    Route::post('/reservation-assistant/requests', [ReservationAssistantController::class, 'store'])
-        ->name('front.reservation-assistant.store');
-    Route::post('/reservation-assistant/requests/{workRequest}/service-providers', [
-        ReservationAssistantController::class,
-        'recommendServiceProviders',
-    ])->whereNumber('workRequest')->middleware('throttle:20,1')
-        ->name('front.reservation-assistant.service-providers');
-});
-
 Route::middleware(['auth', 'verified', 'role.selected', 'can:owner-only'])->group(function () {
-    Route::get('/owner/service-provider-profile', [ServiceProviderProfileController::class, 'edit'])
-        ->name('front.owner-service-provider-profile');
-    Route::put('/owner/service-provider-profile', [ServiceProviderProfileController::class, 'update'])
-        ->name('front.owner-service-provider-profile.update');
     // Owner listings are live CRUD pages, unlike the remaining preview account pages.
     Route::get('/my/equipment', [OwnerEquipmentController::class, 'index'])->name('front.my-equipment');
     Route::get('/my/equipment/new', [OwnerEquipmentController::class, 'create'])->name('front.my-publish');
@@ -172,6 +155,7 @@ Route::get('/two-factor', [AuthDemoController::class, 'show'])
     ->name('auth.two-factor');
 
 Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    Route::post('/equipment/{id}/favorite', [FrontController::class, 'toggleFavorite'])->name('front.equipment.favorite');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
@@ -180,28 +164,9 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     })->name('profile.overview');
 });
 
-// AI Studio is available to authenticated users; customer workspaces use the front-office shell.
-Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
-    Route::get('/ai-dashboard', [AiDemoController::class, 'index'])->name('dashboard.ai');
-    Route::get('/ai', [AiDemoController::class, 'index'])->name('ai.index');
-    Route::get('/ai/usage', [AiDemoController::class, 'usage'])->name('ai.usage');
-    Route::get('/ai/text-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'text')->name('ai.text');
-    Route::get('/ai/image-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'image')->name('ai.image');
-    Route::get('/ai/video-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'video')->name('ai.video');
-    Route::get('/ai/code-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'code')->name('ai.code');
-    Route::get('/ai/chat', [AiDemoController::class, 'tool'])->defaults('tool', 'chat')->name('ai.chat');
-    Route::get('/ai/history', [AiDemoController::class, 'tool'])->defaults('tool', 'history')->name('ai.history');
-    Route::get('/ai/settings', [AiDemoController::class, 'tool'])->defaults('tool', 'settings')->name('ai.settings');
-    Route::post('/ai/generate', [AiDemoController::class, 'generate'])->middleware('throttle:10,1')->name('ai.generate');
-    Route::post('/ai/settings', [AiDemoController::class, 'updateSettings'])->name('ai.settings.update');
-    Route::get('/ai/generations/{generation}/media', [AiDemoController::class, 'media'])->name('ai.generations.media');
-    Route::delete('/ai/generations/{generation}', [AiDemoController::class, 'destroy'])->name('ai.generations.destroy');
-});
-
 Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
-    Route::get('/dashboard', function () {
-        return view('dashboard');
-    })->name('dashboard.main');
+    Route::get('/dashboard', [\App\Http\Controllers\SolarShareDashboardController::class, 'index'])->name('dashboard.main');
+    Route::get('/ecommerce', [DashboardController::class, 'ecommerce'])->name('dashboard.ecommerce');
     Route::get('/stocks', [DashboardController::class, 'sector'])->defaults('dashboard', 'stocks')->name('dashboard.stocks');
     Route::get('/finance', [DashboardController::class, 'sector'])->defaults('dashboard', 'finance')->name('dashboard.finance');
     Route::get('/sales', [DashboardController::class, 'sector'])->defaults('dashboard', 'sales')->name('dashboard.sales');
@@ -259,12 +224,26 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     // Admin User Management
     Route::prefix('admin')->name('admin.')->group(function () {
         Route::resource('users', AdminUserController::class);
-        Route::resource('categories', AdminCategoryController::class)->except(['show']);
+        Route::resource('categories', AdminCategoryController::class);
         Route::resource('equipment', AdminEquipmentController::class);
+        Route::get('equipment-export.csv', [AdminEquipmentController::class, 'exportCsv'])->name('equipment.export');
+        Route::post('equipment-import.csv', [AdminEquipmentController::class, 'importCsv'])->name('equipment.import');
+        Route::resource('equipment.energy-profile', AdminEnergyProfileController::class)
+            ->only(['index', 'create', 'store'])
+            ->parameters(['equipment.energy-profile' => 'equipment'])
+            ->names('equipment.energy-profile');
+        Route::get('equipment/{equipment}/energy-profile/show', [AdminEnergyProfileController::class, 'show'])
+            ->name('equipment.energy-profile.show');
+        Route::get('equipment/{equipment}/energy-profile/edit', [AdminEnergyProfileController::class, 'edit'])
+            ->name('equipment.energy-profile.edit');
+        Route::put('equipment/{equipment}/energy-profile', [AdminEnergyProfileController::class, 'update'])
+            ->name('equipment.energy-profile.update');
+        Route::delete('equipment/{equipment}/energy-profile', [AdminEnergyProfileController::class, 'destroy'])
+            ->name('equipment.energy-profile.destroy');
         Route::put('equipment/{equipment}/approve', [AdminEquipmentController::class, 'approve'])->name('equipment.approve');
         Route::put('equipment/{equipment}/reject', [AdminEquipmentController::class, 'reject'])->name('equipment.reject');
-        Route::resource('rentals', RentalController::class);
-        Route::resource('rental-contracts', RentalContractController::class);
+        Route::resource('rentals', RentalController::class)->only(['index', 'show', 'destroy']);
+        Route::resource('rental-contracts', RentalContractController::class)->only(['index', 'show', 'destroy']);
         Route::get('rental-contracts/{rental_contract}/export-pdf', [RentalContractController::class, 'exportPdf'])
             ->name('rental-contracts.export-pdf');
         // Deposit management (admin)
@@ -273,17 +252,28 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
             Route::post('release', [RentalContractController::class, 'releaseDeposit'])->name('release');
             Route::post('forfeit', [RentalContractController::class, 'forfeitDeposit'])->name('forfeit');
         });
-        Route::resource('rental-extensions', RentalExtensionController::class);
-        Route::post('reservations/{reservation}/cancellation', [ReservationCancellationController::class, 'decide'])
-            ->name('reservations.cancellation-decision');
+        Route::resource('rental-extensions', RentalExtensionController::class)->only(['index', 'show', 'destroy']);
         Route::post('rental-extensions/{rental_extension}/approve', [RentalExtensionController::class, 'approve'])
             ->name('rental-extensions.approve');
         Route::post('rental-extensions/{rental_extension}/reject', [RentalExtensionController::class, 'reject'])
             ->name('rental-extensions.reject');
+
+        // Rental Insights
+        Route::get('rental-insights', [\App\Http\Controllers\Admin\RentalInsightsController::class, 'dashboard'])
+            ->name('rental-insights.dashboard');
+        Route::get('rental-insights/overdue', [\App\Http\Controllers\Admin\RentalInsightsController::class, 'overdue'])
+            ->name('rental-insights.overdue');
+        Route::get('rental-insights/export', [\App\Http\Controllers\Admin\RentalInsightsController::class, 'export'])
+            ->name('rental-insights.export');
+
+        // AI Settings
+        Route::get('ai-settings', [AdminAiSettingsController::class, 'index'])->name('ai-settings.index');
+        Route::put('ai-settings', [AdminAiSettingsController::class, 'update'])->name('ai-settings.update');
+        Route::post('ai-settings/test', [AdminAiSettingsController::class, 'testConnection'])->name('ai-settings.test');
+        Route::post('ai-settings/pull-model', [AdminAiSettingsController::class, 'pullModel'])->name('ai-settings.pull-model');
     });
 
     // Dashboard Routes
-    Route::get('/ecommerce', [DashboardController::class, 'ecommerce'])->name('dashboard.ecommerce');
     Route::get('/analytics', function () {
         return view('pages.dashboard.analytics', ['title' => 'Analytics Dashboard']);
     })->name('dashboard.analytics');
@@ -296,6 +286,19 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/saas', function () {
         return view('pages.dashboard.saas', ['title' => 'SaaS Dashboard']);
     })->name('dashboard.saas');
+    Route::get('/ai-dashboard', function () {
+        return view('pages.dashboard.ai', ['title' => 'AI Dashboard']);
+    })->name('dashboard.ai');
+    Route::get('/ai', [AiDemoController::class, 'index'])->name('ai.index');
+    Route::get('/ai/usage', [AiDemoController::class, 'usage'])->name('ai.usage');
+    Route::get('/ai/text-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'text')->name('ai.text');
+    Route::get('/ai/image-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'image')->name('ai.image');
+    Route::get('/ai/video-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'video')->name('ai.video');
+    Route::get('/ai/code-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'code')->name('ai.code');
+    Route::get('/ai/chat', [AiDemoController::class, 'tool'])->defaults('tool', 'chat')->name('ai.chat');
+    Route::get('/ai/history', [AiDemoController::class, 'tool'])->defaults('tool', 'history')->name('ai.history');
+    Route::get('/ai/settings', [AiDemoController::class, 'tool'])->defaults('tool', 'settings')->name('ai.settings');
+
     // Calendar
     Route::get('/calendar', function () {
         return view('pages.applications.calendar', ['title' => 'Calendar']);
@@ -457,6 +460,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         return view('pages.applications.vector-maps', ['title' => __('Vector Maps')]);
     })->name('maps.vector');
 });
+
 // Isolated technical module. Owner access is scoped to equipment ownership in the controllers.
 Route::middleware(['auth', 'verified', 'role.selected'])->prefix('technical')->name('technical.')->group(function () {
     Route::resource('maintenances', MaintenanceController::class);
@@ -481,6 +485,14 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     Route::post('/rental-contracts/{contract}/sign', [MarketplaceController::class, 'signContract'])->name('buyer.contracts.sign');
     Route::post('/owner/reservations/{reservation}/decision', [MarketplaceController::class, 'decideReservation'])
         ->middleware('can:owner-only')->name('owner.reservations.decision');
+
+    // Front office contract reading and signing
+    Route::prefix('rental-contracts')->name('contracts.')->group(function () {
+        Route::get('{contract}', [\App\Http\Controllers\Front\ContractController::class, 'show'])->name('show');
+        Route::post('{contract}/accept', [\App\Http\Controllers\Front\ContractController::class, 'accept'])->name('accept');
+        Route::post('{contract}/decline', [\App\Http\Controllers\Front\ContractController::class, 'decline'])->name('decline');
+        Route::post('{contract}/summary', [\App\Http\Controllers\Front\ContractController::class, 'summary'])->name('summary')->middleware('throttle:6,1');
+    });
 
     // Deposit management (owner only)
     Route::middleware('can:owner-only')->prefix('owner/rental-contracts/{rental_contract}/deposit')->name('owner.rental-contracts.deposit.')->group(function () {
@@ -512,8 +524,3 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
         ->name('rental.return.process');
 });
 require __DIR__.'/auth.php';
-
-Route::get('/energy-calculator', [\App\Http\Controllers\EnergyCalculatorController::class, 'index'])
-    ->name('front.energy-calculator');
-Route::post('/energy-calculator', [\App\Http\Controllers\EnergyCalculatorController::class, 'calculate'])
-    ->name('front.energy-calculator.calculate');

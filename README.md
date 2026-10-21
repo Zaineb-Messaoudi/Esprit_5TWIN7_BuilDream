@@ -193,6 +193,54 @@ copy .env.example .env
 php -r "file_exists('.env') || copy('.env.example', '.env');"
 ```
 
+### Step 4b: AI/LLM Configuration (Required for AI Features)
+
+Add the following to your `.env` file to enable AI features:
+
+```env
+# AI / LLM Settings (optional - for AI features)
+# Provider: ollama (FREE local), openai, anthropic
+AI_PROVIDER=ollama
+# API Key: Required for OpenAI/Anthropic, NOT needed for Ollama
+AI_API_KEY=
+# Base URL: Ollama default is http://localhost:11434
+AI_BASE_URL=http://localhost:11434
+# Chat Model: For Ollama use llama3.2, mistral, phi3, etc. (run: ollama pull llama3.2)
+AI_MODEL=llama3.2
+# Vision Model: For Ollama use llava, llava-llama3, llava-mistral, etc. (run: ollama pull llava)
+AI_VISION_MODEL=llava
+# Embedding Model: For Ollama use nomic-embed-text, mxbai-embed-large, etc.
+AI_EMBEDDING_MODEL=nomic-embed-text
+
+# Optional: Fallback provider chain (comma-separated)
+AI_FALLBACK_CHAIN=ollama,openai,anthropic
+
+# Optional: OpenAI specific (if using OpenAI as fallback)
+AI_OPENAI_API_KEY=
+AI_OPENAI_MODEL=gpt-4o-mini
+AI_OPENAI_VISION_MODEL=gpt-4o-mini
+AI_OPENAI_EMBEDDING_MODEL=text-embedding-3-small
+
+# Optional: Anthropic specific (if using Anthropic as fallback)
+AI_ANTHROPIC_API_KEY=
+AI_ANTHROPIC_MODEL=claude-3-haiku
+AI_ANTHROPIC_VISION_MODEL=claude-3-haiku
+```
+
+**For Ollama (FREE local LLM):**
+```bash
+# Install Ollama
+curl -fsSL https://ollama.com/install.sh | sh
+
+# Pull required models
+ollama pull llama3.2          # Chat model
+ollama pull llava             # Vision model for image validation
+ollama pull nomic-embed-text  # Embeddings for semantic search
+
+# Start Ollama server
+ollama serve
+```
+
 ### Step 5: Generate Application Key
 
 ```bash

@@ -13,7 +13,22 @@
             </div>
         </x-common.page-breadcrumb>
 
-        {{-- Title + actions --}}
+        {{-- Messages sent by the deposit actions (hold / release / forfeit) --}}
+        @if (session('status'))
+            <p role="status" aria-live="polite" class="rounded-lg border border-success-200 bg-success-50 px-4 py-3 text-sm text-success-700 dark:border-success-500/20 dark:bg-success-500/10 dark:text-success-300">
+                {{ match (session('status')) {
+                    'deposit-held'      => __('Deposit held.'),
+                    'deposit-released'  => __('Deposit released.'),
+                    'deposit-forfeited' => __('Deposit forfeited.'),
+                    default             => session('status'),
+                } }}
+            </p>
+        @endif
+        @if (session('error'))
+            <p role="alert" class="rounded-lg border border-error-200 bg-error-50 px-4 py-3 text-sm text-error-700 dark:border-error-500/20 dark:bg-error-500/10 dark:text-error-300">{{ session('error') }}</p>
+        @endif
+
+        {{-- Title + actions (read-only: an administrator never signs or edits a contract) --}}
         <div class="flex flex-wrap items-center justify-between gap-4">
             <h1 class="text-title-md font-semibold text-gray-800 dark:text-white/90">Contract {{ $contract->contract_number }}</h1>
             <div class="flex items-center gap-3">
@@ -21,7 +36,6 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                     PDF
                 </a>
-                <a href="{{ route('admin.rental-contracts.edit', $contract) }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">Edit</a>
                 <a href="{{ route('admin.rental-contracts.index') }}" class="inline-flex min-h-10 items-center justify-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-300 dark:hover:bg-gray-800">Back to list</a>
             </div>
         </div>
