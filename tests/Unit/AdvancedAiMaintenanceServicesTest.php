@@ -27,7 +27,7 @@ class AdvancedAiMaintenanceServicesTest extends TestCase
 
     public function test_z_score_handles_outlier_small_samples_and_zero_deviation(): void
     {
-        $service = new MaintenanceCostAnomalyService();
+        $service = new MaintenanceCostAnomalyService;
 
         $this->assertGreaterThan(2, $service->zScore(500, [90, 100, 110]));
         $this->assertNull($service->zScore(500, [90, 100]));
@@ -64,7 +64,7 @@ class AdvancedAiMaintenanceServicesTest extends TestCase
         $this->damage($categoryEquipment->id, 600);
         $this->damage($otherEquipment->id, 900);
 
-        $service = new RepairCostEstimatorService();
+        $service = new RepairCostEstimatorService;
         $categoryEstimate = $service->estimate($category->id, 'moderate');
         $fallback = $service->estimate(99, 'moderate');
 
@@ -87,4 +87,3 @@ class AdvancedAiMaintenanceServicesTest extends TestCase
         ]);
     }
 }
-

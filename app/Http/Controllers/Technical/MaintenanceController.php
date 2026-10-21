@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Technical;
 
-use App\Models\Maintenance;
 use App\Http\Requests\Technical\StoreMaintenanceRequest;
+use App\Models\Maintenance;
+use App\Services\Maintenance\MaintenanceCostAnomalyService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use App\Services\Maintenance\MaintenanceCostAnomalyService;
 
 class MaintenanceController extends TechnicalCrudController
 {
@@ -57,7 +57,10 @@ class MaintenanceController extends TechnicalCrudController
         ];
     }
 
-    protected function requestClass(): string { return StoreMaintenanceRequest::class; }
+    protected function requestClass(): string
+    {
+        return StoreMaintenanceRequest::class;
+    }
 
     protected function createRecord(array $data): Model
     {

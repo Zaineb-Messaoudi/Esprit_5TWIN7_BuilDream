@@ -18,9 +18,13 @@ class InspectionChecklistServiceTest extends TestCase
     use RefreshDatabase;
 
     private InspectionChecklistService $service;
+
     private Equipment $equipment;
+
     private InspectionChecklist $checklist;
+
     private InspectionChecklistItem $criticalItem;
+
     private InspectionChecklistItem $regularItem;
 
     protected function setUp(): void
@@ -100,4 +104,3 @@ class InspectionChecklistServiceTest extends TestCase
         ];
     }
 }
-

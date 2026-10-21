@@ -2,7 +2,6 @@
 
 namespace Tests\Unit;
 
-use App\Contracts\AiClientInterface;
 use App\Services\Ai\FakeAiClient;
 use App\Services\Maintenance\DamageSeverityClassifier;
 use App\Services\Maintenance\RuleBasedFailureRiskService;
@@ -12,7 +11,7 @@ class AiMaintenanceServicesTest extends TestCase
 {
     public function test_failure_risk_rules_and_boundaries_are_coherent(): void
     {
-        $service = new RuleBasedFailureRiskService();
+        $service = new RuleBasedFailureRiskService;
 
         $this->assertSame('low', $service->predict(0, 0, 0)['level']);
         $this->assertSame('medium', $service->predict(10, 1, 100)['level']);

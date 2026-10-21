@@ -17,7 +17,7 @@ class InspectionChecklistService
     {
         return DB::transaction(function () use ($data): Inspection {
             $data = $this->validateAndNormalizeResults($data);
-            $inspection = Inspection::query()->create(Arr::only($data, (new Inspection())->getFillable()));
+            $inspection = Inspection::query()->create(Arr::only($data, (new Inspection)->getFillable()));
             $this->synchronizeCriticalDamages($inspection);
 
             return $inspection;

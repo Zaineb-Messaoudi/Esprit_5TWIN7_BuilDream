@@ -47,4 +47,3 @@ class EquipmentTimelineTest extends TestCase
         $this->actingAs($otherOwner)->get(route('technical.equipment.history', $equipment))->assertForbidden();
     }
 }
-

@@ -16,6 +16,6 @@ class InspectionQrCodeService
 
     public function svg(Equipment $equipment): string
     {
-        return (new SvgWriter())->write(new QrCode($this->signedUrl($equipment), size: 320, margin: 12))->getString();
+        return (new SvgWriter)->write(new QrCode($this->signedUrl($equipment), size: 320, margin: 12))->getString();
     }
 }

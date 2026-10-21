@@ -61,4 +61,3 @@ class InspectionChecklistFeatureTest extends TestCase
         ])->assertSessionHasErrors(['checklist_results', 'checklist_results.0.passed']);
     }
 }
-

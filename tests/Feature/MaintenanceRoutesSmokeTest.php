@@ -12,8 +12,7 @@ class MaintenanceRoutesSmokeTest extends TestCase
 
     public function test_every_maintenance_route_handles_anonymous_requests_without_server_error(): void
     {
-        $routes = collect(Route::getRoutes()->getRoutes())->filter(fn ($route) =>
-            str_starts_with((string) $route->getName(), 'technical.')
+        $routes = collect(Route::getRoutes()->getRoutes())->filter(fn ($route) => str_starts_with((string) $route->getName(), 'technical.')
             || str_starts_with((string) $route->getName(), 'admin.technical.')
         );
 

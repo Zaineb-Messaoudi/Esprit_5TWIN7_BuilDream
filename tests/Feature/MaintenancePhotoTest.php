@@ -17,6 +17,7 @@ class MaintenancePhotoTest extends TestCase
     use RefreshDatabase;
 
     private User $owner;
+
     private Maintenance $maintenance;
 
     protected function setUp(): void
@@ -87,4 +88,3 @@ class MaintenancePhotoTest extends TestCase
         return UploadedFile::fake()->createWithContent($name, $content);
     }
 }
-

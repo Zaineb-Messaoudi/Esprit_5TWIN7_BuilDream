@@ -15,7 +15,9 @@ class TechnicalPdfTest extends TestCase
     use RefreshDatabase;
 
     private User $owner;
+
     private Inspection $inspection;
+
     private Maintenance $maintenance;
 
     protected function setUp(): void
@@ -47,4 +49,3 @@ class TechnicalPdfTest extends TestCase
         $this->actingAs($this->owner)->get('/technical/inspections/999999/pdf')->assertNotFound();
     }
 }
-

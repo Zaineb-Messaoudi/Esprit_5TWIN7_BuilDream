@@ -7,7 +7,10 @@ use Illuminate\Validation\Rule;
 
 class EstimateRepairCostRequest extends FormRequest
 {
-    public function authorize(): bool { return $this->user()?->can('technical-access') ?? false; }
+    public function authorize(): bool
+    {
+        return $this->user()?->can('technical-access') ?? false;
+    }
 
     public function rules(): array
     {

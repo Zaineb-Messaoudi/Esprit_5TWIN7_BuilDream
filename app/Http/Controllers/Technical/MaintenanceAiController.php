@@ -32,6 +32,7 @@ class MaintenanceAiController extends Controller
             return response()->json(['message' => $message], 503);
         } catch (Throwable $exception) {
             report($exception);
+
             return response()->json(['message' => __('The image analysis service is temporarily unavailable.')], 503);
         }
     }
@@ -42,6 +43,7 @@ class MaintenanceAiController extends Controller
             return response()->json(['text' => $service->transcribe($request->file('audio'))]);
         } catch (Throwable $exception) {
             report($exception);
+
             return response()->json(['message' => __('The transcription service is temporarily unavailable.')], 503);
         }
     }
@@ -49,6 +51,7 @@ class MaintenanceAiController extends Controller
     public function estimate(EstimateRepairCostRequest $request, RepairCostEstimatorService $service): JsonResponse
     {
         $data = $request->validated();
+
         return response()->json($service->estimate($data['category_id'] ?? null, $data['severity']));
     }
 }

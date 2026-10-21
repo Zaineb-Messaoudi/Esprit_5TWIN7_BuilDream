@@ -6,7 +6,10 @@ use Illuminate\Foundation\Http\FormRequest;
 
 class AnalyzeDamagePhotoRequest extends FormRequest
 {
-    public function authorize(): bool { return $this->user()?->can('technical-access') ?? false; }
+    public function authorize(): bool
+    {
+        return $this->user()?->can('technical-access') ?? false;
+    }
 
     public function rules(): array
     {

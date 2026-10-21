@@ -61,4 +61,3 @@ class TotalCostOfOwnershipServiceTest extends TestCase
         ]);
     }
 }
-

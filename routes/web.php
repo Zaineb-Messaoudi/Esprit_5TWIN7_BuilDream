@@ -38,15 +38,15 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservationCancellationController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SpecialPageController;
-use App\Http\Controllers\Technical\InspectionController;
-use App\Http\Controllers\Technical\MaintenanceController;
-use App\Http\Controllers\Technical\MaintenanceReportController;
-use App\Http\Controllers\Technical\MaintenancePhotoController;
-use App\Http\Controllers\Technical\MaintenanceDashboardController;
-use App\Http\Controllers\Technical\TechnicalPdfController;
 use App\Http\Controllers\Technical\EquipmentTimelineController;
+use App\Http\Controllers\Technical\InspectionController;
 use App\Http\Controllers\Technical\InspectionQrCodeController;
 use App\Http\Controllers\Technical\MaintenanceAiController;
+use App\Http\Controllers\Technical\MaintenanceController;
+use App\Http\Controllers\Technical\MaintenanceDashboardController;
+use App\Http\Controllers\Technical\MaintenancePhotoController;
+use App\Http\Controllers\Technical\MaintenanceReportController;
+use App\Http\Controllers\Technical\TechnicalPdfController;
 
 // Front Office public catalogue and live equipment booking workflow.
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])

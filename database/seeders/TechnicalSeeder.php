@@ -2,12 +2,12 @@
 
 namespace Database\Seeders;
 
+use App\Models\Damage;
 use App\Models\Equipment;
 use App\Models\Inspection;
 use App\Models\Maintenance;
 use App\Models\MaintenanceReport;
 use App\Models\Rental;
-use App\Models\Damage;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\Schema;
 use RuntimeException;
