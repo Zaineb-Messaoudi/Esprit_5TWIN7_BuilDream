@@ -8,9 +8,10 @@ Pull Request to main
 Merge to main
     -> Docker image build
     -> Docker Hub push
+    -> temporary staging stack and /up smoke test
     -> WSL self-hosted runner
     -> Docker Desktop / Docker Compose
-    -> migrations and health check
+    -> migrations, health check and rollback protection
 ```
 
 ## Docker Hub
@@ -38,13 +39,15 @@ $HOME/solarshare-production
 
 Its `.env` file is private and is never committed. Docker Compose starts the
 Laravel application, database, Redis, Meilisearch, queue, scheduler and Reverb
-services. The deployment runs migrations and verifies `/up` before succeeding.
+services. The pipeline first verifies the published image in a temporary staging
+stack. Production then runs migrations and verifies `/up`; a failed rollout
+attempts to restore the previous image.
 
 ## Release rule
 
 `main` is the release branch. A Pull Request must pass all CI checks before it
 can be merged. A successful merge automatically builds, publishes and deploys
-the tested image.
+the tested image after staging succeeds.
 
 ## Rollback
 

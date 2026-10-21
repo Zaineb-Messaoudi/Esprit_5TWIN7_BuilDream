@@ -12,9 +12,10 @@ Pull Request to main
     -> CI: tests, quality, security, frontend build
 Merge to main
     -> Docker image build and Docker Hub push
+    -> temporary staging stack on GitHub-hosted Linux
     -> self-hosted WSL runner
     -> Docker Desktop / Docker Compose
-    -> migrations and /up health check
+    -> migrations, /up health check and rollback protection
 ```
 
 ## 1. Prepare the local production environment
@@ -59,13 +60,15 @@ automatically:
 1. runs the complete CI suite;
 2. builds the Docker image;
 3. pushes the image to Docker Hub;
-4. checks out the tested source on the WSL runner;
-5. pulls the immutable commit image;
-6. starts Docker Compose;
-7. runs Laravel migrations;
-8. checks `/up`.
+4. starts an isolated staging stack on a GitHub-hosted runner;
+5. checks the staging `/up` endpoint and destroys the temporary stack;
+6. checks out the tested source on the WSL runner;
+7. pulls the immutable commit image;
+8. starts Docker Compose;
+9. runs Laravel migrations;
+10. checks `/up`, with rollback protection if the rollout fails.
 
-No deployment button or second deployment command is needed.
+No deployment button or second deployment command is needed after the merge.
 
 ## 4. Local verification
 

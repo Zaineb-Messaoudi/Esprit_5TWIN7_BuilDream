@@ -31,10 +31,28 @@ cp docker-compose.yml "$deploy_dir/docker-compose.yml"
 printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$username" --password-stdin
 
 image="docker.io/$username/solarshare:$image_tag"
+compose_args=(--project-name "solarshare-$environment" --project-directory "$deploy_dir")
+previous_image=""
+app_container="$(docker compose "${compose_args[@]}" ps -q app 2>/dev/null | head -n 1 || true)"
+if [[ -n "$app_container" ]]; then
+  previous_image="$(docker inspect --format '{{.Config.Image}}' "$app_container" 2>/dev/null || true)"
+fi
+
+rollback() {
+  exit_code=$?
+  if [[ "$exit_code" -ne 0 && -n "$previous_image" && "$previous_image" != "$image" ]]; then
+    echo "Deployment failed; rolling back to $previous_image" >&2
+    export APP_IMAGE="$previous_image"
+    docker compose "${compose_args[@]}" up -d --remove-orphans || true
+  fi
+  exit "$exit_code"
+}
+trap rollback EXIT
+
 docker pull "$image"
 export APP_IMAGE="$image"
-compose_args=(--project-name "solarshare-$environment" --project-directory "$deploy_dir")
 docker compose "${compose_args[@]}" up -d --remove-orphans
 docker compose "${compose_args[@]}" exec -T app php artisan migrate --force
 docker compose "${compose_args[@]}" ps
 curl --fail --retry 10 --retry-delay 3 "http://127.0.0.1:$app_port/up"
+trap - EXIT
