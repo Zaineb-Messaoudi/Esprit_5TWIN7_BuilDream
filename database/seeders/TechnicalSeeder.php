@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Damage;
 use App\Models\Equipment;
 use App\Models\Inspection;
 use App\Models\Maintenance;
@@ -21,6 +22,8 @@ class TechnicalSeeder extends Seeder
             || ! Schema::hasTable('inspections')) {
             throw new RuntimeException('TechnicalSeeder needs the Equipment model and an equipment table with owner_id. Merge and migrate the complete Equipment module first.');
         }
+
+        $this->call(InspectionChecklistSeeder::class);
 
         $rentalsReady = class_exists(Rental::class) && Schema::hasTable('rentals');
 
@@ -54,7 +57,7 @@ class TechnicalSeeder extends Seeder
             $rentalId = $rentalsReady
                 ? Rental::query()->where('equipment_id', $item->getKey())->orderBy('id')->value('id')
                 : null;
-            Inspection::query()->firstOrCreate(
+            $inspection = Inspection::query()->firstOrCreate(
                 ['equipment_id' => $item->getKey(), 'comments' => 'Routine return inspection'],
                 Inspection::factory()->make([
                     'equipment_id' => $item->getKey(),
@@ -62,6 +65,20 @@ class TechnicalSeeder extends Seeder
                     'comments' => 'Routine return inspection',
                 ])->getAttributes(),
             );
+            if (Schema::hasTable('damages') && Schema::hasColumn('damages', 'repair_cost')) {
+                foreach ([['minor', 75], ['moderate', 220], ['severe', 650]] as [$severity, $cost]) {
+                    Damage::query()->firstOrCreate(
+                        ['inspection_id' => $inspection->getKey(), 'description' => "Seeded {$severity} repair history"],
+                        [
+                            'equipment_id' => $item->getKey(),
+                            'inspection_checklist_item_id' => null,
+                            'severity' => $severity,
+                            'repair_cost' => $cost,
+                            'status' => 'repaired',
+                        ],
+                    );
+                }
+            }
         }));
     }
 }

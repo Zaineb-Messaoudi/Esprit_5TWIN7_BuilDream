@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers\Technical;
 
+use App\Http\Requests\Technical\StoreInspectionRequest;
+use App\Models\Equipment;
 use App\Models\Inspection;
+use App\Models\InspectionChecklist;
 use App\Models\Rental;
+use App\Services\Maintenance\InspectionChecklistService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
-use Illuminate\Validation\Rule;
+use Illuminate\View\View;
 
 class InspectionController extends TechnicalCrudController
 {
@@ -29,7 +33,7 @@ class InspectionController extends TechnicalCrudController
 
     protected function eagerLoads(): array
     {
-        return $this->rentalsReady() ? ['equipment', 'rental'] : ['equipment'];
+        return $this->rentalsReady() ? ['equipment', 'rental', 'checklist', 'damages'] : ['equipment', 'checklist', 'damages'];
     }
 
     private function rentalsReady(): bool
@@ -37,20 +41,17 @@ class InspectionController extends TechnicalCrudController
         return class_exists(Rental::class) && Schema::hasTable('rentals');
     }
 
-    protected function scope(Builder $query, Request $request): Builder
-    {
-        return $this->isAdmin($request) ? $query : $query->whereHas('equipment', fn (Builder $q) => $q->where('owner_id', $request->user()->id));
-    }
-
     protected function fields(): array
     {
         return [
             'equipment_id' => ['label' => 'Equipment', 'type' => 'select', 'required' => true],
             'rental_id' => ['label' => 'Rental (optional)', 'type' => 'select'],
+            'inspection_checklist_id' => ['label' => 'Inspection checklist', 'type' => 'select'],
             'inspection_date' => ['label' => 'Inspection date', 'type' => 'date', 'required' => true],
             'condition_before' => ['label' => 'Condition before', 'type' => 'text', 'required' => true],
             'condition_after' => ['label' => 'Condition after', 'type' => 'text', 'required' => true],
             'damage_detected' => ['label' => 'Damage detected', 'type' => 'checkbox'],
+            'checklist_results' => ['label' => 'Checklist results', 'type' => 'checklist'],
             'comments' => ['label' => 'Comments', 'type' => 'textarea'],
         ];
     }
@@ -64,22 +65,41 @@ class InspectionController extends TechnicalCrudController
 
         return [
             'equipment_id' => $this->equipmentOptions($request),
+            'equipment_categories' => Equipment::query()
+                ->when(! $this->isAdmin($request), fn (Builder $query) => $query->where('owner_id', $request->user()->id))
+                ->pluck('category_id', 'id')->all(),
             'rental_id' => $rentals->mapWithKeys(fn ($rental) => [$rental->id => '#'.$rental->id.' (equipment #'.$rental->equipment_id.')'])->all(),
+            'inspection_checklist_id' => InspectionChecklist::query()->where('is_active', true)->orderBy('category_name')->pluck('name', 'id')->all(),
+            'checklist_results' => InspectionChecklist::query()->where('is_active', true)->with('items')->get()->mapWithKeys(
+                fn (InspectionChecklist $checklist) => [$checklist->id => $checklist->items->map(fn ($item) => [
+                    'id' => $item->id,
+                    'label' => $item->label,
+                    'is_critical' => $item->is_critical,
+                ])->all()],
+            )->all(),
         ];
     }
 
-    protected function rules(Request $request, ?Model $record = null): array
+    protected function requestClass(): string
     {
-        return [
-            'equipment_id' => ['required', 'integer', Rule::exists('equipment', 'id')->when(! $this->isAdmin($request), fn ($rule) => $rule->where('owner_id', $request->user()->id))],
-            'rental_id' => $this->rentalsReady()
-                ? ['nullable', 'integer', Rule::exists('rentals', 'id')->where('equipment_id', $request->input('equipment_id'))]
-                : ['nullable', Rule::prohibitedIf(true)],
-            'inspection_date' => ['required', 'date'],
-            'condition_before' => ['required', 'string', 'max:255'],
-            'condition_after' => ['required', 'string', 'max:255'],
-            'damage_detected' => ['required', 'boolean'],
-            'comments' => ['nullable', 'string', 'max:10000'],
-        ];
+        return StoreInspectionRequest::class;
+    }
+
+    public function createForEquipment(Request $request, Equipment $equipment): View
+    {
+        abort_unless($request->user()->isAdmin() || (int) $equipment->owner_id === (int) $request->user()->getKey(), 403);
+        $request->query->set('equipment_id', $equipment->getKey());
+
+        return $this->create($request);
+    }
+
+    protected function createRecord(array $data): Model
+    {
+        return app(InspectionChecklistService::class)->create($data);
+    }
+
+    protected function updateRecord(Model $record, array $data): Model
+    {
+        return app(InspectionChecklistService::class)->update($record, $data);
     }
 }

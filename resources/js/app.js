@@ -2,7 +2,109 @@ import { createPopper } from '@popperjs/core';
 import './bootstrap';
 import Alpine from 'alpinejs';
 
+Alpine.data('technicalInspectionForm', (config) => ({
+    ...config,
+    photo: null,
+    busy: false,
+    aiMessage: '',
+    analysisResult: null,
+    estimateSeverity: 'moderate',
+    estimateBusy: false,
+    estimateResult: null,
+    estimateMessage: '',
+    estimateSource: '',
+    speechSupported: false,
+    listening: false,
+    recognition: null,
+    init() {
+        const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+        this.speechSupported = Boolean(Recognition);
+        if (!Recognition) return;
+        this.recognition = new Recognition();
+        this.recognition.lang = 'fr-FR';
+        this.recognition.continuous = true;
+        this.recognition.onresult = (event) => {
+            const text = Array.from(event.results).slice(event.resultIndex).map((result) => result[0].transcript).join(' ');
+            const field = document.getElementById('comments');
+            field.value = [field.value, text].filter(Boolean).join(' ').trim();
+        };
+        this.recognition.onend = () => { this.listening = false; };
+    },
+    toggleDictation() {
+        if (this.listening) this.recognition.stop(); else this.recognition.start();
+        this.listening = !this.listening;
+    },
+    async analyzePhoto() {
+        if (!this.photo) return;
+        this.busy = true;
+        this.aiMessage = '';
+        const body = new FormData();
+        body.append('photo', this.photo);
+        try {
+            const response = await fetch(this.analyzeUrl, { method: 'POST', headers: { 'X-CSRF-TOKEN': this.csrf, Accept: 'application/json' }, body });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+            document.getElementById('damage_detected').checked = data.damage_detected;
+            document.getElementById('comments').value = data.comments;
+            this.estimateSeverity = data.severity;
+            this.analysisResult = data;
+            this.aiMessage = this.prefilledMessage;
+            if (data.damage_detected) {
+                this.estimateSource = `${this.aiLabel}: ${data.severity} · ${Number(data.repair_hours).toFixed(1)} ${this.hoursLabel}`;
+                await this.estimateRepairCost();
+            }
+        } catch (error) {
+            this.aiMessage = error.message || this.unavailableMessage;
+        } finally {
+            this.busy = false;
+        }
+    },
+    async estimateRepairCost() {
+        this.estimateBusy = true;
+        this.estimateMessage = '';
+        try {
+            const payload = { severity: this.estimateSeverity };
+            const categoryId = this.equipmentCategories[this.equipmentId];
+            if (categoryId) payload.category_id = categoryId;
+            const response = await fetch(this.estimateUrl, {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json', 'X-CSRF-TOKEN': this.csrf, Accept: 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            const data = await response.json();
+            if (!response.ok) throw new Error(data.message);
+            this.estimateResult = data;
+        } catch (error) {
+            this.estimateMessage = error.message || this.estimateUnavailableMessage;
+        } finally {
+            this.estimateBusy = false;
+        }
+    },
+    formatEstimate(value) {
+        return value == null ? '' : `${Number(value).toFixed(2)} ${this.currencyLabel}`;
+    },
+    formatRange() {
+        if (!this.estimateResult) return '';
+        return `${this.formatEstimate(this.estimateResult.minimum)} – ${this.formatEstimate(this.estimateResult.maximum)}`;
+    },
+    severityLabel(severity) {
+        return { minor: 'Léger', moderate: 'Modéré', severe: 'Grave' }[severity] || severity;
+    },
+    formatRepairHours(hours) {
+        return `${Number(hours || 0).toFixed(1)} ${this.hoursLabel}`;
+    },
+}));
+
 let apexChartsPromise;
+let chartJsPromise;
+
+function loadChartJs() {
+    if (!chartJsPromise) {
+        chartJsPromise = import('chart.js/auto').then(({ default: Chart }) => Chart);
+    }
+
+    return chartJsPromise;
+}
 
 function loadApexCharts() {
     if (!apexChartsPromise) {
@@ -81,6 +183,33 @@ Alpine.data('apexChart', (options, height) => ({
         if (this.chart) {
             this.chart.destroy();
         }
+    },
+}));
+
+Alpine.data('maintenanceDashboard', (urls) => ({
+    charts: [],
+    error: false,
+    async load() {
+        try {
+            const [Chart, costs, failures, intervals] = await Promise.all([
+                loadChartJs(),
+                fetch(urls.costs, { headers: { Accept: 'application/json' } }).then((response) => response.ok ? response.json() : Promise.reject(response)),
+                fetch(urls.failures, { headers: { Accept: 'application/json' } }).then((response) => response.ok ? response.json() : Promise.reject(response)),
+                fetch(urls.intervals, { headers: { Accept: 'application/json' } }).then((response) => response.ok ? response.json() : Promise.reject(response)),
+            ]);
+            const color = document.documentElement.classList.contains('dark') ? 'rgb(206 212 218)' : 'rgb(52 64 84)';
+            const build = (element, type, data) => new Chart(element, {
+                type,
+                data,
+                options: { responsive: true, maintainAspectRatio: false, color, scales: type === 'doughnut' ? {} : { y: { beginAtZero: true } } },
+            });
+            this.charts = [build(this.$refs.costs, 'bar', costs), build(this.$refs.failures, 'doughnut', failures), build(this.$refs.intervals, 'line', intervals)];
+        } catch (_) {
+            this.error = true;
+        }
+    },
+    destroy() {
+        this.charts.forEach((chart) => chart.destroy());
     },
 }));
 

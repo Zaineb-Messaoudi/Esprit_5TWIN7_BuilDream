@@ -62,6 +62,7 @@ class MenuHelper
                 'icon' => 'logistics',
                 'name' => 'Technical',
                 'subItems' => [
+                    ['name' => 'Maintenance Dashboard', 'path' => route('admin.technical.dashboard'), 'activePrefix' => '/admin/technical/dashboard', 'pro' => false],
                     ['name' => 'Maintenances', 'path' => route('admin.technical.maintenances.index'), 'activePrefix' => '/admin/technical/maintenances', 'pro' => false],
                     ['name' => 'Reports', 'path' => route('admin.technical.reports.index'), 'activePrefix' => '/admin/technical/reports', 'pro' => false],
                     ['name' => 'Inspections', 'path' => route('admin.technical.inspections.index'), 'activePrefix' => '/admin/technical/inspections', 'pro' => false],

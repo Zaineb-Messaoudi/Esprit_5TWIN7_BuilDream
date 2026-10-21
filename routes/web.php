@@ -38,9 +38,15 @@ use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\ReservationCancellationController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SpecialPageController;
+use App\Http\Controllers\Technical\EquipmentTimelineController;
 use App\Http\Controllers\Technical\InspectionController;
+use App\Http\Controllers\Technical\InspectionQrCodeController;
+use App\Http\Controllers\Technical\MaintenanceAiController;
 use App\Http\Controllers\Technical\MaintenanceController;
+use App\Http\Controllers\Technical\MaintenanceDashboardController;
+use App\Http\Controllers\Technical\MaintenancePhotoController;
 use App\Http\Controllers\Technical\MaintenanceReportController;
+use App\Http\Controllers\Technical\TechnicalPdfController;
 
 // Front Office public catalogue and live equipment booking workflow.
 Route::get('/locale/{locale}', [LocaleController::class, 'switch'])
@@ -508,7 +514,17 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
 });
 
 // Isolated technical module. Owner access is scoped to equipment ownership in the controllers.
-Route::middleware(['auth', 'verified', 'role.selected'])->prefix('technical')->name('technical.')->group(function () {
+Route::middleware(['auth', 'verified', 'role.selected', 'can:technical-access'])->prefix('technical')->name('technical.')->group(function () {
+    Route::post('ai/analyze-damage', [MaintenanceAiController::class, 'analyzeDamage'])->name('ai.analyze-damage');
+    Route::post('ai/transcribe', [MaintenanceAiController::class, 'transcribe'])->name('ai.transcribe');
+    Route::post('ai/estimate-repair', [MaintenanceAiController::class, 'estimate'])->name('ai.estimate-repair');
+    Route::get('equipment/{equipment}/inspection-qr', InspectionQrCodeController::class)->name('equipment.inspection-qr');
+    Route::get('equipment/{equipment}/inspect', [InspectionController::class, 'createForEquipment'])->middleware('signed')->name('inspections.prefilled');
+    Route::get('equipment/{equipment}/history', EquipmentTimelineController::class)->name('equipment.history');
+    Route::get('inspections/{inspection}/pdf', [TechnicalPdfController::class, 'inspection'])->name('inspections.pdf');
+    Route::get('maintenances/{maintenance}/pdf', [TechnicalPdfController::class, 'maintenance'])->name('maintenances.pdf');
+    Route::post('maintenances/{maintenance}/photos', [MaintenancePhotoController::class, 'store'])->name('maintenances.photos.store');
+    Route::delete('maintenances/{maintenance}/photos/{photo}', [MaintenancePhotoController::class, 'destroy'])->name('maintenances.photos.destroy');
     Route::resource('maintenances', MaintenanceController::class);
     Route::resource('reports', MaintenanceReportController::class);
     Route::resource('inspections', InspectionController::class);
@@ -516,6 +532,18 @@ Route::middleware(['auth', 'verified', 'role.selected'])->prefix('technical')->n
 
 Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])
     ->prefix('admin/technical')->name('admin.technical.')->group(function () {
+        Route::post('ai/analyze-damage', [MaintenanceAiController::class, 'analyzeDamage'])->name('ai.analyze-damage');
+        Route::post('ai/transcribe', [MaintenanceAiController::class, 'transcribe'])->name('ai.transcribe');
+        Route::post('ai/estimate-repair', [MaintenanceAiController::class, 'estimate'])->name('ai.estimate-repair');
+        Route::get('equipment/{equipment}/history', EquipmentTimelineController::class)->name('equipment.history');
+        Route::get('inspections/{inspection}/pdf', [TechnicalPdfController::class, 'inspection'])->name('inspections.pdf');
+        Route::get('maintenances/{maintenance}/pdf', [TechnicalPdfController::class, 'maintenance'])->name('maintenances.pdf');
+        Route::get('dashboard', [MaintenanceDashboardController::class, 'index'])->name('dashboard');
+        Route::get('dashboard/costs', [MaintenanceDashboardController::class, 'costs'])->name('dashboard.costs');
+        Route::get('dashboard/failures', [MaintenanceDashboardController::class, 'failures'])->name('dashboard.failures');
+        Route::get('dashboard/intervals', [MaintenanceDashboardController::class, 'intervals'])->name('dashboard.intervals');
+        Route::post('maintenances/{maintenance}/photos', [MaintenancePhotoController::class, 'store'])->name('maintenances.photos.store');
+        Route::delete('maintenances/{maintenance}/photos/{photo}', [MaintenancePhotoController::class, 'destroy'])->name('maintenances.photos.destroy');
         Route::resource('maintenances', MaintenanceController::class);
         Route::resource('reports', MaintenanceReportController::class);
         Route::resource('inspections', InspectionController::class);

@@ -28,6 +28,7 @@
         "@popperjs/core": "^2.11.8",
         "alpinejs": "^3.14.9",
         "apexcharts": "^7.0.0",
+        "chart.js": "^4.5.1",
         "flatpickr": "^4.6.13",
         "fullcalendar": "^7.0.2",
         "jsvectormap": "^1.7.0",

@@ -111,7 +111,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS') ?: (env('MAIL_USER') ?: env('MAIL_USERNAME', 'hello@example.com')),
+        'address' => env('MAIL_FROM_ADDRESS') ?: (env('MAIL_USER') ?: env('MAIL_USERNAME')) ?: 'hello@example.com',
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 

@@ -382,6 +382,12 @@ class FrontOfficeTest extends TestCase
             ->assertSee('Browse-only catalogue')
             ->assertDontSee('Preview booking flow');
 
+        $this->get(route('front.equipment.show', 2))
+            ->assertOk()
+            ->assertSee('Health score')
+            ->assertSee('100/100')
+            ->assertSee('Healthy');
+
         $this->get(route('front.reserve'))
             ->assertRedirect(route('login'));
         $this->get(route('front.booking-summary', ['equipment' => 1, 'start' => '2026-10-12', 'end' => '2026-10-14']))

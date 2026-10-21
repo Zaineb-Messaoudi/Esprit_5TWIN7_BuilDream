@@ -2,11 +2,12 @@
 
 namespace App\Http\Controllers\Technical;
 
+use App\Http\Requests\Technical\StoreMaintenanceRequest;
 use App\Models\Maintenance;
+use App\Services\Maintenance\MaintenanceCostAnomalyService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 
 class MaintenanceController extends TechnicalCrudController
 {
@@ -27,7 +28,7 @@ class MaintenanceController extends TechnicalCrudController
 
     protected function eagerLoads(): array
     {
-        return ['equipment', 'report'];
+        return ['equipment', 'report', 'photos'];
     }
 
     protected function scope(Builder $query, Request $request): Builder
@@ -56,16 +57,16 @@ class MaintenanceController extends TechnicalCrudController
         ];
     }
 
-    protected function rules(Request $request, ?Model $record = null): array
+    protected function requestClass(): string
     {
-        return [
-            'equipment_id' => ['required', 'integer', Rule::exists('equipment', 'id')->when(! $this->isAdmin($request), fn ($rule) => $rule->where('owner_id', $request->user()->id))],
-            'start_date' => ['required', 'date'],
-            'end_date' => ['nullable', 'date', 'after_or_equal:start_date'],
-            'reason' => ['required', 'string', 'max:255'],
-            'cost' => ['required', 'numeric', 'min:0', 'max:99999999.99'],
-            'status' => ['required', Rule::in(['planned', 'in_progress', 'completed'])],
-            'notes' => ['nullable', 'string', 'max:10000'],
-        ];
+        return StoreMaintenanceRequest::class;
+    }
+
+    protected function createRecord(array $data): Model
+    {
+        $maintenance = parent::createRecord($data);
+        app(MaintenanceCostAnomalyService::class)->evaluateAndNotify($maintenance);
+
+        return $maintenance;
     }
 }

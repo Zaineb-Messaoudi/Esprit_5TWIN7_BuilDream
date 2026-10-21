@@ -13,11 +13,17 @@ class AppServiceProvider extends ServiceProvider
 {
     public function register(): void
     {
-        //
+        $this->app->bind(\App\Contracts\AiClientInterface::class, \App\Services\Ai\OpenAiCompatibleClient::class);
+        $this->app->bind(\App\Contracts\FailureRiskPredictorInterface::class, \App\Services\Maintenance\RuleBasedFailureRiskService::class);
     }
 
     public function boot(): void
     {
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\Maintenance::class, \App\Policies\TechnicalRecordPolicy::class);
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\MaintenanceReport::class, \App\Policies\TechnicalRecordPolicy::class);
+        \Illuminate\Support\Facades\Gate::policy(\App\Models\Inspection::class, \App\Policies\TechnicalRecordPolicy::class);
+        \Illuminate\Support\Facades\Gate::define('technical-access', fn (\App\Models\User $user): bool => $user->isAdmin() || $user->isOwner());
+
         // Define global role gates
         \Illuminate\Support\Facades\Gate::define('admin-only', function (\App\Models\User $user) {
             return $user->role === \App\Enums\UserRole::ADMIN;
