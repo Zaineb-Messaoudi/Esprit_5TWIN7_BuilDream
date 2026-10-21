@@ -1,0 +1,114 @@
+<svg xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" width="1600" height="980" viewBox="0 0 1600 980" role="img" aria-labelledby="title desc">
+  <title id="title">SolarShare DevOps CI/CD Pipeline</title>
+  <desc id="desc">A structured DevOps workflow from Windows development through GitHub Actions, Docker, GitHub Container Registry, and deployment with Docker Compose.</desc>
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#071827"/>
+      <stop offset="1" stop-color="#102b3f"/>
+    </linearGradient>
+    <linearGradient id="solar" x1="0" y1="0" x2="1" y2="1">
+      <stop offset="0" stop-color="#facc15"/>
+      <stop offset="1" stop-color="#22c55e"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="140%">
+      <feDropShadow dx="0" dy="8" stdDeviation="10" flood-color="#000" flood-opacity=".28"/>
+    </filter>
+    <marker id="arrow" markerWidth="12" markerHeight="12" refX="10" refY="6" orient="auto">
+      <path d="M0,0 L12,6 L0,12 Z" fill="#79d7c5"/>
+    </marker>
+    <style>
+      .title { font: 700 34px Inter, Segoe UI, Arial, sans-serif; fill: #f8fafc; }
+      .subtitle { font: 400 17px Inter, Segoe UI, Arial, sans-serif; fill: #a8c1d1; }
+      .section { font: 700 18px Inter, Segoe UI, Arial, sans-serif; fill: #dffcf5; letter-spacing: 1px; }
+      .label { font: 700 17px Inter, Segoe UI, Arial, sans-serif; fill: #f8fafc; }
+      .small { font: 400 14px Inter, Segoe UI, Arial, sans-serif; fill: #b9ccda; }
+      .tiny { font: 600 12px Inter, Segoe UI, Arial, sans-serif; fill: #b9ccda; }
+      .card { fill: #123149; stroke: #2d5b70; stroke-width: 1.5; }
+      .stage { fill: #0d263a; stroke: #315c72; stroke-width: 2; }
+      .ci { fill: #153b3b; stroke: #46b7a4; stroke-width: 2; }
+      .cd { fill: #283549; stroke: #8e9bb3; stroke-width: 2; }
+      .warn { fill: #3b2e1b; stroke: #e4ae47; stroke-width: 2; }
+      .line { stroke: #79d7c5; stroke-width: 3; fill: none; marker-end: url(#arrow); }
+      .dash { stroke: #6ca6b0; stroke-width: 2; stroke-dasharray: 8 8; fill: none; }
+    </style>
+  </defs>
+
+  <rect width="1600" height="980" fill="url(#bg)"/>
+  <circle cx="1450" cy="-80" r="320" fill="#1a5367" opacity=".22"/>
+  <circle cx="90" cy="1000" r="300" fill="#1a5367" opacity=".18"/>
+
+  <image x="60" y="42" width="82" height="82" xlink:href="../public/images/brand/solarshare-icon.png"/>
+  <text x="165" y="75" class="title">SolarShare DevOps Pipeline</text>
+  <text x="165" y="105" class="subtitle">From Windows development to tested, containerized deployment</text>
+  <rect x="1260" y="52" width="270" height="50" rx="25" fill="url(#solar)"/>
+  <text x="1395" y="84" text-anchor="middle" class="label" fill="#062317">AWA Validation 2026</text>
+
+  <text x="70" y="180" class="section">1 · DEVELOPMENT</text>
+  <text x="455" y="180" class="section">2 · CONTINUOUS INTEGRATION</text>
+  <text x="1045" y="180" class="section">3 · CONTINUOUS DELIVERY</text>
+
+  <rect x="55" y="215" width="320" height="265" rx="18" class="stage" filter="url(#shadow)"/>
+  <image x="82" y="242" width="44" height="44" href="https://cdn.simpleicons.org/windows/0078D4"/>
+  <text x="140" y="272" class="label">Team workstations</text>
+  <text x="82" y="315" class="small">Every member uses:</text>
+  <image x="82" y="335" width="30" height="30" href="https://cdn.simpleicons.org/git/F05032"/>
+  <text x="122" y="357" class="small">Git branches and pull requests</text>
+  <image x="82" y="380" width="30" height="30" href="https://cdn.simpleicons.org/docker/2496ED"/>
+  <text x="122" y="402" class="small">Docker Desktop + WSL 2</text>
+  <text x="82" y="445" class="tiny">Local .env stays private; secrets never enter Git</text>
+
+  <rect x="420" y="215" width="520" height="530" rx="18" class="ci" filter="url(#shadow)"/>
+  <image x="450" y="242" width="46" height="46" href="https://cdn.simpleicons.org/github/FFFFFF"/>
+  <text x="510" y="274" class="label">GitHub repository</text>
+  <rect x="450" y="315" width="460" height="84" rx="14" class="card"/>
+  <image x="472" y="335" width="32" height="32" href="https://cdn.simpleicons.org/githubactions/2088FF"/>
+  <text x="520" y="350" class="label">GitHub Actions · CI</text>
+  <text x="520" y="376" class="small">Triggered on push and pull request</text>
+  <line x1="680" y1="399" x2="680" y2="425" class="line"/>
+  <rect x="450" y="425" width="460" height="245" rx="14" class="card"/>
+  <text x="475" y="458" class="label">Quality gates</text>
+  <text x="475" y="493" class="small">✓ Composer dependencies</text>
+  <text x="475" y="523" class="small">✓ Laravel/Pest feature tests</text>
+  <text x="475" y="553" class="small">✓ Laravel Pint code style</text>
+  <text x="475" y="583" class="small">✓ Vite frontend build</text>
+  <text x="475" y="613" class="small">✓ Composer and NPM security audits</text>
+  <text x="475" y="653" class="tiny">Merge is allowed only after checks pass</text>
+
+  <rect x="985" y="215" width="560" height="530" rx="18" class="cd" filter="url(#shadow)"/>
+  <image x="1015" y="242" width="42" height="42" href="https://cdn.simpleicons.org/docker/2496ED"/>
+  <text x="1070" y="272" class="label">Container delivery</text>
+  <rect x="1015" y="315" width="220" height="130" rx="14" class="card"/>
+  <image x="1040" y="338" width="34" height="34" href="https://cdn.simpleicons.org/docker/2496ED"/>
+  <text x="1085" y="363" class="label">Docker image</text>
+  <text x="1040" y="399" class="small">PHP + Laravel</text>
+  <text x="1040" y="422" class="small">Immutable build</text>
+  <line x1="1235" y1="380" x2="1265" y2="380" class="line"/>
+  <rect x="1265" y="315" width="245" height="130" rx="14" class="card"/>
+  <image x="1290" y="338" width="34" height="34" href="https://cdn.simpleicons.org/github/FFFFFF"/>
+  <text x="1335" y="363" class="label">GHCR registry</text>
+  <text x="1290" y="399" class="small">Versioned image tags</text>
+  <text x="1290" y="422" class="small">Private credentials</text>
+  <line x1="1375" y1="445" x2="1375" y2="480" class="line"/>
+  <rect x="1015" y="480" width="495" height="185" rx="14" class="card"/>
+  <text x="1040" y="515" class="label">Docker Compose deployment</text>
+  <text x="1040" y="550" class="small">Laravel · MySQL · Redis · Meilisearch</text>
+  <text x="1040" y="579" class="small">Reverb · queue worker · scheduler</text>
+  <text x="1040" y="608" class="small">Migrations → health check → release</text>
+  <text x="1040" y="642" class="tiny">Rollback = redeploy previous image tag</text>
+
+  <line x1="375" y1="350" x2="420" y2="350" class="line"/>
+  <line x1="940" y1="480" x2="985" y2="480" class="line"/>
+
+  <rect x="55" y="790" width="1490" height="125" rx="18" class="warn"/>
+  <text x="85" y="830" class="label" fill="#ffe7ad">External integrations and secrets</text>
+  <image x="90" y="850" width="26" height="26" href="https://cdn.simpleicons.org/cloudflare/F38020"/>
+  <text x="125" y="870" class="small">Cloudflare Workers AI</text>
+  <image x="335" y="850" width="26" height="26" href="https://cdn.simpleicons.org/ollama/FFFFFF"/>
+  <text x="370" y="870" class="small">Ollama for local AI</text>
+  <image x="600" y="850" width="26" height="26" href="https://cdn.simpleicons.org/stripe/635BFF"/>
+  <text x="635" y="870" class="small">Stripe test mode</text>
+  <text x="920" y="855" class="small">Gemini / Groq / OAuth / mail credentials</text>
+  <text x="920" y="882" class="tiny">Stored in GitHub Secrets or server environment — never in the image</text>
+
+  <text x="800" y="952" text-anchor="middle" class="tiny">CI validates every change · CD deploys only a validated image · Docker standardizes Windows team environments</text>
+</svg>

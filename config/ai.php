@@ -175,13 +175,15 @@ return [
     */
     'studio' => [
         'enabled' => env('AI_STUDIO_ENABLED', true),
-        'timeout' => env('AI_STUDIO_TIMEOUT', 60),
+        // Reuse the maintenance timeout unless Studio explicitly overrides it.
+        'timeout' => env('AI_STUDIO_TIMEOUT', env('MAINTENANCE_AI_TIMEOUT', 60)),
         'chat_timeout' => env('AI_STUDIO_CHAT_TIMEOUT', 12),
         'chat_fallback_timeout' => env('AI_STUDIO_CHAT_FALLBACK_TIMEOUT', 20),
         'video_timeout' => env('AI_STUDIO_VIDEO_TIMEOUT', 240),
-        'text_model' => env('GROQ_MODEL', 'openai/gpt-oss-20b'),
+        // Maintenance and Studio share the Gemini text model by default.
+        'text_model' => env('GEMINI_STUDIO_TEXT_MODEL', env('MAINTENANCE_AI_MODEL', env('GEMINI_MODEL', 'gemini-3.8-flash'))),
         'image_model' => env('GEMINI_STUDIO_IMAGE_MODEL', 'gemini-3.1-flash-image'),
-        'chat_model' => env('GROQ_MODEL', 'openai/gpt-oss-20b'),
+        'chat_model' => env('GEMINI_STUDIO_CHAT_MODEL', env('MAINTENANCE_AI_MODEL', env('GEMINI_MODEL', 'gemini-3.8-flash'))),
         'video_model' => env('GEMINI_STUDIO_VIDEO_MODEL', 'gemini-omni-1.1-flash'),
     ],
 
