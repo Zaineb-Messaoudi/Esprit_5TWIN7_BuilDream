@@ -53,7 +53,7 @@ class MaintenancePhotoTest extends TestCase
 
         $this->actingAs($this->owner)->post(route('technical.maintenances.photos.store', $this->maintenance), [
             'type' => 'after',
-            'photo' => $this->fakePng('after.png', 5121),
+            'photo' => UploadedFile::fake()->create('after.png', 5121, 'image/png'),
         ])->assertSessionHasErrors('photo');
 
         $this->assertSame(0, MaintenancePhoto::query()->count());

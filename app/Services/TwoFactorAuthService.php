@@ -40,7 +40,7 @@ class TwoFactorAuthService
      */
     public function getQrCodeUrl(User $user, string $secret): string
     {
-        return $this->google2fa->getQRCodeGoogleUrl(
+        return $this->google2fa->getQRCodeUrl(
             config('app.name'),
             $user->email,
             $secret
