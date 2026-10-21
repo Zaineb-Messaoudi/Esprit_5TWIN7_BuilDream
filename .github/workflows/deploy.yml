@@ -24,7 +24,6 @@ on:
 
 env:
   REGISTRY: docker.io
-  IMAGE_NAME: ${{ secrets.DOCKERHUB_USERNAME }}/solarshare
 
 jobs:
   build-and-test:
@@ -45,18 +44,29 @@ jobs:
       - name: Set up Docker Buildx
         uses: docker/setup-buildx-action@v3
 
+      - name: Normalize Docker Hub image name
+        id: docker-image
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+        shell: bash
+        run: |
+          username="$(printf '%s' "$DOCKERHUB_USERNAME" | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')"
+          test -n "$username"
+          echo "username=$username" >> "$GITHUB_OUTPUT"
+          echo "image=docker.io/$username/solarshare" >> "$GITHUB_OUTPUT"
+
       - name: Log in to Container Registry
         uses: docker/login-action@v3
         with:
           registry: ${{ env.REGISTRY }}
-          username: ${{ secrets.DOCKERHUB_USERNAME }}
+          username: ${{ steps.docker-image.outputs.username }}
           password: ${{ secrets.DOCKERHUB_TOKEN }}
 
       - name: Extract metadata
         id: meta
         uses: docker/metadata-action@v5
         with:
-          images: ${{ env.REGISTRY }}/${{ env.IMAGE_NAME }}
+          images: ${{ steps.docker-image.outputs.image }}
           tags: |
             type=ref,event=branch
             type=ref,event=pr
@@ -103,7 +113,8 @@ jobs:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
-          IMAGE="docker.io/${{ secrets.DOCKERHUB_USERNAME }}/solarshare:sha-${GITHUB_SHA:0:7}"
+          DOCKERHUB_USERNAME="$(printf '%s' '${{ secrets.DOCKERHUB_USERNAME }}' | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')"
+          IMAGE="docker.io/${DOCKERHUB_USERNAME}/solarshare:sha-${GITHUB_SHA:0:7}"
           ssh "$DEPLOY_USER@$DEPLOY_HOST" "set -e; cd '$DEPLOY_PATH'; APP_IMAGE='$IMAGE' docker compose pull; APP_IMAGE='$IMAGE' docker compose up -d --no-build; APP_IMAGE='$IMAGE' docker compose exec -T app php artisan migrate --force; APP_IMAGE='$IMAGE' docker compose ps; curl --fail --retry 10 --retry-delay 3 http://127.0.0.1:8000/up"
 
   deploy-production:
@@ -134,7 +145,8 @@ jobs:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
-          IMAGE="docker.io/${{ secrets.DOCKERHUB_USERNAME }}/solarshare:sha-${GITHUB_SHA:0:7}"
+          DOCKERHUB_USERNAME="$(printf '%s' '${{ secrets.DOCKERHUB_USERNAME }}' | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')"
+          IMAGE="docker.io/${DOCKERHUB_USERNAME}/solarshare:sha-${GITHUB_SHA:0:7}"
           ssh "$DEPLOY_USER@$DEPLOY_HOST" "set -e; cd '$DEPLOY_PATH'; APP_IMAGE='$IMAGE' docker compose pull; APP_IMAGE='$IMAGE' docker compose up -d --no-build; APP_IMAGE='$IMAGE' docker compose exec -T app php artisan migrate --force; APP_IMAGE='$IMAGE' docker compose ps; curl --fail --retry 10 --retry-delay 3 http://127.0.0.1:8000/up"
 
   notify-success:
