@@ -59,7 +59,9 @@ class AiDemoController extends Controller
 
     public function index(): View
     {
-        if (! auth()->user()->exists) {
+        $user = auth()->user();
+
+        if (! $user?->exists) {
             return view('pages.dashboard.ai', [
                 'title' => 'AI Dashboard', 'totalRequests' => 0, 'totalInputTokens' => 0,
                 'totalOutputTokens' => 0, 'successRate' => 0, 'recentGenerations' => collect(),
@@ -67,7 +69,7 @@ class AiDemoController extends Controller
             ]);
         }
 
-        $records = $this->recordsFor(auth()->user());
+        $records = $this->recordsFor($user);
 
         return view('pages.dashboard.ai', [
             'title' => 'AI Dashboard',
@@ -82,7 +84,9 @@ class AiDemoController extends Controller
 
     public function usage(): View
     {
-        if (! auth()->user()->exists) {
+        $user = auth()->user();
+
+        if (! $user?->exists) {
             return view('pages.ai.usage', [
                 'title' => 'AI Usage', 'totalRequests' => 0, 'failedRequests' => 0,
                 'inputTokens' => 0, 'outputTokens' => 0, 'imagesGenerated' => 0,
@@ -91,7 +95,7 @@ class AiDemoController extends Controller
             ]);
         }
 
-        $records = $this->recordsFor(auth()->user());
+        $records = $this->recordsFor($user);
 
         return view('pages.ai.usage', [
             'title' => 'AI Usage',
@@ -110,14 +114,16 @@ class AiDemoController extends Controller
     {
         abort_unless(isset(self::TOOLS[$tool]), 404);
 
+        $user = auth()->user();
+
         return view('pages.ai.studio', [
             'title' => self::TOOLS[$tool]['title'],
             'tool' => self::TOOLS[$tool],
             'tools' => self::TOOLS,
-            'settings' => $this->settingsFor(auth()->user()),
+            'settings' => $this->settingsFor($user),
             'initialPrompt' => Str::limit((string) $request->query('prompt', ''), 1200, ''),
             'recentGenerations' => $tool === 'history'
-                ? (auth()->user()->exists ? $this->recordsFor(auth()->user())->latest()->limit(50)->get() : collect())
+                ? ($user?->exists ? $this->recordsFor($user)->latest()->limit(50)->get() : collect())
                 : collect(),
             'configured' => app(GeminiStudioService::class)->configured(),
         ]);
@@ -260,7 +266,7 @@ class AiDemoController extends Controller
 
     private function settingsFor($user): array
     {
-        if (! $user->exists) {
+        if (! $user?->exists) {
             return ['text_model' => config('ai.groq.model'), 'max_output_tokens' => 2048, 'temperature' => 0.4];
         }
 
