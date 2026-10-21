@@ -114,11 +114,15 @@ foreach (config('front.pages') as $slug => $page) {
 
 // Post-login landing: admins -> Back Office, everyone else -> Front Office.
 // Keeps the `dashboard` route name used by the auth controllers.
-Route::get('/portal', function () {
+Route::get('/dashboard', function () {
     $user = auth()->user();
 
     if (! $user->role_setup_completed) {
         return redirect()->route('role.setup');
+    }
+
+    if (! $user->hasVerifiedEmail()) {
+        return redirect()->route('verification.notice');
     }
 
     if ($user->isAdmin()) {
@@ -191,7 +195,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:owner-only'])->grou
 });
 
 Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
-    Route::get('/dashboard', [\App\Http\Controllers\SolarShareDashboardController::class, 'index'])->name('dashboard.main');
+    Route::get('/admin/dashboard', [\App\Http\Controllers\SolarShareDashboardController::class, 'index'])->name('dashboard.main');
     Route::get('/ecommerce', [DashboardController::class, 'ecommerce'])->name('dashboard.ecommerce');
     Route::get('/stocks', [DashboardController::class, 'sector'])->defaults('dashboard', 'stocks')->name('dashboard.stocks');
     Route::get('/finance', [DashboardController::class, 'sector'])->defaults('dashboard', 'finance')->name('dashboard.finance');
@@ -302,6 +306,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         Route::post('ai-settings/test', [AdminAiSettingsController::class, 'testConnection'])->name('ai-settings.test');
         Route::post('ai-settings/pull-model', [AdminAiSettingsController::class, 'pullModel'])->name('ai-settings.pull-model');
     });
+});
 
     Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
         // Dashboard Routes
@@ -335,6 +340,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         Route::post('/ai/generate', [AiDemoController::class, 'generate'])->name('ai.generate');
     });
 
+Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
     // Calendar
     Route::get('/calendar', function () {
         return view('pages.applications.calendar', ['title' => 'Calendar']);
