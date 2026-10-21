@@ -34,7 +34,12 @@ class MaintenanceDashboardTest extends TestCase
         Maintenance::factory()->create(['equipment_id' => $equipment->id, 'start_date' => '2026-01-20', 'cost' => 50.50]);
         Maintenance::factory()->create(['equipment_id' => $equipment->id, 'start_date' => '2026-02-01', 'cost' => 75]);
 
-        $inspection = Inspection::factory()->create(['equipment_id' => $equipment->id]);
+        // Avoid the inspection observer creating an extra zero-cost maintenance
+        // row when a factory happens to generate a damage-detected inspection.
+        $inspection = Inspection::factory()->create([
+            'equipment_id' => $equipment->id,
+            'damage_detected' => false,
+        ]);
         foreach (['2026-01-01', '2026-01-11', '2026-01-31'] as $date) {
             $damage = Damage::query()->create([
                 'inspection_id' => $inspection->id,
