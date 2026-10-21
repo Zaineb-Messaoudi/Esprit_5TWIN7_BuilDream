@@ -1,0 +1,64 @@
+name: Local CD Demo
+
+on:
+  workflow_run:
+    workflows: ['Deploy Production']
+    types: [completed]
+  workflow_dispatch:
+    inputs:
+      environment:
+        description: 'Local environment to deploy'
+        required: true
+        default: staging
+        type: choice
+        options:
+          - staging
+          - production
+      image_tag:
+        description: 'Docker Hub tag to deploy, for example dev or sha-a7d650a'
+        required: true
+        default: latest
+        type: string
+
+permissions:
+  contents: read
+
+jobs:
+  deploy-staging-after-ci:
+    name: Deploy staging on WSL runner
+    if: >-
+      github.event_name == 'workflow_run' &&
+      github.event.workflow_run.conclusion == 'success' &&
+      github.event.workflow_run.head_branch == 'dev'
+    runs-on: [self-hosted, linux, x64]
+    environment: staging
+    steps:
+      - name: Checkout tested commit
+        uses: actions/checkout@v4
+        with:
+          ref: ${{ github.event.workflow_run.head_sha }}
+
+      - name: Deploy tested Docker image
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          IMAGE_TAG: sha-${{ github.event.workflow_run.head_sha }}
+        shell: bash
+        run: ./scripts/deploy/local-compose.sh staging "$IMAGE_TAG"
+
+  deploy-manual:
+    name: Deploy selected local environment
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: [self-hosted, linux, x64]
+    environment: ${{ inputs.environment }}
+    steps:
+      - name: Checkout selected source
+        uses: actions/checkout@v4
+
+      - name: Deploy selected Docker image
+        env:
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        shell: bash
+        run: ./scripts/deploy/local-compose.sh "${{ inputs.environment }}" "$IMAGE_TAG"

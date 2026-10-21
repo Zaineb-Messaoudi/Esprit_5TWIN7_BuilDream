@@ -7,9 +7,9 @@ services:
     env_file:
       - .env
     environment:
-      APP_ENV: local
-      APP_DEBUG: "true"
-      APP_URL: http://localhost:8000
+      APP_ENV: ${APP_ENV:-local}
+      APP_DEBUG: ${APP_DEBUG:-true}
+      APP_URL: ${APP_URL:-http://localhost:8000}
       DB_HOST: mysql
       DB_PORT: 3306
       DB_DATABASE: ${DB_DATABASE:-SolarShare}
@@ -45,7 +45,7 @@ services:
     env_file:
       - .env
     environment:
-      APP_ENV: local
+      APP_ENV: ${APP_ENV:-local}
       DB_HOST: mysql
       REDIS_HOST: redis
       CACHE_STORE: redis
@@ -67,7 +67,7 @@ services:
     env_file:
       - .env
     environment:
-      APP_ENV: local
+      APP_ENV: ${APP_ENV:-local}
       DB_HOST: mysql
       REDIS_HOST: redis
       CACHE_STORE: redis
@@ -87,7 +87,7 @@ services:
     env_file:
       - .env
     environment:
-      APP_ENV: local
+      APP_ENV: ${APP_ENV:-local}
       DB_HOST: mysql
       REDIS_HOST: redis
       BROADCAST_CONNECTION: reverb
