@@ -61,5 +61,6 @@ return Application::configure(basePath: dirname(__DIR__))
         \App\Console\Commands\ScoutSetupMeilisearch::class,
         \App\Console\Commands\SyncBladeTranslations::class,
         \App\Console\Commands\SyncDatabaseTranslations::class,
+        \App\Console\Commands\BackupDatabase::class,
     ])
     ->create();

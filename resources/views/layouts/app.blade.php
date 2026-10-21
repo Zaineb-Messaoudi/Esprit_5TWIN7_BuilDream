@@ -123,6 +123,26 @@
                     }
                 }
             });
+
+            Alpine.store('notifications', {
+                add(message, type = 'info') {
+                    const toast = document.createElement('div');
+                    toast.className = 'fixed bottom-4 right-4 px-4 py-2 rounded-lg shadow-lg z-50 text-white animate-slide-up';
+                    const colors = {
+                        success: 'bg-success-600',
+                        warning: 'bg-warning-600',
+                        error: 'bg-error-600',
+                        info: 'bg-brand-600'
+                    };
+                    toast.classList.add(colors[type] || colors.info);
+                    toast.textContent = message;
+                    document.body.appendChild(toast);
+                    setTimeout(() => {
+                        toast.classList.add('animate-fade-out');
+                        setTimeout(() => toast.remove(), 300);
+                    }, 4000);
+                }
+            });
         });
     </script>
 

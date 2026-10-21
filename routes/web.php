@@ -242,8 +242,8 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
             ->name('equipment.energy-profile.destroy');
         Route::put('equipment/{equipment}/approve', [AdminEquipmentController::class, 'approve'])->name('equipment.approve');
         Route::put('equipment/{equipment}/reject', [AdminEquipmentController::class, 'reject'])->name('equipment.reject');
-        Route::resource('rentals', RentalController::class);
-        Route::resource('rental-contracts', RentalContractController::class);
+        Route::resource('rentals', RentalController::class)->only(['index', 'show', 'destroy']);
+        Route::resource('rental-contracts', RentalContractController::class)->only(['index', 'show', 'destroy']);
         Route::get('rental-contracts/{rental_contract}/export-pdf', [RentalContractController::class, 'exportPdf'])
             ->name('rental-contracts.export-pdf');
         // Deposit management (admin)
@@ -252,11 +252,19 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
             Route::post('release', [RentalContractController::class, 'releaseDeposit'])->name('release');
             Route::post('forfeit', [RentalContractController::class, 'forfeitDeposit'])->name('forfeit');
         });
-        Route::resource('rental-extensions', RentalExtensionController::class);
+        Route::resource('rental-extensions', RentalExtensionController::class)->only(['index', 'show', 'destroy']);
         Route::post('rental-extensions/{rental_extension}/approve', [RentalExtensionController::class, 'approve'])
             ->name('rental-extensions.approve');
         Route::post('rental-extensions/{rental_extension}/reject', [RentalExtensionController::class, 'reject'])
             ->name('rental-extensions.reject');
+
+        // Rental Insights
+        Route::get('rental-insights', [\App\Http\Controllers\Admin\RentalInsightsController::class, 'dashboard'])
+            ->name('rental-insights.dashboard');
+        Route::get('rental-insights/overdue', [\App\Http\Controllers\Admin\RentalInsightsController::class, 'overdue'])
+            ->name('rental-insights.overdue');
+        Route::get('rental-insights/export', [\App\Http\Controllers\Admin\RentalInsightsController::class, 'export'])
+            ->name('rental-insights.export');
 
         // AI Settings
         Route::get('ai-settings', [AdminAiSettingsController::class, 'index'])->name('ai-settings.index');
@@ -475,6 +483,14 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     Route::post('/rental-contracts/{contract}/sign', [MarketplaceController::class, 'signContract'])->name('buyer.contracts.sign');
     Route::post('/owner/reservations/{reservation}/decision', [MarketplaceController::class, 'decideReservation'])
         ->middleware('can:owner-only')->name('owner.reservations.decision');
+
+    // Front office contract reading and signing
+    Route::prefix('rental-contracts')->name('contracts.')->group(function () {
+        Route::get('{contract}', [\App\Http\Controllers\Front\ContractController::class, 'show'])->name('show');
+        Route::post('{contract}/accept', [\App\Http\Controllers\Front\ContractController::class, 'accept'])->name('accept');
+        Route::post('{contract}/decline', [\App\Http\Controllers\Front\ContractController::class, 'decline'])->name('decline');
+        Route::post('{contract}/summary', [\App\Http\Controllers\Front\ContractController::class, 'summary'])->name('summary')->middleware('throttle:6,1');
+    });
 
     // Deposit management (owner only)
     Route::middleware('can:owner-only')->prefix('owner/rental-contracts/{rental_contract}/deposit')->name('owner.rental-contracts.deposit.')->group(function () {

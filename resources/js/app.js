@@ -1,6 +1,7 @@
 import { createPopper } from '@popperjs/core';
 import './bootstrap';
 import Alpine from 'alpinejs';
+import '../fonts/outfit-latin.woff2';
 
 let apexChartsPromise;
 
