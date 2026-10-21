@@ -330,7 +330,6 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         Route::put('/ai/settings', [AiDemoController::class, 'updateSettings'])->name('ai.settings.update');
         Route::post('/ai/generate', [AiDemoController::class, 'generate'])->name('ai.generate');
     });
-    Route::get('/ai-dashboard', [AiDemoController::class, 'index'])->name('dashboard.ai');
 
     // Calendar
     Route::get('/calendar', function () {

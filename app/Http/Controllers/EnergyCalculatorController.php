@@ -14,7 +14,38 @@ class EnergyCalculatorController extends Controller
     {
         // Handle GET with calculate parameter (e.g., from equipment detail link)
         if ($request->has('calculate')) {
-            return $this->calculate($request, $calculator, $matcher);
+            // Use default items for demo/testing when no items provided
+            $defaultItems = [
+                ['key' => 'fridge', 'quantity' => 1, 'hours' => 8],
+                ['key' => 'tv', 'quantity' => 1, 'hours' => 4],
+                ['key' => 'led_lamp', 'quantity' => 1, 'hours' => 5],
+                ['key' => 'laptop', 'quantity' => 1, 'hours' => 1],
+            ];
+
+            $result = $calculator->calculate(
+                $defaultItems,
+                (float) ($request->input('autonomy_days', 1)),
+                $request->has('sun_hours') ? (float) $request->input('sun_hours') : null,
+            );
+
+            $matches = null;
+            if ($result['status'] === 'ok') {
+                $listings = Equipment::query()
+                    ->published()
+                    ->whereHas('energyProfile')
+                    ->with(['energyProfile', 'category'])
+                    ->limit(200)
+                    ->get();
+
+                $matches = $matcher->match($result, $listings);
+            }
+
+            return view('pages.front.energy-calculator', [
+                'appliances' => $calculator->appliances(),
+                'result' => $result,
+                'matches' => $matches,
+                'input' => array_merge(['items' => $defaultItems], $request->all()),
+            ]);
         }
 
         return view('pages.front.energy-calculator', [

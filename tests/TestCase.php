@@ -15,6 +15,7 @@ abstract class TestCase extends BaseTestCase
             \Illuminate\Routing\Middleware\ThrottleRequestsWithRedis::class,
             \App\Http\Middleware\ValidateAiRequest::class,
             \App\Http\Middleware\RateLimitByIpAndUser::class,
+            \App\Http\Middleware\EnsureRoleSelected::class,
         ]);
     }
 }
