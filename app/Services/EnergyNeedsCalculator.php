@@ -17,11 +17,11 @@ class EnergyNeedsCalculator
     /**
      * Typical values. Hours are the effective daily hours of use.
      *
-     * @return array<string, array{label: string, watts: int, hours: float, surge: float, icon: string}>
+     * @return array<string, array{label: string, watts: int, hours: float, surge: float, icon: string, key: string}>
      */
     public function appliances(): array
     {
-        return [
+        $appliances = [
             'led_lamp' => ['label' => 'LED lamp', 'watts' => 10, 'hours' => 5.0, 'surge' => 1.0, 'icon' => '💡'],
             'fridge' => ['label' => 'Refrigerator', 'watts' => 150, 'hours' => 8.0, 'surge' => 3.0, 'icon' => '🧊'],
             'tv' => ['label' => 'Television', 'watts' => 80, 'hours' => 4.0, 'surge' => 1.0, 'icon' => '📺'],
@@ -35,6 +35,12 @@ class EnergyNeedsCalculator
             'microwave' => ['label' => 'Microwave', 'watts' => 1000, 'hours' => 0.5, 'surge' => 1.0, 'icon' => '🍲'],
             'air_conditioner' => ['label' => 'Small air conditioner', 'watts' => 900, 'hours' => 4.0, 'surge' => 3.0, 'icon' => '❄️'],
         ];
+
+        foreach ($appliances as $key => &$appliance) {
+            $appliance['key'] = $key;
+        }
+
+        return $appliances;
     }
 
     /**
