@@ -10,11 +10,11 @@ env:
   APP_ENV: testing
   APP_DEBUG: false
   DB_CONNECTION: sqlite
-  DB_DATABASE: :memory:
+  DB_DATABASE: ':memory:'
   CACHE_STORE: array
   QUEUE_CONNECTION: sync
   SESSION_DRIVER: array
-  SCOUT_DRIVER: null
+  SCOUT_DRIVER: 'null'
   AI_ENABLED: false
 
 jobs:
