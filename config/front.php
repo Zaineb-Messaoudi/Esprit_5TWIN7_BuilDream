@@ -1,8 +1,8 @@
 <?php
 
 /*
- * Front Office template content (static, no backend).
- * Each page = path + title + list of sections rendered by <x-front.section>.
+ * Front-office page metadata. Live account and booking routes are rendered by
+ * PageController from persisted models; these entries provide their paths and titles.
  * Section types: hero, features, steps, stats, faq, plans, quotes, cta,
  * text, form, table, equipment.
  */
@@ -131,34 +131,11 @@ return [
         ]],
 
         // ---------- Booking flow ----------
-        'reserve' => ['path' => '/reserve', 'title' => 'Reserve', 'sections' => [
-            $hero('Step 1 of 3', 'Reserve your equipment', 'Pick your dates. We check nobody else booked them.', ['compact' => true]),
-            ['type' => 'form', 'title' => 'Reservation details', 'submit' => 'Continue to payment', 'href' => 'front.payment', 'fields' => [
-                ['label' => 'Equipment', 'name' => 'equipment', 'type' => 'select', 'options' => ['Portable battery 1000 Wh', 'Foldable solar panel 200 W', 'Portable wind turbine 400 W', 'Compact battery 500 Wh']],
-                ['label' => 'Start date', 'name' => 'start', 'type' => 'date'],
-                ['label' => 'End date', 'name' => 'end', 'type' => 'date'],
-                ['label' => 'Notes for the owner (optional)', 'name' => 'notes', 'type' => 'textarea'],
-            ]],
-        ]],
+        'reserve' => ['path' => '/reserve', 'title' => 'Reserve', 'sections' => []],
         'booking-summary' => ['path' => '/book/summary', 'title' => 'Reservation summary', 'sections' => []],
-        'payment' => ['path' => '/book/payment', 'title' => 'Payment', 'sections' => [
-            $hero('Step 2 of 3', 'Pay securely', 'Total for Portable battery 1000 Wh, 9 – 11 Oct 2026: 54 TND.', ['compact' => true]),
-            ['type' => 'form', 'title' => 'Payment method', 'submit' => 'Pay 54 TND', 'href' => 'front.confirmed', 'fields' => [
-                ['label' => 'Method', 'name' => 'method', 'type' => 'radio', 'options' => ['Card', 'Bank transfer', 'Cash on pickup']],
-                ['label' => 'Cardholder name', 'name' => 'holder', 'type' => 'text'],
-                ['label' => 'Card number', 'name' => 'number', 'type' => 'text', 'placeholder' => '0000 0000 0000 0000'],
-                ['label' => 'Expiry', 'name' => 'expiry', 'type' => 'text', 'placeholder' => 'MM/YY'],
-            ]],
-        ]],
-        'confirmed' => ['path' => '/book/confirmed', 'title' => 'Reservation confirmed', 'sections' => [
-            $hero('Step 3 of 3', 'Reservation confirmed 🎉', 'Your payment went through and your invoice is ready.', ['compact' => true, 'cta' => ['label' => 'View invoice', 'href' => 'front.invoice']]),
-            ['type' => 'steps', 'title' => 'What happens next', 'items' => [['title' => 'Sign the contract', 'text' => 'Your reservation becomes a rental with a contract.'], ['title' => 'Pick up the gear', 'text' => 'Meet the owner on the first day.'], ['title' => 'Return & inspect', 'text' => 'The equipment is checked on return.']]],
-        ]],
-        'invoice' => ['path' => '/book/invoice', 'title' => 'Invoice', 'sections' => [
-            $hero('Invoice INV-2026-0142', 'Your invoice', 'Issued on 3 Oct 2026 for reservation RES-1042.', ['compact' => true]),
-            ['type' => 'table', 'title' => 'Details', 'cols' => ['Description', 'Days', 'Price/day', 'Amount'], 'rows' => [['Portable battery 1000 Wh', '3', '18 TND', '54 TND']]],
-            ['type' => 'stats', 'items' => [['value' => '54.00 TND', 'label' => 'Subtotal'], ['value' => '10.26 TND', 'label' => 'VAT 19%'], ['value' => '64.26 TND', 'label' => 'Total paid']]],
-        ]],
+        'payment' => ['path' => '/book/payment', 'title' => 'Payment', 'sections' => []],
+        'confirmed' => ['path' => '/book/confirmed', 'title' => 'Reservation confirmed', 'sections' => []],
+        'invoice' => ['path' => '/book/invoice', 'title' => 'Invoice', 'sections' => []],
 
         // ---------- My space ----------
         'my-dashboard' => ['path' => '/my/dashboard', 'title' => 'Buyer dashboard', 'shell' => 'account', 'role' => 'buyer', 'sections' => [

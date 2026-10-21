@@ -44,9 +44,11 @@ return [
         'amount_column' => env('MAINTENANCE_TCO_AMOUNT_COLUMN', 'total_amount'),
     ],
     'ai' => [
-        'api_key' => env('MAINTENANCE_AI_API_KEY'),
-        'base_url' => env('MAINTENANCE_AI_BASE_URL', 'https://api.openai.com/v1'),
-        'model' => env('MAINTENANCE_AI_MODEL', 'gpt-4.1-mini'),
+        // Maintenance AI uses the shared provider credentials by default. Set
+        // MAINTENANCE_AI_* only when technical analysis needs a separate model.
+        'api_key' => env('MAINTENANCE_AI_API_KEY') ?: env('GROQ_API_KEY'),
+        'base_url' => env('MAINTENANCE_AI_BASE_URL') ?: env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
+        'model' => env('MAINTENANCE_AI_MODEL') ?: env('GROQ_MODEL', 'openai/gpt-oss-20b'),
         'transcription_model' => env('MAINTENANCE_AI_TRANSCRIPTION_MODEL', 'whisper-1'),
         'timeout' => (int) env('MAINTENANCE_AI_TIMEOUT', 110),
     ],

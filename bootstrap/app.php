@@ -39,6 +39,7 @@ return Application::configure(basePath: dirname(__DIR__))
             \App\Http\Middleware\SetLocale::class,
             \App\Http\Middleware\SecurityHeaders::class,
             \App\Http\Middleware\RateLimitHeaders::class,
+            \App\Http\Middleware\TwoFactorAuth::class,
         ]);
 
         $middleware->api(append: [

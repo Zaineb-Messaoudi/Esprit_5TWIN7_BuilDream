@@ -165,7 +165,7 @@ class AiService
 
         try {
             $response = match ($this->provider) {
-                'openai' => $this->callOpenAI($messages, $options),
+                'openai', 'groq' => $this->callOpenAI($messages, $options),
                 'anthropic' => $this->callAnthropic($messages, $options),
                 'ollama' => $hasImages ? $this->callOllamaVision($messages, $options) : $this->callOllama($messages, $options),
                 default => $hasImages ? $this->callOllamaVision($messages, $options) : $this->callOllama($messages, $options),

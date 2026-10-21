@@ -5,7 +5,7 @@ return [
     |--------------------------------------------------------------------------
     | AI Provider
     |--------------------------------------------------------------------------
-    | Supported: 'ollama' (local, FREE), 'openai', 'anthropic'
+    | Supported: 'ollama' (local, FREE), 'groq', 'openai', 'anthropic'
     | Ollama runs locally on your machine - no API costs!
     | Install: https://ollama.com/
     */
@@ -17,7 +17,7 @@ return [
     |--------------------------------------------------------------------------
     | Required for OpenAI and Anthropic. NOT needed for Ollama.
     */
-    'api_key' => env('AI_API_KEY'),
+    'api_key' => env('AI_API_KEY') ?: env('GROQ_API_KEY'),
 
     /*
     |--------------------------------------------------------------------------
@@ -28,7 +28,9 @@ return [
     | - Anthropic: https://api.anthropic.com/v1 (default)
     | - OpenRouter: https://openrouter.ai/api/v1
     */
-    'base_url' => env('AI_BASE_URL', 'http://localhost:11434'),
+    'base_url' => env('AI_BASE_URL') ?: (env('AI_PROVIDER', 'ollama') === 'groq'
+        ? env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1')
+        : 'http://localhost:11434'),
 
     /*
     |--------------------------------------------------------------------------
@@ -45,7 +47,9 @@ return [
     | OpenAI: gpt-4o-mini, gpt-4o, gpt-3.5-turbo
     | Anthropic: claude-3-haiku, claude-3-sonnet
     */
-    'model' => env('AI_MODEL', 'llama3.2'),
+    'model' => env('AI_MODEL') ?: (env('AI_PROVIDER', 'ollama') === 'groq'
+        ? env('GROQ_MODEL', 'openai/gpt-oss-20b')
+        : 'llama3.2'),
 
     /*
     |--------------------------------------------------------------------------
@@ -97,6 +101,13 @@ return [
             'embedding_model' => env('AI_EMBEDDING_MODEL', 'nomic-embed-text'),
             'base_url' => env('AI_BASE_URL', 'http://localhost:11434'),
             'api_key' => null,
+        ],
+        'groq' => [
+            'model' => env('GROQ_MODEL', 'openai/gpt-oss-20b'),
+            'vision_model' => env('GROQ_VISION_MODEL', 'meta-llama/llama-4-scout-17b-16e-instruct'),
+            'embedding_model' => null,
+            'base_url' => env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
+            'api_key' => env('GROQ_API_KEY'),
         ],
         'openai' => [
             'model' => env('AI_OPENAI_MODEL', 'gpt-4o-mini'),

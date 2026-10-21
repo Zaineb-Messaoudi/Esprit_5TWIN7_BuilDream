@@ -17,7 +17,7 @@ class TwoFactorAuthController extends Controller
     /**
      * Show the 2FA setup page with QR code.
      */
-    public function setup(Request $request): View
+    public function setup(Request $request): View|RedirectResponse
     {
         $user = $request->user();
 
