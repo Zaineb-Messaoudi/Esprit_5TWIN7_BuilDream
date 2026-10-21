@@ -299,34 +299,37 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         Route::post('ai-settings/pull-model', [AdminAiSettingsController::class, 'pullModel'])->name('ai-settings.pull-model');
     });
 
-    // Dashboard Routes
-    Route::get('/analytics', function () {
-        return view('pages.dashboard.analytics', ['title' => 'Analytics Dashboard']);
-    })->name('dashboard.analytics');
-    Route::get('/marketing', function () {
-        return view('pages.dashboard.marketing', ['title' => 'Marketing Dashboard']);
-    })->name('dashboard.marketing');
-    Route::get('/crm', function () {
-        return view('pages.dashboard.crm', ['title' => 'CRM Dashboard']);
-    })->name('dashboard.crm');
-    Route::get('/saas', function () {
-        return view('pages.dashboard.saas', ['title' => 'SaaS Dashboard']);
-    })->name('dashboard.saas');
-    Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
-    // AI Studio (accessible to authenticated users with role selected)
-    Route::get('/ai', [AiDemoController::class, 'index'])->name('ai.index');
-    Route::get('/ai/usage', [AiDemoController::class, 'usage'])->name('ai.usage');
-    Route::get('/ai/text-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'text')->name('ai.text');
-    Route::get('/ai/image-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'image')->name('ai.image');
-    Route::get('/ai/video-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'video')->name('ai.video');
-    Route::get('/ai/code-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'code')->name('ai.code');
-    Route::get('/ai/chat', [AiDemoController::class, 'tool'])->defaults('tool', 'chat')->name('ai.chat');
-    Route::get('/ai/history', [AiDemoController::class, 'tool'])->defaults('tool', 'history')->name('ai.history');
-    Route::get('/ai/settings', [AiDemoController::class, 'tool'])->defaults('tool', 'settings')->name('ai.settings');
-    Route::put('/ai/settings', [AiDemoController::class, 'updateSettings'])->name('ai.settings.update');
-    Route::post('/ai/generate', [AiDemoController::class, 'generate'])->name('ai.generate');
+    Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
+        // Dashboard Routes
+        Route::get('/analytics', function () {
+            return view('pages.dashboard.analytics', ['title' => 'Analytics Dashboard']);
+        })->name('dashboard.analytics');
+        Route::get('/marketing', function () {
+            return view('pages.dashboard.marketing', ['title' => 'Marketing Dashboard']);
+        })->name('dashboard.marketing');
+        Route::get('/crm', function () {
+            return view('pages.dashboard.crm', ['title' => 'CRM Dashboard']);
+        })->name('dashboard.crm');
+        Route::get('/saas', function () {
+            return view('pages.dashboard.saas', ['title' => 'SaaS Dashboard']);
+        })->name('dashboard.saas');
+        Route::get('/ai-dashboard', [AiDemoController::class, 'index'])->name('dashboard.ai');
+    });
 
-    // Dashboard AI (admin only)
+    Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+        // AI Studio (accessible to authenticated users with role selected)
+        Route::get('/ai', [AiDemoController::class, 'index'])->name('ai.index');
+        Route::get('/ai/usage', [AiDemoController::class, 'usage'])->name('ai.usage');
+        Route::get('/ai/text-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'text')->name('ai.text');
+        Route::get('/ai/image-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'image')->name('ai.image');
+        Route::get('/ai/video-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'video')->name('ai.video');
+        Route::get('/ai/code-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'code')->name('ai.code');
+        Route::get('/ai/chat', [AiDemoController::class, 'tool'])->defaults('tool', 'chat')->name('ai.chat');
+        Route::get('/ai/history', [AiDemoController::class, 'tool'])->defaults('tool', 'history')->name('ai.history');
+        Route::get('/ai/settings', [AiDemoController::class, 'tool'])->defaults('tool', 'settings')->name('ai.settings');
+        Route::put('/ai/settings', [AiDemoController::class, 'updateSettings'])->name('ai.settings.update');
+        Route::post('/ai/generate', [AiDemoController::class, 'generate'])->name('ai.generate');
+    });
     Route::get('/ai-dashboard', [AiDemoController::class, 'index'])->name('dashboard.ai');
 
     // Calendar
