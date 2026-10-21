@@ -49,14 +49,14 @@ services:
       dockerfile: docker/nginx/Dockerfile
     image: ${WEB_IMAGE:-solarshare/nginx:local}
     ports:
-      - "${APP_PORT:-8000}:80"
+      - "${APP_PORT:-8000}:8080"
     volumes:
       - solarshare-public-storage:/var/www/html/public/storage
     depends_on:
       app:
         condition: service_healthy
     healthcheck:
-      test: ["CMD-SHELL", "wget --spider --quiet http://127.0.0.1/up || exit 1"]
+      test: ["CMD-SHELL", "wget --spider --quiet http://127.0.0.1:8080/up || exit 1"]
       interval: 10s
       timeout: 5s
       retries: 10
