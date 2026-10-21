@@ -6,6 +6,9 @@ use App\Enums\UserRole;
 use App\Models\Equipment;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\UploadedFile;
+use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 class FrontOfficeTest extends TestCase
@@ -52,6 +55,44 @@ class FrontOfficeTest extends TestCase
             ->assertSee('images/front/battery-station.svg')
             ->assertSee('images/front/wind-turbine.svg')
             ->assertSee(route('front.equipment.show', 1), false);
+    }
+
+    public function test_energy_calculator_recommends_equipment_from_energy_profiles(): void
+    {
+        $equipment = Equipment::factory()->create([
+            'name' => 'Calculator-ready battery',
+            'approval_status' => 'published',
+            'status' => 'available',
+        ]);
+        $equipment->energyProfile()->create([
+            'power_watts' => 500,
+            'capacity_wh' => 2000,
+            'efficiency' => 92,
+            'technology' => 'Lithium-ion',
+            'max_output' => 500,
+        ]);
+
+        $this->get(route('front.energy-calculator', ['calculate' => 1]))
+            ->assertOk()
+            ->assertSee('Energy calculator')
+            ->assertSee('1,640')
+            ->assertSee($equipment->name);
+    }
+
+    public function test_equipment_comparison_reuses_energy_profile_values(): void
+    {
+        $first = Equipment::factory()->create(['name' => 'Comparison battery A']);
+        $first->energyProfile()->create(['power_watts' => 500, 'capacity_wh' => 1000, 'voltage' => 24, 'efficiency' => 92, 'technology' => 'Lithium-ion']);
+        $second = Equipment::factory()->create(['name' => 'Comparison panel B']);
+        $second->energyProfile()->create(['power_watts' => 200, 'capacity_wh' => 800, 'voltage' => 12, 'efficiency' => 88, 'technology' => 'Monocrystalline']);
+
+        $this->get(route('front.equipment.compare', ['ids' => [$first->id, $second->id]]))
+            ->assertOk()
+            ->assertSee('Specification comparison')
+            ->assertSee($first->name)
+            ->assertSee($second->name)
+            ->assertSee('1000')
+            ->assertSee('Monocrystalline');
     }
 
     public function test_solarshare_branding_is_shared_by_front_office_back_office_and_auth_screens(): void
@@ -289,7 +330,7 @@ class FrontOfficeTest extends TestCase
             ['front.my-contract', [], 'No rental contracts yet.'],
             ['front.my-extensions', [], 'No extension requests yet.'],
             ['front.my-payments', [], 'No payments yet.'],
-            ['front.my-notifications', [], 'Your updates'],
+            ['front.my-notifications', [], 'No notifications yet.'],
         ] as [$route, $parameters, $content]) {
             $response = $this->get(route($route, $parameters))->assertOk()->assertSee($content);
             if ($route !== 'front.my-notifications') {
@@ -369,5 +410,78 @@ class FrontOfficeTest extends TestCase
             ->assertOk()
             ->assertSee('Solar kit 2 × 100 W')
             ->assertDontSee('Portable battery 1000 Wh');
+    }
+
+    public function test_equipment_map_renders_available_locations(): void
+    {
+        $equipment = Equipment::factory()->create([
+            'name' => 'Mapped battery',
+            'approval_status' => 'published',
+            'status' => 'available',
+            'latitude' => 36.8065,
+            'longitude' => 10.1815,
+        ]);
+
+        $this->get(route('front.equipment.map'))
+            ->assertOk()
+            ->assertSee('Find useful energy equipment near you.')
+            ->assertSee($equipment->name)
+            ->assertSee('equipment-map', false)
+            ->assertSee('OpenStreetMap', false);
+    }
+
+    public function test_solar_production_and_co2_endpoint_uses_open_meteo_radiation(): void
+    {
+        Http::fake(['api.open-meteo.com/*' => Http::response([
+            'daily' => ['shortwave_radiation_sum' => [5000, 6000, 4000]],
+        ])]);
+        $equipment = Equipment::factory()->create(['name' => 'Solar panel insight', 'latitude' => 36.8, 'longitude' => 10.1]);
+        $equipment->energyProfile()->create(['power_watts' => 200, 'efficiency' => 20]);
+
+        $this->get(route('front.equipment.solar-production', $equipment->id))
+            ->assertOk()
+            ->assertJsonPath('radiation_kwh_m2_day', 5)
+            ->assertJsonPath('production_wh_day', 200)
+            ->assertJsonPath('co2_avoided_kg_day', 0.08);
+    }
+
+    public function test_owner_can_upload_multiple_gallery_images(): void
+    {
+        Storage::fake('public');
+        $owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true, 'email_verified_at' => now()]);
+        $category = \App\Models\Category::factory()->create(['status' => 'active']);
+
+        $this->actingAs($owner)->post(route('front.my-equipment.store'), [
+            'category_id' => $category->id, 'name' => 'Gallery battery', 'price_per_day' => 12,
+            'condition' => 'good', 'location' => 'Tunis', 'status' => 'available',
+            'images' => [UploadedFile::fake()->image('front.jpg'), UploadedFile::fake()->image('side.jpg')],
+        ])->assertRedirect(route('front.my-equipment'));
+
+        $equipment = Equipment::query()->where('name', 'Gallery battery')->firstOrFail();
+        expect($equipment->images)->toHaveCount(2);
+        expect(Storage::disk('public')->allFiles('catalogue/gallery'))->toHaveCount(2);
+    }
+
+    public function test_authenticated_user_can_toggle_equipment_favorites(): void
+    {
+        $buyer = User::factory()->create(['role' => UserRole::BUYER, 'role_setup_completed' => true, 'email_verified_at' => now()]);
+        $equipment = Equipment::factory()->create();
+
+        $this->actingAs($buyer)->post(route('front.equipment.favorite', $equipment->id))
+            ->assertRedirect();
+        $this->assertDatabaseHas('user_equipment', ['user_id' => $buyer->id, 'equipment_id' => $equipment->id]);
+
+        $this->actingAs($buyer)->post(route('front.equipment.favorite', $equipment->id));
+        $this->assertDatabaseMissing('user_equipment', ['user_id' => $buyer->id, 'equipment_id' => $equipment->id]);
+    }
+
+    public function test_equipment_technical_sheet_pdf_is_available(): void
+    {
+        $equipment = Equipment::factory()->create(['name' => 'PDF panel']);
+        $equipment->energyProfile()->create(['power_watts' => 200, 'capacity_wh' => 800, 'efficiency' => 20]);
+
+        $this->get(route('front.equipment.pdf', $equipment->id))
+            ->assertOk()
+            ->assertHeader('content-type', 'application/pdf');
     }
 }

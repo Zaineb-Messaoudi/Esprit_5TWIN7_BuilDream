@@ -12,7 +12,9 @@ class DamageSeverityClassifier
     public function classify(?string $comments): array
     {
         $comments = trim((string) $comments);
-        if ($comments === '') return ['severity' => 'minor', 'repair_hours' => 0, 'source' => 'fallback'];
+        if ($comments === '') {
+            return ['severity' => 'minor', 'repair_hours' => 0, 'source' => 'fallback'];
+        }
 
         try {
             $decoded = json_decode($this->client->classify('Classify as minor, moderate or severe and estimate repair_hours. Return strict JSON. Comment: '.$comments), true, 512, JSON_THROW_ON_ERROR);
@@ -32,6 +34,7 @@ class DamageSeverityClassifier
     public function classifyLocally(?string $comments): array
     {
         $text = mb_strtolower(trim((string) $comments));
+
         return match (true) {
             str_contains($text, 'incend') || str_contains($text, 'cassé') || str_contains($text, 'grave') => ['severity' => 'severe', 'repair_hours' => 16.0, 'source' => 'fallback'],
             str_contains($text, 'fissur') || str_contains($text, 'panne') || str_contains($text, 'modéré') => ['severity' => 'moderate', 'repair_hours' => 6.0, 'source' => 'fallback'],

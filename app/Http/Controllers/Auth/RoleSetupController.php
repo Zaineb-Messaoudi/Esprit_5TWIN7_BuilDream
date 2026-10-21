@@ -7,6 +7,7 @@ use App\Http\Controllers\Controller;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Spatie\Permission\Models\Role;
 
 class RoleSetupController extends Controller
 {
@@ -25,10 +26,21 @@ class RoleSetupController extends Controller
             'role' => ['required', 'string', 'in:buyer,owner'],
         ]);
 
-        $request->user()->forceFill([
-            'role' => UserRole::from($validated['role']),
+        $user = $request->user();
+        $selectedRole = UserRole::from($validated['role']);
+
+        $user->forceFill([
+            'role' => $selectedRole,
             'role_setup_completed' => true,
         ])->save();
+
+        // Assign Spatie role
+        $spatieRoleName = $selectedRole->value;
+        $spatieRole = Role::where('name', $spatieRoleName)->where('guard_name', 'web')->first();
+
+        if ($spatieRole) {
+            $user->syncRoles([$spatieRole]);
+        }
 
         return redirect()->route('dashboard');
     }

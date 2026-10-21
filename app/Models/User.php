@@ -6,15 +6,18 @@ use App\Models\Notification as NotificationModel;
 use Illuminate\Contracts\Auth\MustVerifyEmail;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Notification;
+use Laravel\Sanctum\HasApiTokens;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory;
+    use HasApiTokens, HasFactory, HasRoles;
 
     /**
      * Send a notification using both the custom system and Laravel's facade.
@@ -68,6 +71,8 @@ class User extends Authenticatable implements MustVerifyEmail
         'password',
         'phone_number',
         'address',
+        'address_latitude',
+        'address_longitude',
         'role',
         'role_setup_completed',
         'profile_photo_path',
@@ -115,7 +120,28 @@ class User extends Authenticatable implements MustVerifyEmail
             'current_organization_id' => 'integer',
             'current_team_id' => 'integer',
             'organization_preferences' => 'array',
+            'address_latitude' => 'decimal:8',
+            'address_longitude' => 'decimal:8',
         ];
+    }
+
+    /**
+     * Boot the model.
+     */
+    protected static function booted(): void
+    {
+        static::saved(function (self $user) {
+            if ($user->wasChanged('role') && $user->role_setup_completed) {
+                $spatieRoleName = $user->role->value;
+                $spatieRole = \Spatie\Permission\Models\Role::where('name', $spatieRoleName)
+                    ->where('guard_name', 'web')
+                    ->first();
+
+                if ($spatieRole) {
+                    $user->syncRoles([$spatieRole]);
+                }
+            }
+        });
     }
 
     public function getProfilePhotoUrlAttribute(): ?string
@@ -148,6 +174,16 @@ class User extends Authenticatable implements MustVerifyEmail
     public function equipment(): HasMany
     {
         return $this->hasMany(\App\Models\Equipment::class, 'owner_id');
+    }
+
+    public function serviceProviderProfile(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(\App\Models\ServiceProviderProfile::class);
+    }
+
+    public function favoriteEquipment(): BelongsToMany
+    {
+        return $this->belongsToMany(Equipment::class, 'user_equipment')->withTimestamps();
     }
 
     public function rentals(): HasMany

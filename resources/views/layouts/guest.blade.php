@@ -1,7 +1,7 @@
 @props(['title' => __('Authentication')])
 
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="h-full bg-gray-50 dark:bg-gray-900">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full bg-gray-50 dark:bg-gray-900">
     <head>
         <meta charset="utf-8">
         <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -11,14 +11,15 @@
         <title>{{ __($title) }} | SolarShare Admin</title>
 
         <script>
-            const savedDir = localStorage.getItem('dir');
-            if (savedDir) {
-                document.documentElement.setAttribute('dir', savedDir);
-            }
             if (localStorage.getItem('theme') === 'dark') {
                 document.documentElement.classList.add('dark');
                 document.documentElement.setAttribute('data-color-scheme', 'dark');
             }
+            const savedDir = localStorage.getItem('dir');
+            const initialDir = savedDir === 'ltr' || savedDir === 'rtl'
+                ? savedDir
+                : @js(session('dir', 'ltr'));
+            document.documentElement.setAttribute('dir', initialDir);
         </script>
 
         @vite(['resources/css/app.css', 'resources/js/app.js'])

@@ -2,9 +2,9 @@
 
 namespace App\Http\Controllers\Technical;
 
+use App\Http\Requests\Technical\StoreMaintenanceReportRequest;
 use App\Models\Maintenance;
 use App\Models\MaintenanceReport;
-use App\Http\Requests\Technical\StoreMaintenanceReportRequest;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
@@ -60,6 +60,8 @@ class MaintenanceReportController extends TechnicalCrudController
         )->all()];
     }
 
-    protected function requestClass(): string { return StoreMaintenanceReportRequest::class; }
+    protected function requestClass(): string
+    {
+        return StoreMaintenanceReportRequest::class;
+    }
 }
-

@@ -58,7 +58,7 @@ class SetLocale
         }
 
         // 3. Check Accept-Language header
-        $accepted = $request->getPreferredLanguage(['en', 'fr', 'ar', 'de', 'es', 'it', 'pt', 'tr']);
+        $accepted = $request->getPreferredLanguage(['en', 'fr']);
         if ($accepted && $this->isValidLocale($accepted)) {
             return $accepted;
         }
@@ -69,6 +69,6 @@ class SetLocale
 
     protected function isValidLocale(string $locale): bool
     {
-        return in_array($locale, ['en', 'fr', 'ar', 'de', 'es', 'it', 'pt', 'tr']);
+        return in_array($locale, ['en', 'fr']);
     }
 }

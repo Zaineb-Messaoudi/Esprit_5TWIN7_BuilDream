@@ -39,7 +39,7 @@ class EquipmentHealthScoreService
      * Pure calculation entry point for deterministic unit tests and non-ORM callers.
      * Missing maintenance history is represented by null days.
      *
-     * @param array{age_years?: float|int, damage_severities?: list<string>, days_since_last_maintenance?: int|null, rental_count?: int} $metrics
+     * @param  array{age_years?: float|int, damage_severities?: list<string>, days_since_last_maintenance?: int|null, rental_count?: int}  $metrics
      * @return array<string, float>
      */
     public function components(array $metrics): array

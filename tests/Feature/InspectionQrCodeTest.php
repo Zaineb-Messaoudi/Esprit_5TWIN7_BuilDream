@@ -16,6 +16,7 @@ class InspectionQrCodeTest extends TestCase
     use RefreshDatabase;
 
     private User $owner;
+
     private Equipment $equipment;
 
     protected function setUp(): void

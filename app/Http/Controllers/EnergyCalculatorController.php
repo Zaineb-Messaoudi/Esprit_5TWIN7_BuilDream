@@ -1,0 +1,119 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Equipment;
+use App\Services\EnergyEquipmentMatcher;
+use App\Services\EnergyNeedsCalculator;
+use Illuminate\Contracts\View\View;
+use Illuminate\Http\Request;
+
+class EnergyCalculatorController extends Controller
+{
+    public function index(Request $request, EnergyNeedsCalculator $calculator, EnergyEquipmentMatcher $matcher): View
+    {
+        // Handle GET with calculate parameter (e.g., from equipment detail link)
+        if ($request->has('calculate')) {
+            // Use default items for demo/testing when no items provided
+            $defaultItems = [
+                ['key' => 'fridge', 'quantity' => 1, 'hours' => 8],
+                ['key' => 'tv', 'quantity' => 1, 'hours' => 4],
+                ['key' => 'led_lamp', 'quantity' => 1, 'hours' => 5],
+                ['key' => 'laptop', 'quantity' => 1, 'hours' => 1],
+                ['key' => 'phone_charger', 'quantity' => 1, 'hours' => 1],
+            ];
+
+            $result = $calculator->calculate(
+                $defaultItems,
+                (float) ($request->input('autonomy_days', 1)),
+                $request->has('sun_hours') ? (float) $request->input('sun_hours') : null,
+            );
+
+            $matches = null;
+            if ($result['status'] === 'ok') {
+                $listings = Equipment::query()
+                    ->published()
+                    ->whereHas('energyProfile')
+                    ->with(['energyProfile', 'category'])
+                    ->limit(200)
+                    ->get();
+
+                $matches = collect($matcher->match($result, $listings))
+                    ->flatten(1)
+                    ->map(fn (array $match) => $listings->firstWhere('id', $match['equipment_id']))
+                    ->filter()
+                    ->unique('id')
+                    ->values();
+            }
+
+            return view('pages.front.energy-calculator', [
+                'appliances' => $calculator->appliances(),
+                'result' => $result,
+                'matches' => $matches,
+                'input' => array_merge(['items' => $defaultItems], $request->all()),
+            ]);
+        }
+
+        return view('pages.front.energy-calculator', [
+            'appliances' => $calculator->appliances(),
+            'result' => null,
+            'matches' => null,
+            'input' => [],
+        ]);
+    }
+
+    public function calculate(Request $request, EnergyNeedsCalculator $calculator, EnergyEquipmentMatcher $matcher): View
+    {
+        $data = $request->validate([
+            'items' => ['nullable', 'array'],
+            'items.*.selected' => ['nullable', 'boolean'],
+            'items.*.quantity' => ['nullable', 'integer', 'min:1', 'max:50'],
+            'items.*.hours' => ['nullable', 'numeric', 'min:0', 'max:24'],
+            'autonomy_days' => ['nullable', 'numeric', 'min:0.5', 'max:5'],
+            'sun_hours' => ['nullable', 'numeric', 'min:2', 'max:8'],
+        ]);
+
+        $items = [];
+        foreach (($data['items'] ?? []) as $key => $row) {
+            if (empty($row['selected'])) {
+                continue;
+            }
+
+            $items[] = [
+                'key' => (string) $key,
+                'quantity' => $row['quantity'] ?? 1,
+                'hours' => $row['hours'] ?? null,
+            ];
+        }
+
+        $result = $calculator->calculate(
+            $items,
+            (float) ($data['autonomy_days'] ?? 1),
+            isset($data['sun_hours']) ? (float) $data['sun_hours'] : null,
+        );
+
+        $matches = null;
+        if ($result['status'] === 'ok') {
+            $listings = Equipment::query()
+                ->published()
+                ->whereHas('energyProfile')
+                ->with(['energyProfile', 'category'])
+                ->limit(200)
+                ->get();
+
+            $matches = collect($matcher->match($result, $listings))
+                ->flatten(1)
+                ->map(fn (array $match) => $listings->firstWhere('id', $match['equipment_id']))
+                ->filter()
+                ->unique('id')
+                ->values();
+        }
+
+        return view('pages.front.energy-calculator', [
+            'appliances' => $calculator->appliances(),
+            'result' => $result,
+            'matches' => $matches,
+            'input' => $request->all(),
+        ]);
+    }
+}

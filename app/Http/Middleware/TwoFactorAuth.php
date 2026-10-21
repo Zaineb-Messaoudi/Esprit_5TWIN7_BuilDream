@@ -15,7 +15,7 @@ class TwoFactorAuth
 {
     public function handle(Request $request, Closure $next): Response
     {
-        if (! $request->user()) {
+        if (! $request->user() || ! $this->routeRequiresAuthentication($request)) {
             return $next($request);
         }
 
@@ -57,6 +57,16 @@ class TwoFactorAuth
         return $next($request);
     }
 
+    /** Only enforce 2FA on routes that already require an authenticated user. */
+    protected function routeRequiresAuthentication(Request $request): bool
+    {
+        return collect($request->route()?->gatherMiddleware() ?? [])->contains(
+            fn (string $middleware): bool => $middleware === 'auth'
+                || $middleware === 'auth:sanctum'
+                || str_ends_with($middleware, '\\Authenticate')
+        );
+    }
+
     /**
      * Check if the current route is a 2FA-related route.
      */
@@ -64,9 +74,12 @@ class TwoFactorAuth
     {
         $twoFactorRoutes = [
             'two-factor.setup',
+            'two-factor.enable',
             'two-factor.verify',
+            'two-factor.verify.code',
             'two-factor.disable',
             'two-factor.recovery-codes',
+            'two-factor.regenerate-recovery-codes',
         ];
 
         foreach ($twoFactorRoutes as $route) {

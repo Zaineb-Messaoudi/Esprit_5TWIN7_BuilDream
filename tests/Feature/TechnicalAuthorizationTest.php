@@ -39,4 +39,3 @@ test('buyers are denied technical pages and owners only see their own records', 
     $this->actingAs($owner)->get(route('technical.maintenances.show', $otherMaintenance))->assertNotFound();
     $this->actingAs($owner)->get(route('technical.maintenances.show', $ownedMaintenance))->assertOk();
 });
-

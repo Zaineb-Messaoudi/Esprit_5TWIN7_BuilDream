@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" dir="{{ app()->getLocale() === 'ar' ? 'rtl' : 'ltr' }}" class="h-full scroll-smooth">
+<html lang="{{ str_replace('_', '-', app()->getLocale()) }}" class="h-full scroll-smooth">
 
 <head>
     <meta charset="utf-8">
@@ -18,10 +18,14 @@
 
     <script>
         (function () {
-            const savedDir = localStorage.getItem('dir');
-            if (savedDir) document.documentElement.setAttribute('dir', savedDir);
             if (localStorage.getItem('theme') === 'dark') document.documentElement.classList.add('dark');
             if (localStorage.getItem('navigation-layout') === 'sidebar') document.documentElement.classList.add('nav-sidebar');
+            // Restore the saved direction before the page is rendered.
+            const savedDir = localStorage.getItem('dir');
+            const initialDir = savedDir === 'ltr' || savedDir === 'rtl'
+                ? savedDir
+                : @js(session('dir', 'ltr'));
+            document.documentElement.setAttribute('dir', initialDir);
         })();
     </script>
 
@@ -53,6 +57,14 @@
 
         @include('layouts.partials.front-footer')
     </div>
+
+    @auth
+        @if (auth()->user()->role_setup_completed)
+            <x-ai.assistant-widget />
+        @endif
+    @else
+        <x-ai.assistant-widget />
+    @endauth
 
     @stack('scripts')
 </body>

@@ -44,8 +44,12 @@ class MaintenanceAiFeatureTest extends TestCase
 
     public function test_vision_failure_and_invalid_file_have_clear_responses(): void
     {
-        $this->app->instance(AiClientInterface::class, new class extends FakeAiClient {
-            public function analyzeImage(string $absolutePath, string $mimeType): array { throw new RuntimeException('quota'); }
+        $this->app->instance(AiClientInterface::class, new class extends FakeAiClient
+        {
+            public function analyzeImage(string $absolutePath, string $mimeType): array
+            {
+                throw new RuntimeException('quota');
+            }
         });
 
         $this->actingAs($this->owner)->postJson(route('technical.ai.analyze-damage'), ['photo' => $this->fakePng()])

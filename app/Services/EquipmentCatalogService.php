@@ -45,7 +45,9 @@ class EquipmentCatalogService
         // The nested `energy` payload belongs to energy_profiles, not equipment.
         return DB::transaction(function () use ($attributes): Equipment {
             $energy = $attributes['energy'] ?? [];
+            $images = $attributes['images'] ?? [];
             unset($attributes['energy']);
+            unset($attributes['images']);
             $attributes = $this->storeImage($attributes);
             $attributes['approval_status'] ??= 'published';
 
@@ -53,6 +55,8 @@ class EquipmentCatalogService
             if (array_filter($energy, static fn ($value) => $value !== null && $value !== '')) {
                 $equipment->energyProfile()->create($energy);
             }
+
+            $this->storeGallery($equipment, $images);
 
             return $equipment->load(['category', 'owner', 'energyProfile']);
         });
@@ -63,7 +67,9 @@ class EquipmentCatalogService
         // An empty energy section intentionally removes the old profile.
         return DB::transaction(function () use ($equipment, $attributes): Equipment {
             $energy = $attributes['energy'] ?? [];
+            $images = $attributes['images'] ?? [];
             unset($attributes['energy']);
+            unset($attributes['images']);
             $attributes = $this->storeImage($attributes);
 
             $equipment->update($attributes);
@@ -72,6 +78,8 @@ class EquipmentCatalogService
             } else {
                 $equipment->energyProfile()->delete();
             }
+
+            $this->storeGallery($equipment, $images);
 
             return $equipment->refresh()->load(['category', 'owner', 'energyProfile']);
         });
@@ -94,5 +102,16 @@ class EquipmentCatalogService
         unset($attributes['image']);
 
         return $attributes;
+    }
+
+    private function storeGallery(Equipment $equipment, array $images): void
+    {
+        foreach (array_values(array_filter($images, static fn ($image) => $image instanceof UploadedFile)) as $index => $image) {
+            $equipment->images()->create([
+                'path' => Storage::disk('public')->url($image->store('catalogue/gallery', 'public')),
+                'is_primary' => $index === 0 && ! $equipment->images()->exists(),
+                'sort_order' => $equipment->images()->count() + $index,
+            ]);
+        }
     }
 }

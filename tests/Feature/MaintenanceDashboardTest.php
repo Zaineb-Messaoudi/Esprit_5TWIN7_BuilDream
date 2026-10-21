@@ -3,8 +3,8 @@
 namespace Tests\Feature;
 
 use App\Enums\UserRole;
-use App\Models\Damage;
 use App\Models\Category;
+use App\Models\Damage;
 use App\Models\Equipment;
 use App\Models\Inspection;
 use App\Models\Maintenance;
@@ -75,5 +75,3 @@ class MaintenanceDashboardTest extends TestCase
         $this->actingAs($owner)->getJson(route('admin.technical.dashboard.costs'))->assertForbidden();
     }
 }
-
-

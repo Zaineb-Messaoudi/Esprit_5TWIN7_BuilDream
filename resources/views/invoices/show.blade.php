@@ -9,11 +9,15 @@
                     <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"/></svg>
                     PDF
                 </a>
-                <a class="text-brand-600" href="{{ route('rental.invoices.edit',$invoice) }}">{{ __('Edit') }}</a>
-                <form method="POST" action="{{ route('rental.invoices.destroy',$invoice) }}" onsubmit="return confirm('{{ __('Delete this invoice?') }}')">@csrf @method('DELETE')<button class="text-error-600">{{ __('Delete') }}</button></form>
+                @if (request()->user()->isAdmin() && $invoice->status === 'unpaid' && ! $invoice->reservation->payments->contains('status', 'paid'))
+                    <a class="text-brand-600" href="{{ route('rental.invoices.edit',$invoice) }}">{{ __('Edit') }}</a>
+                    <form method="POST" action="{{ route('rental.invoices.destroy',$invoice) }}" onsubmit="return confirm('{{ __('Delete this invoice?') }}')">@csrf @method('DELETE')<button class="text-error-600">{{ __('Delete') }}</button></form>
+                @endif
             </div>
         </div>
-        <p class="mt-3">{{ $invoice->reservation->reference }} · {{ $invoice->total }} · {{ $invoice->status }}</p>
+        @php($amountPaid = (float) $invoice->reservation->payments->whereIn('status', ['paid', 'partially_refunded'])->sum(fn ($payment) => max(0, (float) $payment->amount - (float) $payment->refunded_amount)))
+        <p class="mt-3">{{ $invoice->reservation->reference }} · {{ number_format((float) $invoice->total, 2) }} TND · {{ __(ucfirst(str_replace('_', ' ', $invoice->status))) }}</p>
+        <p class="mt-2 text-theme-sm">{{ __('Amount paid') }}: {{ number_format($amountPaid, 2) }} TND · {{ __('Remaining balance') }}: {{ number_format(max(0, (float) $invoice->total - $amountPaid), 2) }} TND</p>
     </div>
 </div>
 @endsection

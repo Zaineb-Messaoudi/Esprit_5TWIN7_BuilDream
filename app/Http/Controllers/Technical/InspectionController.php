@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Technical;
 
-use App\Models\Inspection;
-use App\Models\Rental;
 use App\Http\Requests\Technical\StoreInspectionRequest;
-use App\Models\InspectionChecklist;
-use App\Services\Maintenance\InspectionChecklistService;
-use Illuminate\View\View;
 use App\Models\Equipment;
-use Illuminate\Database\Eloquent\Model;
+use App\Models\Inspection;
+use App\Models\InspectionChecklist;
+use App\Models\Rental;
+use App\Services\Maintenance\InspectionChecklistService;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Schema;
+use Illuminate\View\View;
 
 class InspectionController extends TechnicalCrudController
 {
@@ -80,7 +80,10 @@ class InspectionController extends TechnicalCrudController
         ];
     }
 
-    protected function requestClass(): string { return StoreInspectionRequest::class; }
+    protected function requestClass(): string
+    {
+        return StoreInspectionRequest::class;
+    }
 
     public function createForEquipment(Request $request, Equipment $equipment): View
     {

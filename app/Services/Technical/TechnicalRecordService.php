@@ -2,11 +2,11 @@
 
 namespace App\Services\Technical;
 
+use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Contracts\Pagination\LengthAwarePaginator;
 
 class TechnicalRecordService
 {
@@ -27,7 +27,7 @@ class TechnicalRecordService
     /** @param class-string<Model> $modelClass */
     public function create(string $modelClass, array $data): Model
     {
-        return $modelClass::query()->create(Arr::only($data, (new $modelClass())->getFillable()));
+        return $modelClass::query()->create(Arr::only($data, (new $modelClass)->getFillable()));
     }
 
     public function update(Model $record, array $data): Model

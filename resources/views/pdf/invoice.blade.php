@@ -18,7 +18,7 @@
             <div class="info-item">
                 <span class="info-label">Status</span>
                 <span class="info-value">
-                    <span class="status-badge status-{{ $invoice->status }}">{{ ucfirst($invoice->status) }}</span>
+                    <span class="status-badge status-{{ $invoice->status }}">{{ ucfirst(str_replace('_', ' ', $invoice->status)) }}</span>
                 </span>
             </div>
             <div class="info-item">
@@ -48,12 +48,21 @@
                 <span class="amount-value">{{ number_format($invoice->subtotal, 2) }} TND</span>
             </div>
             <div class="amount-row">
-                <span class="amount-label">VAT (19%)</span>
+                <span class="amount-label">{{ __('VAT (:rate%)', ['rate' => number_format((float) $invoice->subtotal > 0 ? (float) $invoice->tax / (float) $invoice->subtotal * 100 : 0, 2)]) }}</span>
                 <span class="amount-value">{{ number_format($invoice->tax, 2) }} TND</span>
             </div>
             <div class="amount-row">
                 <span class="amount-label">Total</span>
                 <span class="amount-value">{{ number_format($invoice->total, 2) }} TND</span>
+            </div>
+            @php($amountPaid = (float) $invoice->reservation->payments->whereIn('status', ['paid', 'partially_refunded'])->sum(fn ($payment) => max(0, (float) $payment->amount - (float) $payment->refunded_amount)))
+            <div class="amount-row">
+                <span class="amount-label">{{ __('Amount paid') }}</span>
+                <span class="amount-value">{{ number_format($amountPaid, 2) }} TND</span>
+            </div>
+            <div class="amount-row">
+                <span class="amount-label">{{ __('Remaining balance') }}</span>
+                <span class="amount-value">{{ number_format(max(0, (float) $invoice->total - $amountPaid), 2) }} TND</span>
             </div>
         </div>
     </div>

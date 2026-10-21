@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\Rental;
 use App\Models\Reservation;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {
@@ -113,8 +114,9 @@ class DashboardController extends Controller
             ->count();
         $completedRentals = Rental::where('status', 'completed')
             ->count();
-        $totalRevenue = Payment::where('status', 'paid')
-            ->sum('amount');
+        $totalRevenue = Payment::whereIn('status', ['paid', 'partially_refunded'])
+            ->selectRaw('COALESCE(SUM(amount - refunded_amount), 0) as net_revenue')
+            ->value('net_revenue');
         $pendingRevenue = Payment::where('status', 'pending')
             ->sum('amount');
         $totalInvoices = Invoice::count();
@@ -124,15 +126,25 @@ class DashboardController extends Controller
             ->count();
         $totalMaintenanceCost = Maintenance::sum('cost');
 
-        // Monthly revenue for chart (last 12 months)
-        $monthlyRevenue = Payment::where('status', 'paid')
+        // Monthly revenue for chart (last 12 months) - database-agnostic
+        $driver = DB::getDriverName();
+        $isSqlite = $driver === 'sqlite';
+
+        $yearExpr = $isSqlite
+            ? "CAST(strftime('%Y', payment_date) AS INTEGER)"
+            : 'YEAR(payment_date)';
+        $monthExpr = $isSqlite
+            ? "CAST(strftime('%m', payment_date) AS INTEGER)"
+            : 'MONTH(payment_date)';
+
+        $monthlyRevenue = Payment::whereIn('status', ['paid', 'partially_refunded'])
             ->where(
                 'payment_date',
                 '>=',
                 now()->subMonths(11)->startOfMonth()
             )
             ->selectRaw(
-                'YEAR(payment_date) as year, MONTH(payment_date) as month, SUM(amount) as total'
+                "{$yearExpr} as year, {$monthExpr} as month, SUM(amount - refunded_amount) as total"
             )
             ->groupBy('year', 'month')
             ->orderBy('year')
