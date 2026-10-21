@@ -117,6 +117,10 @@ foreach (config('front.pages') as $slug => $page) {
 Route::get('/portal', function () {
     $user = auth()->user();
 
+    if (! $user->role_setup_completed) {
+        return redirect()->route('role.setup');
+    }
+
     if ($user->isAdmin()) {
         return redirect()->route('dashboard.ecommerce');
     }

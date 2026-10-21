@@ -16,6 +16,7 @@ abstract class TestCase extends BaseTestCase
             \App\Http\Middleware\ValidateAiRequest::class,
             \App\Http\Middleware\RateLimitByIpAndUser::class,
             \App\Http\Middleware\EnsureRoleSelected::class,
+            \Illuminate\Auth\Middleware\EnsureEmailIsVerified::class,
         ]);
     }
 }
