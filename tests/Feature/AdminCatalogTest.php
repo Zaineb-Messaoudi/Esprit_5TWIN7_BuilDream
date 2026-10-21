@@ -4,6 +4,7 @@ use App\Enums\UserRole;
 use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\User;
+use Illuminate\Http\UploadedFile;
 
 function catalogAdmin(): User
 {
@@ -33,6 +34,27 @@ test('admin can create a category', function () {
         ->assertRedirect(route('admin.categories.index'));
 
     $this->assertDatabaseHas('categories', ['name' => 'Portable solar panels', 'status' => 'active']);
+});
+
+test('admin can update and delete an unused category', function () {
+    $admin = catalogAdmin();
+    $category = Category::factory()->create();
+
+    $this->actingAs($admin)
+        ->put(route('admin.categories.update', $category), [
+            'name' => 'Updated category',
+            'description' => 'Updated description.',
+            'status' => 'inactive',
+        ])
+        ->assertRedirect(route('admin.categories.index'));
+
+    expect($category->refresh()->name)->toBe('Updated category')
+        ->and($category->status)->toBe('inactive');
+
+    $this->delete(route('admin.categories.destroy', $category))
+        ->assertRedirect(route('admin.categories.index'));
+
+    $this->assertDatabaseMissing('categories', ['id' => $category->id]);
 });
 
 test('catalog admin pages render for administrators', function () {
@@ -83,6 +105,54 @@ test('admin can create equipment with its energy profile', function () {
         ->and((int) $equipment->energyProfile->capacity_wh)->toBe(1000);
 });
 
+test('admin can view update and soft delete equipment', function () {
+    $admin = catalogAdmin();
+    $equipment = Equipment::factory()->create(['owner_id' => catalogOwner()->id]);
+
+    $this->actingAs($admin)
+        ->get(route('admin.equipment.show', $equipment))
+        ->assertOk()
+        ->assertSee($equipment->name);
+
+    $this->put(route('admin.equipment.update', $equipment), [
+        'category_id' => $equipment->category_id,
+        'owner_id' => $equipment->owner_id,
+        'name' => 'Updated equipment',
+        'description' => 'Updated equipment description.',
+        'price_per_day' => 42,
+        'condition' => 'new',
+        'location' => 'Sousse',
+        'status' => 'available',
+        'approval_status' => 'published',
+    ])->assertRedirect(route('admin.equipment.index'));
+
+    expect($equipment->refresh()->name)->toBe('Updated equipment')
+        ->and((float) $equipment->price_per_day)->toBe(42.0);
+
+    $this->delete(route('admin.equipment.destroy', $equipment))
+        ->assertRedirect(route('admin.equipment.index'));
+
+    $this->assertSoftDeleted('equipment', ['id' => $equipment->id]);
+});
+
+test('equipment validation rejects incomplete catalogue data', function () {
+    $category = Category::factory()->create();
+    $owner = catalogOwner();
+
+    $this->actingAs(catalogAdmin())
+        ->from(route('admin.equipment.create'))
+        ->post(route('admin.equipment.store'), [
+            'category_id' => $category->id,
+            'owner_id' => $owner->id,
+            'name' => '',
+            'price_per_day' => -1,
+            'condition' => 'invalid',
+            'location' => '',
+            'status' => 'available',
+        ])
+        ->assertSessionHasErrors(['name', 'price_per_day', 'condition', 'location']);
+});
+
 test('non owner users cannot be assigned equipment', function () {
     $category = Category::factory()->create();
     $buyer = User::factory()->create(['role' => UserRole::BUYER]);
@@ -110,4 +180,84 @@ test('category with equipment cannot be deleted', function () {
         ->assertSessionHasErrors('category');
 
     $this->assertDatabaseHas('categories', ['id' => $category->id]);
+});
+
+test('admin can view a category with its related equipment', function () {
+    $category = Category::factory()->create(['name' => 'Solar panels']);
+    $equipment = Equipment::factory()->create([
+        'category_id' => $category->id,
+        'owner_id' => catalogOwner()->id,
+    ]);
+
+    $this->actingAs(catalogAdmin())
+        ->get(route('admin.categories.show', $category))
+        ->assertOk()
+        ->assertSee($category->name)
+        ->assertSee($equipment->name);
+});
+
+test('admin can create update view and delete an energy profile', function () {
+    $equipment = Equipment::factory()->create(['owner_id' => catalogOwner()->id]);
+    $admin = catalogAdmin();
+
+    $this->actingAs($admin)
+        ->post(route('admin.equipment.energy-profile.store', $equipment), [
+            'power_watts' => 500,
+            'voltage' => 24,
+            'capacity_wh' => 1000,
+            'efficiency' => 92,
+            'technology' => 'Lithium-ion',
+            'max_output' => 1000,
+            'operating_duration' => 8,
+        ])
+        ->assertRedirect(route('admin.equipment.energy-profile.index', $equipment));
+
+    $profile = $equipment->energyProfile()->firstOrFail();
+
+    $this->get(route('admin.equipment.energy-profile.show', $equipment))
+        ->assertOk()
+        ->assertSee('Lithium-ion');
+
+    $this->put(route('admin.equipment.energy-profile.update', $equipment), [
+        'power_watts' => 600,
+        'technology' => 'Updated technology',
+    ])->assertRedirect(route('admin.equipment.energy-profile.index', $equipment));
+
+    expect($profile->refresh()->power_watts)->toBe(600);
+
+    $this->delete(route('admin.equipment.energy-profile.destroy', $equipment))
+        ->assertRedirect(route('admin.equipment.energy-profile.index', $equipment));
+
+    $this->assertDatabaseMissing('energy_profiles', ['id' => $profile->id]);
+});
+
+test('equipment factory can create its energy profile relationship', function () {
+    $equipment = Equipment::factory()->withEnergyProfile()->create();
+
+    expect($equipment->energyProfile)->not->toBeNull()
+        ->and($equipment->energyProfile->equipment_id)->toBe($equipment->id);
+});
+
+test('admin can export and import equipment CSV data with validation', function () {
+    $admin = catalogAdmin();
+    $owner = catalogOwner();
+    $category = Category::factory()->create(['name' => 'CSV batteries']);
+    Equipment::factory()->create(['owner_id' => $owner->id, 'category_id' => $category->id, 'name' => 'Export battery']);
+
+    $this->actingAs($admin)
+        ->get(route('admin.equipment.export'))
+        ->assertOk()
+        ->assertHeader('content-type', 'text/csv; charset=UTF-8');
+
+    $csv = implode("\n", [
+        'name,category,owner_email,brand,model,price_per_day,condition,location,latitude,longitude,status,approval_status,power_watts,capacity_wh',
+        "\"Imported battery\",\"CSV batteries\",{$owner->email},Voltix,CSV-1,20,good,Tunis,36.8065,10.1815,available,published,500,1000",
+    ]);
+
+    $this->actingAs($admin)
+        ->post(route('admin.equipment.import'), ['csv' => UploadedFile::fake()->createWithContent('equipment.csv', $csv)])
+        ->assertRedirect()
+        ->assertSessionHas('status', 'Equipment CSV imported successfully.');
+
+    $this->assertDatabaseHas('equipment', ['name' => 'Imported battery', 'latitude' => 36.8065, 'longitude' => 10.1815]);
 });

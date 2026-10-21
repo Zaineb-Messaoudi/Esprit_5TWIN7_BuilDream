@@ -45,7 +45,7 @@ class InvoiceController extends Controller
         $data['subtotal'] = request()->user()->isAdmin() && isset($data['subtotal'])
             ? $data['subtotal']
             : $reservation->total_amount;
-        $data['tax'] = round($data['subtotal'] * 0.19, 2);
+        $data['tax'] = round($data['subtotal'] * (float) config('billing.tax_rate', 0.19), 2);
         $data['total'] = $data['subtotal'] + $data['tax'];
         $data['status'] = 'unpaid';
         $data['invoice_number'] = 'INV-'.random_int(100000, 999999);
@@ -58,7 +58,7 @@ class InvoiceController extends Controller
     public function show(Invoice $invoice)
     {
         abort_unless(request()->user()->isAdmin() || $invoice->reservation->user_id === request()->user()->id, 403);
-        $invoice->load('reservation.equipment');
+        $invoice->load('reservation.equipment', 'reservation.payments');
 
         return view('invoices.show', compact('invoice'));
     }
@@ -66,6 +66,7 @@ class InvoiceController extends Controller
     public function edit(Invoice $invoice)
     {
         abort_unless(request()->user()->isAdmin(), 403);
+        abort_unless($invoice->status === 'unpaid' && ! $invoice->reservation->payments()->exists(), 409, __('An invoice cannot be edited after payment activity begins.'));
 
         return view('invoices.edit', compact('invoice'));
     }
@@ -73,6 +74,7 @@ class InvoiceController extends Controller
     public function update(Request $request, Invoice $invoice)
     {
         abort_unless($request->user()->isAdmin(), 403);
+        abort_unless($invoice->status === 'unpaid' && ! $invoice->reservation->payments()->exists(), 409, __('An invoice cannot be edited after payment activity begins.'));
         $data = $request->validate([
             'issue_date' => 'required|date',
             'subtotal' => 'nullable|numeric|min:0',
@@ -81,7 +83,7 @@ class InvoiceController extends Controller
         $data['subtotal'] = request()->user()->isAdmin() && isset($data['subtotal'])
             ? $data['subtotal']
             : $invoice->reservation->total_amount;
-        $data['tax'] = round($data['subtotal'] * 0.19, 2);
+        $data['tax'] = round($data['subtotal'] * (float) config('billing.tax_rate', 0.19), 2);
         $data['total'] = $data['subtotal'] + $data['tax'];
 
         $invoice->update($data);
@@ -92,7 +94,7 @@ class InvoiceController extends Controller
     public function destroy(Invoice $invoice)
     {
         abort_unless(request()->user()->isAdmin(), 403);
-        abort_unless($invoice->status !== 'paid', 409);
+        abort_unless($invoice->status === 'unpaid' && ! $invoice->reservation->payments()->exists(), 409, __('An invoice cannot be deleted after payment activity begins.'));
         $invoice->delete();
 
         return redirect()->route('rental.invoices.index')->with('success', __('Invoice deleted successfully.'));
@@ -102,7 +104,7 @@ class InvoiceController extends Controller
     public function exportPdf(Invoice $invoice)
     {
         abort_unless(request()->user()->isAdmin() || $invoice->reservation->user_id === request()->user()->id, 403);
-        $invoice->load('reservation.equipment.category', 'reservation.user');
+        $invoice->load('reservation.equipment.category', 'reservation.user', 'reservation.payments');
         $pdf = Pdf::loadView('pdf.invoice', ['invoice' => $invoice]);
 
         return $pdf->download($invoice->invoice_number.'.pdf');

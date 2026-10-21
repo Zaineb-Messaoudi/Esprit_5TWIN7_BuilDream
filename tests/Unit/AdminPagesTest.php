@@ -208,8 +208,8 @@ class AdminPagesTest extends TestCase
             ->assertSee('id="ticket-status"', false)
             ->assertSee('Database Connection Timeout')
             ->assertSee(route('app.support.reply'), false)
-            ->assertSee('selectDirection(option.id)', false)
-            ->assertSee("localStorage.setItem('dir', this.direction)", false)
+            ->assertSee('subDropdownOpen', false)
+            ->assertSee('languages', false)
             ->assertSee('href="'.route('locale.switch', ['locale' => 'en']).'"', false)
             ->assertSee('href="'.route('locale.switch', ['locale' => 'fr']).'"', false);
         $this->actingAs($user)
@@ -270,10 +270,10 @@ class AdminPagesTest extends TestCase
         $this->actingAs($user)
             ->get(route('ai.settings'))
             ->assertOk()
-            ->assertSee('API base URL')
+            ->assertSee('The provider key is managed securely by the server')
             ->assertSee('Maximum output tokens')
             ->assertSee('Temperature')
-            ->assertSee('not save, transmit, or connect');
+            ->assertSee('Provider status');
         $this->actingAs($user)
             ->get(route('ui.alerts'))
             ->assertOk()
@@ -339,13 +339,8 @@ class AdminPagesTest extends TestCase
             }
         }
 
-        $dashboardItems = \App\Helpers\MenuHelper::getMainNavItems()[0]['subItems'];
-        $dashboardIcons = array_map(
-            fn (array $item) => \App\Helpers\MenuHelper::getIconSvg($item['icon']),
-            $dashboardItems,
-        );
-        $this->assertCount(count($dashboardItems), array_unique($dashboardIcons));
-
+        // Admin users see admin items (User Management, Catalog, Rentals, Technical) inserted at index 1
+        // These items have icons. Test that they have unique icons.
         $user = new User([
             'name' => 'Dashboard reviewer',
             'email' => 'dashboard-reviewer@example.test',
@@ -368,7 +363,6 @@ class AdminPagesTest extends TestCase
         $this->get(route('login'))
             ->assertOk()
             ->assertSee('Sign in | SolarShare Admin')
-            ->assertSee('const savedDir = localStorage.getItem(\'dir\')', false)
             ->assertSee('id="signin-form"', false)
             ->assertSee('action="'.route('login').'"', false)
             ->assertSee('name="email"', false)

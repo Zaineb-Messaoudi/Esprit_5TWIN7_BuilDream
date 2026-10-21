@@ -66,6 +66,7 @@
                                         <input type="text" id="fname" name="fname" x-model="firstName" value="{{ old('fname') }}" required autocomplete="given-name"
                                             placeholder="Enter your first name"
                                             class="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:bg-gray-900" />
+                                        @error('fname')<p class="mt-1.5 text-sm text-error-500" role="alert">{{ $message }}</p>@enderror
                                     </div>
                                     <!-- Last Name -->
                                     <div class="sm:col-span-1">
@@ -75,6 +76,7 @@
                                         <input type="text" id="lname" name="lname" x-model="lastName" value="{{ old('lname') }}" required autocomplete="family-name"
                                             placeholder="Enter your last name"
                                             class="h-12 w-full rounded-xl border border-gray-200 bg-gray-50 px-4 text-sm text-gray-900 transition-colors placeholder:text-gray-400 focus:border-brand-500 focus:bg-white focus:outline-none focus:ring-4 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-800 dark:text-white dark:focus:bg-gray-900" />
+                                        @error('lname')<p class="mt-1.5 text-sm text-error-500" role="alert">{{ $message }}</p>@enderror
                                     </div>
                                 </div>
                                 @error('name')
@@ -135,6 +137,7 @@
                                         <p class="mt-1.5 text-sm text-error-500" role="alert">{{ $message }}</p>
                                     @enderror
                                 </div>
+                                <x-form.location-picker :location="old('address')" :latitude="old('address_latitude')" :longitude="old('address_longitude')" location-name="address" latitude-name="address_latitude" longitude-name="address_longitude" location-id="address" :show-input="false" />
                                 <!-- Password -->
                                 <div>
                                     <label for="password" class="mb-2 block text-sm font-medium text-gray-700 dark:text-gray-300">

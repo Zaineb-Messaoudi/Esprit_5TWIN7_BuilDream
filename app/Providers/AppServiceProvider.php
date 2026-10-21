@@ -11,18 +11,12 @@ use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
 {
-    /**
-     * Register any application services.
-     */
     public function register(): void
     {
         $this->app->bind(\App\Contracts\AiClientInterface::class, \App\Services\Ai\OpenAiCompatibleClient::class);
         $this->app->bind(\App\Contracts\FailureRiskPredictorInterface::class, \App\Services\Maintenance\RuleBasedFailureRiskService::class);
     }
 
-    /**
-     * Bootstrap any application services.
-     */
     public function boot(): void
     {
         \Illuminate\Support\Facades\Gate::policy(\App\Models\Maintenance::class, \App\Policies\TechnicalRecordPolicy::class);
@@ -45,6 +39,11 @@ class AppServiceProvider extends ServiceProvider
         // Register model observers
         Inspection::observe(InspectionObserver::class);
         Maintenance::observe(MaintenanceObserver::class);
+
+        // Register AI prompt versions (only if table exists)
+        if (\Illuminate\Support\Facades\Schema::hasTable('ai_prompts')) {
+            app(\App\Services\PromptVersionService::class)->registerEndpointPrompts();
+        }
 
         // Force HTTPS in production
         if (config('app.env') === 'production') {

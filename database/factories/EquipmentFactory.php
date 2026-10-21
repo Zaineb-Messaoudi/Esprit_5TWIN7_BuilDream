@@ -27,4 +27,14 @@ class EquipmentFactory extends Factory
             'status' => 'available',
         ];
     }
+
+    /** Create the optional one-to-one technical profile with the equipment. */
+    public function withEnergyProfile(): static
+    {
+        return $this->afterCreating(function (Equipment $equipment): void {
+            $attributes = EnergyProfileFactory::new()->make()->toArray();
+            unset($attributes['equipment_id']);
+            $equipment->energyProfile()->create($attributes);
+        });
+    }
 }

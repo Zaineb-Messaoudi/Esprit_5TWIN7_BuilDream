@@ -342,13 +342,26 @@ Alpine.store('email', {
 });
 
 async function startAlpine() {
-    if (document.querySelector('.custom-datepicker, [data-class="flatpickr-right"]')) {
+    if (document.querySelector('.custom-datepicker, [data-class="flatpickr-right"], [data-date-picker]')) {
         const [{ default: flatpickr }] = await Promise.all([
             import('flatpickr'),
             import('flatpickr/dist/flatpickr.min.css'),
         ]);
 
         window.flatpickr = flatpickr;
+        document.querySelectorAll('input[type="date"], [data-date-picker]').forEach((input) => {
+            flatpickr(input, {
+                dateFormat: 'Y-m-d',
+                minDate: input.dataset.minDate || input.min || null,
+                disableMobile: true,
+                allowInput: true,
+                onChange: (selectedDates, datestr) => {
+                    input.dispatchEvent(new Event('change', { bubbles: true }));
+                    const paired = input.dataset.pairedDate ? document.querySelector(input.dataset.pairedDate) : null;
+                    if (paired && datestr) paired._flatpickr?.set('minDate', datestr);
+                },
+            });
+        });
     }
 
     Alpine.start();

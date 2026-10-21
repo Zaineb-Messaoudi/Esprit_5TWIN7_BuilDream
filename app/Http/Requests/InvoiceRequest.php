@@ -33,7 +33,7 @@ class InvoiceRequest extends FormRequest
             ],
             'issue_date' => ['required', 'date'],
             'subtotal' => ['required', 'numeric', 'min:0'],
-            'status' => ['required', 'in:unpaid,paid'],
+            'status' => ['required', 'in:unpaid,partially_paid,paid'],
         ];
     }
 }

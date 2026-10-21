@@ -7,6 +7,7 @@ use App\Models\Equipment;
 use App\Models\Reservation;
 use Carbon\Carbon;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
 class ReservationController extends Controller
@@ -33,13 +34,22 @@ class ReservationController extends Controller
         $data['user_id'] = request()->user()->isAdmin() && isset($data['user_id'])
             ? $data['user_id'] : request()->user()->id;
         $data['status'] = 'pending';
-        $data['total_amount'] = $this->computeTotalAmount(
-            (int) $data['equipment_id'],
-            (string) $data['start_date'],
-            (string) $data['end_date']
-        );
+        $reservation = DB::transaction(function () use ($data): Reservation {
+            $equipment = Equipment::query()->lockForUpdate()->findOrFail($data['equipment_id']);
+            $this->assertEquipmentCanBeReserved($equipment);
+            app(\App\Services\ReservationAvailabilityService::class)->assertAvailable(
+                $equipment->id,
+                (string) $data['start_date'],
+                (string) $data['end_date'],
+            );
+            $data['total_amount'] = $this->computeTotalAmount(
+                $equipment->id,
+                (string) $data['start_date'],
+                (string) $data['end_date'],
+            );
 
-        $reservation = Reservation::create($data);
+            return Reservation::create($data);
+        });
 
         return redirect()->route('rental.reservations.index')->with('success', __('Reservation created successfully.'));
     }
@@ -49,14 +59,23 @@ class ReservationController extends Controller
         abort_unless(request()->user()->isAdmin() || $reservation->user_id === request()->user()->id, 403);
         $reservation->load(['equipment', 'user', 'payments', 'invoice']);
 
-        return view('reservations.show', compact('reservation'));
+        return view('reservations.show', [
+            'reservation' => $reservation,
+            'cancellationRequiresManualRefund' => app(\App\Services\ReservationCancellationService::class)
+                ->requiresManualRefundConfirmation($reservation),
+        ]);
     }
 
     public function edit(Reservation $reservation)
     {
         abort_unless(request()->user()->isAdmin() || $reservation->user_id === request()->user()->id, 403);
+        abort_unless(
+            ! $reservation->payments()->exists() && ! $reservation->rental()->exists(),
+            409,
+            __('Reservations with payment activity or a rental cannot be edited.')
+        );
         if (! request()->user()->isAdmin()) {
-            abort_unless($reservation->status === 'pending' && ! $reservation->payments()->exists(), 409);
+            abort_unless($reservation->status === 'pending', 409);
         }
 
         return view('reservations.edit', ['reservation' => $reservation, 'equipments' => Equipment::all()]);
@@ -65,9 +84,6 @@ class ReservationController extends Controller
     public function update(ReservationRequest $request, Reservation $reservation)
     {
         abort_unless(request()->user()->isAdmin() || $reservation->user_id === request()->user()->id, 403);
-        if (! request()->user()->isAdmin()) {
-            abort_unless($reservation->status === 'pending' && ! $reservation->payments()->exists(), 409);
-        }
         $data = $request->validated();
         unset($data['user_id'], $data['total_amount']);
 
@@ -75,12 +91,34 @@ class ReservationController extends Controller
             unset($data['status']);
         }
 
-        $equipmentId = isset($data['equipment_id']) ? (int) $data['equipment_id'] : (int) $reservation->equipment_id;
-        $startDate = isset($data['start_date']) ? (string) $data['start_date'] : (string) $reservation->start_date;
-        $endDate = isset($data['end_date']) ? (string) $data['end_date'] : (string) $reservation->end_date;
-        $data['total_amount'] = $this->computeTotalAmount($equipmentId, $startDate, $endDate);
+        DB::transaction(function () use ($data, $reservation): void {
+            $lockedReservation = Reservation::query()->whereKey($reservation->id)->lockForUpdate()->firstOrFail();
+            abort_unless(
+                ! $lockedReservation->payments()->exists() && ! $lockedReservation->rental()->exists(),
+                409,
+                __('Reservations with payment activity or a rental cannot be edited.')
+            );
+            if (! request()->user()->isAdmin()) {
+                abort_unless($lockedReservation->status === 'pending', 409);
+            }
 
-        $reservation->update($data);
+            $equipmentId = isset($data['equipment_id']) ? (int) $data['equipment_id'] : (int) $lockedReservation->equipment_id;
+            $startDate = isset($data['start_date']) ? (string) $data['start_date'] : (string) $lockedReservation->start_date;
+            $endDate = isset($data['end_date']) ? (string) $data['end_date'] : (string) $lockedReservation->end_date;
+            $equipment = Equipment::query()->lockForUpdate()->findOrFail($equipmentId);
+            if ($equipmentId !== (int) $lockedReservation->equipment_id) {
+                $this->assertEquipmentCanBeReserved($equipment);
+            }
+            app(\App\Services\ReservationAvailabilityService::class)->assertAvailable(
+                $equipment->id,
+                $startDate,
+                $endDate,
+                $lockedReservation->id,
+            );
+            $data['total_amount'] = $this->computeTotalAmount($equipmentId, $startDate, $endDate);
+
+            $lockedReservation->update($data);
+        });
 
         return redirect()->route('rental.reservations.index')->with('success', __('Reservation updated successfully.'));
     }
@@ -102,5 +140,14 @@ class ReservationController extends Controller
         $days = max(1, $start->diffInDays($end) + 1);
 
         return (float) $equipment->price_per_day * $days;
+    }
+
+    private function assertEquipmentCanBeReserved(Equipment $equipment): void
+    {
+        if ($equipment->status !== 'available' || $equipment->approval_status !== 'published') {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'equipment_id' => __('This equipment is not currently available for reservation.'),
+            ]);
+        }
     }
 }

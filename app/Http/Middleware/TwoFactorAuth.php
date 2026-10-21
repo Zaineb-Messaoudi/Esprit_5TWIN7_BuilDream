@@ -64,9 +64,12 @@ class TwoFactorAuth
     {
         $twoFactorRoutes = [
             'two-factor.setup',
+            'two-factor.enable',
             'two-factor.verify',
+            'two-factor.verify.code',
             'two-factor.disable',
             'two-factor.recovery-codes',
+            'two-factor.regenerate-recovery-codes',
         ];
 
         foreach ($twoFactorRoutes as $route) {

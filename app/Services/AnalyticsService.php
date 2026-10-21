@@ -86,11 +86,20 @@ class AnalyticsService
             ->metric($metricName)
             ->whereBetween('recorded_at', [$start, $end]);
 
+        $driver = DB::getDriverName();
+        $isSqlite = $driver === 'sqlite';
+
         $groupBy = match ($interval) {
-            'hour' => DB::raw('DATE_FORMAT(recorded_at, "%Y-%m-%d %H:00:00")'),
+            'hour' => $isSqlite
+                ? DB::raw('strftime("%Y-%m-%d %H:00:00", recorded_at)')
+                : DB::raw('DATE_FORMAT(recorded_at, "%Y-%m-%d %H:00:00")'),
             'day' => DB::raw('DATE(recorded_at)'),
-            'week' => DB::raw('YEARWEEK(recorded_at)'),
-            'month' => DB::raw('DATE_FORMAT(recorded_at, "%Y-%m")'),
+            'week' => $isSqlite
+                ? DB::raw("strftime('%Y-%W', recorded_at)")
+                : DB::raw('YEARWEEK(recorded_at)'),
+            'month' => $isSqlite
+                ? DB::raw('strftime("%Y-%m", recorded_at)')
+                : DB::raw('DATE_FORMAT(recorded_at, "%Y-%m")'),
             default => DB::raw('DATE(recorded_at)'),
         };
 
@@ -329,19 +338,24 @@ class AnalyticsService
         $equipmentRevenue = Payment::query()
             ->whereHas('reservation.equipment')
             ->whereBetween('payment_date', [$start, $end])
-            ->where('status', 'paid')
+            ->whereIn('status', ['paid', 'partially_refunded'])
             ->with('reservation.equipment')
             ->get()
             ->groupBy('reservation.equipment_id')
             ->map(function ($payments, $equipmentId) {
                 $first = $payments->first();
+                $netAmounts = $payments->map(
+                    fn (Payment $payment) => max(0, (float) $payment->amount - (float) $payment->refunded_amount)
+                );
+                $bookingCount = $payments->pluck('reservation_id')->unique()->count();
+                $totalRevenue = $netAmounts->sum();
 
                 return [
                     'equipment_id' => $equipmentId,
                     'equipment_name' => $first->reservation->equipment->name ?? 'Unknown',
-                    'total_revenue' => round($payments->sum('amount'), 2),
-                    'booking_count' => $payments->count(),
-                    'avg_booking_value' => round($payments->avg('amount'), 2),
+                    'total_revenue' => round($totalRevenue, 2),
+                    'booking_count' => $bookingCount,
+                    'avg_booking_value' => $bookingCount > 0 ? round($totalRevenue / $bookingCount, 2) : 0,
                 ];
             })
             ->sortByDesc('total_revenue')
