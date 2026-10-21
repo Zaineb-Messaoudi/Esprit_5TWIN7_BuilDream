@@ -299,6 +299,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/ai/chat', [AiDemoController::class, 'tool'])->defaults('tool', 'chat')->name('ai.chat');
     Route::get('/ai/history', [AiDemoController::class, 'tool'])->defaults('tool', 'history')->name('ai.history');
     Route::get('/ai/settings', [AiDemoController::class, 'tool'])->defaults('tool', 'settings')->name('ai.settings');
+    Route::post('/ai/generate', [AiDemoController::class, 'generate'])->middleware('throttle:10,1')->name('ai.generate');
 
     // Calendar
     Route::get('/calendar', function () {
