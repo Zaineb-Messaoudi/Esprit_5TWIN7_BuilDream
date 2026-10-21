@@ -24,7 +24,7 @@
         "vite-plugin-pwa": "^2.0.0"
     },
     "dependencies": {
-        "@floating-ui/dom": "^1.7.4",
+        "@floating-ui/dom": "^1.8.0",
         "@popperjs/core": "^2.11.8",
         "alpinejs": "^3.14.9",
         "apexcharts": "^8.3.1",
