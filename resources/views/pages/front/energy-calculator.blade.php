@@ -6,7 +6,7 @@
     <div class="pointer-events-none absolute -end-20 -top-24 -z-10 size-80 rounded-full bg-warning-400/15 blur-3xl" aria-hidden="true"></div>
     <div class="mx-auto max-w-7xl px-6 py-12 sm:px-8 sm:py-16 lg:px-10">
         <p class="text-theme-xs font-semibold uppercase tracking-[0.2em] text-warning-300">{{ __('SolarShare / energy studio') }}</p>
-        <h1 class="mt-4 max-w-3xl text-title-lg font-semibold tracking-tight sm:text-title-xl">{{ __('Find the right amount of power before you book.') }}</h1>
+        <h1 class="mt-4 max-w-3xl text-title-lg font-semibold tracking-tight sm:text-title-xl">{{ __('Energy calculator') }}</h1>
         <p class="mt-4 max-w-2xl text-lg leading-7 text-gray-300">{{ __('Estimate your daily energy need, then match it with real catalogue specifications.') }}</p>
         <div class="mt-7 flex flex-wrap gap-3 text-theme-xs font-medium text-gray-200">
             <span class="rounded-full border border-white/15 bg-white/10 px-3 py-1.5">{{ __('Uses EnergyProfile data') }}</span>

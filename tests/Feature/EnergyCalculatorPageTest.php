@@ -3,7 +3,7 @@
 it('shows the energy calculator page to guests', function () {
     $this->get(route('front.energy-calculator'))
         ->assertOk()
-        ->assertSee('Energy needs calculator')
+        ->assertSee('Energy calculator')
         ->assertSee('Ask AI')
         ->assertSee('Sign in to use AI')
         ->assertSee('Refrigerator');
@@ -16,7 +16,7 @@ it('calculates the needs for a selected appliance', function () {
         'sun_hours' => 5,
     ])
         ->assertOk()
-        ->assertSee('Your estimated needs')
+        ->assertSee('Your estimate')
         ->assertSee('Ask AI to explain this estimate')
         ->assertSee(route('ai.chat'), false)
         ->assertSee('1 200 Wh')

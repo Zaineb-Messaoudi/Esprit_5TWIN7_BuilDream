@@ -13,6 +13,8 @@ abstract class TestCase extends BaseTestCase
             \App\Http\Middleware\VerifyCsrfToken::class,
             \Illuminate\Routing\Middleware\ThrottleRequests::class,
             \Illuminate\Routing\Middleware\ThrottleRequestsWithRedis::class,
+            \App\Http\Middleware\ValidateAiRequest::class,
+            \App\Http\Middleware\RateLimitByIpAndUser::class,
         ]);
     }
 }

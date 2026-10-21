@@ -173,7 +173,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:buyer-only'])->grou
         ->name('front.reservation-assistant.analyze');
     Route::post('/reservation-assistant/recommend', [\App\Http\Controllers\ReservationAssistantController::class, 'recommend'])
         ->name('front.reservation-assistant.recommend');
-    Route::post('/reservation-assistant/service-providers/{reservationAssistantRequest}', [\App\Http\Controllers\ReservationAssistantController::class, 'recommendServiceProviders'])
+    Route::post('/reservation-assistant/service-providers/{workRequest}', [\App\Http\Controllers\ReservationAssistantController::class, 'recommendServiceProviders'])
         ->name('front.reservation-assistant.service-providers');
     Route::post('/reservation-assistant', [\App\Http\Controllers\ReservationAssistantController::class, 'store'])
         ->name('front.reservation-assistant.store');
@@ -288,6 +288,10 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
         Route::get('rental-insights/export', [\App\Http\Controllers\Admin\RentalInsightsController::class, 'export'])
             ->name('rental-insights.export');
 
+        // Reservation Cancellation (admin)
+        Route::post('reservations/{reservation}/cancellation-decision', [ReservationCancellationController::class, 'decide'])
+            ->name('reservations.cancellation-decision');
+
         // AI Settings
         Route::get('ai-settings', [AdminAiSettingsController::class, 'index'])->name('ai-settings.index');
         Route::put('ai-settings', [AdminAiSettingsController::class, 'update'])->name('ai-settings.update');
@@ -318,7 +322,8 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/ai/chat', [AiDemoController::class, 'tool'])->defaults('tool', 'chat')->name('ai.chat');
     Route::get('/ai/history', [AiDemoController::class, 'tool'])->defaults('tool', 'history')->name('ai.history');
     Route::get('/ai/settings', [AiDemoController::class, 'tool'])->defaults('tool', 'settings')->name('ai.settings');
-    Route::post('/ai/generate', [AiDemoController::class, 'generate'])->middleware('throttle:10,1')->name('ai.generate');
+    Route::put('/ai/settings', [AiDemoController::class, 'updateSettings'])->name('ai.settings.update');
+    Route::post('/ai/generate', [AiDemoController::class, 'generate'])->name('ai.generate');
 
     // Calendar
     Route::get('/calendar', function () {
