@@ -50,7 +50,8 @@ Route::get('/catalog', [FrontController::class, 'catalog'])->name('front.catalog
 Route::get('/equipment/map', [FrontController::class, 'equipmentMap'])->name('front.equipment.map');
 Route::get('/equipment/{id}/solar-production', [FrontController::class, 'solarProduction'])->name('front.equipment.solar-production');
 Route::get('/equipment/{id}/technical-sheet.pdf', [FrontController::class, 'exportPdf'])->name('front.equipment.pdf');
-Route::get('/energy-calculator', [CatalogueToolsController::class, 'energyCalculator'])->name('front.energy-calculator');
+Route::get('/energy-calculator', [\App\Http\Controllers\EnergyCalculatorController::class, 'index'])->name('front.energy-calculator');
+Route::post('/energy-calculator', [\App\Http\Controllers\EnergyCalculatorController::class, 'calculate'])->name('front.energy-calculator.calculate');
 Route::get('/equipment/compare', [CatalogueToolsController::class, 'compare'])->name('front.equipment.compare');
 Route::get('/equipment/{id}', [FrontController::class, 'show'])
     ->whereNumber('id')
