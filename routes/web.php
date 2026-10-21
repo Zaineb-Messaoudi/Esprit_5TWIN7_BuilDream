@@ -340,6 +340,8 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     Route::post('/ai/generate', [AiDemoController::class, 'generate'])->name('ai.generate');
     Route::get('/ai/generations/{generation}/media', [AiDemoController::class, 'media'])
         ->name('ai.generations.media');
+    Route::delete('/ai/generations/{generation}', [AiDemoController::class, 'destroy'])
+        ->name('ai.generations.destroy');
 });
 
 Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->group(function () {
