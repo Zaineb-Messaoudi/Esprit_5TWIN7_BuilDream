@@ -20,6 +20,7 @@ class EnergyCalculatorController extends Controller
                 ['key' => 'tv', 'quantity' => 1, 'hours' => 4],
                 ['key' => 'led_lamp', 'quantity' => 1, 'hours' => 5],
                 ['key' => 'laptop', 'quantity' => 1, 'hours' => 1],
+                ['key' => 'phone_charger', 'quantity' => 1, 'hours' => 1],
             ];
 
             $result = $calculator->calculate(
