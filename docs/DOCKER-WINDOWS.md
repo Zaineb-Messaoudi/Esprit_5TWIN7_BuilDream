@@ -72,4 +72,6 @@ secrets for both `staging` and `production`:
 
 The server must already have Docker Engine, Compose, the checked-out Compose
 files, and its private `.env`. The workflow pulls the immutable SHA-tagged image,
-starts the stack without rebuilding, and runs migrations.
+starts the stack without rebuilding, runs migrations, prints service status, and
+verifies the `/up` health endpoint. See [DEPLOYMENT.md](DEPLOYMENT.md) for the
+server bootstrap and GitHub Environment checklist.

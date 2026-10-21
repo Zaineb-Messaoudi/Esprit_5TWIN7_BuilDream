@@ -97,7 +97,8 @@ jobs:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
-          ssh "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && APP_IMAGE='ghcr.io/${{ github.repository }}:sha-${GITHUB_SHA:0:7}' docker compose pull && APP_IMAGE='ghcr.io/${{ github.repository }}:sha-${GITHUB_SHA:0:7}' docker compose up -d --no-build && APP_IMAGE='ghcr.io/${{ github.repository }}:sha-${GITHUB_SHA:0:7}' docker compose exec -T app php artisan migrate --force"
+          IMAGE="ghcr.io/${{ github.repository }}:sha-${GITHUB_SHA:0:7}"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "set -e; cd '$DEPLOY_PATH'; APP_IMAGE='$IMAGE' docker compose pull; APP_IMAGE='$IMAGE' docker compose up -d --no-build; APP_IMAGE='$IMAGE' docker compose exec -T app php artisan migrate --force; APP_IMAGE='$IMAGE' docker compose ps; curl --fail --retry 10 --retry-delay 3 http://127.0.0.1:8000/up"
 
   deploy-production:
     name: Deploy to Production
@@ -125,7 +126,8 @@ jobs:
           DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
         run: |
           ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
-          ssh "$DEPLOY_USER@$DEPLOY_HOST" "cd '$DEPLOY_PATH' && APP_IMAGE='ghcr.io/${{ github.repository }}:sha-${GITHUB_SHA:0:7}' docker compose pull && APP_IMAGE='ghcr.io/${{ github.repository }}:sha-${GITHUB_SHA:0:7}' docker compose up -d --no-build && APP_IMAGE='ghcr.io/${{ github.repository }}:sha-${GITHUB_SHA:0:7}' docker compose exec -T app php artisan migrate --force"
+          IMAGE="ghcr.io/${{ github.repository }}:sha-${GITHUB_SHA:0:7}"
+          ssh "$DEPLOY_USER@$DEPLOY_HOST" "set -e; cd '$DEPLOY_PATH'; APP_IMAGE='$IMAGE' docker compose pull; APP_IMAGE='$IMAGE' docker compose up -d --no-build; APP_IMAGE='$IMAGE' docker compose exec -T app php artisan migrate --force; APP_IMAGE='$IMAGE' docker compose ps; curl --fail --retry 10 --retry-delay 3 http://127.0.0.1:8000/up"
 
   notify-success:
     name: Notify Success
