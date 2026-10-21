@@ -35,6 +35,7 @@ RateLimiter::for('auth', function (Request $request) {
 use App\Http\Controllers\PageController;
 use App\Http\Controllers\PaymentController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\ReservationCancellationController;
 use App\Http\Controllers\ReservationController;
 use App\Http\Controllers\SpecialPageController;
 use App\Http\Controllers\Technical\InspectionController;
