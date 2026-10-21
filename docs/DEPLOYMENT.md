@@ -1,8 +1,9 @@
 # SolarShare deployment runbook
 
-This project deploys an immutable Docker image from GitHub Container Registry
-to a Linux Docker host over SSH. The repository does not contain deployment
-credentials or a production `.env`.
+This project builds and publishes an immutable Docker image to Docker Hub. A
+remote Linux Docker host can optionally pull that image over SSH. The
+repository does not contain registry credentials, deployment credentials, or a
+production `.env`.
 
 ## 1. Prepare the server once
 
@@ -55,14 +56,31 @@ Use real values for the mail, OAuth, Stripe, AI, Reverb, and Meilisearch
 settings required by the features enabled in that environment. Never commit
 this file.
 
-If the GHCR package is private, log in once on the server with a GitHub token
-having only `read:packages` permission:
+If the Docker Hub repository is private, log in once on the server with a
+Docker Hub access token having read permission:
 
 ```bash
-echo "$GHCR_READ_TOKEN" | docker login ghcr.io -u YOUR_GITHUB_USERNAME --password-stdin
+echo "$DOCKERHUB_READ_TOKEN" | docker login -u YOUR_DOCKERHUB_USERNAME --password-stdin
 ```
 
-## 2. Configure GitHub Environments
+## 2. Configure Docker Hub and GitHub secrets
+
+Create a Docker Hub repository named `solarshare` and add these repository
+secrets in GitHub Settings → Secrets and variables → Actions:
+
+| Secret | Value |
+| --- | --- |
+| `DOCKERHUB_USERNAME` | Your Docker Hub username |
+| `DOCKERHUB_TOKEN` | A Docker Hub access token with Read & Write permission |
+
+Every successful test/build run publishes these tags:
+
+```text
+YOUR_DOCKERHUB_USERNAME/solarshare:latest
+YOUR_DOCKERHUB_USERNAME/solarshare:sha-COMMIT
+```
+
+## 3. Configure GitHub Environments for optional remote deployment
 
 Create two environments in repository Settings → Environments:
 `staging` and `production`.
@@ -80,6 +98,12 @@ Protect `production` with a required reviewer before enabling real production
 deployments. The workflow does not need the private `.env` as a GitHub secret;
 that file remains on the server.
 
+Remote deployment is intentionally disabled by default. To enable automatic
+deployment, add an environment or repository variable named
+`DEPLOY_STAGING_ENABLED` or `DEPLOY_PRODUCTION_ENABLED` with the value `true`.
+Manual dispatch can also deploy remotely by selecting the target environment
+and setting `deploy_remote` to `true`.
+
 From Windows, after installing GitHub CLI and running `gh auth login`, the
 repository helper can configure both environments without printing the private
 key:
@@ -91,27 +115,27 @@ key:
 The helper asks for the server host, SSH user, deployment path, and local
 private-key path. It never stores the key in the repository.
 
-## 3. Deployment behavior
+## 4. Deployment behavior
 
-- Pushes to `dev` build, test, publish, and deploy to `staging`.
-- A tag such as `v1.0.0` builds, tests, publishes, and deploys to `production`.
-- Manual dispatch can select either environment.
+- Pushes to `dev` build, test, and publish to Docker Hub.
+- A tag such as `v1.0.0` builds, tests, and publishes to Docker Hub.
+- Remote staging/production deployment only runs when explicitly enabled.
 - The server pulls the immutable commit SHA image, starts the stack without a
   source rebuild, runs migrations, and verifies `/up`.
 
 The image tag is derived from the commit that passed CI, so the server never
 deploys an untested floating `latest` image.
 
-## 4. Rollback
+## 5. Rollback
 
 Find the previous successful commit SHA in the workflow run, then on the
 server run:
 
 ```bash
 cd /opt/solarshare
-APP_IMAGE=ghcr.io/zaineb-messaoudi/esprit_5twin7_buildream:sha-PREVIOUS docker compose pull
-APP_IMAGE=ghcr.io/zaineb-messaoudi/esprit_5twin7_buildream:sha-PREVIOUS docker compose up -d --no-build
-APP_IMAGE=ghcr.io/zaineb-messaoudi/esprit_5twin7_buildream:sha-PREVIOUS docker compose exec -T app php artisan migrate:status
+APP_IMAGE=YOUR_DOCKERHUB_USERNAME/solarshare:sha-PREVIOUS docker compose pull
+APP_IMAGE=YOUR_DOCKERHUB_USERNAME/solarshare:sha-PREVIOUS docker compose up -d --no-build
+APP_IMAGE=YOUR_DOCKERHUB_USERNAME/solarshare:sha-PREVIOUS docker compose exec -T app php artisan migrate:status
 ```
 
 Do not roll back application code past migrations that have already changed
