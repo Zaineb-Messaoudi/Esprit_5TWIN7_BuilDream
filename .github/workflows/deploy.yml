@@ -2,10 +2,7 @@ name: Deploy Production
 
 on:
   push:
-    branches:
-      - dev
-    tags:
-      - 'v*'
+    branches: [main]
 
 env:
   REGISTRY: docker.io
@@ -70,27 +67,10 @@ jobs:
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
-  deploy-staging:
-    name: Deploy to Staging
-    needs: docker-build
-    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
-    runs-on: [self-hosted, linux, x64]
-    environment: staging
-    steps:
-      - name: Checkout tested source
-        uses: actions/checkout@v4
-
-      - name: Deploy staging automatically on WSL
-        env:
-          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
-          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
-        run: |
-          ./scripts/deploy/local-compose.sh staging "sha-$GITHUB_SHA"
-
   deploy-production:
     name: Deploy to Production
     needs: docker-build
-    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    if: github.event_name == 'push' && github.ref == 'refs/heads/main'
     runs-on: [self-hosted, linux, x64]
     environment: production
     steps:
@@ -103,13 +83,3 @@ jobs:
           DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
           ./scripts/deploy/local-compose.sh production "sha-$GITHUB_SHA"
-
-  notify-success:
-    name: Notify Success
-    needs: [deploy-staging, deploy-production]
-    if: success() && (needs.deploy-staging.result == 'success' || needs.deploy-production.result == 'success')
-    runs-on: ubuntu-latest
-    steps:
-      - name: Send success notification
-        run: |
-          echo "::notice ::Deployment successful!"

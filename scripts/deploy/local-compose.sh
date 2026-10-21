@@ -5,7 +5,7 @@ environment="${1:?environment is required}"
 image_tag="${2:?image tag is required}"
 
 case "$environment" in
-  staging|production) ;;
+  production) ;;
   *) echo "Unsupported environment: $environment" >&2; exit 1 ;;
 esac
 
@@ -34,13 +34,7 @@ image="docker.io/$username/solarshare:$image_tag"
 docker pull "$image"
 export APP_IMAGE="$image"
 compose_args=(--project-name "solarshare-$environment" --project-directory "$deploy_dir")
-if [[ "$environment" == "staging" ]]; then
-  compose_args+=(--profile public)
-fi
 docker compose "${compose_args[@]}" up -d --remove-orphans
 docker compose "${compose_args[@]}" exec -T app php artisan migrate --force
 docker compose "${compose_args[@]}" ps
-if [[ "$environment" == "staging" ]]; then
-  docker compose "${compose_args[@]}" logs --no-color --tail=30 tunnel || true
-fi
 curl --fail --retry 10 --retry-delay 3 "http://127.0.0.1:$app_port/up"

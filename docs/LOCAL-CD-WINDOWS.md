@@ -1,78 +1,76 @@
-# No-card automatic CI/CD demonstration on Windows + WSL
+# Automatic CI/CD on Windows + WSL
 
-This repository can demonstrate the full CI/CD story without a VPS. GitHub
-Actions runs CI and publishes the image to Docker Hub. A self-hosted GitHub
-Actions runner in WSL then pulls that tested image and deploys it with Docker
-Compose on the Windows machine. Staging automatically starts a Cloudflare Quick
-Tunnel and prints its public URL.
+This is the final no-VPS deployment model for the validation environment.
+GitHub Actions runs CI, builds and publishes the Docker image to Docker Hub,
+then a self-hosted GitHub Actions runner in WSL pulls that exact image and
+deploys it to Docker Desktop with Docker Compose.
 
-This is a demonstration/staging setup, not permanent production hosting.
+## Flow
 
-## 1. Prepare local deployment directories
+```text
+Pull Request to main
+    -> CI: tests, quality, security, frontend build
+Merge to main
+    -> Docker image build and Docker Hub push
+    -> self-hosted WSL runner
+    -> Docker Desktop / Docker Compose
+    -> migrations and /up health check
+```
 
-In WSL, from the repository:
+## 1. Prepare the local production environment
+
+In WSL, create the deployment directory and copy the private environment file:
 
 ```bash
-mkdir -p "$HOME/solarshare-staging" "$HOME/solarshare-production"
-cp .env "$HOME/solarshare-staging/.env"
+mkdir -p "$HOME/solarshare-production"
 cp .env "$HOME/solarshare-production/.env"
 ```
 
-Edit each `.env` separately. Staging should use `APP_ENV=staging`,
-`APP_DEBUG=false`, `APP_PORT=8000`, and `FORWARD_DB_PORT=3307`. Production
-should use `APP_ENV=production`, `APP_DEBUG=false`, `APP_PORT=8002`, and
-`FORWARD_DB_PORT=3308`. Keep both files outside Git.
+Set these values in that private file:
 
-## 2. Install a self-hosted runner
+```env
+APP_ENV=production
+APP_DEBUG=false
+APP_PORT=8000
+FORWARD_DB_PORT=3306
+```
+
+The file remains outside Git.
+
+## 2. Install the self-hosted runner once
 
 Open GitHub repository Settings → Actions → Runners → New self-hosted runner.
-Choose Linux and x64. Copy the commands GitHub shows into WSL. GitHub gives a
-temporary registration token, so do not invent one or commit it.
+Choose Linux and x64, then copy GitHub's generated installation commands into
+WSL. Do not invent or commit the temporary registration token.
 
-Keep the runner process open:
+Start the runner and keep it online:
 
 ```bash
 ./run.sh
 ```
 
-Before leaving it running, verify Docker is available in that same WSL shell:
+The runner must show `Listening for Jobs`. Docker Desktop must also be running.
 
-```bash
-docker version
-docker compose version
-```
+## 3. Automatic deployment
 
-## 3. Automatic staging deployment
+After the Pull Request is merged into `main`, the `Deploy Production` workflow
+automatically:
 
-After the test and Docker build jobs succeed on a push to `dev`, the same
-`Deploy Production` workflow automatically runs its staging job on the WSL
-runner. It pulls the exact tested SHA image from Docker Hub, runs migrations,
-starts Compose, starts the public tunnel, and checks `/up`.
+1. runs the complete CI suite;
+2. builds the Docker image;
+3. pushes the image to Docker Hub;
+4. checks out the tested source on the WSL runner;
+5. pulls the immutable commit image;
+6. starts Docker Compose;
+7. runs Laravel migrations;
+8. checks `/up`.
 
-The runner must be online when the workflow starts. The repository must remain
-private because a self-hosted runner executes repository workflow code.
+No deployment button or second deployment command is needed.
 
-## 4. Automatic production deployment
+## 4. Local verification
 
-Push a version tag after staging validation:
+The application is available at `http://localhost:8000` while Docker Desktop
+and the runner machine are running.
 
-```bash
-git tag v1.0.0
-git push origin v1.0.0
-```
-
-The same workflow automatically deploys the tested production image to the
-production WSL directory. The production environment can still be configured
-with a required reviewer if the team wants a controlled release gate.
-
-## 5. Temporary public URL
-
-The staging deployment starts the tunnel automatically. Find its URL in the
-`Deploy to Staging` job logs. It looks like:
-
-```text
-https://random-words.trycloudflare.com
-```
-
-The URL is temporary and changes when the staging stack is recreated. It stops
-working when Docker Desktop or the computer is turned off.
+The deployment target is intentionally local for validation. A permanent
+public deployment would require a continuously available external server.
