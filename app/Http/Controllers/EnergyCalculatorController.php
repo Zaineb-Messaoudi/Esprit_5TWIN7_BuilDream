@@ -10,8 +10,13 @@ use Illuminate\Http\Request;
 
 class EnergyCalculatorController extends Controller
 {
-    public function index(EnergyNeedsCalculator $calculator): View
+    public function index(Request $request, EnergyNeedsCalculator $calculator, EnergyEquipmentMatcher $matcher): View
     {
+        // Handle GET with calculate parameter (e.g., from equipment detail link)
+        if ($request->has('calculate')) {
+            return $this->calculate($request, $calculator, $matcher);
+        }
+
         return view('pages.front.energy-calculator', [
             'appliances' => $calculator->appliances(),
             'result' => null,

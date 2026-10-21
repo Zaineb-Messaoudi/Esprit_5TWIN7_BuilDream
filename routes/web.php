@@ -312,7 +312,8 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/saas', function () {
         return view('pages.dashboard.saas', ['title' => 'SaaS Dashboard']);
     })->name('dashboard.saas');
-    Route::get('/ai-dashboard', [AiDemoController::class, 'index'])->name('dashboard.ai');
+    Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    // AI Studio (accessible to authenticated users with role selected)
     Route::get('/ai', [AiDemoController::class, 'index'])->name('ai.index');
     Route::get('/ai/usage', [AiDemoController::class, 'usage'])->name('ai.usage');
     Route::get('/ai/text-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'text')->name('ai.text');
@@ -324,6 +325,9 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/ai/settings', [AiDemoController::class, 'tool'])->defaults('tool', 'settings')->name('ai.settings');
     Route::put('/ai/settings', [AiDemoController::class, 'updateSettings'])->name('ai.settings.update');
     Route::post('/ai/generate', [AiDemoController::class, 'generate'])->name('ai.generate');
+
+    // Dashboard AI (admin only)
+    Route::get('/ai-dashboard', [AiDemoController::class, 'index'])->name('dashboard.ai');
 
     // Calendar
     Route::get('/calendar', function () {
