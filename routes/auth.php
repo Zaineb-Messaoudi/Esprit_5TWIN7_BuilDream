@@ -9,6 +9,7 @@ use App\Http\Controllers\Auth\PasswordController;
 use App\Http\Controllers\Auth\PasswordResetLinkController;
 use App\Http\Controllers\Auth\RegisteredUserController;
 use App\Http\Controllers\Auth\SocialAuthController;
+use App\Http\Controllers\Auth\TwoFactorAuthController;
 use App\Http\Controllers\Auth\VerifyEmailController;
 use Illuminate\Support\Facades\Route;
 
@@ -69,4 +70,20 @@ Route::middleware('auth')->group(function () {
 
     Route::post('logout', [AuthenticatedSessionController::class, 'destroy'])
         ->name('logout');
+
+    // Two-Factor Authentication
+    Route::get('two-factor/setup', [TwoFactorAuthController::class, 'setup'])
+        ->name('two-factor.setup');
+    Route::post('two-factor/enable', [TwoFactorAuthController::class, 'enable'])
+        ->name('two-factor.enable');
+    Route::get('two-factor/verify', [TwoFactorAuthController::class, 'verify'])
+        ->name('two-factor.verify');
+    Route::post('two-factor/verify', [TwoFactorAuthController::class, 'verifyCode'])
+        ->name('two-factor.verify.code');
+    Route::delete('two-factor/disable', [TwoFactorAuthController::class, 'disable'])
+        ->name('two-factor.disable');
+    Route::get('two-factor/recovery-codes', [TwoFactorAuthController::class, 'recoveryCodes'])
+        ->name('two-factor.recovery-codes');
+    Route::post('two-factor/regenerate-recovery-codes', [TwoFactorAuthController::class, 'regenerateRecoveryCodes'])
+        ->name('two-factor.regenerate-recovery-codes');
 });

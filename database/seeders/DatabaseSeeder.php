@@ -15,6 +15,8 @@ class DatabaseSeeder extends Seeder
      */
     public function run(): void
     {
+        // Seed roles and permissions first
+        $this->call(RolePermissionSeeder::class);
         // Persona 1: Super Admin
         User::firstOrCreate(['email' => 'admin@solarshare.com'], [
             'name' => 'Solar Admin',

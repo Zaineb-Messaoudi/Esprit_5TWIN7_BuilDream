@@ -11,11 +11,12 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Support\Facades\Notification;
+use Spatie\Permission\Traits\HasRoles;
 
 class User extends Authenticatable implements MustVerifyEmail
 {
     /** @use HasFactory<\Database\Factories\UserFactory> */
-    use HasFactory;
+    use HasFactory, HasRoles;
 
     /**
      * Send a notification using both the custom system and Laravel's facade.
@@ -121,6 +122,25 @@ class User extends Authenticatable implements MustVerifyEmail
             'address_latitude' => 'decimal:8',
             'address_longitude' => 'decimal:8',
         ];
+    }
+
+    /**
+     * Boot the model.
+     */
+    protected static function booted(): void
+    {
+        static::saved(function (self $user) {
+            if ($user->wasChanged('role') && $user->role_setup_completed) {
+                $spatieRoleName = $user->role->value;
+                $spatieRole = \Spatie\Permission\Models\Role::where('name', $spatieRoleName)
+                    ->where('guard_name', 'web')
+                    ->first();
+
+                if ($spatieRole) {
+                    $user->syncRoles([$spatieRole]);
+                }
+            }
+        });
     }
 
     public function getProfilePhotoUrlAttribute(): ?string
