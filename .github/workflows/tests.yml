@@ -6,6 +6,8 @@ jobs:
   test:
     runs-on: ubuntu-latest
     env:
+      APP_ENV: testing
+      APP_KEY: base64:VGhpc0lzQVRlc3RLZXlGb3JDaQ==
       DB_CONNECTION: mysql
       DB_HOST: 127.0.0.1
       DB_PORT: 3306
@@ -36,10 +38,10 @@ jobs:
         with:
           node-version: '22'
           cache: npm
-      - run: cp .env.example .env
-      - run: composer install --no-interaction --prefer-dist
+      - run: cp .env.testing .env
+      - run: composer install --no-interaction --prefer-dist --no-scripts
       - run: npm ci
       - run: npm run build
-      - run: php artisan key:generate
+      - run: php artisan key:generate --force
       - run: php artisan migrate --force
       - run: composer test
