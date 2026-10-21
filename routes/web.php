@@ -306,9 +306,7 @@ Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->grou
     Route::get('/saas', function () {
         return view('pages.dashboard.saas', ['title' => 'SaaS Dashboard']);
     })->name('dashboard.saas');
-    Route::get('/ai-dashboard', function () {
-        return view('pages.dashboard.ai', ['title' => 'AI Dashboard']);
-    })->name('dashboard.ai');
+    Route::get('/ai-dashboard', [AiDemoController::class, 'index'])->name('dashboard.ai');
     Route::get('/ai', [AiDemoController::class, 'index'])->name('ai.index');
     Route::get('/ai/usage', [AiDemoController::class, 'usage'])->name('ai.usage');
     Route::get('/ai/text-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'text')->name('ai.text');
