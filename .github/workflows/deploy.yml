@@ -6,21 +6,6 @@ on:
       - dev
     tags:
       - 'v*'
-  workflow_dispatch:
-    inputs:
-      environment:
-        description: 'Environment to deploy'
-        required: true
-        default: 'production'
-        type: choice
-        options:
-          - production
-          - staging
-    deploy_remote:
-      description: 'Deploy to a configured remote Docker host'
-      required: true
-      default: false
-      type: boolean
 
 env:
   REGISTRY: docker.io
@@ -88,66 +73,36 @@ jobs:
   deploy-staging:
     name: Deploy to Staging
     needs: docker-build
-    if: >-
-      (github.event_name == 'workflow_dispatch' && inputs.environment == 'staging' && inputs.deploy_remote) ||
-      (github.event_name == 'push' && github.ref == 'refs/heads/dev' && vars.DEPLOY_STAGING_ENABLED == 'true')
-    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && github.ref == 'refs/heads/dev'
+    runs-on: [self-hosted, linux, x64]
     environment: staging
     steps:
-      - name: Validate staging deployment secrets
+      - name: Checkout tested source
+        uses: actions/checkout@v4
+
+      - name: Deploy staging automatically on WSL
         env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          test -n "$DEPLOY_HOST" && test -n "$DEPLOY_USER" && test -n "$DEPLOY_SSH_KEY" && test -n "$DEPLOY_PATH"
-      - name: Configure SSH
-        uses: webfactory/ssh-agent@v0.9.1
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
-      - name: Deploy staging image
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        run: |
-          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
-          DOCKERHUB_USERNAME="$(printf '%s' '${{ secrets.DOCKERHUB_USERNAME }}' | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')"
-          IMAGE="docker.io/${DOCKERHUB_USERNAME}/solarshare:sha-${GITHUB_SHA:0:7}"
-          ssh "$DEPLOY_USER@$DEPLOY_HOST" "set -e; cd '$DEPLOY_PATH'; APP_IMAGE='$IMAGE' docker compose pull; APP_IMAGE='$IMAGE' docker compose up -d --no-build; APP_IMAGE='$IMAGE' docker compose exec -T app php artisan migrate --force; APP_IMAGE='$IMAGE' docker compose ps; curl --fail --retry 10 --retry-delay 3 http://127.0.0.1:8000/up"
+          ./scripts/deploy/local-compose.sh staging "sha-$GITHUB_SHA"
 
   deploy-production:
     name: Deploy to Production
     needs: docker-build
-    if: >-
-      (github.event_name == 'workflow_dispatch' && inputs.environment == 'production' && inputs.deploy_remote) ||
-      (github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v') && vars.DEPLOY_PRODUCTION_ENABLED == 'true')
-    runs-on: ubuntu-latest
+    if: github.event_name == 'push' && startsWith(github.ref, 'refs/tags/v')
+    runs-on: [self-hosted, linux, x64]
     environment: production
     steps:
-      - name: Validate production deployment secrets
+      - name: Checkout tested source
+        uses: actions/checkout@v4
+
+      - name: Deploy production automatically on WSL
         env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_SSH_KEY: ${{ secrets.DEPLOY_SSH_KEY }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
+          DOCKERHUB_USERNAME: ${{ secrets.DOCKERHUB_USERNAME }}
+          DOCKERHUB_TOKEN: ${{ secrets.DOCKERHUB_TOKEN }}
         run: |
-          test -n "$DEPLOY_HOST" && test -n "$DEPLOY_USER" && test -n "$DEPLOY_SSH_KEY" && test -n "$DEPLOY_PATH"
-      - name: Configure SSH
-        uses: webfactory/ssh-agent@v0.9.1
-        with:
-          ssh-private-key: ${{ secrets.DEPLOY_SSH_KEY }}
-      - name: Deploy production image
-        env:
-          DEPLOY_HOST: ${{ secrets.DEPLOY_HOST }}
-          DEPLOY_USER: ${{ secrets.DEPLOY_USER }}
-          DEPLOY_PATH: ${{ secrets.DEPLOY_PATH }}
-        run: |
-          ssh-keyscan -H "$DEPLOY_HOST" >> ~/.ssh/known_hosts
-          DOCKERHUB_USERNAME="$(printf '%s' '${{ secrets.DOCKERHUB_USERNAME }}' | tr -d '[:space:]' | tr '[:upper:]' '[:lower:]')"
-          IMAGE="docker.io/${DOCKERHUB_USERNAME}/solarshare:sha-${GITHUB_SHA:0:7}"
-          ssh "$DEPLOY_USER@$DEPLOY_HOST" "set -e; cd '$DEPLOY_PATH'; APP_IMAGE='$IMAGE' docker compose pull; APP_IMAGE='$IMAGE' docker compose up -d --no-build; APP_IMAGE='$IMAGE' docker compose exec -T app php artisan migrate --force; APP_IMAGE='$IMAGE' docker compose ps; curl --fail --retry 10 --retry-delay 3 http://127.0.0.1:8000/up"
+          ./scripts/deploy/local-compose.sh production "sha-$GITHUB_SHA"
 
   notify-success:
     name: Notify Success

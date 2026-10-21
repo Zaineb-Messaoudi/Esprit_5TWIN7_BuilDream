@@ -1,10 +1,10 @@
-# No-card CI/CD demonstration on Windows + WSL
+# No-card automatic CI/CD demonstration on Windows + WSL
 
 This repository can demonstrate the full CI/CD story without a VPS. GitHub
 Actions runs CI and publishes the image to Docker Hub. A self-hosted GitHub
 Actions runner in WSL then pulls that tested image and deploys it with Docker
-Compose on the Windows machine. A Cloudflare Quick Tunnel can expose the local
-staging port temporarily for the validation demo.
+Compose on the Windows machine. Staging automatically starts a Cloudflare Quick
+Tunnel and prints its public URL.
 
 This is a demonstration/staging setup, not permanent production hosting.
 
@@ -44,28 +44,35 @@ docker compose version
 
 ## 3. Automatic staging deployment
 
-After a successful `Deploy Production` workflow on `dev`, `Local CD Demo`
-automatically runs on the WSL runner. It pulls the exact tested SHA image from
-Docker Hub, runs migrations, starts Compose, and checks `/up`.
+After the test and Docker build jobs succeed on a push to `dev`, the same
+`Deploy Production` workflow automatically runs its staging job on the WSL
+runner. It pulls the exact tested SHA image from Docker Hub, runs migrations,
+starts Compose, starts the public tunnel, and checks `/up`.
 
 The runner must be online when the workflow starts. The repository must remain
 private because a self-hosted runner executes repository workflow code.
 
-## 4. Manual production demonstration
+## 4. Automatic production deployment
 
-Use Actions → Local CD Demo → Run workflow, select `production`, and enter a
-published Docker tag such as `sha-a7d650a`. The production environment can be
-configured with a required reviewer for a visible approval step.
+Push a version tag after staging validation:
+
+```bash
+git tag v1.0.0
+git push origin v1.0.0
+```
+
+The same workflow automatically deploys the tested production image to the
+production WSL directory. The production environment can still be configured
+with a required reviewer if the team wants a controlled release gate.
 
 ## 5. Temporary public URL
 
-With staging running on port 8000, open another WSL terminal and run:
+The staging deployment starts the tunnel automatically. Find its URL in the
+`Deploy to Staging` job logs. It looks like:
 
-```bash
-docker run --rm cloudflare/cloudflared:latest \
-  tunnel --no-autoupdate --url http://host.docker.internal:8000
+```text
+https://random-words.trycloudflare.com
 ```
 
-Cloudflare prints a temporary `https://....trycloudflare.com` URL. Keep this
-terminal open during the demonstration. The URL stops working when the command
-is stopped or the computer is turned off.
+The URL is temporary and changes when the staging stack is recreated. It stops
+working when Docker Desktop or the computer is turned off.
