@@ -19,9 +19,9 @@ class TechnicalMysqlCrudTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        
+
         $this->requireMysql();
-        
+
         if (DB::connection()->getDriverName() === 'mysql') {
             $this->seed(\Database\Seeders\TechnicalPreviewSeeder::class);
         }

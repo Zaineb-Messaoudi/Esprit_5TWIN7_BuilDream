@@ -93,7 +93,7 @@ class SolarShareDashboardController extends Controller
         $monthlyRevenue = Payment::where('status', 'paid')
             ->where('payment_date', '>=', now()->subMonths(11)->startOfMonth())
             ->selectRaw(
-                'YEAR(payment_date) as year, MONTH(payment_date) as month, SUM(amount) as total'
+                'strftime("%Y", payment_date) as year, strftime("%m", payment_date) as month, SUM(amount) as total'
             )
             ->groupBy('year', 'month')
             ->orderBy('year')

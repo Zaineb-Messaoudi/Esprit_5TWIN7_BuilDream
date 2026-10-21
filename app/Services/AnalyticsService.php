@@ -86,11 +86,20 @@ class AnalyticsService
             ->metric($metricName)
             ->whereBetween('recorded_at', [$start, $end]);
 
+        $driver = DB::getDriverName();
+        $isSqlite = $driver === 'sqlite';
+
         $groupBy = match ($interval) {
-            'hour' => DB::raw('DATE_FORMAT(recorded_at, "%Y-%m-%d %H:00:00")'),
+            'hour' => $isSqlite
+                ? DB::raw('strftime("%Y-%m-%d %H:00:00", recorded_at)')
+                : DB::raw('DATE_FORMAT(recorded_at, "%Y-%m-%d %H:00:00")'),
             'day' => DB::raw('DATE(recorded_at)'),
-            'week' => DB::raw('YEARWEEK(recorded_at)'),
-            'month' => DB::raw('DATE_FORMAT(recorded_at, "%Y-%m")'),
+            'week' => $isSqlite
+                ? DB::raw("strftime('%Y-%W', recorded_at)")
+                : DB::raw('YEARWEEK(recorded_at)'),
+            'month' => $isSqlite
+                ? DB::raw('strftime("%Y-%m", recorded_at)')
+                : DB::raw('DATE_FORMAT(recorded_at, "%Y-%m")'),
             default => DB::raw('DATE(recorded_at)'),
         };
 
