@@ -101,8 +101,8 @@ jobs:
           restore-keys: |
             composer-${{ runner.os }}-
 
-      - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader
+      - name: Install dependencies (skip scripts)
+        run: composer install --prefer-dist --no-progress --no-interaction --optimize-autoloader --no-scripts
 
       - name: Copy .env.testing
         run: cp .env.testing .env 2>/dev/null || cp .env.example .env
@@ -116,6 +116,9 @@ jobs:
             mysqladmin ping -h 127.0.0.1 -P 3306 -u root -ppassword && break
             sleep 2
           done
+
+      - name: Run package discovery
+        run: php artisan package:discover --ansi
 
       - name: Run migrations
         run: php artisan migrate --force --no-interaction
@@ -147,7 +150,7 @@ jobs:
           tools: composer:v2
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
 
       - name: Check code style
         run: vendor/bin/pint --test --parallel
@@ -172,7 +175,7 @@ jobs:
           cache: 'npm'
 
       - name: Install dependencies
-        run: composer install --prefer-dist --no-progress --no-interaction
+        run: composer install --prefer-dist --no-progress --no-interaction --no-scripts
 
       - name: Install NPM dependencies
         run: npm ci

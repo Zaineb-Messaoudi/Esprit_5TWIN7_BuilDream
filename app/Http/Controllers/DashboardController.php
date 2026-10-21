@@ -9,6 +9,7 @@ use App\Models\Payment;
 use App\Models\Rental;
 use App\Models\Reservation;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 
 class DashboardController extends Controller
 {

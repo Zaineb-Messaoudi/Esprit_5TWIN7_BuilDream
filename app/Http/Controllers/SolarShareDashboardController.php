@@ -13,6 +13,7 @@ use App\Models\RentalExtension;
 use App\Models\Reservation;
 use App\Models\User;
 use Illuminate\Contracts\View\View;
+use Illuminate\Support\Facades\DB;
 
 class SolarShareDashboardController extends Controller
 {
