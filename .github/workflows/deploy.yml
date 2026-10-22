@@ -175,6 +175,16 @@ jobs:
       - name: Wait for staging health endpoint
         run: curl --fail --retry 30 --retry-delay 5 http://127.0.0.1:18000/up
 
+      - name: Diagnose staging failure
+        if: failure()
+        run: |
+          echo '--- HTTP response ---'
+          curl --silent --show-error --include http://127.0.0.1:18000/up || true
+          echo '--- Docker service status ---'
+          docker compose -p solarshare-staging ps
+          echo '--- Application and Nginx logs ---'
+          docker compose -p solarshare-staging logs --no-color --tail=200 app web
+
       - name: Show staging services
         if: always()
         run: docker compose -p solarshare-staging ps
