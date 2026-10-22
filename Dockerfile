@@ -3,13 +3,12 @@
 FROM composer:2 AS php-dependencies
 WORKDIR /var/www/html
 COPY composer.json composer.lock ./
-RUN composer install \
-    --no-dev \
-    --prefer-dist \
-    --no-interaction \
-    --no-progress \
-    --no-scripts \
-    --optimize-autoloader
+ARG COMPOSER_WITH_DEV=false
+RUN if [ "$COMPOSER_WITH_DEV" = "true" ]; then \
+        composer install --prefer-dist --no-interaction --no-progress --no-scripts --optimize-autoloader; \
+    else \
+        composer install --no-dev --prefer-dist --no-interaction --no-progress --no-scripts --optimize-autoloader; \
+    fi
 
 FROM node:22-alpine AS frontend-assets
 WORKDIR /var/www/html

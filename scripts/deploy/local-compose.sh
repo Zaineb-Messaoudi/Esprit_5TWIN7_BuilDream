@@ -65,7 +65,6 @@ export WEB_IMAGE="$web_image"
 docker compose "${compose_args[@]}" up -d --remove-orphans
 docker compose "${compose_args[@]}" exec -T app php artisan backup:database --disk=local --path=backups/database
 docker compose "${compose_args[@]}" exec -T app php artisan migrate --force
-docker compose "${compose_args[@]}" exec -T app php artisan db:seed --force
 docker compose "${compose_args[@]}" ps
 curl --fail --retry 10 --retry-delay 3 "http://127.0.0.1:$app_port/up"
 trap - EXIT

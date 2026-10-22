@@ -29,11 +29,7 @@ services:
       MEILISEARCH_HOST: http://meilisearch:7700
     expose:
       - "9000"
-    command: >
-      sh -c "php artisan migrate --force &&
-             if [ \"$${APP_ENV}\" = \"testing\" ]; then php artisan db:seed --force; fi &&
-             php artisan storage:link &&
-             php-fpm -F"
+    command: php-fpm -F
     volumes:
       - solarshare-storage:/var/www/html/storage/app/private
       - solarshare-public-storage:/var/www/html/storage/app/public
