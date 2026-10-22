@@ -149,7 +149,7 @@ jobs:
 
           cat > .env <<'EOF'
           APP_ENV=testing
-          APP_DEBUG=false
+          APP_DEBUG=true
           APP_URL=http://127.0.0.1:18000
           APP_PORT=18000
           DB_DATABASE=SolarShare
@@ -162,6 +162,20 @@ jobs:
           FORWARD_MAILPIT_DASHBOARD_PORT=18025
           REVERB_PORT=18081
           MEILISEARCH_KEY=staging-master-key
+          CACHE_STORE=array
+          SESSION_DRIVER=array
+          QUEUE_CONNECTION=sync
+          SCOUT_DRIVER=null
+          BROADCAST_CONNECTION=log
+          REVERB_APP_ID=staging
+          REVERB_APP_KEY=staging-key
+          REVERB_APP_SECRET=staging-secret
+          REVERB_HOST=localhost
+          REVERB_SCHEME=http
+          VITE_REVERB_APP_KEY=staging-key
+          VITE_REVERB_HOST=localhost
+          VITE_REVERB_PORT=18081
+          VITE_REVERB_SCHEME=http
           EOF
 
           printf 'APP_KEY=%s\n' "$staging_app_key" >> .env
@@ -172,8 +186,44 @@ jobs:
           WEB_IMAGE: ${{ steps.docker-image.outputs.web-image }}
         run: docker compose -p solarshare-staging up -d --no-build --remove-orphans
 
+      - name: Wait for MySQL to be ready
+        env:
+          DB_PASSWORD: solarshare
+        run: |
+          for i in {1..30}; do
+            if docker compose -p solarshare-staging exec -T mysql mysqladmin ping -h 127.0.0.1 -uroot -p"${DB_PASSWORD}" --silent 2>/dev/null; then
+              echo "MySQL is ready"
+              break
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 2
+          done
+
+      - name: Run Laravel bootstrap (migrations, cache)
+        run: |
+          docker compose -p solarshare-staging exec -T app php artisan config:clear
+          docker compose -p solarshare-staging exec -T app php artisan route:clear
+          docker compose -p solarshare-staging exec -T app php artisan view:clear
+          docker compose -p solarshare-staging restart app
+          sleep 5
+          docker compose -p solarshare-staging exec -T app php artisan migrate --force
+          docker compose -p solarshare-staging exec -T app php artisan config:cache
+          docker compose -p solarshare-staging exec -T app php artisan route:cache
+          docker compose -p solarshare-staging exec -T app php artisan view:cache
+          docker compose -p solarshare-staging exec -T app php artisan storage:link
+
       - name: Wait for staging health endpoint
         run: curl --fail --retry 30 --retry-delay 5 http://127.0.0.1:18000/up
+
+      - name: Diagnose staging failure
+        if: failure()
+        run: |
+          echo '--- HTTP response ---'
+          curl --silent --show-error --include http://127.0.0.1:18000/up || true
+          echo '--- Docker service status ---'
+          docker compose -p solarshare-staging ps
+          echo '--- Application and Nginx logs ---'
+          docker compose -p solarshare-staging logs --no-color --tail=200 app web
 
       - name: Show staging services
         if: always()
