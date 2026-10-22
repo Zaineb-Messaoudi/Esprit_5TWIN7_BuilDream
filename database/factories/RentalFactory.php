@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Facades\Schema;
 use Illuminate\Support\Str;
-use function fake;
 
 /**
  * Factory = a recipe that builds FAKE rentals for tests and demo data.
@@ -31,8 +30,8 @@ class RentalFactory extends Factory
      */
     public function definition(): array
     {
-        $start = Carbon::instance(fake()->dateTimeBetween('-30 days', '+30 days'));
-        $end = $start->copy()->addDays(fake()->numberBetween(1, 14));
+        $start = Carbon::instance($this->faker->dateTimeBetween('-30 days', '+30 days'));
+        $end = $start->copy()->addDays($this->faker->numberBetween(1, 14));
 
         return $this->period($start, $end) + [
             // Temporary unique value: configure() below replaces it with RNT-2026-0001...
@@ -63,9 +62,9 @@ class RentalFactory extends Factory
     public function pending(): static
     {
         return $this->state(function () {
-            $start = today()->addDays(fake()->numberBetween(2, 20));
+            $start = today()->addDays($this->faker->numberBetween(2, 20));
 
-            return $this->period($start, $start->copy()->addDays(fake()->numberBetween(1, 10)));
+            return $this->period($start, $start->copy()->addDays($this->faker->numberBetween(1, 10)));
         });
     }
 
@@ -73,9 +72,9 @@ class RentalFactory extends Factory
     public function active(): static
     {
         return $this->state(function () {
-            $start = today()->subDays(fake()->numberBetween(1, 5));
+            $start = today()->subDays($this->faker->numberBetween(1, 5));
 
-            return $this->period($start, today()->addDays(fake()->numberBetween(2, 10)));
+            return $this->period($start, today()->addDays($this->faker->numberBetween(2, 10)));
         });
     }
 
@@ -83,9 +82,9 @@ class RentalFactory extends Factory
     public function completed(): static
     {
         return $this->state(function () {
-            $end = today()->subDays(fake()->numberBetween(2, 20));
+            $end = today()->subDays($this->faker->numberBetween(2, 20));
 
-            return $this->period($end->copy()->subDays(fake()->numberBetween(1, 10)), $end);
+            return $this->period($end->copy()->subDays($this->faker->numberBetween(1, 10)), $end);
         });
     }
 
@@ -120,7 +119,7 @@ class RentalFactory extends Factory
         return [
             'start_date' => $start->toDateString(),
             'end_date' => $end->toDateString(),
-            'total_amount' => round($days * fake()->randomElement([10, 15, 20, 25, 30, 45, 60]), 2),
+            'total_amount' => round($days * $this->faker->randomElement([10, 15, 20, 25, 30, 45, 60]), 2),
             'status' => $status->value,
         ];
     }

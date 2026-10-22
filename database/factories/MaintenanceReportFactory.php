@@ -5,7 +5,6 @@ namespace Database\Factories;
 use App\Models\Maintenance;
 use App\Models\MaintenanceReport;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use function fake;
 
 /** @extends Factory<MaintenanceReport> */
 class MaintenanceReportFactory extends Factory
@@ -16,10 +15,10 @@ class MaintenanceReportFactory extends Factory
     {
         return [
             'maintenance_id' => Maintenance::factory(),
-            'diagnosis' => fake()->sentence(),
-            'actions_taken' => fake()->paragraph(),
-            'parts_replaced' => fake()->optional()->words(3, true),
-            'technician_notes' => fake()->optional()->sentence(),
+            'diagnosis' => $this->faker->sentence(),
+            'actions_taken' => $this->faker->paragraph(),
+            'parts_replaced' => $this->faker->optional()->words(3, true),
+            'technician_notes' => $this->faker->optional()->sentence(),
             'report_date' => today(),
         ];
     }

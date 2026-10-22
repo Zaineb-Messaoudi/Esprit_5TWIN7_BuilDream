@@ -28,7 +28,23 @@ app_port="$(sed -n 's/^APP_PORT=//p' "$deploy_dir/.env" | tail -n 1 | tr -d '\r"
 app_port="${app_port:-8000}"
 
 cp docker-compose.yml "$deploy_dir/docker-compose.yml"
-printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$username" --password-stdin
+retry_docker() {
+  local attempt=1
+  until "$@"; do
+    if [[ "$attempt" -ge 5 ]]; then
+      echo "Docker operation failed after $attempt attempts: $*" >&2
+      return 1
+    fi
+    echo "Docker Hub temporarily unavailable; retrying in 15 seconds ($attempt/5)..." >&2
+    sleep 15
+    attempt=$((attempt + 1))
+  done
+}
+
+docker_login() {
+  printf '%s' "$DOCKERHUB_TOKEN" | docker login --username "$username" --password-stdin
+}
+retry_docker docker_login
 
 image="docker.io/$username/solarshare:$image_tag"
 web_image="docker.io/$username/solarshare-nginx:$image_tag"
@@ -58,8 +74,8 @@ rollback() {
 }
 trap rollback EXIT
 
-docker pull "$image"
-docker pull "$web_image"
+retry_docker docker pull "$image"
+retry_docker docker pull "$web_image"
 export APP_IMAGE="$image"
 export WEB_IMAGE="$web_image"
 docker compose "${compose_args[@]}" up -d --remove-orphans

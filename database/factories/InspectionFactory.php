@@ -7,7 +7,6 @@ use App\Models\Inspection;
 use App\Models\Rental;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Schema;
-use function fake;
 
 /** @extends Factory<Inspection> */
 class InspectionFactory extends Factory
@@ -24,12 +23,12 @@ class InspectionFactory extends Factory
                 ? Rental::query()->where('equipment_id', $equipment->getKey())->inRandomOrder()->value('id')
                 : null,
             'inspection_checklist_id' => null,
-            'inspection_date' => fake()->dateTimeBetween('-3 months', 'now'),
-            'condition_before' => fake()->randomElement(['New', 'Good', 'Fair']),
-            'condition_after' => fake()->randomElement(['Good', 'Fair', 'Damaged']),
-            'damage_detected' => fake()->boolean(25),
+            'inspection_date' => $this->faker->dateTimeBetween('-3 months', 'now'),
+            'condition_before' => $this->faker->randomElement(['New', 'Good', 'Fair']),
+            'condition_after' => $this->faker->randomElement(['Good', 'Fair', 'Damaged']),
+            'damage_detected' => $this->faker->boolean(25),
             'checklist_results' => null,
-            'comments' => fake()->optional()->sentence(),
+            'comments' => $this->faker->optional()->sentence(),
         ];
     }
 }

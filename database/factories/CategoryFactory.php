@@ -4,7 +4,6 @@ namespace Database\Factories;
 
 use App\Models\Category;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use function fake;
 
 /** @extends Factory<Category> */
 class CategoryFactory extends Factory
@@ -14,8 +13,8 @@ class CategoryFactory extends Factory
     public function definition(): array
     {
         return [
-            'name' => fake()->unique()->words(2, true),
-            'description' => fake()->sentence(),
+            'name' => $this->faker->unique()->words(2, true),
+            'description' => $this->faker->sentence(),
             'status' => 'active',
         ];
     }

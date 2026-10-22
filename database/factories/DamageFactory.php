@@ -6,7 +6,6 @@ use App\Models\Damage;
 use App\Models\Inspection;
 use App\Models\InspectionChecklistItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
-use function fake;
 
 /** @extends Factory<Damage> */
 class DamageFactory extends Factory
@@ -21,9 +20,9 @@ class DamageFactory extends Factory
             'inspection_id' => $inspection->getKey(),
             'equipment_id' => $inspection->equipment_id,
             'inspection_checklist_item_id' => InspectionChecklistItem::factory(),
-            'severity' => fake()->randomElement(['minor', 'moderate', 'severe']),
-            'repair_cost' => fake()->randomFloat(2, 25, 1500),
-            'description' => fake()->sentence(),
+            'severity' => $this->faker->randomElement(['minor', 'moderate', 'severe']),
+            'repair_cost' => $this->faker->randomFloat(2, 25, 1500),
+            'description' => $this->faker->sentence(),
             'status' => 'reported',
         ];
     }
