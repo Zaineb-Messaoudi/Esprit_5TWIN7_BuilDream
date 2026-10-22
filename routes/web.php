@@ -172,12 +172,32 @@ Route::get('/two-factor', [AuthDemoController::class, 'show'])
 
 Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     Route::post('/equipment/{id}/favorite', [FrontController::class, 'toggleFavorite'])->name('front.equipment.favorite');
+    Route::get('/my/favorites', [FrontController::class, 'favorites'])->name('front.my-favorites');
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile/overview', function () {
         return view('pages.account.profile-overview', ['title' => 'Profile Overview']);
     })->name('profile.overview');
+});
+
+Route::middleware(['auth', 'verified', 'role.selected', 'can:admin-only'])->prefix('admin/operations')->name('admin.operations.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Admin\OperationsController::class, 'index'])->name('index');
+    Route::patch('/disputes/{dispute}', [\App\Http\Controllers\Admin\OperationsController::class, 'resolveDispute'])->name('disputes.resolve');
+    Route::post('/deliveries/auto-cancel', [\App\Http\Controllers\Admin\OperationsController::class, 'autoCancelDeliveries'])->name('deliveries.auto-cancel');
+});
+
+Route::middleware(['auth', 'verified', 'role.selected'])->prefix('my/reviews')->name('front.reviews.')->group(function () {
+    Route::get('/', [\App\Http\Controllers\Front\ReviewController::class, 'index'])->name('index');
+    Route::get('/{rental}/create', [\App\Http\Controllers\Front\ReviewController::class, 'create'])->name('create');
+    Route::post('/{rental}', [\App\Http\Controllers\Front\ReviewController::class, 'store'])->name('store');
+});
+
+Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
+    Route::get('/my/deliveries', [\App\Http\Controllers\Front\OperationsController::class, 'deliveries'])->name('front.deliveries');
+    Route::patch('/my/deliveries/{delivery}', [\App\Http\Controllers\Front\OperationsController::class, 'updateDelivery'])->name('front.deliveries.update');
+    Route::get('/my/rentals/{rental}/chat', [\App\Http\Controllers\Front\OperationsController::class, 'chat'])->name('front.rental-chat');
+    Route::post('/my/rentals/{rental}/chat', [\App\Http\Controllers\Front\OperationsController::class, 'sendMessage'])->name('front.rental-chat.send');
 });
 
 Route::middleware(['auth', 'verified', 'role.selected', 'can:buyer-only'])->group(function () {
@@ -336,8 +356,6 @@ Route::middleware(['auth', 'verified', 'role.selected'])->group(function () {
     Route::get('/ai', [AiDemoController::class, 'index'])->name('ai.index');
     Route::get('/ai/usage', [AiDemoController::class, 'usage'])->name('ai.usage');
     Route::get('/ai/text-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'text')->name('ai.text');
-    Route::get('/ai/image-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'image')->name('ai.image');
-    Route::get('/ai/video-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'video')->name('ai.video');
     Route::get('/ai/code-generator', [AiDemoController::class, 'tool'])->defaults('tool', 'code')->name('ai.code');
     Route::get('/ai/chat', [AiDemoController::class, 'tool'])->defaults('tool', 'chat')->name('ai.chat');
     Route::get('/ai/history', [AiDemoController::class, 'tool'])->defaults('tool', 'history')->name('ai.history');

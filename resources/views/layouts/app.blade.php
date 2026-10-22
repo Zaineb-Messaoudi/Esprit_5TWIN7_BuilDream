@@ -5,8 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="pusher-key" content="{{ env('PUSHER_APP_KEY') }}">
+    <meta name="pusher-key" content="{{ env('REVERB_APP_KEY') ?: env('PUSHER_APP_KEY') }}">
     <meta name="pusher-cluster" content="{{ env('PUSHER_APP_CLUSTER', 'mt1') }}">
+    <meta name="reverb-port" content="{{ env('REVERB_CLIENT_PORT', 8081) }}">
     <link rel="manifest" href="{{ asset('manifest.json') }}">
     <meta name="theme-color" content="#1F7A45">
     <meta name="apple-mobile-web-app-capable" content="yes">
@@ -19,6 +20,8 @@
     <link rel="icon" type="image/png" href="{{ asset('images/brand/solarshare-icon.png') }}">
 
     <title>{{ __($title ?? 'Dashboard') }} | SolarShare Admin</title>
+
+    @stack('head')
 
     <!-- Scripts -->
     @vite(['resources/css/app.css', 'resources/js/app.js'])

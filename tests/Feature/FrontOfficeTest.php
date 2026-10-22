@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Enums\UserRole;
 use App\Models\Equipment;
+use App\Models\Rental;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\UploadedFile;
@@ -473,6 +474,56 @@ class FrontOfficeTest extends TestCase
 
         $this->actingAs($buyer)->post(route('front.equipment.favorite', $equipment->id));
         $this->assertDatabaseMissing('user_equipment', ['user_id' => $buyer->id, 'equipment_id' => $equipment->id]);
+    }
+
+    public function test_buyer_can_browse_saved_favorites(): void
+    {
+        $buyer = User::factory()->create(['role' => UserRole::BUYER, 'role_setup_completed' => true]);
+        $equipment = Equipment::factory()->create([
+            'name' => 'Saved solar battery',
+            'approval_status' => 'published',
+        ]);
+        $buyer->favoriteEquipment()->attach($equipment->id);
+
+        $this->actingAs($buyer)
+            ->get(route('front.my-favorites'))
+            ->assertOk()
+            ->assertSee('Saved solar battery')
+            ->assertSee('My favorites');
+    }
+
+    public function test_completed_rental_participant_can_submit_a_review(): void
+    {
+        $owner = User::factory()->create(['role' => UserRole::OWNER, 'role_setup_completed' => true]);
+        $buyer = User::factory()->create(['role' => UserRole::BUYER, 'role_setup_completed' => true]);
+        $equipment = Equipment::factory()->create(['owner_id' => $owner->id]);
+        $rental = Rental::factory()->completed()->create([
+            'equipment_id' => $equipment->id,
+            'user_id' => $buyer->id,
+        ]);
+
+        $this->actingAs($buyer)
+            ->get(route('front.reviews.create', $rental))
+            ->assertOk()
+            ->assertSee('Leave a review');
+
+        $this->actingAs($buyer)
+            ->post(route('front.reviews.store', $rental), [
+                'overall' => 5,
+                'communication' => 5,
+                'reliability' => 4,
+                'condition' => 5,
+                'value' => 4,
+                'comment' => 'Smooth rental experience.',
+            ])
+            ->assertRedirect(route('front.reviews.index'));
+
+        $this->assertDatabaseHas('reviews', [
+            'rental_id' => $rental->id,
+            'reviewer_id' => $buyer->id,
+            'reviewee_id' => $owner->id,
+            'overall_rating' => 5,
+        ]);
     }
 
     public function test_equipment_technical_sheet_pdf_is_available(): void

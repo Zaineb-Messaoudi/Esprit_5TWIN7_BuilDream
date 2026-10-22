@@ -179,17 +179,14 @@ return [
         'timeout' => env('AI_STUDIO_TIMEOUT', env('MAINTENANCE_AI_TIMEOUT', 60)),
         'chat_timeout' => env('AI_STUDIO_CHAT_TIMEOUT', 12),
         'chat_fallback_timeout' => env('AI_STUDIO_CHAT_FALLBACK_TIMEOUT', 20),
-        'video_timeout' => env('AI_STUDIO_VIDEO_TIMEOUT', 240),
         // Maintenance and Studio share the Gemini text model by default.
         'text_model' => env('GEMINI_STUDIO_TEXT_MODEL', env('MAINTENANCE_AI_MODEL', env('GEMINI_MODEL', 'gemini-3.8-flash'))),
-        'image_model' => env('GEMINI_STUDIO_IMAGE_MODEL', 'gemini-3.1-flash-image'),
         'chat_model' => env('GEMINI_STUDIO_CHAT_MODEL', env('MAINTENANCE_AI_MODEL', env('GEMINI_MODEL', 'gemini-3.8-flash'))),
-        'video_model' => env('GEMINI_STUDIO_VIDEO_MODEL', 'gemini-omni-1.1-flash'),
     ],
 
     /*
     |--------------------------------------------------------------------------
-    | Gemini / Groq / Cloudflare (used by the parser and AI Studio)
+    | Gemini / Groq (used by the parser and AI Studio)
     |--------------------------------------------------------------------------
     */
     'gemini' => [
@@ -204,10 +201,4 @@ return [
         'base_url' => env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
     ],
 
-    'cloudflare' => [
-        'account_id' => env('CLOUDFLARE_ACCOUNT_ID'),
-        'api_token' => env('CLOUDFLARE_API_TOKEN'),
-        'image_model' => env('CLOUDFLARE_AI_IMAGE_MODEL', '@cf/black-forest-labs/flux-1-schnell'),
-        'base_url' => 'https://api.cloudflare.com/client/v4/accounts',
-    ],
 ];

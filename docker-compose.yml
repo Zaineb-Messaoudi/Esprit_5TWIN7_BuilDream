@@ -80,7 +80,7 @@ services:
       QUEUE_CONNECTION: redis
       SCOUT_DRIVER: meilisearch
       MEILISEARCH_HOST: http://meilisearch:7700
-    command: php artisan queue:work --sleep=1 --tries=3 --timeout=120
+    command: php artisan queue:work --queue=ai:high,ai:default,ai:low,default --sleep=1 --tries=3 --timeout=180
     healthcheck:
       disable: true
     depends_on:

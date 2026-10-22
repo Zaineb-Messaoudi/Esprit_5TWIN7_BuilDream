@@ -52,6 +52,15 @@
                     const longitudeInput = root.querySelector('[data-longitude-input]');
                     const searchButton = root.querySelector('[data-location-search]');
                     const status = root.querySelector('[data-location-status]');
+                    // Some forms keep the address input outside this component.
+                    // Move the map action into that input's wrapper so both layouts
+                    // have the same compact, discoverable control.
+                    if (locationInput && searchButton && !root.contains(locationInput)) {
+                        const inputWrapper = locationInput.parentElement;
+                        inputWrapper?.classList.add('relative');
+                        searchButton.className = 'location-picker-external-button absolute end-2 z-1 flex size-9 -translate-y-1/2 items-center justify-center rounded-lg text-brand-700 transition hover:bg-brand-50 focus:outline-hidden focus:ring-2 focus:ring-brand-500/30 dark:text-brand-300 dark:hover:bg-brand-500/10';
+                        inputWrapper?.appendChild(searchButton);
+                    }
                     const initialLat = Number(latitudeInput.value) || 36.8065;
                     const initialLng = Number(longitudeInput.value) || 10.1815;
                     const map = L.map(mapElement, { scrollWheelZoom: false }).setView([initialLat, initialLng], latitudeInput.value && longitudeInput.value ? 13 : 7);
@@ -95,11 +104,19 @@
 
 <div data-location-picker data-location-input-id="{{ $locationId }}" class="space-y-3">
     <div class="flex flex-wrap items-end gap-2">
-        @if($showInput)<div class="min-w-0 flex-1">
+        @if($showInput)<div class="relative min-w-0 flex-1">
             <label for="{{ $locationId }}" class="mb-1.5 block text-theme-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Location') }}</label>
-            <input id="{{ $locationId }}" name="{{ $locationName }}" value="{{ old($locationName, $location) }}" required data-location-input autocomplete="street-address" class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 text-theme-sm text-gray-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+            <input id="{{ $locationId }}" name="{{ $locationName }}" value="{{ old($locationName, $location) }}" required data-location-input autocomplete="street-address" class="min-h-11 w-full rounded-lg border border-gray-300 bg-white px-3 pe-12 text-theme-sm text-gray-800 focus:border-brand-500 focus:outline-none focus:ring-2 focus:ring-brand-500/30 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+            <button type="button" data-location-search aria-label="{{ __('Find on map') }}" class="absolute end-2 bottom-1 flex size-9 items-center justify-center rounded-lg text-brand-700 transition hover:bg-brand-50 focus:outline-hidden focus:ring-2 focus:ring-brand-500/30 dark:text-brand-300 dark:hover:bg-brand-500/10">
+                <svg aria-hidden="true" class="size-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.2"/></svg>
+            </button>
         </div>@endif
-        <button type="button" data-location-search class="min-h-11 rounded-lg border border-brand-300 px-4 text-theme-sm font-semibold text-brand-700 hover:bg-brand-50 dark:border-brand-500/40 dark:text-brand-300 dark:hover:bg-brand-500/10">{{ __('Find on map') }}</button>
+        @unless($showInput)
+            <button type="button" data-location-search aria-label="{{ __('Find on map') }}" class="min-h-11 rounded-lg border border-brand-300 px-4 text-theme-sm font-semibold text-brand-700 hover:bg-brand-50 dark:border-brand-500/40 dark:text-brand-300 dark:hover:bg-brand-500/10">
+                <svg aria-hidden="true" class="inline-block size-5 align-middle" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M12 21s7-5.2 7-11a7 7 0 1 0-14 0c0 5.8 7 11 7 11Z"/><circle cx="12" cy="10" r="2.2"/></svg>
+                <span class="sr-only">{{ __('Find on map') }}</span>
+            </button>
+        @endunless
     </div>
     <input type="hidden" name="{{ $latitudeName }}" value="{{ old($latitudeName, $latitude) }}" data-latitude-input>
     <input type="hidden" name="{{ $longitudeName }}" value="{{ old($longitudeName, $longitude) }}" data-longitude-input>

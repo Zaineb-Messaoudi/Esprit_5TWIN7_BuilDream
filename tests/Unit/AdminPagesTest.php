@@ -58,8 +58,6 @@ class AdminPagesTest extends TestCase
             'ai.index',
             'ai.usage',
             'ai.text',
-            'ai.image',
-            'ai.video',
             'ai.code',
             'ai.chat',
             'ai.history',

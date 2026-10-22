@@ -5,8 +5,9 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
     <meta name="csrf-token" content="{{ csrf_token() }}">
-    <meta name="pusher-key" content="{{ env('PUSHER_APP_KEY') }}">
+    <meta name="pusher-key" content="{{ env('REVERB_APP_KEY') ?: env('PUSHER_APP_KEY') }}">
     <meta name="pusher-cluster" content="{{ env('PUSHER_APP_CLUSTER', 'mt1') }}">
+    <meta name="reverb-port" content="{{ env('REVERB_CLIENT_PORT', 8081) }}">
     @if(auth()->check())
         <meta name="user-id" content="{{ auth()->id() }}">
     @endif

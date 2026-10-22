@@ -5,7 +5,6 @@ use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\User;
 use Illuminate\Support\Facades\Http;
-use Illuminate\Support\Facades\Storage;
 
 function aiStudioUser(): User
 {
@@ -50,101 +49,6 @@ it('generates text and code with Gemini and records usage privately', function (
     $this->actingAs($user)->postJson(route('ai.generate'), [
         'tool' => 'code', 'prompt' => 'Create a safe input validator.',
     ])->assertOk()->assertJsonPath('text', 'Generated safely.');
-});
-
-it('generates images and serves their private media only to the owner', function () {
-    configureGeminiStudioForTest();
-    Storage::fake('local');
-    Http::fake(['*' => Http::response([
-        'candidates' => [['content' => ['parts' => [
-            ['text' => 'Image ready.'],
-            ['inlineData' => ['mimeType' => 'image/png', 'data' => base64_encode('fake image bytes')]],
-        ]]]],
-    ], 200)]);
-    $owner = aiStudioUser();
-
-    $response = $this->actingAs($owner)->postJson(route('ai.generate'), [
-        'tool' => 'image', 'prompt' => 'A simple solar panel icon.',
-    ]);
-
-    $response->assertOk()->assertJsonPath('text', 'Image ready.');
-    $mediaUrl = $response->json('media_url');
-    $this->get($mediaUrl)->assertOk()->assertHeader('content-type', 'image/png');
-    expect(Storage::disk('local')->allFiles('ai-generations/'.$owner->id))->toHaveCount(1);
-
-    $otherUser = aiStudioUser();
-    $this->actingAs($otherUser)->get($mediaUrl)->assertNotFound();
-});
-
-it('uses Cloudflare Workers AI for image generation when its credentials are configured', function () {
-    config([
-        'ai.provider' => 'groq',
-        'ai.studio.enabled' => true,
-        'ai.cloudflare.account_id' => 'test-account',
-        'ai.cloudflare.api_token' => 'test-cloudflare-token',
-        'ai.cloudflare.image_model' => '@cf/black-forest-labs/flux-1-schnell',
-        'ai.gemini.key' => null,
-    ]);
-    Storage::fake('local');
-    Http::fake(['api.cloudflare.com/*' => Http::response([
-        'result' => ['image' => base64_encode('fake cloudflare image')],
-        'success' => true,
-    ], 200, ['Content-Type' => 'application/json'])]);
-    $user = aiStudioUser();
-
-    $response = $this->actingAs($user)->postJson(route('ai.generate'), [
-        'tool' => 'image', 'prompt' => 'A sunny solar panel on a Tunisian rooftop.',
-    ]);
-
-    $response->assertOk()->assertJsonPath('model', '@cf/black-forest-labs/flux-1-schnell');
-    $this->get($response->json('media_url'))->assertOk()->assertHeader('content-type', 'image/jpeg');
-    Http::assertSent(fn ($request) => str_contains($request->url(), '/ai/run/@cf/black-forest-labs/flux-1-schnell')
-        && $request->hasHeader('Authorization', 'Bearer test-cloudflare-token')
-        && data_get($request->data(), 'prompt') === 'A sunny solar panel on a Tunisian rooftop.');
-    $this->assertDatabaseHas('ai_generations', [
-        'user_id' => $user->id, 'tool' => 'image', 'status' => 'succeeded',
-        'model' => '@cf/black-forest-labs/flux-1-schnell',
-    ]);
-});
-
-it('does not fall back to Gemini when the Cloudflare free image quota is exhausted', function () {
-    config([
-        'ai.provider' => 'groq',
-        'ai.studio.enabled' => true,
-        'ai.cloudflare.account_id' => 'test-account',
-        'ai.cloudflare.api_token' => 'test-cloudflare-token',
-        'ai.gemini.key' => 'test-gemini-key',
-    ]);
-    Http::fake(['api.cloudflare.com/*' => Http::response(['errors' => [['message' => 'Quota exceeded']]], 429)]);
-    $user = aiStudioUser();
-
-    $this->actingAs($user)->postJson(route('ai.generate'), [
-        'tool' => 'image', 'prompt' => 'A small solar battery.',
-    ])->assertUnprocessable()->assertJsonPath('message', __('The free Cloudflare image-generation limit was reached. Try again after the daily reset.'));
-
-    Http::assertSentCount(1);
-    $this->assertDatabaseHas('ai_generations', [
-        'user_id' => $user->id, 'tool' => 'image', 'status' => 'failed',
-    ]);
-});
-
-it('generates videos through Gemini interactions and stores the private video', function () {
-    configureGeminiStudioForTest();
-    Storage::fake('local');
-    Http::fake(['*' => Http::response([
-        'steps' => [['type' => 'model_output', 'content' => [[
-            'type' => 'video', 'mime_type' => 'video/mp4', 'data' => base64_encode('fake video bytes'),
-        ]]]],
-    ], 200)]);
-    $user = aiStudioUser();
-
-    $response = $this->actingAs($user)->postJson(route('ai.generate'), [
-        'tool' => 'video', 'prompt' => 'A short sunrise over a solar farm.',
-    ]);
-
-    $response->assertOk()->assertJsonPath('text', 'Video generated successfully.');
-    $this->get($response->json('media_url'))->assertOk()->assertHeader('content-type', 'video/mp4');
-    expect(Storage::disk('local')->allFiles('ai-generations/'.$user->id))->toHaveCount(1);
 });
 
 it('keeps multi-turn chat context and saves user preferences', function () {

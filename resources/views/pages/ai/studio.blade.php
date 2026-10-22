@@ -1,6 +1,7 @@
 @extends(auth()->user()->isAdmin() ? 'layouts.app' : 'layouts.front')
 
 @section('content')
+    @php($toolAvailable = in_array($tool['kind'], ['settings', 'history'], true) || ($capabilities[$tool['kind']] ?? false))
     <div class="space-y-6" x-data="{
         kind: @js($tool['kind']),
         prompt: @js($initialPrompt ?? ''),
@@ -51,10 +52,10 @@
                 <h1 class="mt-1 text-title-md font-semibold text-gray-800 dark:text-white/90">{{ __($tool['title']) }}</h1>
                 <p class="mt-1 text-sm text-gray-500 dark:text-gray-400">{{ __($tool['description']) }}</p>
             </div>
-            @if ($configured)
-                <x-ui.badge variant="light" color="success">{{ __('AI provider connected') }}</x-ui.badge>
+            @if ($toolAvailable)
+                <x-ui.badge variant="light" color="success">{{ __(':provider ready', ['provider' => $capabilities['providers'][$tool['kind']] ?? __('AI provider')]) }}</x-ui.badge>
             @else
-                <x-ui.badge variant="light" color="error">{{ __('Provider unavailable') }}</x-ui.badge>
+                <x-ui.badge variant="light" color="warning">{{ __('This tool is unavailable') }}</x-ui.badge>
             @endif
         </div>
 
@@ -92,7 +93,7 @@
                             <label for="ai-temperature" class="block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Temperature') }}
                                 <input id="ai-temperature" name="temperature" type="number" min="0" max="1" step="0.1" value="{{ old('temperature', $settings['temperature']) }}" class="mt-2 w-full rounded-lg border border-gray-300 bg-white px-3 py-2.5 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white" />
                             </label>
-                            <p class="rounded-lg bg-warning-50 px-3 py-2.5 text-xs leading-5 text-warning-700 dark:bg-warning-500/10 dark:text-warning-300">{{ __('Your text prompts are sent to Groq for processing and saved in your account history. Do not submit passwords or payment details. Image generation can use Cloudflare Workers AI; video generation requires Gemini.') }}</p>
+                            <p class="rounded-lg bg-warning-50 px-3 py-2.5 text-xs leading-5 text-warning-700 dark:bg-warning-500/10 dark:text-warning-300">{{ __('Text, code, and chat use the configured provider. Requests are saved in your private generation history.') }}</p>
                             <button type="submit" class="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600">{{ __('Save preferences') }}</button>
                             @if (session('status') === 'ai-settings-saved')<p role="status" class="text-sm text-success-600 dark:text-success-400">{{ __('AI preferences saved.') }}</p>@endif
                             @if ($errors->any())<p role="alert" class="text-sm text-error-600">{{ $errors->first() }}</p>@endif
@@ -118,8 +119,7 @@
                                         </div>
                                         @if ($generation->result_text)<p class="mt-3 whitespace-pre-wrap text-sm text-gray-600 dark:text-gray-300">{{ Str::limit($generation->result_text, 1200) }}</p>@endif
                                         @if ($generation->media_path)
-                                            @if (str_starts_with((string) $generation->media_mime_type, 'image/'))<img src="{{ route('ai.generations.media', $generation) }}" alt="{{ __('AI generated result') }}" class="mt-4 max-h-96 rounded-lg" loading="lazy" />
-                                            @else<a href="{{ route('ai.generations.media', $generation) }}" class="mt-3 inline-flex text-sm font-medium text-brand-600 hover:underline dark:text-brand-300" download>{{ __('Download generated video') }}</a>@endif
+                                            <a href="{{ route('ai.generations.media', $generation) }}" class="mt-3 inline-flex text-sm font-medium text-brand-600 hover:underline dark:text-brand-300" download>{{ __('Download saved result') }}</a>
                                         @endif
                                         @if ($generation->error_message)<p class="mt-3 text-sm text-error-600">{{ $generation->error_message }}</p>@endif
                                         <form method="POST" action="{{ route('ai.generations.destroy', $generation) }}" class="mt-3">@csrf @method('DELETE')<button type="submit" class="text-xs font-medium text-gray-500 hover:text-error-600">{{ __('Delete record') }}</button></form>
@@ -129,7 +129,7 @@
                         @endif
                     </x-common.component-card>
                 @elseif ($tool['kind'] === 'chat')
-                    <x-common.component-card :title="__('SolarShare AI chat')" :desc="__('Messages are sent to Groq and saved in your generation history.')">
+                    <x-common.component-card :title="__('SolarShare AI chat')" :desc="__('Messages are sent to the configured text provider and saved in your generation history.')">
                         <div class="flex min-h-[440px] flex-col">
                             <div class="flex-1 space-y-4 overflow-y-auto p-1" aria-live="polite">
                                 <template x-for="(message, index) in messages" :key="index">
@@ -145,12 +145,15 @@
                     </x-common.component-card>
                 @else
                     <x-common.component-card :title="__($tool['title'])" :desc="__('Your prompt is sent to the configured AI provider. Results are saved privately in your account history.')">
+                        @if (! $toolAvailable)
+                            <div class="mb-5 rounded-lg border border-warning-200 bg-warning-50 px-4 py-3 text-sm text-warning-800 dark:border-warning-500/30 dark:bg-warning-500/10 dark:text-warning-200" role="status">{{ __('This AI capability is not configured on the server.') }}</div>
+                        @endif
                         <form @submit.prevent="submit()" class="space-y-5">
                             <label class="block text-sm font-medium text-gray-700 dark:text-gray-300" for="ai-prompt">{{ __('Describe what you need') }}
                                 <textarea id="ai-prompt" x-model="prompt" rows="5" maxlength="1200" required placeholder="{{ __('Enter a detailed prompt...') }}" class="mt-2 w-full resize-y rounded-lg border border-gray-300 bg-white px-4 py-3 text-sm text-gray-800 placeholder:text-gray-400 focus:border-brand-300 focus:outline-hidden focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white"></textarea>
                             </label>
                             <div class="flex flex-wrap items-center gap-3 border-t border-gray-100 pt-5 dark:border-gray-800">
-                                <button type="submit" :disabled="loading || !prompt.trim()" class="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"><span x-text="loading ? @js(__('Generating...')) : @js(__('Generate'))"></span></button>
+                                <button type="submit" @disabled(! $toolAvailable) :disabled="loading || !prompt.trim()" class="rounded-lg bg-brand-500 px-4 py-2.5 text-sm font-medium text-white hover:bg-brand-600 disabled:cursor-not-allowed disabled:opacity-50"><span x-text="loading ? @js(__('Generating...')) : @js(__('Generate'))"></span></button>
                                 <span class="text-xs text-gray-400"><span x-text="prompt.length"></span>/1200 {{ __('characters') }}</span>
                             </div>
                         </form>
@@ -161,8 +164,6 @@
                 <div x-show="result || mediaUrl" x-cloak class="space-y-4" aria-live="polite">
                     <x-common.component-card :title="__('Generated result')">
                         <p x-show="result" class="whitespace-pre-wrap text-sm leading-7 text-gray-700 dark:text-gray-300" x-text="result"></p>
-                        <img x-show="mediaUrl && kind === 'image'" :src="mediaUrl" alt="{{ __('AI generated result') }}" class="mt-4 max-h-[600px] rounded-lg" />
-                        <video x-show="mediaUrl && kind === 'video'" :src="mediaUrl" controls class="mt-4 max-h-[600px] w-full rounded-lg"></video>
                         <a x-show="mediaUrl" :href="mediaUrl" download class="mt-4 inline-flex text-sm font-medium text-brand-600 hover:underline dark:text-brand-300">{{ __('Download result') }}</a>
                     </x-common.component-card>
                     <p class="text-xs text-gray-500"><a href="{{ route('ai.history') }}" class="font-medium text-brand-600 hover:underline dark:text-brand-300">{{ __('Open generation history') }}</a></p>

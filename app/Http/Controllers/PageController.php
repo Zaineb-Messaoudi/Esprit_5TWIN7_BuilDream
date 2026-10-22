@@ -10,6 +10,7 @@ use App\Models\Rental;
 use App\Models\RentalContract;
 use App\Models\RentalExtension;
 use App\Models\Reservation;
+use App\Models\Review;
 use App\Support\FrontDemo;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Contracts\View\View;
@@ -52,6 +53,8 @@ class PageController extends Controller
 
         return view('pages.front.live-record-detail', [
             'title' => __('Rental details'), 'record' => $rental, 'recordType' => 'rental', 'owner' => false,
+            'canReview' => $rental->status->value === 'completed'
+                && ! Review::where('rental_id', $rental->id)->where('reviewer_id', $request->user()->id)->exists(),
         ]);
     }
 
@@ -62,6 +65,8 @@ class PageController extends Controller
 
         return view('pages.front.live-record-detail', [
             'title' => __('Rental details'), 'record' => $rental, 'recordType' => 'rental', 'owner' => true,
+            'canReview' => $rental->status->value === 'completed'
+                && ! Review::where('rental_id', $rental->id)->where('reviewer_id', $request->user()->id)->exists(),
         ]);
     }
 

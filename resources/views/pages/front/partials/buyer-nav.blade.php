@@ -5,6 +5,10 @@
         ['label' => __('Rentals'), 'route' => 'front.my-rentals', 'active' => request()->routeIs('front.my-rentals', 'front.buyer-rental-detail', 'front.my-contract')],
         ['label' => __('Extensions'), 'route' => 'front.my-extensions', 'active' => request()->routeIs('front.my-extensions')],
         ['label' => __('Payments & invoices'), 'route' => 'front.my-payments', 'active' => request()->routeIs('front.my-payments')],
+        ['label' => __('Favorites'), 'route' => 'front.my-favorites', 'active' => request()->routeIs('front.my-favorites')],
+        ['label' => __('Reviews'), 'route' => 'front.reviews.index', 'active' => request()->routeIs('front.reviews.*')],
+        ['label' => __('Deliveries'), 'route' => 'front.deliveries', 'active' => request()->routeIs('front.deliveries*')],
+        ['label' => __('Chat'), 'route' => 'front.my-rentals', 'active' => request()->routeIs('front.rental-chat*')],
         ['label' => __('Notifications'), 'route' => 'front.my-notifications', 'active' => request()->routeIs('front.my-notifications')],
         ['label' => __('Profile'), 'route' => 'profile.edit', 'active' => request()->routeIs('profile.edit')],
     ];

@@ -26,6 +26,7 @@ Alpine.data('technicalInspectionForm', (config) => ({
         this.recognition.onresult = (event) => {
             const text = Array.from(event.results).slice(event.resultIndex).map((result) => result[0].transcript).join(' ');
             const field = document.getElementById('comments');
+            if (!field) return;
             field.value = [field.value, text].filter(Boolean).join(' ').trim();
         };
         this.recognition.onend = () => { this.listening = false; };
@@ -44,8 +45,10 @@ Alpine.data('technicalInspectionForm', (config) => ({
             const response = await fetch(this.analyzeUrl, { method: 'POST', headers: { 'X-CSRF-TOKEN': this.csrf, Accept: 'application/json' }, body });
             const data = await response.json();
             if (!response.ok) throw new Error(data.message);
-            document.getElementById('damage_detected').checked = data.damage_detected;
-            document.getElementById('comments').value = data.comments;
+            const damageField = document.getElementById('damage_detected');
+            const commentsField = document.getElementById('comments');
+            if (damageField) damageField.checked = data.damage_detected;
+            if (commentsField) commentsField.value = data.comments;
             this.estimateSeverity = data.severity;
             this.analysisResult = data;
             this.aiMessage = this.prefilledMessage;
@@ -361,6 +364,23 @@ async function startAlpine() {
                     if (paired && datestr) paired._flatpickr?.set('minDate', datestr);
                 },
             });
+
+            if (!input.closest('[data-calendar-control]')) {
+                const wrapper = document.createElement('div');
+                wrapper.dataset.calendarControl = 'true';
+                wrapper.className = 'relative w-full';
+                input.parentNode.insertBefore(wrapper, input);
+                wrapper.appendChild(input);
+                input.classList.add('pe-11', 'cursor-pointer');
+
+                const button = document.createElement('button');
+                button.type = 'button';
+                button.className = 'date-picker-trigger';
+                button.setAttribute('aria-label', 'Open calendar');
+                button.innerHTML = '<svg aria-hidden="true" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8"><path stroke-linecap="round" stroke-linejoin="round" d="M7 3v3m10-3v3M4.75 9.25h14.5M6 5h12a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2Z"/></svg>';
+                button.addEventListener('click', () => input._flatpickr?.open());
+                wrapper.appendChild(button);
+            }
         });
     }
 
