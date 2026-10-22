@@ -167,6 +167,15 @@ jobs:
           QUEUE_CONNECTION=sync
           SCOUT_DRIVER=null
           BROADCAST_CONNECTION=log
+          REVERB_APP_ID=staging
+          REVERB_APP_KEY=staging-key
+          REVERB_APP_SECRET=staging-secret
+          REVERB_HOST=localhost
+          REVERB_SCHEME=http
+          VITE_REVERB_APP_KEY=staging-key
+          VITE_REVERB_HOST=localhost
+          VITE_REVERB_PORT=18081
+          VITE_REVERB_SCHEME=http
           EOF
 
           printf 'APP_KEY=%s\n' "$staging_app_key" >> .env
@@ -192,6 +201,11 @@ jobs:
 
       - name: Run Laravel bootstrap (migrations, cache)
         run: |
+          docker compose -p solarshare-staging exec -T app php artisan config:clear
+          docker compose -p solarshare-staging exec -T app php artisan route:clear
+          docker compose -p solarshare-staging exec -T app php artisan view:clear
+          docker compose -p solarshare-staging restart app
+          sleep 5
           docker compose -p solarshare-staging exec -T app php artisan migrate --force
           docker compose -p solarshare-staging exec -T app php artisan config:cache
           docker compose -p solarshare-staging exec -T app php artisan route:cache
