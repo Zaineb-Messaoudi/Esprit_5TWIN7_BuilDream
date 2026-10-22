@@ -175,6 +175,14 @@ jobs:
           WEB_IMAGE: ${{ steps.docker-image.outputs.web-image }}
         run: docker compose -p solarshare-staging up -d --no-build --remove-orphans
 
+      - name: Run Laravel bootstrap (migrations, cache)
+        run: |
+          docker compose -p solarshare-staging exec -T app php artisan migrate --force
+          docker compose -p solarshare-staging exec -T app php artisan config:cache
+          docker compose -p solarshare-staging exec -T app php artisan route:cache
+          docker compose -p solarshare-staging exec -T app php artisan view:cache
+          docker compose -p solarshare-staging exec -T app php artisan storage:link
+
       - name: Wait for staging health endpoint
         run: curl --fail --retry 30 --retry-delay 5 http://127.0.0.1:18000/up
 
