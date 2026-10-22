@@ -149,7 +149,10 @@ jobs:
 
           cat > .env <<'EOF'
           APP_ENV=testing
-          APP_DEBUG=false
+          # This stack exists only inside the GitHub runner and is destroyed
+          # after the smoke test. Keep debug enabled so failed boot requests
+          # expose the exception in CI diagnostics; production stays disabled.
+          APP_DEBUG=true
           APP_URL=http://127.0.0.1:18000
           APP_PORT=18000
           DB_DATABASE=SolarShare
