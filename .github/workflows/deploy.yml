@@ -149,9 +149,6 @@ jobs:
 
           cat > .env <<'EOF'
           APP_ENV=testing
-          # This stack exists only inside the GitHub runner and is destroyed
-          # after the smoke test. Keep debug enabled so failed boot requests
-          # expose the exception in CI diagnostics; production stays disabled.
           APP_DEBUG=true
           APP_URL=http://127.0.0.1:18000
           APP_PORT=18000
@@ -165,6 +162,11 @@ jobs:
           FORWARD_MAILPIT_DASHBOARD_PORT=18025
           REVERB_PORT=18081
           MEILISEARCH_KEY=staging-master-key
+          CACHE_STORE=array
+          SESSION_DRIVER=array
+          QUEUE_CONNECTION=sync
+          SCOUT_DRIVER=null
+          BROADCAST_CONNECTION=log
           EOF
 
           printf 'APP_KEY=%s\n' "$staging_app_key" >> .env
@@ -174,6 +176,19 @@ jobs:
           APP_IMAGE: ${{ steps.docker-image.outputs.image }}
           WEB_IMAGE: ${{ steps.docker-image.outputs.web-image }}
         run: docker compose -p solarshare-staging up -d --no-build --remove-orphans
+
+      - name: Wait for MySQL to be ready
+        env:
+          DB_PASSWORD: solarshare
+        run: |
+          for i in {1..30}; do
+            if docker compose -p solarshare-staging exec -T mysql mysqladmin ping -h 127.0.0.1 -uroot -p"${DB_PASSWORD}" --silent 2>/dev/null; then
+              echo "MySQL is ready"
+              break
+            fi
+            echo "Waiting for MySQL... ($i/30)"
+            sleep 2
+          done
 
       - name: Run Laravel bootstrap (migrations, cache)
         run: |
