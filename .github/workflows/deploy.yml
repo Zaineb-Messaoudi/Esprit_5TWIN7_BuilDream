@@ -145,10 +145,11 @@ jobs:
 
       - name: Create isolated staging environment
         run: |
+          staging_app_key="base64:$(openssl rand -base64 32 | tr -d '\n')"
+
           cat > .env <<'EOF'
           APP_ENV=testing
           APP_DEBUG=false
-          APP_KEY=base64:SGVsbG9Tb2xhclNoYXJlU3RhZ2luZ0tleQ==
           APP_URL=http://127.0.0.1:18000
           APP_PORT=18000
           DB_DATABASE=SolarShare
@@ -162,6 +163,8 @@ jobs:
           REVERB_PORT=18081
           MEILISEARCH_KEY=staging-master-key
           EOF
+
+          printf 'APP_KEY=%s\n' "$staging_app_key" >> .env
 
       - name: Start staging stack from the published image
         env:
