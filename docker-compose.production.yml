@@ -30,11 +30,9 @@ services:
       MEILISEARCH_HOST: http://meilisearch:7700
     expose:
       - "9000"
-    command: >
-      sh -c "php artisan migrate --force &&
-             php artisan db:seed --force &&
-             php artisan storage:link &&
-             php-fpm -F"
+    # Migrations and seeding are run once by scripts/deploy/local-compose.sh
+    # after this service is healthy. Keep the app process alive first.
+    command: php-fpm -F
     volumes:
       - solarshare-storage:/var/www/html/storage/app/private
       - solarshare-public-storage:/var/www/html/storage/app/public
@@ -81,7 +79,7 @@ services:
       QUEUE_CONNECTION: redis
       SCOUT_DRIVER: meilisearch
       MEILISEARCH_HOST: http://meilisearch:7700
-    command: php artisan queue:work --sleep=1 --tries=3 --timeout=120
+    command: php artisan queue:work --queue=ai:high,ai:default,ai:low,default --sleep=1 --tries=3 --timeout=180
     healthcheck:
       disable: true
     depends_on:
