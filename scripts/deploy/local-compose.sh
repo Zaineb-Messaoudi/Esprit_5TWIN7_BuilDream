@@ -100,7 +100,7 @@ docker compose "${compose_args[@]}" exec -T mysql mysql -h 127.0.0.1 -uroot -p"$
 
 # Run migrations and seed (skip backup for now due to SQLite config issue)
 docker compose "${compose_args[@]}" exec -T app php artisan migrate --force
-docker compose "${compose_args[@]}" exec -T app php artisan db:seed --force
+docker compose "${compose_args[@]}" exec -T app php -d memory_limit=512M artisan db:seed --force
 docker compose "${compose_args[@]}" ps
 curl --fail --retry 10 --retry-delay 3 "http://127.0.0.1:$app_port/up"
 trap - EXIT
