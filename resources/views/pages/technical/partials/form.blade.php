@@ -97,19 +97,19 @@
                 <dl class="mt-3 grid gap-3 sm:grid-cols-2">
                     <div>
                         <dt class="text-gray-600 dark:text-gray-300" x-text="detectedDamageLabel"></dt>
-                        <dd class="mt-1 font-medium" x-text="analysisResult.damage_detected ? detectedDamageLabel : noDamageLabel"></dd>
+                        <dd class="mt-1 font-medium" x-text="analysisResult?.damage_detected ? detectedDamageLabel : noDamageLabel"></dd>
                     </div>
                     <div>
                         <dt class="text-gray-600 dark:text-gray-300" x-text="estimatedSeverityLabel"></dt>
-                        <dd class="mt-1 font-medium" x-text="severityLabel(analysisResult.severity)"></dd>
+                        <dd class="mt-1 font-medium" x-text="severityLabel(analysisResult?.severity || '')"></dd>
                     </div>
                     <div>
                         <dt class="text-gray-600 dark:text-gray-300" x-text="estimatedDurationLabel"></dt>
-                        <dd class="mt-1 font-medium" x-text="formatRepairHours(analysisResult.repair_hours)"></dd>
+                        <dd class="mt-1 font-medium" x-text="formatRepairHours(analysisResult?.repair_hours)"></dd>
                     </div>
                     <div class="sm:col-span-2">
                         <dt class="text-gray-600 dark:text-gray-300" x-text="descriptionLabel"></dt>
-                        <dd class="mt-1 font-medium" x-text="analysisResult.comments"></dd>
+                        <dd class="mt-1 font-medium" x-text="analysisResult?.comments || ''"></dd>
                     </div>
                 </dl>
             </div>

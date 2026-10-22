@@ -329,4 +329,18 @@ class FrontController extends Controller
 
         return back()->with('status', __('Favorite list updated.'));
     }
+
+    public function favorites(Request $request): View
+    {
+        $favorites = $request->user()->favoriteEquipment()
+            ->with(['category', 'energyProfile', 'owner'])
+            ->where('approval_status', 'published')
+            ->latest('user_equipment.created_at')
+            ->paginate(12);
+
+        return view('pages.front.favorites', [
+            'title' => __('My favorites'),
+            'favorites' => $favorites,
+        ]);
+    }
 }

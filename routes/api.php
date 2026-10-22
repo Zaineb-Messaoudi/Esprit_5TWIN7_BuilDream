@@ -52,7 +52,12 @@ Route::get('/health', function () {
     }
 
     try {
-        \Illuminate\Support\Facades\Queue::size('default');
+        $queueNames = ['ai:high', 'ai:default', 'ai:low', 'default'];
+        $queueSizes = collect($queueNames)->mapWithKeys(fn (string $queue): array => [
+            $queue => \Illuminate\Support\Facades\Queue::size($queue),
+        ])->all();
+        $checks['queue_sizes'] = $queueSizes;
+        $checks['queue_pending'] = array_sum($queueSizes);
     } catch (\Throwable) {
         $checks['queue'] = 'failed';
     }

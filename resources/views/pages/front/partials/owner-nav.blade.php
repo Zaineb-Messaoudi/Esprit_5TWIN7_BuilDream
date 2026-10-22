@@ -10,6 +10,9 @@
         ['label' => __('Maintenance'), 'route' => 'front.my-maintenance', 'active' => request()->routeIs('front.my-maintenance', 'front.my-inspections')],
         ['label' => __('Inspections'), 'route' => 'front.my-inspections', 'active' => request()->routeIs('front.my-inspections')],
         ['label' => __('Earnings'), 'route' => 'front.my-earnings', 'active' => request()->routeIs('front.my-earnings')],
+        ['label' => __('Reviews'), 'route' => 'front.reviews.index', 'active' => request()->routeIs('front.reviews.*')],
+        ['label' => __('Deliveries'), 'route' => 'front.deliveries', 'active' => request()->routeIs('front.deliveries*')],
+        ['label' => __('Chat'), 'route' => 'front.my-rentals', 'active' => request()->routeIs('front.rental-chat*')],
         ['label' => __('Notifications'), 'route' => 'front.my-notifications', 'active' => request()->routeIs('front.my-notifications')],
         ['label' => __('Profile'), 'route' => 'profile.edit', 'active' => request()->routeIs('profile.edit')],
     ];

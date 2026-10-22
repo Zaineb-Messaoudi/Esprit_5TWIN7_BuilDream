@@ -25,16 +25,6 @@ class AiDemoController extends Controller
             'description' => 'Generate finished writing for product listings, messages, and campaign content.',
             'kind' => 'text',
         ],
-        'image' => [
-            'title' => 'Image generator',
-            'description' => 'Generate an original image from a detailed description.',
-            'kind' => 'image',
-        ],
-        'video' => [
-            'title' => 'Video generator',
-            'description' => 'Generate a short video from a scene or storyboard description.',
-            'kind' => 'video',
-        ],
         'code' => [
             'title' => 'Code generator',
             'description' => 'Generate secure, maintainable code for a specific task.',
@@ -79,6 +69,7 @@ class AiDemoController extends Controller
             'successRate' => $this->successRate($records),
             'recentGenerations' => (clone $records)->latest()->limit(6)->get(),
             'configured' => app(GeminiStudioService::class)->configured(),
+            'capabilities' => app(GeminiStudioService::class)->capabilities(),
         ]);
     }
 
@@ -89,8 +80,7 @@ class AiDemoController extends Controller
         if (! $user?->exists) {
             return view('pages.ai.usage', [
                 'title' => 'AI Usage', 'totalRequests' => 0, 'failedRequests' => 0,
-                'inputTokens' => 0, 'outputTokens' => 0, 'imagesGenerated' => 0,
-                'videosGenerated' => 0, 'recentGenerations' => collect(),
+                'inputTokens' => 0, 'outputTokens' => 0, 'recentGenerations' => collect(),
                 'configured' => app(GeminiStudioService::class)->configured(),
             ]);
         }
@@ -103,8 +93,6 @@ class AiDemoController extends Controller
             'failedRequests' => (clone $records)->where('status', 'failed')->count(),
             'inputTokens' => (clone $records)->sum('input_tokens'),
             'outputTokens' => (clone $records)->sum('output_tokens'),
-            'imagesGenerated' => (clone $records)->where('tool', 'image')->where('status', 'succeeded')->count(),
-            'videosGenerated' => (clone $records)->where('tool', 'video')->where('status', 'succeeded')->count(),
             'recentGenerations' => (clone $records)->latest()->limit(20)->get(),
             'configured' => app(GeminiStudioService::class)->configured(),
         ]);
@@ -132,7 +120,7 @@ class AiDemoController extends Controller
     public function generate(Request $request, GeminiStudioService $gemini, CatalogAssistantContext $catalogContext): JsonResponse
     {
         $data = $request->validate([
-            'tool' => ['required', 'in:text,code,image,video,chat'],
+            'tool' => ['required', 'in:text,code,chat'],
             'prompt' => ['required', 'string', 'min:1', 'max:1200'],
             'history' => ['sometimes', 'array', 'max:20'],
             'history.*.role' => ['required_with:history', 'in:user,assistant'],
@@ -157,8 +145,7 @@ class AiDemoController extends Controller
                 $extension = match ($result['mime_type'] ?? null) {
                     'image/jpeg' => 'jpg',
                     'image/webp' => 'webp',
-                    'video/mp4' => 'mp4',
-                    default => ($data['tool'] === 'image' ? 'png' : 'mp4'),
+                    default => 'bin',
                 };
                 $mediaPath = 'ai-generations/'.$user->id.'/'.Str::uuid().'.'.$extension;
                 Storage::disk('local')->put($mediaPath, $result['media']);
@@ -307,8 +294,6 @@ class AiDemoController extends Controller
     private function modelFor(string $tool, array $settings): string
     {
         return match ($tool) {
-            'image' => (string) config('ai.studio.image_model'),
-            'video' => (string) config('ai.studio.video_model'),
             'chat' => (string) config('ai.groq.model'),
             default => $settings['text_model'] ?: (string) config('ai.groq.model', 'openai/gpt-oss-20b'),
         };

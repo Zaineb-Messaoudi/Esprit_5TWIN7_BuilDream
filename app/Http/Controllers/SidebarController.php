@@ -184,6 +184,42 @@ class SidebarController extends Controller
             ],
         ];
 
+        // Keep the template's source data intact while exposing only real
+        // SolarShare workflows in the production admin navigation.
+        $allowedPaths = [
+            '/admin/dashboard',
+            '/admin/equipment',
+            '/admin/categories',
+            '/admin/users',
+            '/admin/rentals',
+            '/admin/rental-contracts',
+            '/admin/rental-extensions',
+            '/admin/technical/dashboard',
+            '/admin/technical/maintenances',
+            '/admin/technical/inspections',
+            '/admin/technical/reports',
+            '/admin/operations',
+            '/admin/ai-settings',
+            '/profile',
+        ];
+
+        $menuGroups = array_values(array_filter(array_map(function (array $group) use ($allowedPaths): array {
+            $group['items'] = array_values(array_filter(array_map(function (array $item) use ($allowedPaths): ?array {
+                if (isset($item['path'])) {
+                    return in_array($item['path'], $allowedPaths, true) ? $item : null;
+                }
+
+                $item['subItems'] = array_values(array_filter(
+                    $item['subItems'] ?? [],
+                    fn (array $subItem): bool => in_array($subItem['path'] ?? null, $allowedPaths, true)
+                ));
+
+                return $item['subItems'] !== [] ? $item : null;
+            }, $group['items'])));
+
+            return $group['items'] !== [] ? $group : null;
+        }, $menuGroups)));
+
         return view('components.sidebar', compact('menuGroups'));
     }
 }

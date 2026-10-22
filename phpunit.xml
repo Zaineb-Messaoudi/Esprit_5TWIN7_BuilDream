@@ -20,6 +20,8 @@
     <php>
         <env name="AI_PARSER_ENABLED" value="false" force="true"/>
         <env name="APP_ENV" value="testing"/>
+        <!-- A deterministic throwaway key keeps tests independent from a developer's .env files. -->
+        <env name="APP_KEY" value="base64:AAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA=" force="true"/>
         <!-- The database connection is not set here on purpose: it comes from the
              git-ignored .env.testing file so credentials stay out of the repo.
              Tests run against a dedicated MySQL database (solarshare_test). -->

@@ -170,8 +170,6 @@ class MenuHelper
                 'subItems' => [
                     ['name' => 'AI Dashboard', 'path' => route('ai.index'), 'pro' => false],
                     ['name' => 'Text Generator', 'path' => route('ai.text'), 'pro' => false],
-                    ['name' => 'Image Generator', 'path' => route('ai.image'), 'pro' => false],
-                    ['name' => 'Video Generator', 'path' => route('ai.video'), 'pro' => false],
                     ['name' => 'Code Generator', 'path' => route('ai.code'), 'pro' => false],
                     ['name' => 'AI Chat', 'path' => route('ai.chat'), 'pro' => false],
                     ['name' => 'Generation History', 'path' => route('ai.history'), 'pro' => false],

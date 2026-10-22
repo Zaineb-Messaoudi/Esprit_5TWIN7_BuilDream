@@ -44,11 +44,18 @@ return [
         'amount_column' => env('MAINTENANCE_TCO_AMOUNT_COLUMN', 'total_amount'),
     ],
     'ai' => [
-        // Maintenance AI shares the canonical Gemini credential. The
-        // MAINTENANCE_AI_* variables customize the endpoint/model only.
-        'api_key' => env('GEMINI_API_KEY'),
-        'base_url' => env('MAINTENANCE_AI_BASE_URL') ?: env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1'),
-        'model' => env('MAINTENANCE_AI_MODEL') ?: env('GROQ_MODEL', 'openai/gpt-oss-20b'),
+        // Maintenance uses the same OpenAI-compatible client with Groq,
+        // Gemini-compatible endpoints, or a local Ollama server.
+        'provider' => env('MAINTENANCE_AI_PROVIDER', env('AI_PROVIDER', 'groq')),
+        'api_key' => env('MAINTENANCE_AI_PROVIDER', env('AI_PROVIDER', 'groq')) === 'groq'
+            ? env('GROQ_API_KEY')
+            : (env('MAINTENANCE_AI_API_KEY') ?: env('GEMINI_API_KEY')),
+        'base_url' => env('MAINTENANCE_AI_PROVIDER', env('AI_PROVIDER', 'groq')) === 'groq'
+            ? env('GROQ_BASE_URL', 'https://api.groq.com/openai/v1')
+            : (env('MAINTENANCE_AI_BASE_URL') ?: env('AI_BASE_URL', 'http://localhost:11434/v1')),
+        'model' => env('MAINTENANCE_AI_PROVIDER', env('AI_PROVIDER', 'groq')) === 'groq'
+            ? env('GROQ_VISION_MODEL', 'qwen/qwen3.6-27b')
+            : (env('MAINTENANCE_AI_MODEL') ?: env('AI_VISION_MODEL', 'llava')),
         'transcription_model' => env('MAINTENANCE_AI_TRANSCRIPTION_MODEL', 'whisper-1'),
         'timeout' => (int) env('MAINTENANCE_AI_TIMEOUT', 110),
     ],

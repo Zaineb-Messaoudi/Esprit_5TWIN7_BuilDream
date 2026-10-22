@@ -43,8 +43,9 @@ return [
             'url' => env('MAIL_URL'),
             'host' => env('MAIL_HOST', '127.0.0.1'),
             'port' => env('MAIL_PORT', 2525),
-            'username' => env('MAIL_USER') ?: env('MAIL_USERNAME'),
-            'password' => env('MAIL_PASS') ?: env('MAIL_PASSWORD'),
+            // Prefer Laravel's standard variables; legacy aliases are fallback only.
+            'username' => env('MAIL_USERNAME') ?: env('MAIL_USER'),
+            'password' => env('MAIL_PASSWORD') ?: env('MAIL_PASS'),
             'timeout' => null,
             'local_domain' => env('MAIL_EHLO_DOMAIN', parse_url((string) env('APP_URL', 'http://localhost'), PHP_URL_HOST)),
         ],
@@ -111,7 +112,7 @@ return [
     */
 
     'from' => [
-        'address' => env('MAIL_FROM_ADDRESS') ?: (env('MAIL_USER') ?: env('MAIL_USERNAME')) ?: 'hello@example.com',
+        'address' => env('MAIL_FROM_ADDRESS') ?: (env('MAIL_USERNAME') ?: env('MAIL_USER')) ?: 'hello@example.com',
         'name' => env('MAIL_FROM_NAME', 'Example'),
     ],
 

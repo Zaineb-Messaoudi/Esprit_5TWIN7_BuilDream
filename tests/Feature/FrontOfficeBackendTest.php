@@ -81,6 +81,11 @@ test('returning damaged equipment creates maintenance and makes it available aft
     ]);
 
     $this->actingAs($buyer)
+        ->get(route('front.buyer-rental-detail', $rental->fresh()->reference))
+        ->assertOk()
+        ->assertSee('Return equipment');
+
+    $this->actingAs($buyer)
         ->post(route('rental.return.process', $rental), [
             'condition_before' => 'Good',
             'condition_after' => 'Cracked casing',

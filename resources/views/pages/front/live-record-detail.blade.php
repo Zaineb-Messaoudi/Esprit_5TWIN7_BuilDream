@@ -171,7 +171,7 @@
                 </div>
                 @endif
 
-                @if ($owner && in_array($record->status->value, ['active', 'completed']) && ! $record->inspections->first())
+                @if (in_array($record->status->value, ['active', 'completed']) && ! $record->inspections->first())
                 <div class="mt-5">
                     <a href="{{ route('rental.return.form', $record) }}" class="inline-flex min-h-10 items-center justify-center rounded-lg bg-warning-500 px-4 py-2 text-sm font-medium text-white hover:bg-warning-600">
                         <svg class="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
@@ -227,6 +227,24 @@
                         </div>
                     </div>
                     @endforeach
+                </div>
+                @endif
+
+                @if (($canReview ?? false))
+                <div class="mt-5 rounded-xl border border-brand-200 bg-brand-50 p-4 dark:border-brand-500/30 dark:bg-brand-500/10">
+                    <p class="text-theme-sm font-semibold text-gray-900 dark:text-white">{{ __('How was this rental?') }}</p>
+                    <p class="mt-1 text-theme-xs text-gray-600 dark:text-gray-300">{{ __('Share your experience with the other participant.') }}</p>
+                    <a href="{{ route('front.reviews.create', $record) }}" class="mt-3 inline-flex min-h-10 items-center justify-center rounded-lg bg-brand-600 px-4 py-2 text-sm font-medium text-white hover:bg-brand-700">
+                        {{ __('Leave a review') }}
+                    </a>
+                </div>
+                @endif
+
+                @if ($recordType === 'rental')
+                <div class="mt-5">
+                    <a href="{{ route('front.rental-chat', $record) }}" class="inline-flex min-h-10 items-center justify-center rounded-lg border border-brand-300 px-4 py-2 text-sm font-medium text-brand-700 hover:bg-brand-50 dark:border-brand-500/40 dark:text-brand-300 dark:hover:bg-brand-500/10">
+                        {{ __('Open rental chat') }}
+                    </a>
                 </div>
                 @endif
             </section>

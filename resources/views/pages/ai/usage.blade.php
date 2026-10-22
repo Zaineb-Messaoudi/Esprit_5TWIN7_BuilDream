@@ -17,8 +17,6 @@
                 [__('Failed requests'), number_format($failedRequests)],
                 [__('Input tokens'), number_format($inputTokens)],
                 [__('Output tokens'), number_format($outputTokens)],
-                [__('Images generated'), number_format($imagesGenerated)],
-                [__('Videos generated'), number_format($videosGenerated)],
             ] as [$label, $value])
                 <x-common.component-card :title="$label"><p class="text-2xl font-semibold text-gray-800 dark:text-white/90">{{ $value }}</p></x-common.component-card>
             @endforeach

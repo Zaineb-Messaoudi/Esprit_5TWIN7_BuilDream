@@ -24,7 +24,7 @@
 
         <x-common.component-card :title="__('AI Studio tools')" :desc="__('Choose a tool to generate content with AI.')">
             <div class="flex flex-wrap gap-3">
-                @foreach (['Text generator' => 'ai.text', 'Image generator' => 'ai.image', 'Video generator' => 'ai.video', 'Code generator' => 'ai.code', 'AI chat' => 'ai.chat'] as $label => $routeName)
+                @foreach (['Text generator' => 'ai.text', 'Code generator' => 'ai.code', 'AI chat' => 'ai.chat'] as $label => $routeName)
                     <a href="{{ route($routeName) }}" class="inline-flex min-h-10 items-center rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">{{ __($label) }}</a>
                 @endforeach
                 <a href="{{ route('ai.history') }}" class="inline-flex min-h-10 items-center rounded-lg border border-gray-300 px-4 py-2 text-sm font-medium text-gray-700 hover:bg-gray-50 dark:border-gray-700 dark:text-gray-200 dark:hover:bg-gray-800">{{ __('Generation history') }}</a>
@@ -34,7 +34,7 @@
 
         <x-common.component-card :title="__('Recent generations')" :desc="__('Your latest AI requests and their status.')">
             @if ($recentGenerations->isEmpty())
-                <x-ui.empty-state :title="__('No generations yet')" :message="__('Start with a text, image, video, code, or chat request.')" />
+                <x-ui.empty-state :title="__('No generations yet')" :message="__('Start with a text, code, or chat request.')" />
             @else
                 <div class="space-y-3">
                     @foreach ($recentGenerations as $generation)
