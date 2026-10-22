@@ -36,7 +36,8 @@ RUN apt-get update \
         curl \
     && docker-php-ext-configure gd --with-freetype --with-jpeg \
     && docker-php-ext-install -j"$(nproc)" bcmath exif gd intl mbstring opcache pcntl pdo_mysql sockets zip \
-    && pecl install redis \
+    && pecl channel-update pecl.php.net \
+    && pecl install redis-6.1.0 \
     && docker-php-ext-enable redis \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
