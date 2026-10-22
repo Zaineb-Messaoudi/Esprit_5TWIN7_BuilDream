@@ -27,7 +27,10 @@ test -f "$deploy_dir/.env" || {
 app_port="$(sed -n 's/^APP_PORT=//p' "$deploy_dir/.env" | tail -n 1 | tr -d '\r"' | tr -d "'")"
 app_port="${app_port:-8000}"
 
-cp docker-compose.yml "$deploy_dir/docker-compose.yml"
+# Use production-specific docker-compose file
+compose_file="docker-compose.production.yml"
+cp "$compose_file" "$deploy_dir/$compose_file"
+
 retry_docker() {
   local attempt=1
   until "$@"; do
@@ -48,7 +51,7 @@ retry_docker docker_login
 
 image="docker.io/$username/solarshare:$image_tag"
 web_image="docker.io/$username/solarshare-nginx:$image_tag"
-compose_args=(--project-name "solarshare-$environment" --project-directory "$deploy_dir")
+compose_args=(--project-name "solarshare-$environment" --project-directory "$deploy_dir" -f "$compose_file")
 previous_image=""
 previous_web_image=""
 app_container="$(docker compose "${compose_args[@]}" ps -q app 2>/dev/null | head -n 1 || true)"
@@ -79,8 +82,25 @@ retry_docker docker pull "$web_image"
 export APP_IMAGE="$image"
 export WEB_IMAGE="$web_image"
 docker compose "${compose_args[@]}" up -d --remove-orphans
+
+# Wait for MySQL and ensure database exists
+echo "Waiting for MySQL to be ready..."
+for i in {1..30}; do
+  if docker compose "${compose_args[@]}" exec -T mysql mysqladmin ping -h 127.0.0.1 -uroot -p"${DB_PASSWORD:-solarshare}" --silent 2>/dev/null; then
+    echo "MySQL is ready"
+    break
+  fi
+  echo "Waiting for MySQL... ($i/30)"
+  sleep 2
+done
+
+# Ensure database exists (in case volume already exists from previous deploy)
+echo "Ensuring database exists..."
+docker compose "${compose_args[@]}" exec -T mysql mysql -h 127.0.0.1 -uroot -p"${DB_PASSWORD:-solarshare}" -e "CREATE DATABASE IF NOT EXISTS \`${DB_DATABASE:-SolarShare}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
+
 docker compose "${compose_args[@]}" exec -T app php artisan backup:database --disk=local --path=backups/database
 docker compose "${compose_args[@]}" exec -T app php artisan migrate --force
+docker compose "${compose_args[@]}" exec -T app php artisan db:seed --force
 docker compose "${compose_args[@]}" ps
 curl --fail --retry 10 --retry-delay 3 "http://127.0.0.1:$app_port/up"
 trap - EXIT

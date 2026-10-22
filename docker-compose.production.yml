@@ -1,0 +1,206 @@
+# Docker Compose for Production - Uses alternative ports to avoid conflicts with local development
+services:
+  app:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    image: ${APP_IMAGE:-solarshare/app:local}
+    env_file:
+      - .env
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      APP_DEBUG: ${APP_DEBUG:-false}
+      APP_URL: ${APP_URL:-http://localhost:8000}
+      DB_HOST: mysql
+      DB_PORT: 3306
+      DB_DATABASE: ${DB_DATABASE:-SolarShare}
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-solarshare}
+      REDIS_HOST: redis
+      REDIS_PORT: 6379
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      BROADCAST_CONNECTION: reverb
+      REVERB_HOST: reverb
+      REVERB_PORT: 8080
+      REVERB_SERVER_HOST: 0.0.0.0
+      REVERB_SERVER_PORT: 8080
+      SCOUT_DRIVER: meilisearch
+      MEILISEARCH_HOST: http://meilisearch:7700
+    expose:
+      - "9000"
+    command: >
+      sh -c "php artisan migrate --force &&
+             php artisan db:seed --force &&
+             php artisan storage:link &&
+             php-fpm -F"
+    volumes:
+      - solarshare-storage:/var/www/html/storage/app/private
+      - solarshare-public-storage:/var/www/html/storage/app/public
+    depends_on:
+      mysql:
+        condition: service_healthy
+      redis:
+        condition: service_healthy
+      meilisearch:
+        condition: service_healthy
+    networks:
+      - solarshare
+
+  web:
+    build:
+      context: .
+      dockerfile: docker/nginx/Dockerfile
+    image: ${WEB_IMAGE:-solarshare/nginx:local}
+    ports:
+      - "${APP_PORT:-8000}:8080"
+    volumes:
+      - solarshare-public-storage:/var/www/html/public/storage
+    depends_on:
+      app:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD-SHELL", "wget --spider --quiet http://127.0.0.1:8080/up || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - solarshare
+
+  queue:
+    image: ${APP_IMAGE:-solarshare/app:local}
+    env_file:
+      - .env
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      DB_HOST: mysql
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+      SCOUT_DRIVER: meilisearch
+      MEILISEARCH_HOST: http://meilisearch:7700
+    command: php artisan queue:work --sleep=1 --tries=3 --timeout=120
+    healthcheck:
+      disable: true
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - solarshare
+
+  scheduler:
+    image: ${APP_IMAGE:-solarshare/app:local}
+    env_file:
+      - .env
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      DB_HOST: mysql
+      REDIS_HOST: redis
+      CACHE_STORE: redis
+      SESSION_DRIVER: redis
+      QUEUE_CONNECTION: redis
+    command: php artisan schedule:work
+    healthcheck:
+      disable: true
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - solarshare
+
+  reverb:
+    image: ${APP_IMAGE:-solarshare/app:local}
+    env_file:
+      - .env
+    environment:
+      APP_ENV: ${APP_ENV:-production}
+      DB_HOST: mysql
+      REDIS_HOST: redis
+      BROADCAST_CONNECTION: reverb
+      REVERB_HOST: 0.0.0.0
+      REVERB_PORT: 8080
+      REVERB_SERVER_HOST: 0.0.0.0
+      REVERB_SERVER_PORT: 8080
+    command: php artisan reverb:start --host=0.0.0.0 --port=8080
+    healthcheck:
+      disable: true
+    ports:
+      - "${REVERB_PORT:-8081}:8080"
+    depends_on:
+      app:
+        condition: service_healthy
+    networks:
+      - solarshare
+
+  mysql:
+    image: mysql:8.0
+    environment:
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-solarshare}
+      MYSQL_DATABASE: ${DB_DATABASE:-SolarShare}
+      MYSQL_USER: ${MYSQL_USER:-solarshare}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD:-${DB_PASSWORD:-solarshare}}
+      MYSQL_ROOT_HOST: "%"
+      MYSQL_ALLOW_EMPTY_PASSWORD: "no"
+    ports:
+      - "3307:3306"
+    volumes:
+      - solarshare-mysql:/var/lib/mysql
+    healthcheck:
+      test: ["CMD-SHELL", "mysqladmin ping -h 127.0.0.1 -uroot -p\"$${MYSQL_ROOT_PASSWORD}\" --silent"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - solarshare
+
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6380:6379"
+    volumes:
+      - solarshare-redis:/data
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - solarshare
+
+  meilisearch:
+    image: getmeili/meilisearch:v1.13
+    environment:
+      MEILI_ENV: development
+      MEILI_MASTER_KEY: ${MEILISEARCH_KEY:-masterKey}
+    ports:
+      - "7701:7700"
+    volumes:
+      - solarshare-meilisearch:/meili_data
+    healthcheck:
+      test: ["CMD", "curl", "--fail", "http://127.0.0.1:7700/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 10
+    networks:
+      - solarshare
+
+  mailpit:
+    image: axllent/mailpit:v1.21
+    ports:
+      - "11026:1025"
+      - "18026:8025"
+    networks:
+      - solarshare
+
+networks:
+  solarshare:
+    driver: bridge
+
+volumes:
+  solarshare-storage:
+  solarshare-public-storage:
+  solarshare-mysql:
+  solarshare-redis:
+  solarshare-meilisearch:
