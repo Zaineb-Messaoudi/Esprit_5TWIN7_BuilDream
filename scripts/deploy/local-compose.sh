@@ -98,7 +98,7 @@ done
 echo "Ensuring database exists..."
 docker compose "${compose_args[@]}" exec -T mysql mysql -h 127.0.0.1 -uroot -p"${DB_PASSWORD:-solarshare}" -e "CREATE DATABASE IF NOT EXISTS \`${DB_DATABASE:-SolarShare}\` CHARACTER SET utf8mb4 COLLATE utf8mb4_unicode_ci;" 2>/dev/null || true
 
-docker compose "${compose_args[@]}" exec -T app php artisan backup:database --disk=local --path=backups/database
+# Run migrations and seed (skip backup for now due to SQLite config issue)
 docker compose "${compose_args[@]}" exec -T app php artisan migrate --force
 docker compose "${compose_args[@]}" exec -T app php artisan db:seed --force
 docker compose "${compose_args[@]}" ps
