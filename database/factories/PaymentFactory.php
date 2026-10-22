@@ -11,11 +11,11 @@ class PaymentFactory extends Factory
     {
         return [
             'reservation_id' => Reservation::factory(),
-            'amount' => fake()->randomFloat(2, 50, 1000),
-            'payment_date' => fake()->dateTimeBetween('-1 month', 'now'),
-            'transaction_reference' => 'TRX-'.strtoupper(fake()->unique()->bothify('########')),
-            'status' => fake()->randomElement(['pending', 'paid', 'failed']),
-            'payment_method' => fake()->randomElement(['CARD', 'BANK_TRANSFER', 'CASH']),
+            'amount' => $this->faker->randomFloat(2, 50, 1000),
+            'payment_date' => $this->faker->dateTimeBetween('-1 month', 'now'),
+            'transaction_reference' => 'TRX-'.strtoupper($this->faker->unique()->bothify('########')),
+            'status' => $this->faker->randomElement(['pending', 'paid', 'failed']),
+            'payment_method' => $this->faker->randomElement(['CARD', 'BANK_TRANSFER', 'CASH']),
         ];
     }
 }

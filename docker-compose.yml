@@ -3,6 +3,10 @@ services:
     build:
       context: .
       dockerfile: Dockerfile
+      args:
+        # Local Docker Compose runs seeders and therefore needs Faker.
+        # Production uses the published image and does not build locally.
+        COMPOSER_WITH_DEV: ${COMPOSER_WITH_DEV:-true}
     image: ${APP_IMAGE:-solarshare/app:local}
     env_file:
       - .env

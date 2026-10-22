@@ -13,17 +13,17 @@ class MaintenanceFactory extends Factory
 
     public function definition(): array
     {
-        $start = fake()->dateTimeBetween('-6 months', '-7 days');
+        $start = $this->faker->dateTimeBetween('-6 months', '-7 days');
 
         return [
             // A factory record must always point to an existing equipment row.
             'equipment_id' => Equipment::query()->inRandomOrder()->firstOrFail()->getKey(),
             'start_date' => $start,
-            'end_date' => fake()->dateTimeBetween($start, 'now'),
-            'reason' => fake()->sentence(),
-            'cost' => fake()->randomFloat(2, 0, 750),
+            'end_date' => $this->faker->dateTimeBetween($start, 'now'),
+            'reason' => $this->faker->sentence(),
+            'cost' => $this->faker->randomFloat(2, 0, 750),
             'status' => 'completed',
-            'notes' => fake()->optional()->paragraph(),
+            'notes' => $this->faker->optional()->paragraph(),
         ];
     }
 }

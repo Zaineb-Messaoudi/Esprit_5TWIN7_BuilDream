@@ -15,11 +15,11 @@ class MaintenancePhotoFactory extends Factory
     {
         return [
             'maintenance_id' => Maintenance::factory(),
-            'type' => fake()->randomElement(['before', 'after']),
-            'path' => 'maintenance/example/'.fake()->uuid().'.jpg',
-            'original_name' => fake()->word().'.jpg',
+            'type' => $this->faker->randomElement(['before', 'after']),
+            'path' => 'maintenance/example/'.$this->faker->uuid().'.jpg',
+            'original_name' => $this->faker->word().'.jpg',
             'mime_type' => 'image/jpeg',
-            'size' => fake()->numberBetween(1000, 5000000),
+            'size' => $this->faker->numberBetween(1000, 5000000),
         ];
     }
 }

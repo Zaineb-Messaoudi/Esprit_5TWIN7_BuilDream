@@ -28,13 +28,13 @@ class RentalExtensionFactory extends Factory
     public function definition(): array
     {
         // Number of extra days, chosen once so the end date and the amount match
-        $extraDays = fake()->numberBetween(1, 5);
+        $extraDays = $this->faker->numberBetween(1, 5);
 
         return [
             // A new rental is created automatically unless rental_id is given
             'rental_id' => Rental::factory(),
 
-            'requested_date' => now()->subDays(fake()->numberBetween(0, 5))->toDateString(),
+            'requested_date' => now()->subDays($this->faker->numberBetween(0, 5))->toDateString(),
 
             // The closures receive the attributes already computed (rental_id is ready here)
             'old_end_date' => fn (array $attributes) => Rental::find($attributes['rental_id'])->end_date,
@@ -50,7 +50,7 @@ class RentalExtensionFactory extends Factory
                 return round(((float) $rental->total_amount / $rentalDays) * $extraDays, 2);
             },
 
-            'reason' => fake()->optional(0.8)->randomElement([
+            'reason' => $this->faker->optional(0.8)->randomElement([
                 'I need the equipment for one more day.',
                 'My trip was extended.',
                 'The weather was bad, I could not use it as planned.',

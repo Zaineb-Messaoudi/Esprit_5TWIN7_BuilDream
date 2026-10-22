@@ -1,6 +1,6 @@
 FROM nginx:1.29-alpine
 
-RUN apk upgrade --no-cache
+RUN apk upgrade --no-cache --available || apk upgrade --no-cache --available --repository=https://dl-cdn.alpinelinux.org/alpine/v3.20/main --repository=https://dl-cdn.alpinelinux.org/alpine/v3.20/community
 
 RUN mkdir -p /var/cache/nginx /var/run/nginx /tmp/client_temp /tmp/proxy_temp \
     /tmp/fastcgi_temp /tmp/uwsgi_temp /tmp/scgi_temp \

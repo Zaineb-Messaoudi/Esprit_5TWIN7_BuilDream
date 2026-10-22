@@ -17,13 +17,13 @@ class EquipmentFactory extends Factory
         return [
             'category_id' => Category::factory(),
             'owner_id' => User::factory(),
-            'name' => fake()->words(3, true),
-            'description' => fake()->paragraph(),
-            'brand' => fake()->company(),
-            'model' => strtoupper(fake()->bothify('??-###')),
-            'price_per_day' => fake()->randomFloat(2, 5, 150),
-            'condition' => fake()->randomElement(['new', 'good', 'fair']),
-            'location' => fake()->city(),
+            'name' => $this->faker->words(3, true),
+            'description' => $this->faker->paragraph(),
+            'brand' => $this->faker->company(),
+            'model' => strtoupper($this->faker->bothify('??-###')),
+            'price_per_day' => $this->faker->randomFloat(2, 5, 150),
+            'condition' => $this->faker->randomElement(['new', 'good', 'fair']),
+            'location' => $this->faker->city(),
             'status' => 'available',
         ];
     }
