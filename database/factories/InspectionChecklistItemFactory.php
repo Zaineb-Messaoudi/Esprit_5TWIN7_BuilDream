@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\InspectionChecklist;
 use App\Models\InspectionChecklistItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use function fake;
 
 /** @extends Factory<InspectionChecklistItem> */
 class InspectionChecklistItemFactory extends Factory

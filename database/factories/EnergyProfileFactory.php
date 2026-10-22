@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\EnergyProfile;
 use App\Models\Equipment;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use function fake;
 
 /** @extends Factory<EnergyProfile> */
 class EnergyProfileFactory extends Factory

@@ -7,6 +7,7 @@ use App\Models\Inspection;
 use App\Models\Rental;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Schema;
+use function fake;
 
 /** @extends Factory<Inspection> */
 class InspectionFactory extends Factory

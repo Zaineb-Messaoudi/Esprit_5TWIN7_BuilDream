@@ -5,6 +5,7 @@ namespace Database\Factories;
 use App\Models\Maintenance;
 use App\Models\MaintenancePhoto;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use function fake;
 
 /** @extends Factory<MaintenancePhoto> */
 class MaintenancePhotoFactory extends Factory

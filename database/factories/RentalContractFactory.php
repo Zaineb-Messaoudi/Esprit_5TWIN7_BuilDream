@@ -7,6 +7,7 @@ use App\Models\Rental;
 use App\Models\RentalContract;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Str;
+use function fake;
 
 /**
  * Builds FAKE rental contracts.

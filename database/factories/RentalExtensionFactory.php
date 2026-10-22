@@ -6,6 +6,7 @@ use App\Enums\ExtensionStatus;
 use App\Models\Rental;
 use App\Models\RentalExtension;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use function fake;
 
 /**
  * Builds FAKE extension requests.

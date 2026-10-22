@@ -6,6 +6,7 @@ use App\Models\Category;
 use App\Models\Equipment;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use function fake;
 
 /** @extends Factory<Equipment> */
 class EquipmentFactory extends Factory

@@ -10,17 +10,17 @@ class ReservationFactory extends Factory
 {
     public function definition(): array
     {
-        $start = fake()->dateTimeBetween('now', '+2 months');
+        $start = \fake()->dateTimeBetween('now', '+2 months');
         $end = (clone $start)->modify('+'.rand(1, 10).' days');
 
         return [
-            'reference' => 'RES-'.strtoupper(fake()->unique()->bothify('????-####')),
+            'reference' => 'RES-'.strtoupper(\fake()->unique()->bothify('????-####')),
             'equipment_id' => Equipment::factory(),
             'user_id' => User::factory(),
             'start_date' => $start,
             'end_date' => $end,
-            'total_amount' => fake()->randomFloat(2, 100, 2000),
-            'status' => fake()->randomElement(['pending', 'confirmed', 'cancelled']),
+            'total_amount' => \fake()->randomFloat(2, 100, 2000),
+            'status' => \fake()->randomElement(['pending', 'confirmed', 'cancelled']),
         ];
     }
 }

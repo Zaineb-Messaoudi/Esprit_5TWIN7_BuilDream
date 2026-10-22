@@ -6,6 +6,7 @@ use App\Models\Damage;
 use App\Models\Inspection;
 use App\Models\InspectionChecklistItem;
 use Illuminate\Database\Eloquent\Factories\Factory;
+use function fake;
 
 /** @extends Factory<Damage> */
 class DamageFactory extends Factory
