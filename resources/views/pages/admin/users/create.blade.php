@@ -18,38 +18,36 @@
                     @csrf
                     <div class="grid grid-cols-1 gap-5 sm:grid-cols-2">
                         <div>
-                            <x-form.input :label="__('Full name')" name="name" :value="old('name')" required autocomplete="name" />
-                            @error('name')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+                            <x-form.input :label="__('Full name')" name="name" :value="old('name')" required autocomplete="name" :error="$errors->first('name')" />
                         </div>
                         <div>
-                            <x-form.input :label="__('Email address')" name="email" type="email" :value="old('email')" required autocomplete="email" />
-                            @error('email')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+                            <x-form.input :label="__('Email address')" name="email" type="email" :value="old('email')" required autocomplete="email" :error="$errors->first('email')" />
                         </div>
                         <div>
-                            <x-form.input :label="__('Phone number')" name="phone_number" type="tel" :value="old('phone_number')" autocomplete="tel" />
-                            @error('phone_number')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+                            <x-form.input :label="__('Phone number')" name="phone_number" type="tel" :value="old('phone_number')" autocomplete="tel" :error="$errors->first('phone_number')" />
                         </div>
                         <div>
-                            <label for="role" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Account role') }}</label>
-                            <select id="role" name="role" required class="h-11 w-full rounded-lg border border-gray-300 bg-white px-4 text-sm text-gray-800 focus:border-brand-400 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white">
-                                <option value="buyer" @selected(old('role', 'buyer') === 'buyer')>{{ __('Buyer') }}</option>
-                                <option value="owner" @selected(old('role') === 'owner')>{{ __('Equipment Owner') }}</option>
-                                <option value="user" @selected(old('role') === 'user')>{{ __('Legacy buyer') }}</option>
-                                <option value="admin" @selected(old('role') === 'admin')>{{ __('Administrator') }}</option>
-                            </select>
-                            @error('role')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+                            <x-form.select
+                                :label="__('Account role')"
+                                name="role"
+                                id="role"
+                                required
+                                :options="['buyer' => __('Buyer'), 'owner' => __('Equipment Owner'), 'user' => __('Legacy buyer'), 'admin' => __('Administrator')]"
+                                :selected="old('role', 'buyer')"
+                                :error="$errors->first('role')" />
                         </div>
                         <div class="sm:col-span-2">
                             <label for="address" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Address') }}</label>
-                            <textarea id="address" name="address" rows="3" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-400 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white">{{ old('address') }}</textarea>
-                            @error('address')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+                            <textarea id="address" name="address" rows="3" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-400 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white @error('address') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror">{{ old('address') }}</textarea>
+                            @error('address')
+                                <x-input-error :messages="[$message]" class="mt-1" />
+                            @enderror
                         </div>
                         <div>
-                            <x-form.input :label="__('Temporary password')" name="password" type="password" required autocomplete="new-password" />
-                            @error('password')<p class="mt-1 text-xs text-error-600">{{ $message }}</p>@enderror
+                            <x-form.input :label="__('Temporary password')" name="password" type="password" required autocomplete="new-password" :error="$errors->first('password')" />
                         </div>
                         <div>
-                            <x-form.input :label="__('Confirm password')" name="password_confirmation" type="password" required autocomplete="new-password" />
+                            <x-form.input :label="__('Confirm password')" name="password_confirmation" type="password" required autocomplete="new-password" :error="$errors->first('password_confirmation')" />
                         </div>
                     </div>
                     <p class="rounded-lg bg-brand-50 px-4 py-3 text-xs leading-5 text-brand-700 dark:bg-brand-500/10 dark:text-brand-300">{{ __('The new user will need to verify their email address before accessing verified workspace pages.') }}</p>

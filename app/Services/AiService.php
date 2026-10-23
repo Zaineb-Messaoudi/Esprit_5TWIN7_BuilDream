@@ -89,6 +89,101 @@ class AiService
     }
 
     /**
+     * Execute a chat completion using a specific provider (without changing default).
+     */
+    public function chatWithProvider(string $provider, array $messages, array $options = []): ?string
+    {
+        $originalProvider = $this->provider;
+        $originalModel = $this->model;
+        $originalBaseUrl = $this->baseUrl;
+        $originalApiKey = $this->apiKey;
+        $originalVisionModel = $this->visionModel;
+
+        try {
+            $this->switchToProvider($provider);
+            return $this->chat($messages, $options);
+        } finally {
+            $this->restoreProvider($originalProvider, $originalModel, $originalBaseUrl, $originalApiKey, $originalVisionModel);
+        }
+    }
+
+    /**
+     * Execute a chat completion expecting JSON using a specific provider.
+     */
+    public function chatJsonWithProvider(string $provider, array $messages, array $options = []): ?array
+    {
+        $originalProvider = $this->provider;
+        $originalModel = $this->model;
+        $originalBaseUrl = $this->baseUrl;
+        $originalApiKey = $this->apiKey;
+        $originalVisionModel = $this->visionModel;
+
+        try {
+            $this->switchToProvider($provider);
+            return $this->chatJson($messages, $options);
+        } finally {
+            $this->restoreProvider($originalProvider, $originalModel, $originalBaseUrl, $originalApiKey, $originalVisionModel);
+        }
+    }
+
+    /**
+     * Get embeddings using a specific provider.
+     */
+    public function getEmbeddingWithProvider(string $provider, string $text): ?array
+    {
+        $originalProvider = $this->provider;
+        $originalModel = $this->model;
+        $originalBaseUrl = $this->baseUrl;
+        $originalApiKey = $this->apiKey;
+        $originalVisionModel = $this->visionModel;
+
+        try {
+            $this->switchToProvider($provider);
+            return $this->getEmbedding($text);
+        } finally {
+            $this->restoreProvider($originalProvider, $originalModel, $originalBaseUrl, $originalApiKey, $originalVisionModel);
+        }
+    }
+
+    /**
+     * Switch to a specific provider temporarily.
+     */
+    private function switchToProvider(string $provider): void
+    {
+        $providerConfig = config("ai.providers.$provider");
+        if (! $providerConfig) {
+            throw new \InvalidArgumentException("Provider '$provider' not configured");
+        }
+
+        $this->provider = $provider;
+        $this->model = $providerConfig['model'] ?? $this->model;
+        $this->baseUrl = $providerConfig['base_url'] ?? $this->baseUrl;
+        $this->apiKey = $providerConfig['api_key'] ?? $this->apiKey;
+        $this->visionModel = $providerConfig['vision_model'] ?? $this->visionModel;
+
+        // Reset circuit breaker for new provider
+        $this->circuitBreaker = [
+            'failures' => 0,
+            'last_failure' => 0,
+            'state' => 'closed',
+            'threshold' => config('ai.circuit_breaker.threshold', 5),
+            'timeout' => config('ai.circuit_breaker.timeout', 60),
+        ];
+    }
+
+    /**
+     * Restore original provider configuration.
+     */
+    private function restoreProvider(string $provider, string $model, string $baseUrl, ?string $apiKey, string $visionModel): void
+    {
+        $this->provider = $provider;
+        $this->model = $model;
+        $this->baseUrl = $baseUrl;
+        $this->apiKey = $apiKey;
+        $this->visionModel = $visionModel;
+    }
+
+    /**
      * Check circuit breaker state and record failures.
      */
     private function checkCircuitBreaker(): bool

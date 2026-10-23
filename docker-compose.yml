@@ -37,6 +37,7 @@ services:
     volumes:
       - solarshare-storage:/var/www/html/storage/app/private
       - solarshare-public-storage:/var/www/html/storage/app/public
+      - .env:/var/www/html/.env:ro
     depends_on:
       mysql:
         condition: service_healthy
@@ -88,6 +89,8 @@ services:
         condition: service_healthy
     networks:
       - solarshare
+    volumes:
+      - .env:/var/www/html/.env:ro
 
   scheduler:
     image: ${APP_IMAGE:-solarshare/app:local}
@@ -108,6 +111,8 @@ services:
         condition: service_healthy
     networks:
       - solarshare
+    volumes:
+      - .env:/var/www/html/.env:ro
 
   reverb:
     image: ${APP_IMAGE:-solarshare/app:local}
@@ -132,6 +137,8 @@ services:
         condition: service_healthy
     networks:
       - solarshare
+    volumes:
+      - .env:/var/www/html/.env:ro
 
   mysql:
     image: mysql:8.0
@@ -156,8 +163,8 @@ services:
 
   redis:
     image: redis:7-alpine
-    ports:
-      - "${FORWARD_REDIS_PORT:-6379}:6379"
+    # ports:
+    #   - "${FORWARD_REDIS_PORT:-6379}:6379"
     volumes:
       - solarshare-redis:/data
     healthcheck:

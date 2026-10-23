@@ -6,7 +6,10 @@
     <form method="POST" action="{{ route('admin.equipment.import') }}" enctype="multipart/form-data" class="flex flex-wrap items-center gap-2">
         @csrf
         <label for="equipment-csv" class="sr-only">{{ __('Equipment CSV') }}</label>
-        <input id="equipment-csv" type="file" name="csv" accept=".csv,text/csv" required class="max-w-xs text-sm text-gray-600 dark:text-gray-300">
+        <input id="equipment-csv" type="file" name="csv" accept=".csv,text/csv" required class="max-w-xs text-sm text-gray-600 dark:text-gray-300 @error('csv') border-red-500 focus:ring-red-500 @enderror">
+        @error('csv')
+            <x-input-error :messages="[$message]" class="ml-2" />
+        @enderror
         <button type="submit" class="rounded-lg bg-brand-500 px-4 py-2 text-sm font-medium text-white hover:bg-brand-600">{{ __('Import CSV') }}</button>
     </form>
 </div>

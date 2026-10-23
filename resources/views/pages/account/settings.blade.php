@@ -102,8 +102,11 @@
                                 <label class="flex cursor-pointer items-center justify-between gap-4 py-4">
                                     <span><span class="block text-sm font-medium text-gray-800 dark:text-white/90">{{ $name }}</span><span class="mt-1 block text-xs text-gray-500 dark:text-gray-400">{{ $description }}</span></span>
                                     <input type="checkbox" name="preferences[{{ $key }}]" value="1"
-                                        @checked(old("preferences.$key", $user->wantsEmail($key)))
-                                        class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500" />
+                                        @checked(old("preferences.{$key}", $user->wantsEmail($key)))
+                                        class="h-4 w-4 rounded border-gray-300 text-brand-500 focus:ring-brand-500 @error("preferences.{$key}") border-red-500 focus:ring-red-500 @enderror" />
+                                    @error("preferences.{$key}")
+                                        <x-input-error :messages="[$message]" class="mt-1 ml-10" />
+                                    @enderror
                                 </label>
                             @endforeach
                             <div class="flex flex-wrap items-center gap-3 pt-5">

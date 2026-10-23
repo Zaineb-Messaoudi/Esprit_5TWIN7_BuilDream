@@ -44,6 +44,7 @@ RUN apt-get update \
 
 COPY --from=php-dependencies /var/www/html/vendor ./vendor
 COPY . .
+COPY docker/php/www.conf /usr/local/etc/php-fpm.d/www.conf
 COPY --from=frontend-assets /var/www/html/public/build ./public/build
 
 RUN rm -f bootstrap/cache/*.php \

@@ -25,18 +25,15 @@
 
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                     <div class="space-y-2">
-                        <x-form.input :label="__('Full name')" name="name" value="{{ old('name', $user->name) }}" required />
-                        @error('name') <span class="text-error-500 text-xs">{{ $message }}</span> @enderror
+                        <x-form.input :label="__('Full name')" name="name" value="{{ old('name', $user->name) }}" required :error="$errors->first('name')" />
                     </div>
 
                     <div class="space-y-2">
-                        <x-form.input :label="__('Email address')" name="email" type="email" value="{{ old('email', $user->email) }}" required />
-                        @error('email') <span class="text-error-500 text-xs">{{ $message }}</span> @enderror
+                        <x-form.input :label="__('Email address')" name="email" type="email" value="{{ old('email', $user->email) }}" required :error="$errors->first('email')" />
                     </div>
 
                     <div class="space-y-2">
-                        <x-form.input :label="__('Phone number')" name="phone_number" value="{{ old('phone_number', $user->phone_number) }}" />
-                        @error('phone_number') <span class="text-error-500 text-xs">{{ $message }}</span> @enderror
+                        <x-form.input :label="__('Phone number')" name="phone_number" value="{{ old('phone_number', $user->phone_number) }}" :error="$errors->first('phone_number')" />
                     </div>
 
                     <div class="space-y-2">
@@ -46,15 +43,17 @@
                             :selected="old('role', $user->role->value)"
                             :options="['buyer' => __('Buyer'), 'owner' => __('Equipment Owner'), 'user' => __('Legacy buyer'), 'admin' => __('Administrator')]"
                             required
+                            :error="$errors->first('role')"
                         />
-                        @error('role') <span class="text-error-500 text-xs">{{ $message }}</span> @enderror
                     </div>
                 </div>
 
                 <div class="space-y-2">
                     <label for="address" class="mb-1.5 block text-sm font-medium text-gray-700 dark:text-gray-300">{{ __('Address') }}</label>
-                    <textarea id="address" name="address" rows="3" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-400 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white">{{ old('address', $user->address) }}</textarea>
-                    @error('address') <span class="text-error-500 text-xs">{{ $message }}</span> @enderror
+                    <textarea id="address" name="address" rows="3" class="w-full rounded-lg border border-gray-300 bg-white px-4 py-2.5 text-sm text-gray-800 focus:border-brand-400 focus:outline-none focus:ring-3 focus:ring-brand-500/10 dark:border-gray-700 dark:bg-gray-900 dark:text-white @error('address') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror">{{ old('address', $user->address) }}</textarea>
+                    @error('address')
+                        <x-input-error :messages="[$message]" class="mt-1" />
+                    @enderror
                 </div>
 
                 <div class="flex justify-end gap-4 pt-6 border-t dark:border-gray-700">

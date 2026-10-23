@@ -199,13 +199,18 @@
                     </div>
                 </div>
 
-                <form @submit.prevent="sendMessage()" class="mt-4 flex gap-2" x-show="messages.length > 0 || input">
-                    <input type="text" x-model="input" @keydown.enter.prevent="sendMessage()" placeholder="{{ __('Ask a question about this equipment...') }}" class="flex-1 min-h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white" autocomplete="off">
-                    <button type="submit" :disabled="!input.trim() || sending" class="px-4 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed">
-                        <span x-show="!sending">{{ __('Send') }}</span>
-                        <span x-show="sending">{{ __('Sending...') }}</span>
-                    </button>
-                </form>
+                @verbatim
+<form @submit.prevent="sendMessage()" class="mt-4 flex gap-2" @x-show="messages.length > 0 || input">
+    <input type="text" @x-model="input" @keydown.enter.prevent="sendMessage()" placeholder="{{ __('Ask a question about this equipment...') }}" class="flex-1 min-h-11 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white" :class="{ 'border-red-500 focus:ring-red-500 focus:border-red-500': inputError }" autocomplete="off">
+    <div @x-show="inputError" class="mt-1">
+        <x-input-error :messages="[inputError]" />
+    </div>
+    <button type="submit" :disabled="!input.trim() || sending" class="px-4 py-2.5 rounded-lg bg-brand-500 text-white text-sm font-medium hover:bg-brand-600 disabled:opacity-50 disabled:cursor-not-allowed">
+        <span @x-show="!sending">{{ __('Send') }}</span>
+        <span @x-show="sending">{{ __('Sending...') }}</span>
+    </button>
+</form>
+@endverbatim
 
                 <p class="mt-2 text-xs text-gray-500 dark:text-gray-400">{{ __('AI only uses the equipment data shown on this page. It cannot access external information.') }}</p>
             </div>
@@ -214,11 +219,13 @@
 @endsection
 
 @push('scripts')
+@verbatim
 <script>
 function aiChatbot(equipmentId) {
     return {
         messages: [],
         input: '',
+        inputError: '',
         sending: false,
         typing: false,
 
@@ -230,6 +237,7 @@ function aiChatbot(equipmentId) {
             this.input = '';
             this.sending = true;
             this.typing = true;
+            this.inputError = '';
 
             try {
                 // Get context equipment IDs (current + related)
@@ -250,6 +258,19 @@ function aiChatbot(equipmentId) {
                         context_equipment_ids: contextIds,
                     }),
                 });
+
+                this.typing = false;
+                
+                if (response.status === 422) {
+                    const data = await response.json();
+                    if (data.errors && data.errors.message) {
+                        this.inputError = data.errors.message[0];
+                    } else {
+                        this.inputError = '{{ __('Invalid message. Please try again.') }}';
+                    }
+                    this.sending = false;
+                    return;
+                }
 
                 const data = await response.json();
 
@@ -279,4 +300,5 @@ function aiChatbot(equipmentId) {
     };
 }
 </script>
+@endverbatim
 @endpush

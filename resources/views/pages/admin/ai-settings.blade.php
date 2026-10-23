@@ -30,11 +30,14 @@
                 <!-- Provider Selection -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('AI Provider') }}</label>
-                    <select name="provider" x-model="provider" @change="updateProviderModels()" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                    <select name="provider" x-model="provider" @change="updateProviderModels()" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white @error('provider') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror">
                         @foreach($providers as $key => $label)
-                            <option value="{{ $key }}" {{ $config['provider'] === $key ? 'selected' : '' }}>{{ $label }}</option>
+                            <option value="{{ $key }}" {{ old('provider', $config['provider']) === $key ? 'selected' : '' }}>{{ $label }}</option>
                         @endforeach
                     </select>
+                    @error('provider')
+                        <x-input-error :messages="[$message]" class="mt-1" />
+                    @enderror
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-show="provider === 'ollama'">FREE - Runs locally on your machine via Ollama</p>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-show="provider === 'openai'">Paid - Requires OpenAI API key</p>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-show="provider === 'anthropic'">Paid - Requires Anthropic API key</p>
@@ -43,40 +46,52 @@
                 <!-- Base URL -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('API Base URL') }}</label>
-                    <input type="url" name="base_url" :value="config.base_url" x-model="config.base_url" placeholder="http://localhost:11434" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                    <input type="url" name="base_url" x-model="config.base_url" :value="old('base_url', config.base_url)" placeholder="http://localhost:11434" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white @error('base_url') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror">
+                    @error('base_url')
+                        <x-input-error :messages="[$message]" class="mt-1" />
+                    @enderror
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Default: http://localhost:11434 for Ollama</p>
                 </div>
 
                 <!-- Model Selection -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Chat Model') }}</label>
-                    <select name="model" x-model="config.model" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                    <select name="model" x-model="config.model" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white @error('model') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror">
                         <template x-for="model in availableModels" :key="model.value">
                             <option :value="model.value" :selected="config.model === model.value" x-text="model.label"></option>
                         </template>
                     </select>
+                    @error('model')
+                        <x-input-error :messages="[$message]" class="mt-1" />
+                    @enderror
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-show="provider === 'ollama'">Must be pulled first: <code>ollama pull llama3.2</code></p>
                 </div>
 
                 <!-- Embedding Model -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Embedding Model (Semantic Search)') }}</label>
-                    <select name="embedding_model" x-model="config.embedding_model" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                    <select name="embedding_model" x-model="config.embedding_model" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white @error('embedding_model') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror">
                         <template x-for="model in embeddingModels" :key="model.value">
                             <option :value="model.value" :selected="config.embedding_model === model.value" x-text="model.label"></option>
                         </template>
                     </select>
+                    @error('embedding_model')
+                        <x-input-error :messages="[$message]" class="mt-1" />
+                    @enderror
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-show="provider === 'ollama'">For semantic search. Pull first: <code>ollama pull nomic-embed-text</code></p>
                 </div>
 
                 <!-- Vision Model -->
                 <div>
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Vision Model (Image Validation)') }}</label>
-                    <select name="vision_model" x-model="config.vision_model" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white">
+                    <select name="vision_model" x-model="config.vision_model" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white @error('vision_model') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror">
                         <template x-for="model in visionModels" :key="model.value">
                             <option :value="model.value" :selected="config.vision_model === model.value" x-text="model.label"></option>
                         </template>
                     </select>
+                    @error('vision_model')
+                        <x-input-error :messages="[$message]" class="mt-1" />
+                    @enderror
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-show="provider === 'ollama'">For image validation. Pull first: <code>ollama pull llava</code></p>
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400" x-show="provider === 'openai'">gpt-4o-mini, gpt-4o support vision</p>
                 </div>
@@ -85,12 +100,15 @@
                 <div x-show="provider !== 'ollama'">
                     <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('API Key') }}</label>
                     <div class="relative">
-                        <input type="password" name="api_key" :value="config.api_key" x-model="config.api_key" autocomplete="new-password" placeholder="Enter API key" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white pr-10">
+                        <input type="password" name="api_key" x-model="config.api_key" :value="old('api_key', config.api_key)" autocomplete="new-password" placeholder="Enter API key" class="w-full min-h-10 rounded-lg border border-gray-300 bg-white px-3 text-sm dark:border-gray-700 dark:bg-gray-900 dark:text-white pr-10 @error('api_key') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror">
                         <button type="button" @click="toggleApiKey()" class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700">
                             <svg x-show="!showApiKey" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 12a3 3 0 11-6 0 3 3 0 016 0z"/><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z"/></svg>
                             <svg x-show="showApiKey" class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13.875 18.825A10.05 10.05 0 0112 19c-4.478 0-8.268-2.943-9.543-7a9.97 9.97 0 011.563-3.029m5.858.908a3 3 0 114.243 4.243M9.878 9.878l4.242 4.242M9.88 9.88l-3.29-3.29m7.532 7.532l3.29 3.29M3 3l3.59 3.59m0 0A9.953 9.953 0 0112 5c4.478 0 8.268 2.943 9.543 7a10.025 10.025 0 01-4.132 5.411m0 0L21 21"/></svg>
                         </button>
                     </div>
+                    @error('api_key')
+                        <x-input-error :messages="[$message]" class="mt-1" />
+                    @enderror
                     <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Required for OpenAI/Anthropic. Stored in .env file.</p>
                 </div>
 
@@ -98,12 +116,18 @@
                 <div class="grid gap-4 sm:grid-cols-2">
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Temperature') }} <span x-text="config.temperature.toFixed(1)"></span></label>
-                        <input type="range" name="temperature" min="0" max="2" step="0.1" x-model.number="config.temperature" class="w-full accent-brand-500">
+                        <input type="range" name="temperature" min="0" max="2" step="0.1" x-model.number="config.temperature" :value="old('temperature', config.temperature)" class="w-full accent-brand-500 @error('temperature') accent-red-500 @enderror">
+                        @error('temperature')
+                            <x-input-error :messages="[$message]" class="mt-1" />
+                        @enderror
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Lower = more deterministic, Higher = more creative</p>
                     </div>
                     <div>
                         <label class="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">{{ __('Max Tokens') }} <span x-text="config.max_tokens"></span></label>
-                        <input type="range" name="max_tokens" min="256" max="8192" step="256" x-model.number="config.max_tokens" class="w-full accent-brand-500">
+                        <input type="range" name="max_tokens" min="256" max="8192" step="256" x-model.number="config.max_tokens" :value="old('max_tokens', config.max_tokens)" class="w-full accent-brand-500 @error('max_tokens') accent-red-500 @enderror">
+                        @error('max_tokens')
+                            <x-input-error :messages="[$message]" class="mt-1" />
+                        @enderror
                         <p class="mt-1 text-xs text-gray-500 dark:text-gray-400">Maximum response length</p>
                     </div>
                 </div>

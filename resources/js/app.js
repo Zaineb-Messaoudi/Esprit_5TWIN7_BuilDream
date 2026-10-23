@@ -461,3 +461,23 @@ document.addEventListener('DOMContentLoaded', () => {
         observeNearViewport(element, () => import('./components/calendar-init').then(module => module.calendarInit()));
     }
 });
+
+
+// Validation is handled server-side by Laravel (Form Requests / validate()).
+// Turn off the browser's native HTML5 validation popups so Laravel's errors are shown instead.
+const disableNativeValidation = (root = document) => {
+    root.querySelectorAll('form').forEach((form) => form.setAttribute('novalidate', ''));
+};
+
+document.addEventListener('DOMContentLoaded', () => {
+    disableNativeValidation();
+
+    // Also cover forms that Alpine or other scripts add to the page later.
+    new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => mutation.addedNodes.forEach((node) => {
+            if (node.nodeType !== 1) return;
+            if (node.tagName === 'FORM') node.setAttribute('novalidate', '');
+            else disableNativeValidation(node);
+        }));
+    }).observe(document.body, { childList: true, subtree: true });
+});

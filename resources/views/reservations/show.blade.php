@@ -26,12 +26,18 @@
                 @csrf
                 @if ($cancellationRequiresManualRefund)
                     <label class="flex items-start gap-2 text-theme-xs text-gray-600 dark:text-gray-300">
-                        <input type="checkbox" name="manual_refund_confirmed" value="1" class="mt-0.5 rounded border-gray-300">
+                        <input type="checkbox" name="manual_refund_confirmed" value="1" class="mt-0.5 rounded border-gray-300 @error('manual_refund_confirmed') border-red-500 focus:ring-red-500 @enderror">
                         <span>{{ __('I confirm that the displayed refund for non-Stripe payments has been transferred.') }}</span>
                     </label>
+                    @error('manual_refund_confirmed')
+                        <x-input-error :messages="[$message]" class="mt-1 ml-6" />
+                    @enderror
                 @endif
-                <button name="decision" value="approve" class="button-base button-primary">{{ __('Approve cancellation and refund') }}</button>
-                <button name="decision" value="reject" class="min-h-10 rounded-lg border border-gray-300 px-4 text-theme-xs font-semibold dark:border-gray-700">{{ __('Decline request') }}</button>
+                <button name="decision" value="approve" class="button-base button-primary @error('decision') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror">{{ __('Approve cancellation and refund') }}</button>
+                <button name="decision" value="reject" class="min-h-10 rounded-lg border border-gray-300 px-4 text-theme-xs font-semibold dark:border-gray-700 @error('decision') border-red-500 focus:ring-red-500 focus:border-red-500 @enderror">{{ __('Decline request') }}</button>
+                @error('decision')
+                    <x-input-error :messages="[$message]" class="mt-1 ml-auto" />
+                @enderror
             </form>
         </section>
     @endif

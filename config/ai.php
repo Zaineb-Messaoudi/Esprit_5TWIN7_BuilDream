@@ -85,7 +85,7 @@ return [
     | Ordered list of providers to try when primary fails.
     | Each provider must have its configuration in 'providers' below.
     */
-    'fallback_chain' => env('AI_FALLBACK_CHAIN', 'ollama,openai,anthropic'),
+    'fallback_chain' => env('AI_FALLBACK_CHAIN', 'ollama,groq,openai,anthropic'),
 
     /*
     |--------------------------------------------------------------------------
