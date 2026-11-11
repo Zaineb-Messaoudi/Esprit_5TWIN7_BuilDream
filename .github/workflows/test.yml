@@ -61,7 +61,7 @@ jobs:
         run: npx eslint resources/js --ext .js,.vue 2>/dev/null || true
 
       - name: Cache build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             public/build
@@ -91,7 +91,7 @@ jobs:
         uses: actions/checkout@v4
 
       - name: Restore build artifacts
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: |
             public/build
@@ -109,7 +109,7 @@ jobs:
           tools: composer:v2
 
       - name: Cache Composer packages
-        uses: actions/cache@v4
+        uses: actions/cache@v6
         with:
           path: vendor
           key: composer-${{ runner.os }}-${{ hashFiles('composer.lock') }}
