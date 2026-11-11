@@ -17,7 +17,7 @@
         "laravel/reverb": "^1.12",
         "laravel/sanctum": "^4.3",
         "laravel/scout": "^11.9",
-        "laravel/tinker": "^2.10.1",
+        "laravel/tinker": "^3.0.2",
         "meilisearch/meilisearch-php": "^1.17",
         "pragmarx/google2fa-laravel": "^3.0",
         "pusher/pusher-php-server": "^7.3",
